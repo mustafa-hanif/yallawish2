@@ -1,110 +1,274 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
+import {
+  Alert,
+  FlatList,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+// Categories for browsing
+const categories = [
+  { id: 1, name: "Electronics", emoji: "📱", count: 156 },
+  { id: 2, name: "Fashion", emoji: "👕", count: 243 },
+  { id: 3, name: "Home & Garden", emoji: "🏠", count: 89 },
+  { id: 4, name: "Sports", emoji: "⚽", count: 127 },
+  { id: 5, name: "Books", emoji: "📚", count: 78 },
+  { id: 6, name: "Gaming", emoji: "🎮", count: 95 },
+  { id: 7, name: "Beauty", emoji: "💄", count: 134 },
+  { id: 8, name: "Toys", emoji: "🧸", count: 67 },
+];
 
-export default function TabTwoScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
+// Featured products
+const featuredProducts = [
+  { id: 1, name: "Latest iPhone", price: "$999", image: "📱", rating: 4.8 },
+  { id: 2, name: "Designer Shoes", price: "$299", image: "👟", rating: 4.6 },
+  { id: 3, name: "Smart Watch", price: "$399", image: "⌚", rating: 4.7 },
+  { id: 4, name: "Gaming Laptop", price: "$1599", image: "💻", rating: 4.9 },
+];
+
+interface Category {
+  id: number;
+  name: string;
+  emoji: string;
+  count: number;
+}
+
+interface FeaturedProduct {
+  id: number;
+  name: string;
+  price: string;
+  image: string;
+  rating: number;
+}
+
+export default function BrowseScreen() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const backgroundColor = useThemeColor({}, "background");
+  const tintColor = useThemeColor({}, "tint");
+  const textColor = useThemeColor({}, "text");
+
+  const handleCategoryPress = (category: Category) => {
+    Alert.alert(
+      category.name,
+      `Browse ${category.count} products in ${category.name}`,
+      [{ text: "OK" }]
+    );
+  };
+
+  const handleProductPress = (product: FeaturedProduct) => {
+    Alert.alert(
+      product.name,
+      `Price: ${product.price}\nRating: ${product.rating}/5`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Add to Wishlist",
+          onPress: () => console.log(`Added ${product.name} to wishlist`),
+        },
+      ]
+    );
+  };
+
+  const renderCategory = ({ item }: { item: Category }) => (
+    <TouchableOpacity
+      style={[styles.categoryCard, { borderColor: tintColor + "20" }]}
+      onPress={() => handleCategoryPress(item)}
+    >
+      <ThemedText style={styles.categoryEmoji}>{item.emoji}</ThemedText>
+      <ThemedText type="defaultSemiBold" style={styles.categoryName}>
+        {item.name}
+      </ThemedText>
+      <ThemedText style={[styles.categoryCount, { color: tintColor }]}>
+        {item.count} items
+      </ThemedText>
+    </TouchableOpacity>
+  );
+
+  const renderFeaturedProduct = ({ item }: { item: FeaturedProduct }) => (
+    <TouchableOpacity
+      style={[styles.featuredCard, { borderColor: tintColor + "20" }]}
+      onPress={() => handleProductPress(item)}
+    >
+      <ThemedText style={styles.featuredImage}>{item.image}</ThemedText>
+      <ThemedView style={styles.featuredInfo}>
+        <ThemedText type="defaultSemiBold" style={styles.featuredName}>
+          {item.name}
+        </ThemedText>
+        <ThemedText style={styles.featuredPrice}>{item.price}</ThemedText>
+        <ThemedView style={styles.ratingContainer}>
+          <Ionicons name="star" size={16} color="#FFD700" />
+          <ThemedText style={styles.rating}>{item.rating}</ThemedText>
+        </ThemedView>
       </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
+    </TouchableOpacity>
+  );
+
+  return (
+    <ThemedView style={[styles.container, { backgroundColor }]}>
+      {/* Header */}
+      <ThemedView style={styles.header}>
+        <ThemedText type="title" style={styles.headerTitle}>
+          🔍 Browse Products
         </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+
+        {/* Search Bar */}
+        <ThemedView
+          style={[styles.searchContainer, { borderColor: tintColor + "30" }]}
+        >
+          <Ionicons
+            name="search"
+            size={20}
+            color={tintColor}
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={[styles.searchInput, { color: textColor }]}
+            placeholder="Search for products..."
+            placeholderTextColor={textColor + "60"}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </ThemedView>
+      </ThemedView>
+
+      <FlatList
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        ListHeaderComponent={
+          <>
+            {/* Categories Section */}
+            <ThemedView style={styles.section}>
+              <ThemedText type="subtitle" style={styles.sectionTitle}>
+                Categories
+              </ThemedText>
+              <FlatList
+                data={categories}
+                renderItem={renderCategory}
+                keyExtractor={(item) => item.id.toString()}
+                numColumns={2}
+                scrollEnabled={false}
+                columnWrapperStyle={styles.categoryRow}
+              />
+            </ThemedView>
+
+            {/* Featured Products Section */}
+            <ThemedView style={styles.section}>
+              <ThemedText type="subtitle" style={styles.sectionTitle}>
+                Featured Products
+              </ThemedText>
+            </ThemedView>
+          </>
+        }
+        data={featuredProducts}
+        renderItem={renderFeaturedProduct}
+        keyExtractor={(item) => item.id.toString()}
+      />
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
+    paddingTop: 60,
   },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+  header: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: "bold",
+    marginBottom: 16,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "transparent",
+  },
+  searchIcon: {
+    marginRight: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  section: {
+    marginBottom: 30,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    marginBottom: 16,
+  },
+  categoryRow: {
+    justifyContent: "space-between",
+  },
+  categoryCard: {
+    width: "48%",
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  categoryEmoji: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  categoryName: {
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 4,
+  },
+  categoryCount: {
+    fontSize: 12,
+  },
+  featuredCard: {
+    flexDirection: "row",
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    alignItems: "center",
+  },
+  featuredImage: {
+    fontSize: 40,
+    marginRight: 16,
+  },
+  featuredInfo: {
+    flex: 1,
+  },
+  featuredName: {
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  featuredPrice: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  rating: {
+    fontSize: 14,
+    marginLeft: 4,
   },
 });
