@@ -1,6 +1,7 @@
 import {
   Nunito_300Light,
   Nunito_400Regular,
+  Nunito_500Medium,
   Nunito_600SemiBold,
   Nunito_700Bold,
 } from "@expo-google-fonts/nunito";
@@ -18,6 +19,7 @@ export default function useFonts() {
     Nunito_400Regular,
     Nunito_600SemiBold,
     Nunito_700Bold,
+    Nunito_500Medium,
     Poppins_400Regular,
     Poppins_500Medium,
     Poppins_600SemiBold,

@@ -4,6 +4,7 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
+    fontFamily: "Nunito_400Regular",
   },
   header: {
     fontFamily: "Nunito_400Regular",
@@ -28,6 +29,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     color: "#FFFFFF",
     fontSize: 14,
+    fontFamily: "Nunito_400Regular",
     marginLeft: 10,
   },
   profileButton: {
@@ -46,6 +48,7 @@ export const styles = StyleSheet.create({
   },
   profileText: {
     fontSize: 20,
+    fontFamily: "Nunito_400Regular",
   },
   welcomeSection: {
     paddingHorizontal: 20,
@@ -55,11 +58,13 @@ export const styles = StyleSheet.create({
   welcomeTitle: {
     fontSize: 24,
     fontWeight: "bold",
+    fontFamily: "Nunito_700Bold",
     color: "#FFFFFF",
     marginBottom: 5,
   },
   welcomeSubtitle: {
     fontSize: 16,
+    fontFamily: "Nunito_400Regular",
     color: "#FFFFFF80",
   },
   addListContainer: {
@@ -143,12 +148,14 @@ export const styles = StyleSheet.create({
   addListTitle: {
     fontSize: 16,
     fontWeight: "bold",
+    fontFamily: "Nunito_700Bold",
     color: "#1F2937",
     marginBottom: 4,
     textAlign: "center",
   },
   addListSubtitle: {
     fontSize: 10,
+    fontFamily: "Nunito_400Regular",
     color: "#6B7280",
     textAlign: "center",
     lineHeight: 14,
@@ -168,6 +175,7 @@ export const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
+    fontFamily: "Nunito_700Bold",
     color: "white",
   },
   categoriesScroll: {
@@ -185,6 +193,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderRadius: 15,
     width: 120,
+    fontFamily: "Nunito_400Regular",
     height: 100,
     marginRight: 15,
     overflow: "hidden",
@@ -205,6 +214,7 @@ export const styles = StyleSheet.create({
   },
   categoryName: {
     fontSize: 14,
+    fontFamily: "Nunito_500Medium",
     color: "#FFFFFF",
     textAlign: "center",
     fontWeight: "500",
@@ -247,11 +257,13 @@ export const styles = StyleSheet.create({
   eventDateNumber: {
     fontSize: 28,
     fontWeight: "bold",
+    fontFamily: "Nunito_700Bold",
     color: "#1F2937",
     lineHeight: 32,
   },
   eventDateMonth: {
     fontSize: 12,
+    fontFamily: "Nunito_600SemiBold",
     color: "#6B7280",
     fontWeight: "600",
     textTransform: "uppercase",
@@ -262,11 +274,13 @@ export const styles = StyleSheet.create({
   eventTitle: {
     fontSize: 16,
     fontWeight: "600",
+    fontFamily: "Nunito_600SemiBold",
     color: "#1F2937",
     marginBottom: 4,
   },
   eventSubtitle: {
     fontSize: 12,
+    fontFamily: "Nunito_400Regular",
     color: "#6B7280",
   },
   picksScroll: {
@@ -295,17 +309,20 @@ export const styles = StyleSheet.create({
   pickName: {
     fontSize: 14,
     fontWeight: "600",
+    fontFamily: "Nunito_600SemiBold",
     color: "#1F2937",
     marginBottom: 2,
   },
   pickSubtitle: {
     fontSize: 12,
+    fontFamily: "Nunito_400Regular",
     color: "#6B7280",
     marginBottom: 5,
   },
   pickPrice: {
     fontSize: 14,
     fontWeight: "bold",
+    fontFamily: "Nunito_700Bold",
     color: "#1F2937",
   },
   inspirationCard: {
@@ -333,11 +350,13 @@ export const styles = StyleSheet.create({
   inspirationTitle: {
     fontSize: 14,
     fontWeight: "600",
+    fontFamily: "Nunito_600SemiBold",
     color: "#1F2937",
     marginBottom: 4,
   },
   inspirationSubtitle: {
     fontSize: 12,
+    fontFamily: "Nunito_400Regular",
     color: "#6B7280",
     lineHeight: 16,
   },
@@ -357,6 +376,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     color: "#FFFFFF",
     fontSize: 10,
+    fontFamily: "Nunito_700Bold",
     fontWeight: "bold",
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -365,11 +385,13 @@ export const styles = StyleSheet.create({
   aiTitle: {
     fontSize: 24,
     fontWeight: "bold",
+    fontFamily: "Nunito_700Bold",
     color: "#FFFFFF",
     marginBottom: 10,
   },
   aiDescription: {
     fontSize: 14,
+    fontFamily: "Nunito_400Regular",
     color: "#FFFFFF",
     lineHeight: 20,
     marginBottom: 20,
@@ -413,5 +435,6 @@ export const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 12,
     fontWeight: "bold",
+    fontFamily: "Nunito_700Bold",
   },
 });
