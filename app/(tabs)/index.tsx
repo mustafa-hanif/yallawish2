@@ -1,102 +1,93 @@
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { useThemeColor } from "@/hooks/useThemeColor";
-import directus from "@/provider/sdkprovider";
-import { readItems } from "@directus/sdk";
+import { Image } from "expo-image";
+
+import { styles } from "@/styles";
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
-import { Alert, FlatList, StyleSheet, TouchableOpacity } from "react-native";
-
-// Sample product data - you can replace this with your actual data
-const sampleProducts = [
-  {
-    id: 1,
-    name: "iPhone 15 Pro",
-    price: "$999",
-    category: "Electronics",
-    emoji: "📱",
-  },
-  {
-    id: 2,
-    name: "MacBook Air",
-    price: "$1299",
-    category: "Electronics",
-    emoji: "💻",
-  },
-  {
-    id: 3,
-    name: "AirPods Pro",
-    price: "$249",
-    category: "Electronics",
-    emoji: "🎧",
-  },
-  {
-    id: 4,
-    name: "Nike Air Max",
-    price: "$150",
-    category: "Fashion",
-    emoji: "👟",
-  },
-  { id: 5, name: "Coffee Maker", price: "$89", category: "Home", emoji: "☕" },
-  {
-    id: 6,
-    name: "Gaming Chair",
-    price: "$299",
-    category: "Gaming",
-    emoji: "🪑",
-  },
-  {
-    id: 7,
-    name: "Smart Watch",
-    price: "$399",
-    category: "Electronics",
-    emoji: "⌚",
-  },
-  {
-    id: 8,
-    name: "Bluetooth Speaker",
-    price: "$79",
-    category: "Electronics",
-    emoji: "🔊",
-  },
-];
-
-interface Product {
-  id: number;
-  name: string;
-  price: string;
-  category: string;
-  emoji: string;
-}
+import { useState } from "react";
+import {
+  Alert,
+  Animated,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
-  const [products, setProducts] = useState<Product[]>(sampleProducts);
-  const backgroundColor = useThemeColor({}, "background");
-  const tintColor = useThemeColor({}, "tint");
-  const textColor = useThemeColor({}, "text");
+  // State for managing which card is in center
+  const [centerCardIndex, setCenterCardIndex] = useState(1);
+  const [animatedValues] = useState([
+    new Animated.Value(0), // left card
+    new Animated.Value(1), // center card (default)
+    new Animated.Value(0), // right card
+  ]);
 
-  useEffect(() => {
-    // Try to fetch products from Directus, fallback to sample data
-    const fetchProducts = async () => {
-      try {
-        const response = await directus.request(
-          readItems("products", {
-            fields: [{ category: ["title"] }, { wishlists: ["*"] }],
-          })
-        );
-        console.log("Fetched products:", response);
-        // If you have real data, map it to the Product interface format
-        // For now, we'll keep using sample data but you can uncomment the line below
-        // setProducts(mappedResponse);
-      } catch (error) {
-        console.log("Using sample data - Directus not available:", error);
-        // Ensure we have sample data loaded
-        setProducts(sampleProducts);
-      }
-    };
+  const categories = [
+    { id: 1, name: "Wedding", color: "#00D4AA" },
+    { id: 2, name: "Birthday", color: "#00C4F0" },
+    { id: 3, name: "New Home", color: "#FFD700" },
+    { id: 4, name: "Graduation", color: "#FF69B4" },
+    { id: 5, name: "Baby Shower", color: "#9966CC" },
+    { id: 6, name: "Retirement", color: "#FF4500" },
+  ];
 
-    fetchProducts();
-  }, []);
+  const upcomingEvents = [
+    {
+      id: 1,
+      date: "08",
+      month: "JUNE",
+      title: "Hala's Housewarming",
+      subtitle: "Gifts purchased: 8",
+      color: "#FFD700",
+    },
+    {
+      id: 2,
+      date: "21",
+      month: "JUNE",
+      title: "Rita's Birthday Party",
+      subtitle: "Gifts purchased: 5",
+      color: "#4A90E2",
+    },
+  ];
+
+  const topPicks = [
+    {
+      id: 1,
+      name: "Nike Air Jester 1",
+      subtitle: "Sonic Green",
+      price: "325.32",
+      image: "👟",
+    },
+    {
+      id: 2,
+      name: "Oculus Quest",
+      subtitle: "Dynamic White",
+      price: "325.32",
+      image: "🥽",
+    },
+  ];
+
+  const inspirationBoards = [
+    {
+      id: 1,
+      title: "Build your nursery",
+      subtitle: "All essentials items under one roof with Pottery Barn Kids",
+      image: "🍼",
+    },
+    {
+      id: 2,
+      title: "The wedding checklist",
+      subtitle: "Don't know where to start? See what others do.",
+      image: "💒",
+    },
+    {
+      id: 3,
+      title: "From house to home",
+      subtitle: "Set up your space with a little oomph with Pan Home",
+      image: "🏡",
+    },
+  ];
 
   const handleCreateWishlist = () => {
     Alert.alert(
@@ -106,174 +97,327 @@ export default function HomeScreen() {
     );
   };
 
-  const handleProductSelect = (product: Product) => {
-    Alert.alert(
-      "Add to Wishlist",
-      `Do you want to add ${product.name} to your wishlist?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Add",
-          onPress: () => console.log(`Added ${product.name} to wishlist`),
-        },
-      ]
-    );
+  // Card data for the three different cards
+  const cardData = [
+    {
+      id: 1,
+      title: "Share List",
+      subtitle: "Discover amazing gifts for your loved ones",
+      image: require("@/assets/images/shareList.png"), // You can change this to a different image
+      action: () => Alert.alert("Browse Gifts", "This will open gift browsing"),
+    },
+    {
+      id: 0,
+      title: "Add List",
+      subtitle: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+      image: require("@/assets/images/addList.png"),
+      action: handleCreateWishlist,
+    },
+
+    {
+      id: 2,
+      title: "Community Lists",
+      subtitle: "Check out your existing wishlists",
+      image: require("@/assets/images/community.png"), // You can change this to a different image
+      action: () => Alert.alert("View Lists", "This will show your lists"),
+    },
+  ];
+
+  // Animation function to move card to center
+  const animateToCenter = (targetIndex: number) => {
+    if (targetIndex === centerCardIndex) return;
+
+    // Reset all animations
+    animatedValues.forEach((animValue, index) => {
+      Animated.spring(animValue, {
+        toValue: index === targetIndex ? 1 : 0,
+        useNativeDriver: true,
+      }).start();
+    });
+
+    setCenterCardIndex(targetIndex);
   };
 
-  const renderProduct = ({ item }: { item: Product }) => (
-    <TouchableOpacity
-      style={[styles.productCard, { borderColor: tintColor + "20" }]}
-      onPress={() => handleProductSelect(item)}
-    >
-      <ThemedView style={styles.productContent}>
-        <ThemedText style={styles.productEmoji}>{item.emoji}</ThemedText>
-        <ThemedView style={styles.productInfo}>
-          <ThemedText type="defaultSemiBold" style={styles.productName}>
-            {item.name}
-          </ThemedText>
-          <ThemedText style={[styles.productCategory, { color: tintColor }]}>
-            {item.category}
-          </ThemedText>
-          <ThemedText type="defaultSemiBold" style={styles.productPrice}>
-            {item.price}
-          </ThemedText>
-        </ThemedView>
-        <Ionicons name="add-circle-outline" size={24} color={tintColor} />
-      </ThemedView>
-    </TouchableOpacity>
-  );
-
   return (
-    <ThemedView style={[styles.container, { backgroundColor }]}>
-      {/* Header */}
-      <ThemedView style={styles.header}>
-        <ThemedText type="title" style={styles.headerTitle}>
-          🎁 YallaWish
-        </ThemedText>
-        <ThemedText
-          style={[styles.headerSubtitle, { color: textColor + "80" }]}
-        >
-          Create your dream wishlist
-        </ThemedText>
-      </ThemedView>
+    <SafeAreaView style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={16} color="#FFFFFF80" />
+            <TextInput
+              placeholder="Type your search here..."
+              style={styles.searchInput}
+              placeholderTextColor="#FFFFFF80"
+            />
+          </View>
+          <Pressable style={styles.profileButton}>
+            <View style={styles.profileImage}>
+              <Text style={styles.profileText}>👤</Text>
+            </View>
+          </Pressable>
+        </View>
 
-      {/* Create Button */}
-      <TouchableOpacity
-        style={[styles.createButton, { backgroundColor: tintColor }]}
-        onPress={handleCreateWishlist}
-      >
-        <Ionicons name="add" size={24} color="white" />
-        <ThemedText style={styles.createButtonText}>
-          Create New Wishlist
-        </ThemedText>
-      </TouchableOpacity>
+        {/* Welcome Section */}
+        <View style={styles.welcomeSection}>
+          <Text style={styles.welcomeTitle}>Hi Ayesha!</Text>
+          <Text style={styles.welcomeSubtitle}>
+            Ready to make someone smile?
+          </Text>
+        </View>
 
-      {/* Products Section */}
-      <ThemedView style={styles.productsSection}>
-        <ThemedText type="subtitle" style={styles.sectionTitle}>
-          Choose Products to Add
-        </ThemedText>
-        <FlatList
-          data={products}
-          renderItem={renderProduct}
-          keyExtractor={(item) => item.id.toString()}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.productsList}
-        />
-      </ThemedView>
-    </ThemedView>
+        {/* Add List Card */}
+        <View style={styles.addListContainer}>
+          <View style={styles.cardStack}>
+            {cardData.map((card, index) => {
+              const isCenter = index === centerCardIndex;
+              const isLeft = index === (centerCardIndex + 2) % 3;
+              const isRight = index === (centerCardIndex + 1) % 3;
+
+              let cardStyle;
+              let cardPosition = {};
+
+              if (isCenter) {
+                cardStyle = styles.mainCard;
+                cardPosition = { zIndex: 3 };
+              } else if (isLeft) {
+                cardStyle = styles.leftCard;
+                cardPosition = { zIndex: 1 };
+              } else if (isRight) {
+                cardStyle = styles.rightCard;
+                cardPosition = { zIndex: 1 };
+              } else {
+                cardStyle = styles.sideCard;
+                cardPosition = { zIndex: 1 };
+              }
+
+              return (
+                <Animated.View
+                  key={card.id}
+                  style={[
+                    cardPosition,
+                    {
+                      opacity: animatedValues[index].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.8, 1],
+                      }),
+                      transform: [
+                        {
+                          scale: animatedValues[index].interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0.85, 1],
+                          }),
+                        },
+                        // {
+                        //   rotate: animatedValues[index].interpolate({
+                        //     inputRange: [0, 1],
+                        //     outputRange: isCenter
+                        //       ? ["-20deg", "0deg"]
+                        //       : ["0deg", "0deg"],
+                        //   }),
+                        // },
+                      ],
+                    },
+                  ]}
+                >
+                  <Pressable
+                    style={[cardStyle]}
+                    onPress={() => {
+                      if (isCenter) {
+                        card.action();
+                      } else {
+                        animateToCenter(index);
+                      }
+                    }}
+                  >
+                    <View style={styles.addIconContainer}>
+                      <Image
+                        source={card.image}
+                        contentFit="cover"
+                        style={{
+                          position: "absolute",
+                          width: 50,
+                          height: 50,
+                        }}
+                      />
+                    </View>
+                    <Text style={styles.addListTitle}>{card.title}</Text>
+                    <Text style={styles.addListSubtitle}>{card.subtitle}</Text>
+                  </Pressable>
+                </Animated.View>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* Categories */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Browse by categories</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.categoriesScroll}
+          >
+            <View style={styles.categoriesContainer}>
+              <View style={styles.categoriesRow}>
+                {categories.slice(0, 3).map((category) => (
+                  <Pressable key={category.id} style={styles.categoryCard}>
+                    <View style={styles.categoryContent}>
+                      <View style={styles.categoryIconContainer}>
+                        <Image
+                          source={require("@/assets/images/gift.svg")}
+                          style={styles.categoryIcon}
+                          contentFit="contain"
+                        />
+                      </View>
+                      <Text style={styles.categoryName}>{category.name}</Text>
+                    </View>
+                    <View
+                      style={[
+                        styles.categoryBorder,
+                        { backgroundColor: category.color },
+                      ]}
+                    />
+                  </Pressable>
+                ))}
+              </View>
+              <View style={styles.categoriesRow}>
+                {categories.slice(3, 6).map((category) => (
+                  <Pressable key={category.id} style={styles.categoryCard}>
+                    <View style={styles.categoryContent}>
+                      <View style={styles.categoryIconContainer}>
+                        <Image
+                          source={require("@/assets/images/gift.svg")}
+                          style={styles.categoryIcon}
+                          contentFit="contain"
+                        />
+                      </View>
+                      <Text style={styles.categoryName}>{category.name}</Text>
+                    </View>
+                    <View
+                      style={[
+                        styles.categoryBorder,
+                        { backgroundColor: category.color },
+                      ]}
+                    />
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          </ScrollView>
+        </View>
+
+        {/* Upcoming Events */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Upcoming events</Text>
+            <Pressable>
+              <Ionicons name="chevron-forward" size={16} color="#6B7280" />
+            </Pressable>
+          </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.eventsScroll}
+          >
+            {upcomingEvents.map((event) => (
+              <View key={event.id} style={styles.eventCard}>
+                <View
+                  style={[
+                    styles.eventLeftBorder,
+                    { backgroundColor: event.color },
+                  ]}
+                />
+                <View style={styles.eventContent}>
+                  <View style={styles.eventDateContainer}>
+                    <Text style={styles.eventDateNumber}>{event.date}</Text>
+                    <Text style={styles.eventDateMonth}>{event.month}</Text>
+                  </View>
+                  <View style={styles.eventInfo}>
+                    <Text style={styles.eventTitle}>{event.title}</Text>
+                    <Text style={styles.eventSubtitle}>{event.subtitle}</Text>
+                  </View>
+                </View>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Top Picks */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Top picks for you...</Text>
+            <Pressable>
+              <Ionicons name="chevron-forward" size={16} color="#6B7280" />
+            </Pressable>
+          </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.picksScroll}
+          >
+            {topPicks.map((item) => (
+              <View key={item.id} style={styles.pickCard}>
+                <View style={styles.pickImageContainer}>
+                  <Text style={styles.pickEmoji}>{item.image}</Text>
+                </View>
+                <Text style={styles.pickName}>{item.name}</Text>
+                <Text style={styles.pickSubtitle}>{item.subtitle}</Text>
+                <Text style={styles.pickPrice}>৳ {item.price}</Text>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Inspiration Boards */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Inspiration boards</Text>
+            <Pressable>
+              <Ionicons name="chevron-forward" size={16} color="#6B7280" />
+            </Pressable>
+          </View>
+          {inspirationBoards.map((board) => (
+            <Pressable key={board.id} style={styles.inspirationCard}>
+              <View style={styles.inspirationImageContainer}>
+                <Text style={styles.inspirationEmoji}>{board.image}</Text>
+              </View>
+              <View style={styles.inspirationContent}>
+                <Text style={styles.inspirationTitle}>{board.title}</Text>
+                <Text style={styles.inspirationSubtitle}>{board.subtitle}</Text>
+              </View>
+            </Pressable>
+          ))}
+        </View>
+
+        {/* AI Assistant */}
+        <View style={styles.aiSection}>
+          <View style={styles.aiHeader}>
+            <Text style={styles.aiButton}>AI-POWERED</Text>
+          </View>
+          <Text style={styles.aiTitle}>Meet Genie!</Text>
+          <Text style={styles.aiDescription}>
+            Let our smart assistant suggest the perfect registry items based on
+            your lifestyle, preferences, and needs — saving you time and
+            guesswork!
+          </Text>
+          <Pressable style={styles.aiChatButton}>
+            <Ionicons name="chevron-forward" size={16} color="#FFFFFF" />
+          </Pressable>
+          <View style={styles.aiRobotContainer}>
+            <View style={styles.aiRobot}>
+              <Image
+                source={require("@/assets/images/robot.png")}
+                style={styles.robotImage}
+                contentFit="contain"
+              />
+            </View>
+            <View style={styles.aiLogo}>
+              <Text style={styles.aiLogoText}>Yalla AI</Text>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 60,
-  },
-  header: {
-    alignItems: "center",
-    paddingHorizontal: 20,
-    marginBottom: 30,
-  },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    textAlign: "center",
-  },
-  createButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginHorizontal: 20,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    marginBottom: 30,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  createButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
-    marginLeft: 8,
-  },
-  productsSection: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  sectionTitle: {
-    marginBottom: 16,
-    fontSize: 20,
-  },
-  productsList: {
-    paddingBottom: 20,
-  },
-  productCard: {
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  productContent: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  productEmoji: {
-    fontSize: 32,
-    marginRight: 16,
-  },
-  productInfo: {
-    flex: 1,
-  },
-  productName: {
-    fontSize: 16,
-    marginBottom: 4,
-  },
-  productCategory: {
-    fontSize: 12,
-    marginBottom: 4,
-  },
-  productPrice: {
-    fontSize: 14,
-  },
-});
