@@ -1,6 +1,7 @@
 import { Image } from "expo-image";
 
 import { styles } from "@/styles";
+import { SignedIn, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
@@ -15,6 +16,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
+  const { user } = useUser();
+
   // State for managing which card is in center
   const [centerCardIndex, setCenterCardIndex] = useState(1);
   const [animatedValues] = useState([
@@ -151,31 +154,19 @@ export default function HomeScreen() {
               placeholderTextColor="#FFFFFF"
             />
           </View>
-          <Pressable style={styles.profileButton}>
-            <View style={styles.profileImage}>
-              <Image
-                source={require("@/assets/images/girlUser.png")}
-                style={{
-                  width: 48,
-                  height: 48,
-                }}
-              />
-              <View
-                style={{
-                  backgroundColor: "#03FFEE",
-                  borderRadius: 50,
-                  position: "absolute",
-                  zIndex: 2,
-                  width: 20,
-                  height: 20,
-                  bottom: 0,
-                  left: 0,
-                }}
-              >
-                2
+          <SignedIn>
+            <Pressable style={styles.profileButton}>
+              <View style={styles.profileImage}>
+                <Image
+                  source={require("@/assets/images/girlUser.png")}
+                  style={{
+                    width: 48,
+                    height: 48,
+                  }}
+                />
               </View>
-            </View>
-          </Pressable>
+            </Pressable>
+          </SignedIn>
         </View>
 
         {/* Welcome Section */}
