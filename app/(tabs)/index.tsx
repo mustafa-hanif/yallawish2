@@ -57,14 +57,14 @@ export default function HomeScreen() {
       name: "Nike Air Jester 1",
       subtitle: "Sonic Green",
       price: "325.32",
-      image: "👟",
+      image: require("@/assets/images/nikeShoes.png"),
     },
     {
       id: 2,
       name: "Oculus Quest",
       subtitle: "Dynamic White",
       price: "325.32",
-      image: "🥽",
+      image: require("@/assets/images/oculus.png"),
     },
   ];
 
@@ -73,19 +73,19 @@ export default function HomeScreen() {
       id: 1,
       title: "Build your nursery",
       subtitle: "All essentials items under one roof with Pottery Barn Kids",
-      image: "🍼",
+      image: require("@/assets/images/nursery.png"),
     },
     {
       id: 2,
       title: "The wedding checklist",
       subtitle: "Don't know where to start? See what others do.",
-      image: "💒",
+      image: require("@/assets/images/wedding.png"),
     },
     {
       id: 3,
       title: "From house to home",
       subtitle: "Set up your space with a little oomph with Pan Home",
-      image: "🏡",
+      image: require("@/assets/images/pan.png"),
     },
   ];
 
@@ -144,16 +144,36 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.searchContainer}>
-            <Ionicons name="search" size={16} color="#FFFFFF80" />
+            <Ionicons name="search" size={22} color="#FFFFFF" />
             <TextInput
               placeholder="Type your search here..."
               style={styles.searchInput}
-              placeholderTextColor="#FFFFFF80"
+              placeholderTextColor="#FFFFFF"
             />
           </View>
           <Pressable style={styles.profileButton}>
             <View style={styles.profileImage}>
-              <Text style={styles.profileText}>👤</Text>
+              <Image
+                source={require("@/assets/images/girlUser.png")}
+                style={{
+                  width: 48,
+                  height: 48,
+                }}
+              />
+              <View
+                style={{
+                  backgroundColor: "#03FFEE",
+                  borderRadius: 50,
+                  position: "absolute",
+                  zIndex: 2,
+                  width: 20,
+                  height: 20,
+                  bottom: 0,
+                  left: 0,
+                }}
+              >
+                2
+              </View>
             </View>
           </Pressable>
         </View>
@@ -197,10 +217,7 @@ export default function HomeScreen() {
                   style={[
                     cardPosition,
                     {
-                      opacity: animatedValues[index].interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0.8, 1],
-                      }),
+                      opacity: 1,
                       transform: [
                         {
                           scale: animatedValues[index].interpolate({
@@ -236,8 +253,9 @@ export default function HomeScreen() {
                         contentFit="cover"
                         style={{
                           position: "absolute",
-                          width: 50,
-                          height: 50,
+                          top: 10,
+                          width: 96,
+                          height: 92,
                         }}
                       />
                     </View>
@@ -252,7 +270,7 @@ export default function HomeScreen() {
 
         {/* Categories */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Browse by categories</Text>
+          <Text style={styles.sectionTitleCategory}>Browse by categories</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -308,18 +326,14 @@ export default function HomeScreen() {
         </View>
 
         {/* Upcoming Events */}
-        <View style={styles.section}>
+        <View style={styles.eventSection}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Upcoming events</Text>
+            <Text style={styles.eventSectionTitle}>Upcoming events</Text>
             <Pressable>
-              <Ionicons name="chevron-forward" size={16} color="#6B7280" />
+              <Ionicons name="chevron-forward" size={28} color="black" />
             </Pressable>
           </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.eventsScroll}
-          >
+          <ScrollView horizontal style={styles.eventsScroll}>
             {upcomingEvents.map((event) => (
               <View key={event.id} style={styles.eventCard}>
                 <View
@@ -344,11 +358,11 @@ export default function HomeScreen() {
         </View>
 
         {/* Top Picks */}
-        <View style={styles.section}>
+        <View style={styles.topSection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Top picks for you...</Text>
             <Pressable>
-              <Ionicons name="chevron-forward" size={16} color="#6B7280" />
+              <Ionicons name="chevron-forward" size={24} color="black" />
             </Pressable>
           </View>
           <ScrollView
@@ -359,32 +373,57 @@ export default function HomeScreen() {
             {topPicks.map((item) => (
               <View key={item.id} style={styles.pickCard}>
                 <View style={styles.pickImageContainer}>
-                  <Text style={styles.pickEmoji}>{item.image}</Text>
+                  <Image
+                    style={{
+                      height: 147,
+                      width: 180,
+                      borderRadius: 8,
+                    }}
+                    contentFit="contain"
+                    source={item.image}
+                  />
                 </View>
                 <Text style={styles.pickName}>{item.name}</Text>
                 <Text style={styles.pickSubtitle}>{item.subtitle}</Text>
-                <Text style={styles.pickPrice}>৳ {item.price}</Text>
+                <Text style={styles.pickPrice}>
+                  <Image
+                    source={require("@/assets/images/dirham.png")}
+                    style={{
+                      width: 14,
+                      marginTop: -1,
+                      height: 12,
+                    }}
+                  />
+                  {item.price}
+                </Text>
               </View>
             ))}
           </ScrollView>
         </View>
 
         {/* Inspiration Boards */}
-        <View style={styles.section}>
+        <View style={styles.isection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Inspiration boards</Text>
             <Pressable>
-              <Ionicons name="chevron-forward" size={16} color="#6B7280" />
+              <Ionicons name="chevron-forward" size={24} color="black" />
             </Pressable>
           </View>
           {inspirationBoards.map((board) => (
             <Pressable key={board.id} style={styles.inspirationCard}>
-              <View style={styles.inspirationImageContainer}>
-                <Text style={styles.inspirationEmoji}>{board.image}</Text>
-              </View>
               <View style={styles.inspirationContent}>
                 <Text style={styles.inspirationTitle}>{board.title}</Text>
                 <Text style={styles.inspirationSubtitle}>{board.subtitle}</Text>
+              </View>
+              <View style={styles.inspirationImageContainer}>
+                <Image
+                  style={{
+                    width: 148,
+                    height: 148,
+                  }}
+                  contentFit="cover"
+                  source={board.image}
+                />
               </View>
             </Pressable>
           ))}
@@ -402,19 +441,18 @@ export default function HomeScreen() {
             guesswork!
           </Text>
           <Pressable style={styles.aiChatButton}>
-            <Ionicons name="chevron-forward" size={16} color="#FFFFFF" />
+            <Ionicons name="chevron-forward" size={32} color="#FFFFFF" />
           </Pressable>
-          <View style={styles.aiRobotContainer}>
-            <View style={styles.aiRobot}>
-              <Image
-                source={require("@/assets/images/robot.png")}
-                style={styles.robotImage}
-                contentFit="contain"
-              />
-            </View>
-            <View style={styles.aiLogo}>
-              <Text style={styles.aiLogoText}>Yalla AI</Text>
-            </View>
+          <View
+            style={{
+              height: 280,
+            }}
+          >
+            <Image
+              source={require("@/assets/images/robot.png")}
+              style={styles.robotImage}
+              contentFit="contain"
+            />
           </View>
         </View>
       </ScrollView>
