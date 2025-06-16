@@ -167,6 +167,26 @@ export const styles = StyleSheet.create({
     lineHeight: 14,
     paddingHorizontal: 4,
   },
+  carouselContainer: {
+    paddingVertical: 20,
+    backgroundColor: "#FFF",
+    height: 300,
+  },
+  carouselCard: {
+    borderRadius: 20,
+    height: 240,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 8,
+    padding: 15,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   section: {
     position: "relative",
     paddingHorizontal: 20,
@@ -211,7 +231,6 @@ export const styles = StyleSheet.create({
   },
   sectionTitleCategory: {
     fontSize: 24,
-    paddingTop: 200,
     marginBottom: 20,
     fontWeight: "bold",
     fontFamily: "Nunito_700Bold",

@@ -1,30 +1,32 @@
 import { Image } from "expo-image";
 
 import { styles } from "@/styles";
-import { SignedIn, useUser } from "@clerk/clerk-expo";
+import { SignedIn } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
 import {
   Alert,
-  Animated,
+  Dimensions,
   Pressable,
   ScrollView,
   Text,
   TextInput,
   View,
 } from "react-native";
+import Animated, {
+  Extrapolate,
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
-  const { user } = useUser();
-
-  // State for managing which card is in center
-  const [centerCardIndex, setCenterCardIndex] = useState(1);
-  const [animatedValues] = useState([
-    new Animated.Value(0), // left card
-    new Animated.Value(1), // center card (default)
-    new Animated.Value(0), // right card
-  ]);
+  const screenWidth = Dimensions.get("window").width;
+  const CARD_WIDTH = Math.min(screenWidth * 0.65, 240); // Reduced width for better overlap
+  const CARD_SPACING = -30; // Negative spacing for overlap
+  const SNAP_INTERVAL = CARD_WIDTH + CARD_SPACING; // This should be 210 (240 - 30)
+  const scrollX = useSharedValue(0);
 
   const categories = [
     { id: 1, name: "Wedding", color: "#00D4AA" },
@@ -103,43 +105,139 @@ export default function HomeScreen() {
   // Card data for the three different cards
   const cardData = [
     {
-      id: 1,
-      title: "Share List",
-      subtitle: "Discover amazing gifts for your loved ones",
-      image: require("@/assets/images/shareList.png"), // You can change this to a different image
-      action: () => Alert.alert("Browse Gifts", "This will open gift browsing"),
-    },
-    {
       id: 0,
       title: "Add List",
       subtitle: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
       image: require("@/assets/images/addList.png"),
+      backgroundColor: "#F3ECFE",
       action: handleCreateWishlist,
     },
-
+    {
+      id: 1,
+      title: "Share List",
+      subtitle: "Discover amazing gifts for your loved ones",
+      image: require("@/assets/images/shareList.png"),
+      backgroundColor: "#E9FFE2",
+      action: () => Alert.alert("Browse Gifts", "This will open gift browsing"),
+    },
     {
       id: 2,
       title: "Community Lists",
       subtitle: "Check out your existing wishlists",
-      image: require("@/assets/images/community.png"), // You can change this to a different image
+      image: require("@/assets/images/community.png"),
+      backgroundColor: "#C2D9FF",
       action: () => Alert.alert("View Lists", "This will show your lists"),
     },
   ];
 
-  // Animation function to move card to center
-  const animateToCenter = (targetIndex: number) => {
-    if (targetIndex === centerCardIndex) return;
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollX.value = event.contentOffset.x;
+    },
+  });
 
-    // Reset all animations
-    animatedValues.forEach((animValue, index) => {
-      Animated.spring(animValue, {
-        toValue: index === targetIndex ? 1 : 0,
-        useNativeDriver: true,
-      }).start();
-    });
+  // Create animated styles for each card
+  const card0AnimatedStyle = useAnimatedStyle(() => {
+    const inputRange = [
+      -1 * SNAP_INTERVAL,
+      0 * SNAP_INTERVAL,
+      1 * SNAP_INTERVAL,
+    ];
 
-    setCenterCardIndex(targetIndex);
-  };
+    const scale = interpolate(
+      scrollX.value,
+      inputRange,
+      [0.8, 1, 0.8],
+      Extrapolate.CLAMP
+    );
+
+    const opacity = interpolate(
+      scrollX.value,
+      inputRange,
+      [0.6, 1, 0.6],
+      Extrapolate.CLAMP
+    );
+
+    const rotateZ = interpolate(
+      scrollX.value,
+      inputRange,
+      [-15, 0, 15],
+      Extrapolate.CLAMP
+    );
+
+    return {
+      transform: [{ scale }, { rotateZ: `${rotateZ}deg` }],
+      opacity,
+    };
+  });
+
+  const card1AnimatedStyle = useAnimatedStyle(() => {
+    const inputRange = [
+      0 * SNAP_INTERVAL,
+      1 * SNAP_INTERVAL,
+      2 * SNAP_INTERVAL,
+    ];
+
+    const scale = interpolate(
+      scrollX.value,
+      inputRange,
+      [0.8, 1, 0.8],
+      Extrapolate.CLAMP
+    );
+
+    const opacity = interpolate(
+      scrollX.value,
+      inputRange,
+      [0.6, 1, 0.6],
+      Extrapolate.CLAMP
+    );
+
+    const rotateZ = interpolate(
+      scrollX.value,
+      inputRange,
+      [-15, 0, 15],
+      Extrapolate.CLAMP
+    );
+
+    return {
+      transform: [{ scale }, { rotateZ: `${rotateZ}deg` }],
+      opacity,
+    };
+  });
+
+  const card2AnimatedStyle = useAnimatedStyle(() => {
+    const inputRange = [
+      1 * SNAP_INTERVAL,
+      2 * SNAP_INTERVAL,
+      3 * SNAP_INTERVAL,
+    ];
+
+    const scale = interpolate(
+      scrollX.value,
+      inputRange,
+      [0.8, 1, 0.8],
+      Extrapolate.CLAMP
+    );
+
+    const opacity = interpolate(
+      scrollX.value,
+      inputRange,
+      [0.6, 1, 0.6],
+      Extrapolate.CLAMP
+    );
+
+    const rotateZ = interpolate(
+      scrollX.value,
+      inputRange,
+      [-15, 0, 15],
+      Extrapolate.CLAMP
+    );
+
+    return {
+      transform: [{ scale }, { rotateZ: `${rotateZ}deg` }],
+      opacity,
+    };
+  });
 
   return (
     <SafeAreaView style={styles.container}>
@@ -178,69 +276,50 @@ export default function HomeScreen() {
         </View>
 
         {/* Add List Card */}
-        <View style={styles.addListContainer}>
-          <View style={styles.cardStack}>
-            {cardData.map((card, index) => {
-              const isCenter = index === centerCardIndex;
-              const isLeft = index === (centerCardIndex + 2) % 3;
-              const isRight = index === (centerCardIndex + 1) % 3;
-
-              let cardStyle;
-              let cardPosition = {};
-
-              if (isCenter) {
-                cardStyle = styles.mainCard;
-                cardPosition = { zIndex: 3 };
-              } else if (isLeft) {
-                cardStyle = styles.leftCard;
-                cardPosition = { zIndex: 1 };
-              } else if (isRight) {
-                cardStyle = styles.rightCard;
-                cardPosition = { zIndex: 1 };
-              } else {
-                cardStyle = styles.sideCard;
-                cardPosition = { zIndex: 1 };
-              }
+        <View style={styles.carouselContainer}>
+          <Animated.ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            pagingEnabled={false}
+            decelerationRate="fast"
+            snapToInterval={SNAP_INTERVAL}
+            snapToAlignment="center"
+            snapToStart={false}
+            snapToEnd={false}
+            contentContainerStyle={{
+              paddingHorizontal: (screenWidth - CARD_WIDTH) / 2 + 40, // Extra padding for overlap
+            }}
+            onScroll={scrollHandler}
+            scrollEventThrottle={16}
+            contentInsetAdjustmentBehavior="never"
+          >
+            {cardData.map((item, index) => {
+              let animatedStyle;
+              if (index === 0) animatedStyle = card0AnimatedStyle;
+              else if (index === 1) animatedStyle = card1AnimatedStyle;
+              else animatedStyle = card2AnimatedStyle;
 
               return (
                 <Animated.View
-                  key={card.id}
+                  key={item.id}
                   style={[
-                    cardPosition,
                     {
-                      opacity: 1,
-                      transform: [
-                        {
-                          scale: animatedValues[index].interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [0.85, 1],
-                          }),
-                        },
-                        // {
-                        //   rotate: animatedValues[index].interpolate({
-                        //     inputRange: [0, 1],
-                        //     outputRange: isCenter
-                        //       ? ["-20deg", "0deg"]
-                        //       : ["0deg", "0deg"],
-                        //   }),
-                        // },
-                      ],
+                      width: CARD_WIDTH,
+                      marginRight: CARD_SPACING,
                     },
+                    animatedStyle,
                   ]}
                 >
                   <Pressable
-                    style={[cardStyle]}
-                    onPress={() => {
-                      if (isCenter) {
-                        card.action();
-                      } else {
-                        animateToCenter(index);
-                      }
-                    }}
+                    style={[
+                      styles.carouselCard,
+                      { backgroundColor: item.backgroundColor },
+                    ]}
+                    onPress={item.action}
                   >
                     <View style={styles.addIconContainer}>
                       <Image
-                        source={card.image}
+                        source={item.image}
                         contentFit="cover"
                         style={{
                           position: "absolute",
@@ -250,13 +329,13 @@ export default function HomeScreen() {
                         }}
                       />
                     </View>
-                    <Text style={styles.addListTitle}>{card.title}</Text>
-                    <Text style={styles.addListSubtitle}>{card.subtitle}</Text>
+                    <Text style={styles.addListTitle}>{item.title}</Text>
+                    <Text style={styles.addListSubtitle}>{item.subtitle}</Text>
                   </Pressable>
                 </Animated.View>
               );
             })}
-          </View>
+          </Animated.ScrollView>
         </View>
 
         {/* Categories */}
