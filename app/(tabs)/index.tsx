@@ -1,7 +1,8 @@
 import { Image } from "expo-image";
 
+import { SignOutButton } from "@/components/SignOutButton";
 import { styles } from "@/styles";
-import { SignedIn } from "@clerk/clerk-expo";
+import { SignedIn, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import {
   Alert,
@@ -22,6 +23,7 @@ import Animated, {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
+  const { isSignedIn, user, isLoaded } = useUser();
   const screenWidth = Dimensions.get("window").width;
   const CARD_WIDTH = Math.min(screenWidth * 0.65, 240); // Reduced width for better overlap
   const CARD_SPACING = -30; // Negative spacing for overlap
@@ -269,7 +271,7 @@ export default function HomeScreen() {
 
         {/* Welcome Section */}
         <View style={styles.welcomeSection}>
-          <Text style={styles.welcomeTitle}>Hi Ayesha!</Text>
+          <Text style={styles.welcomeTitle}>Hi {user?.firstName}!</Text>
           <Text style={styles.welcomeSubtitle}>
             Ready to make someone smile?
           </Text>
@@ -525,6 +527,7 @@ export default function HomeScreen() {
             />
           </View>
         </View>
+        <SignOutButton />
       </ScrollView>
     </SafeAreaView>
   );

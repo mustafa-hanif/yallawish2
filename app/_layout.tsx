@@ -37,10 +37,17 @@ export default function RootLayout() {
   }
 
   return (
-    <ClerkProvider tokenCache={tokenCache}>
+    <ClerkProvider
+      publishableKey="pk_test_cHJvZm91bmQtc3RhZy04Ny5jbGVyay5hY2NvdW50cy5kZXYk"
+      tokenCache={tokenCache}
+    >
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="(auth)"
+            options={{ headerShown: false, title: "" }}
+          />
           <Stack.Screen name="+not-found" />
         </Stack>
         <StatusBar style="auto" />
