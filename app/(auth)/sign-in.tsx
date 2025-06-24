@@ -1,7 +1,15 @@
+import { styles } from "@/styles/auth";
 import { useSignIn } from "@clerk/clerk-expo";
 import { Link, useRouter } from "expo-router";
 import React from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function Page() {
   const { signIn, setActive, isLoaded } = useSignIn();
@@ -39,56 +47,81 @@ export default function Page() {
   };
 
   return (
-    <View
-      style={{
-        backgroundColor: "white",
-        display: "flex",
-        gap: 20,
-        padding: 20,
-      }}
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.scrollContent}
     >
-      <Text>Sign in</Text>
-      <TextInput
-        style={{ borderWidth: 1, padding: 10 }}
-        autoCapitalize="none"
-        value={emailAddress}
-        placeholder="Enter email"
-        onChangeText={(emailAddress) => setEmailAddress(emailAddress)}
-      />
-      <TextInput
-        style={{ borderWidth: 1, padding: 10 }}
-        value={password}
-        placeholder="Enter password"
-        secureTextEntry={true}
-        onChangeText={(password) => setPassword(password)}
-      />
-      <Pressable
-        style={{
-          backgroundColor: "#007AFF",
-          padding: 10,
-          borderRadius: 5,
-          alignItems: "center",
-        }}
-        onPress={onSignInPress}
-      >
-        <Text>Continue</Text>
-      </Pressable>
-      <View
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          gap: 3,
-          justifyContent: "center",
-          backgroundColor: "white",
-          borderWidth: 1,
-          padding: 10,
-          borderRadius: 5,
-        }}
-      >
-        <Link href="/sign-up">
-          <Text>Sign up</Text>
-        </Link>
+      {/* Header section with logo and toggle buttons */}
+      <View style={styles.header}>
+        <View style={styles.logoContainer}>
+          <Text style={styles.logo}>YallaWish</Text>
+        </View>
+
+        <View style={styles.toggleContainer}>
+          <Link
+            href="/sign-up"
+            style={[styles.toggleButton, styles.inactiveToggle]}
+          >
+            <Text style={styles.inactiveToggleText}>Sign-up</Text>
+          </Link>
+          <Link
+            href="/sign-in"
+            style={[styles.toggleButton, styles.activeToggle]}
+          >
+            <Text style={styles.activeToggleText}>Login</Text>
+          </Link>
+        </View>
       </View>
-    </View>
+
+      {/* Main content */}
+      <View style={styles.content}>
+        <Text style={styles.title}>Welcome Back!</Text>
+        <Text style={styles.subtitle}>Enter your details below</Text>
+
+        {/* Form fields */}
+        <View style={styles.formContainer}>
+          <TextInput
+            style={styles.input}
+            autoCapitalize="none"
+            value={emailAddress}
+            placeholder="Email"
+            placeholderTextColor="rgba(255, 255, 255, 0.6)"
+            keyboardType="email-address"
+            onChangeText={setEmailAddress}
+          />
+
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={[styles.input, styles.passwordInput]}
+              value={password}
+              placeholder="Password"
+              placeholderTextColor="rgba(255, 255, 255, 0.6)"
+              secureTextEntry={true}
+              onChangeText={setPassword}
+            />
+            <TouchableOpacity style={styles.eyeIcon}>
+              <Text style={styles.eyeIconText}>👁</Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity style={styles.forgotPasswordContainer}>
+            <Text style={styles.forgotPasswordText}>
+              Forget your password ?
+            </Text>
+          </TouchableOpacity>
+
+          <Pressable style={styles.loginButton} onPress={onSignInPress}>
+            <Text style={styles.loginButtonText}>Log In</Text>
+          </Pressable>
+
+          <View style={styles.signUpContainer}>
+            <Text style={styles.signUpText}>Don&apos;t have an account? </Text>
+            <Link href="/sign-up">
+              <Text style={styles.signUpLink}>Sign Up</Text>
+            </Link>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
   );
 }

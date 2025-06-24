@@ -3,6 +3,7 @@ import { Link, useRouter } from "expo-router";
 import * as React from "react";
 import {
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -155,7 +156,7 @@ export default function SignUpScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {/* Header section with logo and toggle buttons */}
       <View style={styles.header}>
         <View style={styles.logoContainer}>
@@ -324,7 +325,7 @@ export default function SignUpScreen() {
           </View>
         )}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -332,6 +333,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#1a1a2e",
+    overflowY: "scroll",
   },
   header: {
     paddingTop: 60,
