@@ -1,4 +1,6 @@
 import { ClerkProvider } from "@clerk/clerk-expo";
+import { ConvexProvider, ConvexReactClient } from "convex/react";
+
 import { tokenCache } from "@clerk/clerk-expo/token-cache";
 import {
   DarkTheme,
@@ -18,6 +20,9 @@ import useGoogleFonts from "@/hooks/useFonts";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+const convex = new ConvexReactClient(
+  process.env.EXPO_PUBLIC_CONVEX_URL as string
+);
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -41,17 +46,21 @@ export default function RootLayout() {
       publishableKey="pk_test_cHJvZm91bmQtc3RhZy04Ny5jbGVyay5hY2NvdW50cy5kZXYk"
       tokenCache={tokenCache}
     >
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="(auth)"
-            options={{ headerShown: false, title: "" }}
-          />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <ConvexProvider client={convex}>
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        >
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="(auth)"
+              options={{ headerShown: false, title: "" }}
+            />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </ConvexProvider>
     </ClerkProvider>
   );
 }
