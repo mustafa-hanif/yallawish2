@@ -4,6 +4,7 @@ import { SignOutButton } from "@/components/SignOutButton";
 import { styles } from "@/styles";
 import { SignedIn, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import {
   Alert,
   Dimensions,
@@ -97,11 +98,7 @@ export default function HomeScreen() {
   ];
 
   const handleCreateWishlist = () => {
-    Alert.alert(
-      "Create Wishlist",
-      "This will open the wishlist creation screen",
-      [{ text: "OK" }]
-    );
+    router.push("/create-list-step1");
   };
 
   // Card data for the three different cards

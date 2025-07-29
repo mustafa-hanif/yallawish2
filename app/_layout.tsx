@@ -56,6 +56,10 @@ export default function RootLayout() {
               name="(auth)"
               options={{ headerShown: false, title: "" }}
             />
+            <Stack.Screen
+              name="create-list-step1"
+              options={{ headerShown: false, presentation: 'card' }}
+            />
             <Stack.Screen name="+not-found" />
           </Stack>
           <StatusBar style="auto" />
