@@ -84,8 +84,9 @@ export default function AddGift() {
   const [price, setPrice] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [saving, setSaving] = useState(false);
   const DESCRIPTION_LIMIT = 400;
-  const canSave = (link.trim().length > 0 || name.trim().length > 0) && quantity > 0;
+  const canSave = !!listId && (link.trim().length > 0 || name.trim().length > 0) && quantity > 0 && !saving;
 
   const handleAddGift = () => setShowSheet(true);
   const closeSheet = () => setShowSheet(false);
@@ -93,11 +94,28 @@ export default function AddGift() {
   const decQty = useCallback(() => setQuantity(q => Math.max(1, q - 1)), []);
   const resetForm = () => { setLink(""); setSearch(""); setQuantity(1); setPrice(""); setName(""); setDescription(""); setImageUrl(null); setScrapeError(null); };
   const handleCancel = () => { closeSheet(); resetForm(); };
-  const handleSave = () => {
-    if (!canSave) return;
-    console.log("Saving gift", { link, search, quantity, price, name, description, imageUrl, listId });
-    closeSheet();
-    resetForm();
+  const createItem = useMutation(api.products.createListItem as any);
+  const handleSave = async () => {
+    if (!canSave || !listId) return;
+    try {
+      setSaving(true);
+      await createItem({
+        list_id: listId as any,
+        name: name || link, // fallback
+        description: description || null,
+        image_url: imageUrl || null,
+        quantity,
+        price: price || null,
+        currency: 'AED',
+        buy_url: link || null,
+      });
+    } catch (e) {
+      console.warn('Failed to save gift', e);
+    } finally {
+      setSaving(false);
+      closeSheet();
+      resetForm();
+    }
   };
 
   // Scrape on link change (debounced)
@@ -355,8 +373,8 @@ export default function AddGift() {
                 <Text style={styles.charCount}>{DESCRIPTION_LIMIT - description.length}</Text>
               </View>
             </View>
-            <Pressable style={[styles.saveBtn, !canSave && styles.saveBtnDisabled]} onPress={handleSave} disabled={!canSave}>
-              <Text style={[styles.saveBtnText, !canSave && styles.saveBtnTextDisabled]}>Save</Text>
+            <Pressable style={[styles.saveBtn, (!canSave) && styles.saveBtnDisabled]} onPress={handleSave} disabled={!canSave}>
+              <Text style={[styles.saveBtnText, (!canSave) && styles.saveBtnTextDisabled]}>{saving ? 'Saving...' : 'Save'}</Text>
             </Pressable>
             <Pressable style={styles.cancelBtn} onPress={handleCancel}>
               <Text style={styles.cancelBtnText}>Cancel</Text>
