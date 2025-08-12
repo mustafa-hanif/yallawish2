@@ -1,5 +1,6 @@
 import { RibbonHeader } from "@/components/RibbonHeader";
 import { api } from "@/convex/_generated/api";
+import { styles } from "@/styles/addGiftStyles";
 import { Ionicons } from "@expo/vector-icons";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
@@ -13,10 +14,9 @@ import {
   Pressable,
   ScrollView,
   StatusBar,
-  StyleSheet,
   Text,
   TextInput,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -211,38 +211,44 @@ export default function AddGift() {
 
         <View style={styles.addGiftSection}>
           {firstItem ? (
-            <View style={styles.itemCard}>
-              <View style={styles.itemImageWrap}>
-                {firstItem.image_url ? (
-                  <Image source={{ uri: firstItem.image_url }} style={styles.itemImage} />
-                ) : (
-                  <View style={[styles.itemImage, { backgroundColor: '#EEE' }]} />
-                )}
-              </View>
-              <View style={styles.itemContent}>
-                <Text style={styles.itemName}>{truncate(firstItem.name, 38)}</Text>
-                <Text style={styles.itemQuantity}>Quantity: <Text style={styles.itemQuantityValue}>{firstItem.quantity}</Text></Text>
-                <View style={styles.claimBadgeWrap}>
-                  <View style={styles.claimBadge}> 
-                    <Text style={styles.claimBadgeText}>{firstItem.claimed} Claimed</Text>
-                  </View>
-                  <Pressable style={styles.itemChevron}>
-                    <Ionicons name="chevron-forward" size={20} color="#1C0335" />
-                  </Pressable>
-                </View>
-                <View style={styles.priceRow}>
-                  <Text style={styles.itemPrice}>AED {firstItem.price}</Text>
-                  {firstItem.buy_url && (
-                    <Pressable>
-                      <Text style={styles.buyNow}>Buy Now</Text>
-                    </Pressable>
+            <>
+              <View style={styles.itemCard}>
+                <View style={styles.itemImageWrap}>
+                  {firstItem.image_url ? (
+                    <Image source={{ uri: firstItem.image_url }} style={styles.itemImage} />
+                  ) : (
+                    <View style={[styles.itemImage, { backgroundColor: '#EEE' }]} />
                   )}
                 </View>
-                <View style={styles.progressTrack}>
-                  <View style={[styles.progressFill, { flex: firstItem.claimed, maxWidth: `${(firstItem.claimed/firstItem.quantity)*100}%` }]} />
+                <View style={styles.itemContent}>
+                  <Text style={styles.itemName}>{truncate(firstItem.name, 38)}</Text>
+                  <Text style={styles.itemQuantity}>Quantity: <Text style={styles.itemQuantityValue}>{firstItem.quantity}</Text></Text>
+                  <View style={styles.claimBadgeWrap}>
+                    <View style={styles.claimBadge}> 
+                      <Text style={styles.claimBadgeText}>{firstItem.claimed} Claimed</Text>
+                    </View>
+                    <Pressable style={styles.itemChevron}>
+                      <Ionicons name="chevron-forward" size={20} color="#1C0335" />
+                    </Pressable>
+                  </View>
+                  <View style={styles.priceRow}>
+                    <Text style={styles.itemPrice}>AED {firstItem.price}</Text>
+                    {firstItem.buy_url && (
+                      <Pressable>
+                        <Text style={styles.buyNow}>Buy Now</Text>
+                      </Pressable>
+                    )}
+                  </View>
+                  <View style={styles.progressTrack}>
+                    <View style={[styles.progressFill, { width: `${(firstItem.claimed/firstItem.quantity)*100}%` }]} />
+                  </View>
                 </View>
               </View>
-            </View>
+              <Pressable style={styles.addMoreButton} onPress={handleAddGift}>
+                <Ionicons name="add" size={20} color="#3B0076" />
+                <Text style={styles.addMoreButtonText}>Add more gifts</Text>
+              </Pressable>
+            </>
           ) : (
             <>
               <Text style={styles.addGiftTitle}>Add your first gift item</Text>
@@ -367,241 +373,3 @@ export default function AddGift() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
-  header: {
-    paddingBottom: 16,
-  },
-  headerContent: {
-    paddingHorizontal: 16,
-    paddingTop: 50,
-  },
-  navigation: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-  backButton: {
-    padding: 4,
-  },
-  headerTitle: {
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontWeight: "700",
-    fontFamily: "Nunito_700Bold",
-    lineHeight: 28,
-    letterSpacing: -1,
-  },
-  scrollContent: {
-    paddingBottom: 200, // Space for footer
-  },
-  coverContainer: {
-    height: 145,
-    width: "100%",
-  },
-  coverImage: {
-    height: "100%",
-    width: "100%",
-    resizeMode: "cover",
-  },
-  coverOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(29, 23, 0, 0.32)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  daysToGo: {
-    color: "#FFFFFF",
-    fontSize: 40,
-    fontWeight: "700",
-    fontFamily: "Nunito_700Bold",
-    textShadowColor: "rgba(0, 0, 0, 0.25)",
-    textShadowOffset: { width: 0, height: 4 },
-    textShadowRadius: 40,
-  },
-  listInfoContainer: {
-    marginTop: -40,
-    paddingHorizontal: 16,
-    alignItems: "center",
-  },
-  actionsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#AEAEB2",
-  },
-  privacyContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  privacyStatus: {
-    fontSize: 16,
-    fontWeight: "700",
-    fontFamily: "Nunito_700Bold",
-    color: "#1C0335",
-  },
-  privacyDesc: {
-    fontSize: 12,
-    fontFamily: "Nunito_300Light",
-    color: "#1C0335",
-  },
-  actionButtons: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  iconButton: {
-    borderWidth: 1,
-    borderColor: "#1C0335",
-    borderRadius: 20,
-    padding: 8,
-  },
-  addGiftSection: {
-    paddingHorizontal: 16,
-    paddingVertical: 24,
-    gap: 16,
-  },
-  addGiftTitle: { fontSize:16, fontFamily:'Nunito_700Bold', color:'#1C0335' },
-  addGiftButton: { height:134, borderWidth:1, borderColor:'#AEAEB2', borderStyle:'dashed', borderRadius:8, justifyContent:'center', alignItems:'center', flexDirection:'row', gap:8 },
-  addGiftButtonText: { fontSize:16, fontFamily:'Nunito_700Bold', color:'#3B0076' },
-  itemCard: {
-    flexDirection: 'row',
-    padding: 16,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E5E5EA',
-    borderRadius: 12,
-    gap: 16,
-  },
-  itemImageWrap: { width: 96, height: 96, borderRadius: 12, overflow: 'hidden', borderWidth:1, borderColor:'#E5E5EA', justifyContent:'center', alignItems:'center' },
-  itemImage: { width: '100%', height: '100%', resizeMode: 'cover' },
-  itemContent: { flex:1 },
-  itemName: { fontSize:16, fontFamily:'Nunito_700Bold', color:'#1C0335', marginBottom:4 },
-  itemQuantity: { fontSize:12, fontFamily:'Nunito_400Regular', color:'#1C0335', marginBottom:4 },
-  itemQuantityValue: { fontFamily:'Nunito_700Bold' },
-  claimBadgeWrap: { flexDirection:'row', alignItems:'center', justifyContent:'space-between', marginBottom:6 },
-  claimBadge: { backgroundColor:'#F9E2A7', borderRadius:6, paddingHorizontal:8, paddingVertical:4 },
-  claimBadgeText: { fontSize:12, fontFamily:'Nunito_700Bold', color:'#784B00' },
-  itemChevron: { padding:4 },
-  priceRow: { flexDirection:'row', alignItems:'center', gap:8, marginBottom:8 },
-  itemPrice: { fontSize:16, fontFamily:'Nunito_700Bold', color:'#1C0335' },
-  buyNow: { fontSize:16, fontFamily:'Nunito_700Bold', color:'#0062FF', textDecorationLine:'underline' },
-  progressTrack: { height:6, backgroundColor:'#D1D1D6', borderRadius:3, overflow:'hidden' },
-  progressFill: { backgroundColor:'#3B0076', height:'100%' },
-  infoBox: {
-    backgroundColor: "#F5EDFE",
-    borderRadius: 8,
-    padding: 8,
-    marginHorizontal: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  infoText: {
-    flex: 1,
-    fontSize: 12,
-    fontFamily: "Nunito_700Bold",
-    color: "#3B0076",
-  },
-  linkText: {
-    textDecorationLine: "underline",
-    color: "#0062FF",
-  },
-  footer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 34,
-    gap: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#D1D1D6",
-  },
-  lastUpdated: {
-    textAlign: "center",
-    fontSize: 12,
-    fontFamily: "Nunito_300Light",
-    color: "#1C0335",
-  },
-  button: {
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 8,
-  },
-  buttonPrimary: {
-    backgroundColor: "#3B0076",
-  },
-  buttonSecondary: {
-    borderWidth: 1,
-    borderColor: "#3B0076",
-  },
-  buttonPrimaryText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "700",
-    fontFamily: "Nunito_700Bold",
-  },
-  buttonSecondaryText: {
-    color: "#3B0076",
-    fontSize: 16,
-    fontWeight: "700",
-    fontFamily: "Nunito_700Bold",
-  },
-  // Bottom sheet styles
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.3)" },
-  sheetContainer: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    maxHeight: "92%",
-    backgroundColor: "#F5F4F8",
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingBottom: 40,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: -4 },
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  sheetHandle: { alignSelf: "center", width: 60, height: 6, borderRadius: 3, backgroundColor: "#C8C7CC", marginTop: 8, marginBottom: 16 },
-  sheetContent: { paddingHorizontal: 16, paddingBottom: 60, gap: 20 },
-  sheetTitle: { fontSize: 28, fontWeight: "700", fontFamily: "Nunito_700Bold", color: "#1C0335", marginTop: 8 },
-  fieldGroup: { gap: 8 },
-  fieldLabel: { fontSize: 14, fontFamily: "Nunito_700Bold", color: "#1C0335" },
-  inputRow: { flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: "#D1D1D6", backgroundColor: "#FFFFFF", borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, gap: 8 },
-  input: { flex: 1, fontSize: 16, fontFamily: "Nunito_700Bold", color: "#1C0335", padding: 0 },
-  orDivider: { flexDirection: "row", alignItems: "center", gap: 12 },
-  orLine: { flex: 1, height: 1, backgroundColor: "#D1D1D6" },
-  orText: { fontSize: 14, fontFamily: "Nunito_700Bold", color: "#1C0335" },
-  qtyRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderWidth: 1, borderColor: "#D1D1D6", backgroundColor: "#F1EFF5", borderRadius: 12, paddingHorizontal: 12, paddingVertical: 14 },
-  qtyBtn: { width: 48, height: 48, borderRadius: 8, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center" },
-  qtyBtnText: { fontSize: 28, color: "#1C0335", fontFamily: "Nunito_700Bold", lineHeight: 32 },
-  qtyValue: { fontSize: 32, fontFamily: "Nunito_700Bold", color: "#1C0335" },
-  textareaWrapper: { alignItems: "flex-start", paddingTop: 12 },
-  textarea: { minHeight: 110, textAlignVertical: "top" },
-  charCount: { position: "absolute", bottom: 8, right: 12, fontSize: 12, color: "#7A6F88", fontFamily: "Nunito_700Bold" },
-  saveBtn: { height: 56, borderRadius: 12, backgroundColor: "#3B0076", alignItems: "center", justifyContent: "center" },
-  saveBtnDisabled: { backgroundColor: "#D1D1D6" },
-  saveBtnText: { fontSize: 18, fontFamily: "Nunito_700Bold", color: "#FFFFFF" },
-  saveBtnTextDisabled: { color: "#8E8E93" },
-  cancelBtn: { height: 56, borderRadius: 12, borderWidth: 1, borderColor: "#3B0076", backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center" },
-  cancelBtnText: { fontSize: 18, fontFamily: "Nunito_700Bold", color: "#3B0076" },
-  scrapeStatus: { fontSize: 16, fontFamily: "Nunito_700Bold", color: "#7A6F88" },
-  errorText: { fontSize: 12, color: "#B00020", fontFamily: "Nunito_700Bold" },
-  previewImage: { width: 120, height: 120, borderRadius: 12, marginTop: 8, backgroundColor: '#E1DEE6' },
-});
