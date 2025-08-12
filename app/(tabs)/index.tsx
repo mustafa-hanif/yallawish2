@@ -1,9 +1,12 @@
 import { Image } from "expo-image";
+import React, { useMemo } from "react";
 
 import { SignOutButton } from "@/components/SignOutButton";
+import { api } from "@/convex/_generated/api";
 import { styles } from "@/styles";
 import { SignedIn, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
+import { useQuery } from "convex/react";
 import { router } from "expo-router";
 import {
   Alert,
@@ -23,13 +26,88 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+// Occasion -> color map for event left border (module-level to avoid hook deps)
+const OCCASION_COLOR: Record<string, string> = {
+  birthday: "#00C4F0",
+  wedding: "#00D4AA",
+  "new-home": "#FFD700",
+  graduation: "#FF69B4",
+  "baby-shower": "#9966CC",
+  retirement: "#FF4500",
+  other: "#4D4D4D",
+  "no-occasion": "#4D4D4D",
+};
+
 export default function HomeScreen() {
-  const { isSignedIn, user, isLoaded } = useUser();
+  const { user } = useUser();
   const screenWidth = Dimensions.get("window").width;
   const CARD_WIDTH = Math.min(screenWidth * 0.65, 240); // Reduced width for better overlap
   const CARD_SPACING = -30; // Negative spacing for overlap
   const SNAP_INTERVAL = CARD_WIDTH + CARD_SPACING; // This should be 210 (240 - 30)
   const scrollX = useSharedValue(0);
+
+  // Load user's lists from Convex
+  const myLists = useQuery(
+    api.products.getMyLists,
+    user?.id ? { user_id: user.id } : "skip"
+  );
+
+  type UpcomingEvent = {
+    id: string;
+    date: string;
+    month: string;
+    title: string;
+    subtitle: string;
+    color: string;
+    dateValue: number;
+  };
+
+  // Build upcoming events from lists with eventDate
+  const upcomingEvents = useMemo(() => {
+    if (!myLists) return [] as UpcomingEvent[];
+
+    const items: UpcomingEvent[] = myLists
+      .filter((l: any) => !!l.eventDate)
+      .map((l: any) => {
+        const [y, m, d] = String(l.eventDate).split("-").map((n) => parseInt(n, 10));
+        const dateObj = new Date(y, (m ?? 1) - 1, d ?? 1); // local date to avoid TZ shift
+        const dayStr = String(d ?? 1).padStart(2, "0");
+        let monthStr = "";
+        try {
+          monthStr = new Intl.DateTimeFormat(undefined, { month: "long" })
+            .format(dateObj)
+            .toUpperCase();
+        } catch {
+          const months = [
+            "JANUARY",
+            "FEBRUARY",
+            "MARCH",
+            "APRIL",
+            "MAY",
+            "JUNE",
+            "JULY",
+            "AUGUST",
+            "SEPTEMBER",
+            "OCTOBER",
+            "NOVEMBER",
+            "DECEMBER",
+          ];
+          monthStr = months[dateObj.getMonth()];
+        }
+        return {
+          id: String(l._id),
+          date: dayStr,
+          month: monthStr,
+          title: l.title || "Untitled",
+          subtitle: l.note || (l.occasion ? `Occasion: ${l.occasion}` : ""),
+          color: OCCASION_COLOR[String(l.occasion)] ?? "#AEAEB2",
+          dateValue: dateObj.getTime(),
+        };
+      })
+      .sort((a, b) => a.dateValue - b.dateValue);
+
+    return items;
+  }, [myLists]);
 
   const categories = [
     { id: 1, name: "Wedding", color: "#00D4AA" },
@@ -38,25 +116,6 @@ export default function HomeScreen() {
     { id: 4, name: "Graduation", color: "#FF69B4" },
     { id: 5, name: "Baby Shower", color: "#9966CC" },
     { id: 6, name: "Retirement", color: "#FF4500" },
-  ];
-
-  const upcomingEvents = [
-    {
-      id: 1,
-      date: "08",
-      month: "JUNE",
-      title: "Hala's Housewarming",
-      subtitle: "Gifts purchased: 8",
-      color: "#FFD700",
-    },
-    {
-      id: 2,
-      date: "21",
-      month: "JUNE",
-      title: "Rita's Birthday Party",
-      subtitle: "Gifts purchased: 5",
-      color: "#4A90E2",
-    },
   ];
 
   const topPicks = [
@@ -404,7 +463,11 @@ export default function HomeScreen() {
           </View>
           <ScrollView horizontal style={styles.eventsScroll}>
             {upcomingEvents.map((event) => (
-              <View key={event.id} style={styles.eventCard}>
+              <Pressable
+                key={event.id}
+                style={styles.eventCard}
+                onPress={() => router.push({ pathname: "/create-list-step2", params: { listId: String(event.id) } })}
+              >
                 <View
                   style={[
                     styles.eventLeftBorder,
@@ -421,7 +484,7 @@ export default function HomeScreen() {
                     <Text style={styles.eventSubtitle}>{event.subtitle}</Text>
                   </View>
                 </View>
-              </View>
+              </Pressable>
             ))}
           </ScrollView>
         </View>

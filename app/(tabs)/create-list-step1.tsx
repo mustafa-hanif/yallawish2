@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
+import React, { useState } from "react";
 import {
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  StatusBar,
   Dimensions,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+  Pressable,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const { width: screenWidth } = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get("window");
 
-type ListOption = 'myself' | 'someone-else' | null;
+type ListOption = "myself" | "someone-else" | null;
 
 export default function CreateListStep1() {
-  const [selectedOption, setSelectedOption] = useState<ListOption>('myself');
+  const [selectedOption, setSelectedOption] = useState<ListOption>("myself");
 
   const handleBack = () => {
     router.back();
@@ -25,8 +25,8 @@ export default function CreateListStep1() {
 
   const handleContinue = () => {
     // Navigate to next step
-    console.log('Continue with option:', selectedOption);
-    router.push('/create-list-step2');
+    console.log("Continue with option:", selectedOption);
+    router.push("/create-list-step2");
   };
 
   const ProgressIndicator = () => (
@@ -47,7 +47,7 @@ export default function CreateListStep1() {
     icon,
     title,
     description,
-    isSelected
+    isSelected,
   }: {
     option: ListOption;
     icon: React.ReactNode;
@@ -58,17 +58,19 @@ export default function CreateListStep1() {
     <Pressable
       style={[
         styles.optionCard,
-        isSelected ? styles.optionCardSelected : styles.optionCardUnselected
+        isSelected ? styles.optionCardSelected : styles.optionCardUnselected,
       ]}
       onPress={() => setSelectedOption(option)}
     >
       <View style={styles.optionContent}>
         {/* Checkbox */}
         <View style={styles.checkboxContainer}>
-          <View style={[
-            styles.checkbox,
-            isSelected ? styles.checkboxSelected : styles.checkboxUnselected
-          ]}>
+          <View
+            style={[
+              styles.checkbox,
+              isSelected ? styles.checkboxSelected : styles.checkboxUnselected,
+            ]}
+          >
             {isSelected && (
               <Ionicons name="checkmark" size={16} color="#FFFFFF" />
             )}
@@ -93,12 +95,12 @@ export default function CreateListStep1() {
 
       {/* Header */}
       <LinearGradient
-        colors={['#330065', '#6600CB']}
+        colors={["#330065", "#6600CB"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.header}
       >
-        <SafeAreaView edges={['top']}>
+        <SafeAreaView edges={["top"]}>
           <View style={styles.headerContent}>
             {/* Status Bar Spacer */}
             <View style={styles.statusBar}>
@@ -128,30 +130,45 @@ export default function CreateListStep1() {
 
       {/* Main Content */}
       <View style={styles.content}>
-        <Text style={styles.sectionTitle}>Make a list from</Text>
+        <Text style={styles.sectionTitle}>Make a list for</Text>
 
         <View style={styles.optionsContainer}>
           <OptionCard
             option="myself"
-            icon={<Ionicons name="person-circle-outline" size={40} color="#1C0335" />}
+            icon={
+              <Ionicons
+                name="person-circle-outline"
+                size={40}
+                color="#1C0335"
+              />
+            }
             title="Myself"
             description="Build a wish list for your own celebrations, milestones, or just a treat for yourself!"
-            isSelected={selectedOption === 'myself'}
+            isSelected={selectedOption === "myself"}
           />
 
           <OptionCard
             option="someone-else"
-            icon={<Ionicons name="people-circle-outline" size={40} color="#1C0335" />}
+            icon={
+              <Ionicons
+                name="people-circle-outline"
+                size={40}
+                color="#1C0335"
+              />
+            }
             title="Someone else"
             description="Create a gift list for your children, pets, or anyone who's your loved one"
-            isSelected={selectedOption === 'someone-else'}
+            isSelected={selectedOption === "someone-else"}
           />
         </View>
 
         {/* Continue Button */}
         <View style={styles.continueContainer}>
           <Pressable
-            style={[styles.continueButton, !selectedOption && styles.continueButtonDisabled]}
+            style={[
+              styles.continueButton,
+              !selectedOption && styles.continueButtonDisabled,
+            ]}
             onPress={handleContinue}
             disabled={!selectedOption}
           >
@@ -159,8 +176,6 @@ export default function CreateListStep1() {
           </Pressable>
         </View>
       </View>
-
-
     </View>
   );
 }
@@ -168,7 +183,7 @@ export default function CreateListStep1() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   header: {
     paddingBottom: 16,
@@ -177,39 +192,39 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   statusBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     height: 44,
     paddingTop: 10,
   },
   timeText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: '600',
-    fontFamily: 'Nunito_600SemiBold',
+    fontWeight: "600",
+    fontFamily: "Nunito_600SemiBold",
   },
   statusIcons: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   batteryIcon: {
     width: 22,
     height: 11,
     borderWidth: 1,
-    borderColor: '#FFFFFF',
+    borderColor: "#FFFFFF",
     borderRadius: 2,
     padding: 1,
   },
   batteryFill: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 1,
   },
   navigation: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 16,
     paddingTop: 16,
   },
@@ -217,20 +232,20 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   headerTitle: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 24,
-    fontWeight: '700',
-    fontFamily: 'Nunito_700Bold',
+    fontWeight: "700",
+    fontFamily: "Nunito_700Bold",
     lineHeight: 28,
     letterSpacing: -1,
   },
   progressContainer: {
     paddingHorizontal: 16,
     paddingVertical: 40,
-    alignItems: 'center',
+    alignItems: "center",
   },
   progressBarContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     width: screenWidth - 32,
     gap: 4,
   },
@@ -240,10 +255,10 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   progressActive: {
-    backgroundColor: '#45018A',
+    backgroundColor: "#45018A",
   },
   progressInactive: {
-    backgroundColor: '#DDD7E4',
+    backgroundColor: "#DDD7E4",
   },
   content: {
     flex: 1,
@@ -251,9 +266,9 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 24,
-    fontWeight: '700',
-    fontFamily: 'Nunito_700Bold',
-    color: '#1C0335',
+    fontWeight: "700",
+    fontFamily: "Nunito_700Bold",
+    color: "#1C0335",
     marginBottom: 24,
     lineHeight: 28,
   },
@@ -268,18 +283,18 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   optionCardSelected: {
-    backgroundColor: '#F5EDFE',
-    borderColor: '#1C0335',
+    backgroundColor: "#F5EDFE",
+    borderColor: "#1C0335",
   },
   optionCardUnselected: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#AEAEB2',
+    backgroundColor: "#FFFFFF",
+    borderColor: "#AEAEB2",
   },
   optionContent: {
-    position: 'relative',
+    position: "relative",
   },
   checkboxContainer: {
-    position: 'absolute',
+    position: "absolute",
     right: 0,
     top: 0,
   },
@@ -287,36 +302,36 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   checkboxSelected: {
-    backgroundColor: '#3B0076',
+    backgroundColor: "#3B0076",
   },
   checkboxUnselected: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: '#AEAEB2',
+    borderColor: "#AEAEB2",
   },
   optionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     marginBottom: 16,
     marginTop: 24,
   },
   optionTitle: {
     fontSize: 24,
-    fontWeight: '700',
-    fontFamily: 'Nunito_700Bold',
-    color: '#1C0335',
+    fontWeight: "700",
+    fontFamily: "Nunito_700Bold",
+    color: "#1C0335",
     lineHeight: 24,
   },
   optionDescription: {
     fontSize: 16,
-    fontWeight: '400',
-    fontFamily: 'Nunito_400Regular',
-    color: '#1C0335',
+    fontWeight: "400",
+    fontFamily: "Nunito_400Regular",
+    color: "#1C0335",
     lineHeight: 24,
     marginRight: 24,
   },
@@ -325,19 +340,19 @@ const styles = StyleSheet.create({
     paddingBottom: 100, // Add space for tab bar
   },
   continueButton: {
-    backgroundColor: '#3B0076',
+    backgroundColor: "#3B0076",
     borderRadius: 8,
     paddingVertical: 16,
-    alignItems: 'center',
+    alignItems: "center",
   },
   continueButtonDisabled: {
-    backgroundColor: '#AEAEB2',
+    backgroundColor: "#AEAEB2",
   },
   continueButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: '700',
-    fontFamily: 'Nunito_700Bold',
+    fontWeight: "700",
+    fontFamily: "Nunito_700Bold",
     lineHeight: 16,
   },
 });

@@ -21,4 +21,56 @@ export default defineSchema({
     created_at: v.string(),
     updated_at: v.string(),
   }).index("by_keyword", ["keyword"]),
+  // New table to store user-created gift lists
+  lists: defineTable({
+    user_id: v.optional(v.union(v.string(), v.null())),
+    title: v.string(),
+    note: v.optional(v.union(v.string(), v.null())),
+    eventDate: v.optional(v.union(v.string(), v.null())),
+    shippingAddress: v.optional(v.union(v.string(), v.null())),
+    occasion: v.optional(v.union(v.string(), v.null())),
+    coverPhotoUri: v.optional(v.union(v.string(), v.null())),
+    privacy: v.union(v.literal("private"), v.literal("shared")),
+    created_at: v.string(),
+    updated_at: v.string(),
+  }).index("by_user", ["user_id"]),
+
+  // Contacts (friends) owned by a user
+  contacts: defineTable({
+    owner_id: v.string(), // Clerk user id of owner
+    name: v.string(),
+    email: v.optional(v.string()),
+    avatarUrl: v.optional(v.union(v.string(), v.null())),
+    created_at: v.string(),
+    updated_at: v.string(),
+  }).index("by_owner", ["owner_id"]),
+
+  // Groups owned by a user
+  groups: defineTable({
+    owner_id: v.string(), // Clerk user id of owner
+    name: v.string(),
+    coverPhotoUri: v.optional(v.union(v.string(), v.null())),
+    created_at: v.string(),
+    updated_at: v.string(),
+  }).index("by_owner", ["owner_id"]),
+
+  // Group membership linking groups to contacts
+  group_members: defineTable({
+    group_id: v.id("groups"),
+    contact_id: v.id("contacts"),
+    created_at: v.string(),
+  })
+    .index("by_group", ["group_id"])
+    .index("by_contact", ["contact_id"]),
+
+  // List shares: which groups or contacts can access a list when shared
+  list_shares: defineTable({
+    list_id: v.id("lists"),
+    group_id: v.optional(v.id("groups")),
+    contact_id: v.optional(v.id("contacts")),
+    created_at: v.string(),
+  })
+    .index("by_list", ["list_id"])
+    .index("by_group", ["group_id"])
+    .index("by_contact", ["contact_id"]),
 });

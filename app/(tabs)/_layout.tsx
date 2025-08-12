@@ -104,6 +104,32 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      {/* Gift and List journey screens - hidden from tab bar but included in this navigator */}
+      <Tabs.Screen
+        name="create-list-step1"
+        options={{
+          href: null, // This hides it from the tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="create-list-step2"
+        options={{
+          href: null, // This hides it from the tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="create-list-step3"
+        options={{
+          href: null, // This hides it from the tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="add-gift"
+        options={{
+          href: null, // This hides it from the tab bar
+        }}
+      />
     </Tabs>
   );
 }

@@ -1,9 +1,16 @@
+import { api } from "@/convex/_generated/api";
+import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
+import { useMutation, useQuery } from "convex/react";
+import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
   Dimensions,
+  Image,
+  Platform,
   Pressable,
   ScrollView,
   StatusBar,
@@ -12,7 +19,52 @@ import {
   TextInput,
   View,
 } from "react-native";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+// Stable, top-level FormField component
+type FormFieldProps = {
+  label: string;
+  value: string;
+  onChangeText: (text: string) => void;
+  multiline?: boolean;
+  rightIcon?: React.ReactNode;
+  placeholder?: string;
+  style?: any;
+};
+const FormField = React.memo(
+  ({
+    label,
+    value,
+    onChangeText,
+    multiline = false,
+    rightIcon,
+    placeholder,
+    style,
+  }: FormFieldProps) => (
+    <View style={[styles.fieldContainer, style]}>
+      <View style={styles.fieldWrapper}>
+        <TextInput
+          style={[
+            styles.textInput,
+            multiline && styles.textInputMultiline,
+            !value && styles.textInputEmpty,
+          ]}
+          value={value}
+          onChangeText={onChangeText}
+          multiline={multiline}
+          placeholder={placeholder}
+          placeholderTextColor="#D1D1D6"
+        />
+        <View style={styles.floatingLabel}>
+          <Text style={styles.floatingLabelText}>{label}</Text>
+        </View>
+        {rightIcon && <View style={styles.rightIconContainer}>{rightIcon}</View>}
+      </View>
+    </View>
+  )
+);
+FormField.displayName = "FormField";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -33,6 +85,7 @@ interface FormData {
   eventDate: string;
   shippingAddress: string;
   occasion: Occasion;
+  coverPhotoUri: string | null;
 }
 
 export default function CreateListStep2() {
@@ -42,17 +95,109 @@ export default function CreateListStep2() {
     eventDate: "",
     shippingAddress: "",
     occasion: null,
+    coverPhotoUri: null,
   });
 
   const [characterCount, setCharacterCount] = useState(0);
+  const createList = useMutation(api.products.createList);
+  const updateListDetails = useMutation(api.products.updateListDetails);
+  const { user } = useUser();
+  const { listId } = useLocalSearchParams<{ listId?: string }>();
+  const existing = useQuery(api.products.getListById, listId ? { listId: listId as any } : "skip");
+
+  React.useEffect(() => {
+    if (existing) {
+      setFormData({
+        eventTitle: existing.title ?? "",
+        eventNote: existing.note ?? "",
+        eventDate: existing.eventDate ?? "",
+        shippingAddress: existing.shippingAddress ?? "",
+        occasion: (existing.occasion as Occasion) ?? null,
+        coverPhotoUri: (existing.coverPhotoUri as string | null) ?? null,
+      });
+      setCharacterCount((existing.note ?? "").length);
+    }
+  }, [existing]);
+
+  // Date picker state & handlers
+  const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+  const showDatePicker = () => {
+    if (Platform.OS === "web") {
+      try {
+        const input = document.createElement("input");
+        input.type = "date";
+        if (formData.eventDate) input.value = formData.eventDate;
+        input.style.position = "fixed";
+        input.style.opacity = "0";
+        input.style.pointerEvents = "none";
+        document.body.appendChild(input);
+        const cleanup = () => {
+          input.onchange = null;
+          input.onblur = null;
+          if (input.parentNode) input.parentNode.removeChild(input);
+        };
+        input.onchange = () => {
+          const value = input.value;
+          if (value) updateFormData("eventDate", value);
+          cleanup();
+        };
+        input.onblur = () => cleanup();
+        if (typeof (input as any).showPicker === "function") {
+          (input as any).showPicker();
+        } else {
+          input.click();
+        }
+      } catch {
+        setDatePickerVisible(true);
+      }
+      return;
+    }
+    setDatePickerVisible(true);
+  };
+  const hideDatePicker = () => setDatePickerVisible(false);
+  const handleDateConfirm = (date: Date) => {
+    // Store as YYYY-MM-DD
+    const formatted = date.toISOString().split("T")[0];
+    updateFormData("eventDate", formatted);
+    hideDatePicker();
+  };
 
   const handleBack = () => {
     router.back();
   };
 
-  const handleContinue = () => {
-    console.log("Continue with form data:", formData);
-    router.push("/create-list-step3");
+  const handleContinue = async () => {
+    try {
+      if (listId) {
+        // Editing existing list: update and then continue to step 3
+        await updateListDetails({
+          listId: listId as any,
+          title: formData.eventTitle,
+          note: formData.eventNote || null,
+          eventDate: formData.eventDate || null,
+          shippingAddress: formData.shippingAddress || null,
+          occasion: formData.occasion || null,
+          coverPhotoUri: formData.coverPhotoUri || null,
+        });
+        router.push({ pathname: "/create-list-step3", params: { listId: String(listId) } });
+        return;
+      }
+      // Save a draft list with default privacy 'private'; step 3 can update it later if needed
+      const newListId = await createList({
+        title: formData.eventTitle,
+        note: formData.eventNote || null,
+        eventDate: formData.eventDate || null,
+        shippingAddress: formData.shippingAddress || null,
+        occasion: formData.occasion || null,
+        coverPhotoUri: formData.coverPhotoUri || null,
+        privacy: "private",
+        user_id: user?.id ?? null,
+      });
+      router.push({ pathname: "/create-list-step3", params: { listId: String(newListId) } });
+    } catch (e) {
+      console.error("Failed to save list", e);
+      Alert.alert("Error", "Could not save your list. Please try again.");
+    }
   };
 
   const updateFormData = (field: keyof FormData, value: string | Occasion) => {
@@ -69,6 +214,58 @@ export default function CreateListStep2() {
     }
   };
 
+  // Image picker for cover photo upload
+  const handlePickImage = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission required",
+          "Please allow photo library access to upload a cover photo."
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [16, 9],
+        quality: 0.9,
+      });
+
+      if (result.canceled) return;
+
+      const asset = result.assets?.[0];
+      if (!asset) return;
+
+      const uri = asset.uri;
+      const mime = asset.mimeType ?? "";
+      const ext = uri.split(".").pop()?.toLowerCase();
+      const isValidType =
+        mime.startsWith("image/jpeg") ||
+        mime.startsWith("image/png") ||
+        ext === "jpg" ||
+        ext === "jpeg" ||
+        ext === "png";
+
+      if (!isValidType) {
+        Alert.alert("Unsupported file", "Please select a JPG or PNG image.");
+        return;
+      }
+
+      const sizeBytes = asset.fileSize;
+      if (typeof sizeBytes === "number" && sizeBytes > 4 * 1024 * 1024) {
+        Alert.alert("File too large", "Please choose an image under 4MB.");
+        return;
+      }
+
+      updateFormData("coverPhotoUri", uri);
+    } catch (e) {
+      console.error("Image picker error", e);
+      Alert.alert("Upload failed", "Something went wrong. Please try again.");
+    }
+  };
+
   const ProgressIndicator = () => (
     <View style={styles.progressContainer}>
       <View style={styles.progressBarContainer}>
@@ -78,47 +275,6 @@ export default function CreateListStep2() {
         <View style={[styles.progressSegment, styles.progressActive]} />
         {/* Step 3 - Inactive */}
         <View style={[styles.progressSegment, styles.progressInactive]} />
-      </View>
-    </View>
-  );
-
-  const FormField = ({
-    label,
-    value,
-    onChangeText,
-    multiline = false,
-    rightIcon,
-    placeholder,
-    style,
-  }: {
-    label: string;
-    value: string;
-    onChangeText: (text: string) => void;
-    multiline?: boolean;
-    rightIcon?: React.ReactNode;
-    placeholder?: string;
-    style?: any;
-  }) => (
-    <View style={[styles.fieldContainer, style]}>
-      <View style={styles.fieldWrapper}>
-        <TextInput
-          style={[
-            styles.textInput,
-            multiline && styles.textInputMultiline,
-            !value && styles.textInputEmpty,
-          ]}
-          value={value}
-          onChangeText={onChangeText}
-          multiline={multiline}
-          placeholder={placeholder}
-          placeholderTextColor="#D1D1D6"
-        />
-        <View style={styles.floatingLabel}>
-          <Text style={styles.floatingLabelText}>{label}</Text>
-        </View>
-        {rightIcon && (
-          <View style={styles.rightIconContainer}>{rightIcon}</View>
-        )}
       </View>
     </View>
   );
@@ -285,13 +441,32 @@ export default function CreateListStep2() {
               </View>
             </View>
 
-            <FormField
-              label="Event date"
-              value={formData.eventDate}
-              onChangeText={(text) => updateFormData("eventDate", text)}
-              rightIcon={
-                <Ionicons name="calendar-outline" size={24} color="#AEAEB2" />
-              }
+            {/* Event Date - Date Picker */}
+            <View style={styles.fieldContainer}>
+              <Pressable onPress={showDatePicker} style={styles.fieldWrapper}>
+                <Text
+                  style={[
+                    styles.textInput,
+                    !formData.eventDate && styles.textInputEmpty,
+                    { color: formData.eventDate ? "#1C0335" : "#D1D1D6" },
+                  ]}
+                >
+                  {formData.eventDate || "Select a date"}
+                </Text>
+                <View style={styles.floatingLabel}>
+                  <Text style={styles.floatingLabelText}>Event date</Text>
+                </View>
+                <View style={styles.rightIconContainer}>
+                  <Ionicons name="calendar-outline" size={24} color="#AEAEB2" />
+                </View>
+              </Pressable>
+            </View>
+            <DateTimePickerModal
+              isVisible={isDatePickerVisible}
+              mode="date"
+              onConfirm={handleDateConfirm}
+              onCancel={hideDatePicker}
+              display={Platform.OS === "ios" ? "inline" : "default"}
             />
 
             <FormField
@@ -312,15 +487,28 @@ export default function CreateListStep2() {
             <View style={styles.coverPhotoSection}>
               <Text style={styles.coverPhotoLabel}>Cover photo (optional)</Text>
 
-              <Pressable style={styles.uploadArea}>
-                <View style={styles.uploadContent}>
-                  <Ionicons
-                    name="cloud-upload-outline"
-                    size={24}
-                    color="#3B0076"
+              <Pressable
+                style={[
+                  styles.uploadArea,
+                  formData.coverPhotoUri && styles.uploadAreaPreview,
+                ]}
+                onPress={handlePickImage}
+              >
+                {formData.coverPhotoUri ? (
+                  <Image
+                    source={{ uri: formData.coverPhotoUri }}
+                    style={styles.coverPhotoImage}
                   />
-                  <Text style={styles.uploadText}>Upload</Text>
-                </View>
+                ) : (
+                  <View style={styles.uploadContent}>
+                    <Ionicons
+                      name="cloud-upload-outline"
+                      size={24}
+                      color="#3B0076"
+                    />
+                    <Text style={styles.uploadText}>Upload</Text>
+                  </View>
+                )}
               </Pressable>
 
               <Text style={styles.uploadInfo}>Max: 4MB | JPG, PNG | 16:9</Text>
@@ -364,19 +552,8 @@ export default function CreateListStep2() {
           </Pressable>
         </View>
 
-        {/* Bottom Tab Navigation Spacer */}
-        <View style={styles.tabBarSpacer}>
-          <View style={styles.tabBar}>
-            <Ionicons name="home-outline" size={24} color="#8E8E93" />
-            <Ionicons name="heart-outline" size={24} color="#8E8E93" />
-            <View style={styles.addButton}>
-              <Ionicons name="add" size={30} color="#FFFFFF" />
-            </View>
-            <Ionicons name="globe-outline" size={24} color="#8E8E93" />
-            <Ionicons name="mail-outline" size={24} color="#8E8E93" />
-          </View>
-          <View style={styles.homeIndicator} />
-        </View>
+        {/* Bottom space for global tab bar */}
+        <View style={styles.tabBarSpacer} />
       </ScrollView>
     </View>
   );
@@ -564,10 +741,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  uploadAreaPreview: {
+    borderStyle: "solid",
+    overflow: "hidden",
+    alignItems: "stretch",
+    justifyContent: "flex-start",
+  },
   uploadContent: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+  },
+  coverPhotoImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "contain",
   },
   uploadText: {
     fontSize: 16,
@@ -666,32 +854,6 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   tabBarSpacer: {
-    backgroundColor: "#FFFFFF",
-    borderTopWidth: 1,
-    borderTopColor: "#D1D1D6",
-    paddingTop: 8,
-  },
-  tabBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-  },
-  addButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#3B0076",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  homeIndicator: {
-    width: 134,
-    height: 5,
-    borderRadius: 34,
-    backgroundColor: "#1C1C1C",
-    alignSelf: "center",
-    marginBottom: 8,
+    height: 100, // Space for global tab bar
   },
 });
