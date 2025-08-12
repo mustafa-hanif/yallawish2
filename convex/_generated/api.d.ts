@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as fetchProducts from "../fetchProducts.js";
 import type * as products from "../products.js";
+import type * as scrape from "../scrape.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -27,6 +28,7 @@ import type * as products from "../products.js";
 declare const fullApi: ApiFromModules<{
   fetchProducts: typeof fetchProducts;
   products: typeof products;
+  scrape: typeof scrape;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,
