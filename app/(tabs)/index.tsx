@@ -466,7 +466,7 @@ export default function HomeScreen() {
               <Pressable
                 key={event.id}
                 style={styles.eventCard}
-                onPress={() => router.push({ pathname: "/create-list-step2", params: { listId: String(event.id) } })}
+                onPress={() => router.push({ pathname: "/add-gift", params: { listId: String(event.id) } })}
               >
                 <View
                   style={[

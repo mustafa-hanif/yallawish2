@@ -366,3 +366,81 @@ export const seedShareDataPublic = mutation({
     return "ok";
   },
 });
+
+export const deleteList = mutation({
+  args: { listId: v.id("lists") },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.listId);
+    return true;
+  },
+});
+
+export const createListItem = mutation({
+  args: {
+    list_id: v.id("lists"),
+    name: v.string(),
+    description: v.optional(v.union(v.string(), v.null())),
+    image_url: v.optional(v.union(v.string(), v.null())),
+    quantity: v.number(),
+    price: v.optional(v.union(v.float64(), v.string(), v.null())),
+    currency: v.optional(v.string()),
+    buy_url: v.optional(v.union(v.string(), v.null())),
+  },
+  handler: async (ctx, args) => {
+    const now = new Date().toISOString();
+    const id = await ctx.db.insert("list_items", {
+      list_id: args.list_id,
+      name: args.name,
+      description: args.description ?? null,
+      image_url: args.image_url ?? null,
+      quantity: args.quantity,
+      claimed: 0,
+      price: args.price ?? null,
+      currency: args.currency ?? "AED",
+      buy_url: args.buy_url ?? null,
+      status: "active",
+      created_at: now,
+      updated_at: now,
+    });
+    return id;
+  },
+});
+
+export const getListItems = query({
+  args: { list_id: v.id("lists") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("list_items")
+      .withIndex("by_list", (q) => q.eq("list_id", args.list_id))
+      .collect();
+  },
+});
+
+export const seedDummyListItem = mutation({
+  args: { list_id: v.id("lists") },
+  handler: async (ctx, args) => {
+    // If already has items do nothing
+    const existing = await ctx.db
+      .query("list_items")
+      .withIndex("by_list", (q) => q.eq("list_id", args.list_id))
+      .collect();
+    if (existing.length > 0) return "skipped";
+
+    const now = new Date().toISOString();
+    await ctx.db.insert("list_items", {
+      list_id: args.list_id,
+      name: "Apple AirPods Max wireless over-ear headphones", 
+      description: "High-fidelity audio with Active Noise Cancellation and spatial audio.",
+      image_url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/airpods-max-select-202409-blue?wid=940&hei=1112&fmt=png-alpha&.v=1725380856538", 
+      quantity: 2,
+      claimed: 1,
+      price: "1899.00",
+      currency: "AED",
+      buy_url: "https://www.apple.com/airpods-max/",
+      status: "active",
+      created_at: now,
+      updated_at: now,
+    });
+    return "ok";
+  },
+});

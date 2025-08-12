@@ -73,4 +73,22 @@ export default defineSchema({
     .index("by_list", ["list_id"])
     .index("by_group", ["group_id"])
     .index("by_contact", ["contact_id"]),
+
+  // Gift items belonging to a list
+  list_items: defineTable({
+    list_id: v.id("lists"),
+    name: v.string(),
+    description: v.optional(v.union(v.string(), v.null())),
+    image_url: v.optional(v.union(v.string(), v.null())),
+    quantity: v.number(),
+    claimed: v.number(),
+    price: v.optional(v.union(v.float64(), v.string(), v.null())),
+    currency: v.optional(v.string()),
+    buy_url: v.optional(v.union(v.string(), v.null())),
+    status: v.union(v.literal("active"), v.literal("archived")),
+    created_at: v.string(),
+    updated_at: v.string(),
+  })
+    .index("by_list", ["list_id"]) 
+    .index("by_list_status", ["list_id", "status"]),
 });
