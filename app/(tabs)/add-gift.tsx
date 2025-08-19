@@ -19,6 +19,7 @@ import {
   View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { WebView } from 'react-native-webview';
 
 export default function AddGift() {
   const { listId } = useLocalSearchParams<{ listId?: string }>();
@@ -34,7 +35,35 @@ export default function AddGift() {
     }
   }, [items, listId, seedItem]);
 
-  const firstItem = Array.isArray(items) ? items[0] : undefined;
+  // All list items
+  const giftItems = Array.isArray(items) ? [...items] : [];
+
+  // Sort & Filter state
+  type SortOption = 'default' | 'priceAsc' | 'priceDesc' | 'newest' | 'oldest';
+  const [sortBy, setSortBy] = useState<SortOption>('default');
+  const [filterClaimed, setFilterClaimed] = useState(false);
+  const [filterUnclaimed, setFilterUnclaimed] = useState(false);
+
+  // Derived displayed items
+  let displayedItems = giftItems;
+  if (filterClaimed && !filterUnclaimed) {
+    displayedItems = displayedItems.filter((i: any) => (i.claimed ?? 0) >= (i.quantity ?? 1));
+  } else if (filterUnclaimed && !filterClaimed) {
+    displayedItems = displayedItems.filter((i: any) => (i.claimed ?? 0) < (i.quantity ?? 1));
+  }
+  try {
+    displayedItems = [...displayedItems].sort((a: any, b: any) => {
+      const aPrice = parseFloat(a.price) || 0; const bPrice = parseFloat(b.price) || 0;
+      const ad = a.created_at || ""; const bd = b.created_at || "";
+      switch (sortBy) {
+        case 'priceAsc': return aPrice - bPrice;
+        case 'priceDesc': return bPrice - aPrice;
+        case 'newest': return bd.localeCompare(ad);
+        case 'oldest': return ad.localeCompare(bd);
+        default: return 0;
+      }
+    });
+  } catch {}
   // @ts-ignore generated after adding convex action
   const scrape = useAction((api as any).scrape.productMetadata);
 
@@ -84,8 +113,19 @@ export default function AddGift() {
   const [price, setPrice] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [saving, setSaving] = useState(false);
+  // In-sheet browser state
+  const [showBrowser, setShowBrowser] = useState(false);
+  const [browserUrl, setBrowserUrl] = useState<string | null>(null); // initial search url
+  const [currentBrowserUrl, setCurrentBrowserUrl] = useState<string | null>(null); // updated as user navigates
+  // Sort & Filter sheet visibility
+  const [showSortSheet, setShowSortSheet] = useState(false);
+  // Temp draft selections while sheet open
+  const [tempSortBy, setTempSortBy] = useState<SortOption>('default');
+  const [tempFilterClaimed, setTempFilterClaimed] = useState(false);
+  const [tempFilterUnclaimed, setTempFilterUnclaimed] = useState(false);
   const DESCRIPTION_LIMIT = 400;
-  const canSave = (link.trim().length > 0 || name.trim().length > 0) && quantity > 0;
+  const canSave = !!listId && (link.trim().length > 0 || name.trim().length > 0) && quantity > 0 && !saving;
 
   const handleAddGift = () => setShowSheet(true);
   const closeSheet = () => setShowSheet(false);
@@ -93,11 +133,48 @@ export default function AddGift() {
   const decQty = useCallback(() => setQuantity(q => Math.max(1, q - 1)), []);
   const resetForm = () => { setLink(""); setSearch(""); setQuantity(1); setPrice(""); setName(""); setDescription(""); setImageUrl(null); setScrapeError(null); };
   const handleCancel = () => { closeSheet(); resetForm(); };
-  const handleSave = () => {
-    if (!canSave) return;
-    console.log("Saving gift", { link, search, quantity, price, name, description, imageUrl, listId });
-    closeSheet();
-    resetForm();
+  const createItem = useMutation(api.products.createListItem as any);
+  const handleSave = async () => {
+    if (!canSave || !listId) return;
+    try {
+      setSaving(true);
+      await createItem({
+        list_id: listId as any,
+        name: name || link, // fallback
+        description: description || null,
+        image_url: imageUrl || null,
+        quantity,
+        price: price || null,
+        currency: 'AED',
+        buy_url: link || null,
+      });
+    } catch (e) {
+      console.warn('Failed to save gift', e);
+    } finally {
+      setSaving(false);
+      closeSheet();
+      resetForm();
+    }
+  };
+
+  const openSearchBrowser = () => {
+    if (!search.trim()) return;
+    const q = encodeURIComponent(search.trim());
+    const url = `https://www.google.com/search?q=${q}&tbm=shop`;
+    setBrowserUrl(url);
+    setCurrentBrowserUrl(url);
+  // Hide sheet while browsing
+  setShowSheet(false);
+  setShowBrowser(true);
+  };
+
+  const handleBrowserAdd = async () => {
+    if (!currentBrowserUrl) return;
+    // Set link field then trigger scrape (will auto-scrape due to effect)
+    setLink(currentBrowserUrl);
+  setShowBrowser(false);
+  // Reopen sheet so user can confirm/edit
+  setTimeout(() => setShowSheet(true), 60);
   };
 
   // Scrape on link change (debounced)
@@ -203,47 +280,49 @@ export default function AddGift() {
             <Pressable style={styles.iconButton}>
               <Ionicons name="location-outline" size={24} color="#1C0335" />
             </Pressable>
-            <Pressable style={styles.iconButton}>
+            <Pressable style={styles.iconButton} onPress={() => setShowSortSheet(true)}>
               <Ionicons name="filter-outline" size={24} color="#1C0335" />
             </Pressable>
           </View>
         </View>
 
         <View style={styles.addGiftSection}>
-          {firstItem ? (
+      {displayedItems.length > 0 ? (
             <>
-              <View style={styles.itemCard}>
-                <View style={styles.itemImageWrap}>
-                  {firstItem.image_url ? (
-                    <Image source={{ uri: firstItem.image_url }} style={styles.itemImage} />
-                  ) : (
-                    <View style={[styles.itemImage, { backgroundColor: '#EEE' }]} />
-                  )}
-                </View>
-                <View style={styles.itemContent}>
-                  <Text style={styles.itemName}>{truncate(firstItem.name, 38)}</Text>
-                  <Text style={styles.itemQuantity}>Quantity: <Text style={styles.itemQuantityValue}>{firstItem.quantity}</Text></Text>
-                  <View style={styles.claimBadgeWrap}>
-                    <View style={styles.claimBadge}> 
-                      <Text style={styles.claimBadgeText}>{firstItem.claimed} Claimed</Text>
-                    </View>
-                    <Pressable style={styles.itemChevron}>
-                      <Ionicons name="chevron-forward" size={20} color="#1C0335" />
-                    </Pressable>
-                  </View>
-                  <View style={styles.priceRow}>
-                    <Text style={styles.itemPrice}>AED {firstItem.price}</Text>
-                    {firstItem.buy_url && (
-                      <Pressable>
-                        <Text style={styles.buyNow}>Buy Now</Text>
-                      </Pressable>
+        {displayedItems.map((item: any) => (
+                <View key={item._id} style={styles.itemCard}>
+                  <View style={styles.itemImageWrap}>
+                    {item.image_url ? (
+                      <Image source={{ uri: item.image_url }} style={styles.itemImage} />
+                    ) : (
+                      <View style={[styles.itemImage, { backgroundColor: '#EEE' }]} />
                     )}
                   </View>
-                  <View style={styles.progressTrack}>
-                    <View style={[styles.progressFill, { width: `${(firstItem.claimed/firstItem.quantity)*100}%` }]} />
+                  <View style={styles.itemContent}>
+                    <Text style={styles.itemName}>{truncate(item.name, 38)}</Text>
+                    <Text style={styles.itemQuantity}>Quantity: <Text style={styles.itemQuantityValue}>{item.quantity}</Text></Text>
+                    <View style={styles.claimBadgeWrap}>
+                      <View style={styles.claimBadge}> 
+                        <Text style={styles.claimBadgeText}>{item.claimed} Claimed</Text>
+                      </View>
+                      <Pressable style={styles.itemChevron}>
+                        <Ionicons name="chevron-forward" size={20} color="#1C0335" />
+                      </Pressable>
+                    </View>
+                    <View style={styles.priceRow}>
+                      <Text style={styles.itemPrice}>AED {item.price}</Text>
+                      {item.buy_url && (
+                        <Pressable>
+                          <Text style={styles.buyNow}>Buy Now</Text>
+                        </Pressable>
+                      )}
+                    </View>
+                    <View style={styles.progressTrack}>
+                      <View style={[styles.progressFill, { width: `${(item.claimed/item.quantity)*100}%` }]} />
+                    </View>
                   </View>
                 </View>
-              </View>
+              ))}
               <Pressable style={styles.addMoreButton} onPress={handleAddGift}>
                 <Ionicons name="add" size={20} color="#3B0076" />
                 <Text style={styles.addMoreButtonText}>Add more gifts</Text>
@@ -256,12 +335,10 @@ export default function AddGift() {
                 <Ionicons name="add" size={24} color="#3B0076" />
                 <Text style={styles.addGiftButtonText}>Add a gift</Text>
               </Pressable>
+              {listId && (
+                <Text style={{ textAlign: 'center', color: '#8E8E93' }}>Working on list: {String(listId)}</Text>
+              )}
             </>
-          )}
-          {listId && !firstItem && (
-            <Text style={{ textAlign: "center", color: "#8E8E93" }}>
-              Working on list: {String(listId)}
-            </Text>
           )}
         </View>
 
@@ -320,8 +397,10 @@ export default function AddGift() {
             <View style={styles.fieldGroup}>
               <Text style={styles.fieldLabel}>Search via Google</Text>
               <View style={styles.inputRow}>
-                <TextInput value={search} onChangeText={setSearch} style={styles.input} autoCapitalize="none" autoCorrect={false} />
-                <Ionicons name="search-outline" size={20} color="#1C0335" />
+                <TextInput value={search} onChangeText={setSearch} style={styles.input} autoCapitalize="none" autoCorrect={false} placeholder="Search products" returnKeyType="search" onSubmitEditing={openSearchBrowser} />
+                <Pressable onPress={openSearchBrowser}>
+                  <Ionicons name="search-outline" size={20} color="#1C0335" />
+                </Pressable>
               </View>
             </View>
             <View style={styles.fieldGroup}>
@@ -361,14 +440,105 @@ export default function AddGift() {
                 <Text style={styles.charCount}>{DESCRIPTION_LIMIT - description.length}</Text>
               </View>
             </View>
-            <Pressable style={[styles.saveBtn, !canSave && styles.saveBtnDisabled]} onPress={handleSave} disabled={!canSave}>
-              <Text style={[styles.saveBtnText, !canSave && styles.saveBtnTextDisabled]}>Save</Text>
+            <Pressable style={[styles.saveBtn, (!canSave) && styles.saveBtnDisabled]} onPress={handleSave} disabled={!canSave}>
+              <Text style={[styles.saveBtnText, (!canSave) && styles.saveBtnTextDisabled]}>{saving ? 'Saving...' : 'Save'}</Text>
             </Pressable>
             <Pressable style={styles.cancelBtn} onPress={handleCancel}>
               <Text style={styles.cancelBtnText}>Cancel</Text>
             </Pressable>
           </ScrollView>
         </Animated.View>
+      </Modal>
+      {/* Product search browser modal */}
+      <Modal visible={showBrowser} animationType="slide" presentationStyle="fullScreen" onRequestClose={() => setShowBrowser(false)}>
+        <View style={styles.browserModalContainer}>
+          <View style={styles.browserHeader}>
+            <Pressable style={styles.browserHeaderBtn} onPress={() => { setShowBrowser(false); setTimeout(() => setShowSheet(true), 60); }}>
+              <Ionicons name="chevron-back" size={24} color="#1C0335" />
+            </Pressable>
+            <Text style={styles.browserTitle} numberOfLines={1}>{currentBrowserUrl?.replace(/^https?:\/\//,'')}</Text>
+            <Pressable style={styles.browserHeaderBtn} onPress={() => setShowBrowser(false)}>
+              <Ionicons name="close" size={24} color="#1C0335" />
+            </Pressable>
+          </View>
+          {browserUrl && (
+            <WebView
+              source={{ uri: browserUrl }}
+              onNavigationStateChange={(nav) => setCurrentBrowserUrl(nav.url)}
+              startInLoadingState
+              style={styles.webview}
+            />
+          )}
+          <SafeAreaView edges={['bottom']} style={styles.browserActionBarWrapper}>
+            <Pressable style={styles.browserActionBar} onPress={handleBrowserAdd}>
+              <Ionicons name="add" size={20} color="#FFFFFF" />
+              <Text style={styles.browserActionBarText}>Add Product</Text>
+            </Pressable>
+          </SafeAreaView>
+        </View>
+      </Modal>
+      {/* Sort & Filter Bottom Sheet (designed) */}
+      <Modal visible={showSortSheet} transparent animationType="fade" onRequestClose={() => setShowSortSheet(false)}>
+        <Pressable style={styles.backdrop} onPress={() => setShowSortSheet(false)} />
+        <View style={styles.sortSheetContainer}>
+          <View style={styles.sortSheetHandle} />
+          <ScrollView contentContainerStyle={styles.sortSheetContent} showsVerticalScrollIndicator={false}>
+            <Text style={styles.sortSheetTitle}>Sort & Filter</Text>
+            <View style={styles.sortDivider} />
+            <View style={styles.sortSection}>
+              <View style={styles.sortSectionHeader}>
+                <Text style={styles.sortSectionTitle}>Sort by</Text>
+                <Ionicons name="chevron-down" size={20} color="#1C0335" />
+              </View>
+              {[
+                { key:'default', label:'Default' },
+                { key:'priceAsc', label:'Price Lowest - Highest' },
+                { key:'priceDesc', label:'Price Highest - Lowest' },
+                { key:'newest', label:'Most Recent to Oldest' },
+                { key:'oldest', label:'Oldest to Most Recent' },
+              ].map(o => (
+                <Pressable key={o.key} style={styles.radioRow} onPress={()=>setTempSortBy(o.key as SortOption)}>
+                  <View style={[styles.radioOuter, tempSortBy===o.key && styles.radioOuterActive]}>
+                    {tempSortBy===o.key && <View style={styles.radioInner} />}
+                  </View>
+                  <Text style={styles.radioLabel}>{o.label}</Text>
+                </Pressable>
+              ))}
+            </View>
+            <View style={styles.sortSection}>
+              <View style={styles.sortSectionHeader}>
+                <Text style={styles.sortSectionTitle}>Filter by Availability</Text>
+                <Ionicons name="chevron-down" size={20} color="#1C0335" />
+              </View>
+              <Pressable style={styles.radioRow} onPress={()=>setTempFilterClaimed(v=>!v)}>
+                <View style={[styles.checkboxBox, tempFilterClaimed && styles.checkboxBoxActive]}>
+                  {tempFilterClaimed && <Ionicons name="checkmark" size={20} color="#FFFFFF" />}
+                </View>
+                <Text style={styles.radioLabel}>Claimed</Text>
+              </Pressable>
+              <Pressable style={styles.radioRow} onPress={()=>setTempFilterUnclaimed(v=>!v)}>
+                <View style={[styles.checkboxBox, tempFilterUnclaimed && styles.checkboxBoxActive]}>
+                  {tempFilterUnclaimed && <Ionicons name="checkmark" size={20} color="#FFFFFF" />}
+                </View>
+                <Text style={styles.radioLabel}>Unclaimed</Text>
+              </Pressable>
+            </View>
+            <View style={styles.sortScrollSpacer} />
+          </ScrollView>
+          <View style={styles.applyBarWrapper}>
+            <Pressable
+              style={styles.applyBtnFull}
+              onPress={() => {
+                setSortBy(tempSortBy);
+                setFilterClaimed(tempFilterClaimed);
+                setFilterUnclaimed(tempFilterUnclaimed);
+                setShowSortSheet(false);
+              }}
+            >
+              <Text style={styles.applyBtnText}>Apply</Text>
+            </Pressable>
+          </View>
+        </View>
       </Modal>
     </View>
   );
