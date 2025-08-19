@@ -250,7 +250,7 @@ export default function AddGift() {
             <Image source={{ uri: coverUri }} style={styles.coverImage} />
           ) : (
             <Image
-              source={require("@/assets/images/c880529f92a902eb188e079575f79246e2c24c5c.png")}
+              source={require("@/assets/images/nursery.png")}
               style={styles.coverImage}
             />
           )}

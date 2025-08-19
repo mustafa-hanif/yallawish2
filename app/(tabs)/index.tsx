@@ -110,12 +110,11 @@ export default function HomeScreen() {
         </View>
 
         {/* Swiper action cards */}
-        <View style={{ height: 260, marginBottom: 36 }}>
+        <View style={{ height: 200, marginBottom: 36 }}>
           <Swiper
             cards={cards}
             stackSize={3}
             stackSeparation={-22}
-            
             backgroundColor="transparent"
             disableTopSwipe
             disableBottomSwipe
@@ -123,16 +122,17 @@ export default function HomeScreen() {
             infinite
             // Removed onSwipedAll reset; cards now loop seamlessly
             cardVerticalMargin={0}
+            cardHorizontalMargin={16}
             renderCard={(card: any) => {
               if (!card) return <View />;
               return (
                 <Pressable
                   onPress={card.action}
                   style={{
-                    flex: 1,
+                    height: 180,
                     borderRadius: 32,
                     paddingHorizontal: 28,
-                    paddingVertical: 30,
+                    paddingVertical: 24,
                     backgroundColor: card.backgroundColor,
                     alignItems: 'center',
                     justifyContent: 'flex-start',
@@ -142,11 +142,11 @@ export default function HomeScreen() {
                     shadowOffset: { width: 0, height: 8 },
                   }}
                 >
-                  <View style={{ width: 104, height: 104, borderRadius: 32, backgroundColor: '#FFFFFF', opacity:0.92, alignItems:'center', justifyContent:'center', marginBottom: 26 }}>
-                    <Image source={card.image} contentFit="contain" style={{ width: 74, height: 74 }} />
+                  <View style={{ width: 80, height: 80, borderRadius: 24, backgroundColor: '#FFFFFF', opacity:0.92, alignItems:'center', justifyContent:'center', marginBottom: 16 }}>
+                    <Image source={card.image} contentFit="contain" style={{ width: 60, height: 60 }} />
                   </View>
-                  <Text style={[styles.addListTitle, { textAlign:'center', fontSize:22, marginBottom:8 }]}>{card.title}</Text>
-                  <Text style={[styles.addListSubtitle, { textAlign:'center', fontSize:14, lineHeight:20, maxWidth:200 }]} numberOfLines={2}>{card.subtitle}</Text>
+                  <Text style={[styles.addListTitle, { textAlign:'center', fontSize:18, marginBottom:6 }]}>{card.title}</Text>
+                  <Text style={[styles.addListSubtitle, { textAlign:'center', fontSize:12, lineHeight:16, maxWidth:180 }]} numberOfLines={2}>{card.subtitle}</Text>
                 </Pressable>
               );
             }}
