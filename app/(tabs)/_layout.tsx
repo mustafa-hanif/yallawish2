@@ -1,7 +1,8 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Redirect, Tabs } from "expo-router";
 import React from "react";
-import { Platform } from "react-native";
+import { Platform, View } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import TabBarBackground from "@/components/ui/TabBarBackground";
@@ -69,12 +70,25 @@ export default function TabLayout() {
         name="add-product"
         options={{
           title: "",
-          tabBarIcon: ({ color }) => (
-            <Image
-              source={require("@/assets/images/addProductIcon.png")}
-              style={{ width: 72, height: 72, tintColor: color }}
-              contentFit="contain"
-            />
+          tabBarIcon: ({ focused }) => (
+            <View
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: 36,
+                backgroundColor: focused ? "#4B0082" : "#6A0FBF",
+                alignItems: "center",
+                justifyContent: "center",
+                shadowColor: "#000",
+                shadowOpacity: 0.15,
+                shadowRadius: 8,
+                shadowOffset: { width: 0, height: 4 },
+                elevation: 6,
+                marginTop: -24,
+              }}
+            >
+              <Ionicons name="add" size={42} color="#FFFFFF" />
+            </View>
           ),
         }}
       />
@@ -128,6 +142,12 @@ export default function TabLayout() {
         name="add-gift"
         options={{
           href: null, // This hides it from the tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="manage-list"
+        options={{
+          href: null, // Hide manage-list from tab bar
         }}
       />
     </Tabs>

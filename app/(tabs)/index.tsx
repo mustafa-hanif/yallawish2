@@ -8,25 +8,11 @@ import { SignedIn, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
 import { router } from "expo-router";
-import {
-  Alert,
-  Dimensions,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
-import Animated, {
-  Extrapolate,
-  interpolate,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useSharedValue,
-} from "react-native-reanimated";
+import { Alert, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import Swiper from "react-native-deck-swiper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Occasion -> color map for event left border (module-level to avoid hook deps)
+// Occasion -> color map for event left border
 const OCCASION_COLOR: Record<string, string> = {
   birthday: "#00C4F0",
   wedding: "#00D4AA",
@@ -37,76 +23,35 @@ const OCCASION_COLOR: Record<string, string> = {
   other: "#4D4D4D",
   "no-occasion": "#4D4D4D",
 };
-
 export default function HomeScreen() {
   const { user } = useUser();
-  const screenWidth = Dimensions.get("window").width;
-  const CARD_WIDTH = Math.min(screenWidth * 0.65, 240); // Reduced width for better overlap
-  const CARD_SPACING = -30; // Negative spacing for overlap
-  const SNAP_INTERVAL = CARD_WIDTH + CARD_SPACING; // This should be 210 (240 - 30)
-  const scrollX = useSharedValue(0);
 
-  // Load user's lists from Convex
   const myLists = useQuery(
     api.products.getMyLists,
     user?.id ? { user_id: user.id } : "skip"
   );
 
   type UpcomingEvent = {
-    id: string;
-    date: string;
-    month: string;
-    title: string;
-    subtitle: string;
-    color: string;
-    dateValue: number;
+    id: string; date: string; month: string; title: string; subtitle: string; color: string; dateValue: number;
   };
 
-  // Build upcoming events from lists with eventDate
   const upcomingEvents = useMemo(() => {
     if (!myLists) return [] as UpcomingEvent[];
-
-    const items: UpcomingEvent[] = myLists
+    return myLists
       .filter((l: any) => !!l.eventDate)
       .map((l: any) => {
         const [y, m, d] = String(l.eventDate).split("-").map((n) => parseInt(n, 10));
-        const dateObj = new Date(y, (m ?? 1) - 1, d ?? 1); // local date to avoid TZ shift
+        const dateObj = new Date(y, (m ?? 1) - 1, d ?? 1);
         const dayStr = String(d ?? 1).padStart(2, "0");
         let monthStr = "";
         try {
-          monthStr = new Intl.DateTimeFormat(undefined, { month: "long" })
-            .format(dateObj)
-            .toUpperCase();
+          monthStr = new Intl.DateTimeFormat(undefined, { month: "long" }).format(dateObj).toUpperCase();
         } catch {
-          const months = [
-            "JANUARY",
-            "FEBRUARY",
-            "MARCH",
-            "APRIL",
-            "MAY",
-            "JUNE",
-            "JULY",
-            "AUGUST",
-            "SEPTEMBER",
-            "OCTOBER",
-            "NOVEMBER",
-            "DECEMBER",
-          ];
-          monthStr = months[dateObj.getMonth()];
+          const months = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"]; monthStr = months[dateObj.getMonth()];
         }
-        return {
-          id: String(l._id),
-          date: dayStr,
-          month: monthStr,
-          title: l.title || "Untitled",
-          subtitle: l.note || (l.occasion ? `Occasion: ${l.occasion}` : ""),
-          color: OCCASION_COLOR[String(l.occasion)] ?? "#AEAEB2",
-          dateValue: dateObj.getTime(),
-        };
+        return { id: String(l._id), date: dayStr, month: monthStr, title: l.title || "Untitled", subtitle: l.note || (l.occasion ? `Occasion: ${l.occasion}` : ""), color: OCCASION_COLOR[String(l.occasion)] ?? "#AEAEB2", dateValue: dateObj.getTime() };
       })
-      .sort((a, b) => a.dateValue - b.dateValue);
-
-    return items;
+      .sort((a: UpcomingEvent, b: UpcomingEvent) => a.dateValue - b.dateValue);
   }, [myLists]);
 
   const categories = [
@@ -119,183 +64,26 @@ export default function HomeScreen() {
   ];
 
   const topPicks = [
-    {
-      id: 1,
-      name: "Nike Air Jester 1",
-      subtitle: "Sonic Green",
-      price: "325.32",
-      image: require("@/assets/images/nikeShoes.png"),
-    },
-    {
-      id: 2,
-      name: "Oculus Quest",
-      subtitle: "Dynamic White",
-      price: "325.32",
-      image: require("@/assets/images/oculus.png"),
-    },
+    { id: 1, name: "Nike Air Jester 1", subtitle: "Sonic Green", price: "325.32", image: require("@/assets/images/nikeShoes.png") },
+    { id: 2, name: "Oculus Quest", subtitle: "Dynamic White", price: "325.32", image: require("@/assets/images/oculus.png") },
   ];
 
   const inspirationBoards = [
-    {
-      id: 1,
-      title: "Build your nursery",
-      subtitle: "All essentials items under one roof with Pottery Barn Kids",
-      image: require("@/assets/images/nursery.png"),
-    },
-    {
-      id: 2,
-      title: "The wedding checklist",
-      subtitle: "Don't know where to start? See what others do.",
-      image: require("@/assets/images/wedding.png"),
-    },
-    {
-      id: 3,
-      title: "From house to home",
-      subtitle: "Set up your space with a little oomph with Pan Home",
-      image: require("@/assets/images/pan.png"),
-    },
+    { id: 1, title: "Build your nursery", subtitle: "All essentials items under one roof with Pottery Barn Kids", image: require("@/assets/images/nursery.png") },
+    { id: 2, title: "The wedding checklist", subtitle: "Don't know where to start? See what others do.", image: require("@/assets/images/wedding.png") },
+    { id: 3, title: "From house to home", subtitle: "Set up your space with a little oomph with Pan Home", image: require("@/assets/images/pan.png") },
   ];
 
-  const handleCreateWishlist = () => {
-    router.push("/create-list-step1");
-  };
+  const handleCreateWishlist = () => router.push("/create-list-step1");
 
-  // Card data for the three different cards
-  const cardData = [
-    {
-      id: 0,
-      title: "Add List",
-      subtitle: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-      image: require("@/assets/images/addList.png"),
-      backgroundColor: "#F3ECFE",
-      action: handleCreateWishlist,
-    },
-    {
-      id: 1,
-      title: "Share List",
-      subtitle: "Discover amazing gifts for your loved ones",
-      image: require("@/assets/images/shareList.png"),
-      backgroundColor: "#E9FFE2",
-      action: () => Alert.alert("Browse Gifts", "This will open gift browsing"),
-    },
-    {
-      id: 2,
-      title: "Community Lists",
-      subtitle: "Check out your existing wishlists",
-      image: require("@/assets/images/community.png"),
-      backgroundColor: "#C2D9FF",
-      action: () => Alert.alert("View Lists", "This will show your lists"),
-    },
+  const initialCards = [
+    { id: 0, title: "Add List", subtitle: "Create a new wishlist for any occasion", image: require("@/assets/images/addList.png"), backgroundColor: "#F3ECFE", action: handleCreateWishlist },
+    { id: 1, title: "Share List", subtitle: "Invite friends & family to view your list", image: require("@/assets/images/shareList.png"), backgroundColor: "#E9FFE2", action: () => Alert.alert("Share", "Sharing coming soon") },
+    { id: 2, title: "Community Lists", subtitle: "See popular public registries", image: require("@/assets/images/community.png"), backgroundColor: "#C2D9FF", action: () => Alert.alert("Community", "Community lists coming soon") },
   ];
 
-  const scrollHandler = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      scrollX.value = event.contentOffset.x;
-    },
-  });
-
-  // Create animated styles for each card
-  const card0AnimatedStyle = useAnimatedStyle(() => {
-    const inputRange = [
-      -1 * SNAP_INTERVAL,
-      0 * SNAP_INTERVAL,
-      1 * SNAP_INTERVAL,
-    ];
-
-    const scale = interpolate(
-      scrollX.value,
-      inputRange,
-      [0.8, 1, 0.8],
-      Extrapolate.CLAMP
-    );
-
-    const opacity = interpolate(
-      scrollX.value,
-      inputRange,
-      [0.6, 1, 0.6],
-      Extrapolate.CLAMP
-    );
-
-    const rotateZ = interpolate(
-      scrollX.value,
-      inputRange,
-      [-15, 0, 15],
-      Extrapolate.CLAMP
-    );
-
-    return {
-      transform: [{ scale }, { rotateZ: `${rotateZ}deg` }],
-      opacity,
-    };
-  });
-
-  const card1AnimatedStyle = useAnimatedStyle(() => {
-    const inputRange = [
-      0 * SNAP_INTERVAL,
-      1 * SNAP_INTERVAL,
-      2 * SNAP_INTERVAL,
-    ];
-
-    const scale = interpolate(
-      scrollX.value,
-      inputRange,
-      [0.8, 1, 0.8],
-      Extrapolate.CLAMP
-    );
-
-    const opacity = interpolate(
-      scrollX.value,
-      inputRange,
-      [0.6, 1, 0.6],
-      Extrapolate.CLAMP
-    );
-
-    const rotateZ = interpolate(
-      scrollX.value,
-      inputRange,
-      [-15, 0, 15],
-      Extrapolate.CLAMP
-    );
-
-    return {
-      transform: [{ scale }, { rotateZ: `${rotateZ}deg` }],
-      opacity,
-    };
-  });
-
-  const card2AnimatedStyle = useAnimatedStyle(() => {
-    const inputRange = [
-      1 * SNAP_INTERVAL,
-      2 * SNAP_INTERVAL,
-      3 * SNAP_INTERVAL,
-    ];
-
-    const scale = interpolate(
-      scrollX.value,
-      inputRange,
-      [0.8, 1, 0.8],
-      Extrapolate.CLAMP
-    );
-
-    const opacity = interpolate(
-      scrollX.value,
-      inputRange,
-      [0.6, 1, 0.6],
-      Extrapolate.CLAMP
-    );
-
-    const rotateZ = interpolate(
-      scrollX.value,
-      inputRange,
-      [-15, 0, 15],
-      Extrapolate.CLAMP
-    );
-
-    return {
-      transform: [{ scale }, { rotateZ: `${rotateZ}deg` }],
-      opacity,
-    };
-  });
+  // Cards array static for infinite loop (no state mutation needed)
+  const cards = initialCards;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -304,22 +92,12 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View style={styles.searchContainer}>
             <Ionicons name="search" size={22} color="#FFFFFF" />
-            <TextInput
-              placeholder="Type your search here..."
-              style={styles.searchInput}
-              placeholderTextColor="#FFFFFF"
-            />
+            <TextInput placeholder="Type your search here..." style={styles.searchInput} placeholderTextColor="#FFFFFF" />
           </View>
           <SignedIn>
             <Pressable style={styles.profileButton}>
               <View style={styles.profileImage}>
-                <Image
-                  source={require("@/assets/images/girlUser.png")}
-                  style={{
-                    width: 48,
-                    height: 48,
-                  }}
-                />
+                <Image source={require("@/assets/images/girlUser.png")} style={{ width: 48, height: 48 }} />
               </View>
             </Pressable>
           </SignedIn>
@@ -328,102 +106,69 @@ export default function HomeScreen() {
         {/* Welcome Section */}
         <View style={styles.welcomeSection}>
           <Text style={styles.welcomeTitle}>Hi {user?.firstName}!</Text>
-          <Text style={styles.welcomeSubtitle}>
-            Ready to make someone smile?
-          </Text>
+          <Text style={styles.welcomeSubtitle}>Ready to make someone smile?</Text>
         </View>
 
-        {/* Add List Card */}
-        <View style={styles.carouselContainer}>
-          <Animated.ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            pagingEnabled={false}
-            decelerationRate="fast"
-            snapToInterval={SNAP_INTERVAL}
-            snapToAlignment="center"
-            snapToStart={false}
-            snapToEnd={false}
-            contentContainerStyle={{
-              paddingHorizontal: (screenWidth - CARD_WIDTH) / 2 + 40, // Extra padding for overlap
-            }}
-            onScroll={scrollHandler}
-            scrollEventThrottle={16}
-            contentInsetAdjustmentBehavior="never"
-          >
-            {cardData.map((item, index) => {
-              let animatedStyle;
-              if (index === 0) animatedStyle = card0AnimatedStyle;
-              else if (index === 1) animatedStyle = card1AnimatedStyle;
-              else animatedStyle = card2AnimatedStyle;
-
+        {/* Swiper action cards */}
+        <View style={{ height: 260, marginBottom: 36 }}>
+          <Swiper
+            cards={cards}
+            stackSize={3}
+            stackSeparation={-22}
+            
+            backgroundColor="transparent"
+            disableTopSwipe
+            disableBottomSwipe
+            // Enable infinite looping so user can't swipe past last card
+            infinite
+            // Removed onSwipedAll reset; cards now loop seamlessly
+            cardVerticalMargin={0}
+            renderCard={(card: any) => {
+              if (!card) return <View />;
               return (
-                <Animated.View
-                  key={item.id}
-                  style={[
-                    {
-                      width: CARD_WIDTH,
-                      marginRight: CARD_SPACING,
-                    },
-                    animatedStyle,
-                  ]}
+                <Pressable
+                  onPress={card.action}
+                  style={{
+                    flex: 1,
+                    borderRadius: 32,
+                    paddingHorizontal: 28,
+                    paddingVertical: 30,
+                    backgroundColor: card.backgroundColor,
+                    alignItems: 'center',
+                    justifyContent: 'flex-start',
+                    shadowColor: '#000',
+                    shadowOpacity: 0.08,
+                    shadowRadius: 18,
+                    shadowOffset: { width: 0, height: 8 },
+                  }}
                 >
-                  <Pressable
-                    style={[
-                      styles.carouselCard,
-                      { backgroundColor: item.backgroundColor },
-                    ]}
-                    onPress={item.action}
-                  >
-                    <View style={styles.addIconContainer}>
-                      <Image
-                        source={item.image}
-                        contentFit="cover"
-                        style={{
-                          position: "absolute",
-                          top: 10,
-                          width: 96,
-                          height: 92,
-                        }}
-                      />
-                    </View>
-                    <Text style={styles.addListTitle}>{item.title}</Text>
-                    <Text style={styles.addListSubtitle}>{item.subtitle}</Text>
-                  </Pressable>
-                </Animated.View>
+                  <View style={{ width: 104, height: 104, borderRadius: 32, backgroundColor: '#FFFFFF', opacity:0.92, alignItems:'center', justifyContent:'center', marginBottom: 26 }}>
+                    <Image source={card.image} contentFit="contain" style={{ width: 74, height: 74 }} />
+                  </View>
+                  <Text style={[styles.addListTitle, { textAlign:'center', fontSize:22, marginBottom:8 }]}>{card.title}</Text>
+                  <Text style={[styles.addListSubtitle, { textAlign:'center', fontSize:14, lineHeight:20, maxWidth:200 }]} numberOfLines={2}>{card.subtitle}</Text>
+                </Pressable>
               );
-            })}
-          </Animated.ScrollView>
+            }}
+          />
+          <Text style={{ position: 'absolute', bottom: 0, alignSelf:'center', fontSize:12, color:'#6E6E73' }}>Swipe</Text>
         </View>
 
         {/* Categories */}
         <View style={styles.section}>
           <Text style={styles.sectionTitleCategory}>Browse by categories</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.categoriesScroll}
-          >
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesScroll}>
             <View style={styles.categoriesContainer}>
               <View style={styles.categoriesRow}>
                 {categories.slice(0, 3).map((category) => (
                   <Pressable key={category.id} style={styles.categoryCard}>
                     <View style={styles.categoryContent}>
                       <View style={styles.categoryIconContainer}>
-                        <Image
-                          source={require("@/assets/images/gift.svg")}
-                          style={styles.categoryIcon}
-                          contentFit="contain"
-                        />
+                        <Image source={require("@/assets/images/gift.svg")} style={styles.categoryIcon} contentFit="contain" />
                       </View>
                       <Text style={styles.categoryName}>{category.name}</Text>
                     </View>
-                    <View
-                      style={[
-                        styles.categoryBorder,
-                        { backgroundColor: category.color },
-                      ]}
-                    />
+                    <View style={[styles.categoryBorder, { backgroundColor: category.color }]} />
                   </Pressable>
                 ))}
               </View>
@@ -432,20 +177,11 @@ export default function HomeScreen() {
                   <Pressable key={category.id} style={styles.categoryCard}>
                     <View style={styles.categoryContent}>
                       <View style={styles.categoryIconContainer}>
-                        <Image
-                          source={require("@/assets/images/gift.svg")}
-                          style={styles.categoryIcon}
-                          contentFit="contain"
-                        />
+                        <Image source={require("@/assets/images/gift.svg")} style={styles.categoryIcon} contentFit="contain" />
                       </View>
                       <Text style={styles.categoryName}>{category.name}</Text>
                     </View>
-                    <View
-                      style={[
-                        styles.categoryBorder,
-                        { backgroundColor: category.color },
-                      ]}
-                    />
+                    <View style={[styles.categoryBorder, { backgroundColor: category.color }]} />
                   </Pressable>
                 ))}
               </View>
@@ -463,17 +199,8 @@ export default function HomeScreen() {
           </View>
           <ScrollView horizontal style={styles.eventsScroll}>
             {upcomingEvents.map((event) => (
-              <Pressable
-                key={event.id}
-                style={styles.eventCard}
-                onPress={() => router.push({ pathname: "/add-gift", params: { listId: String(event.id) } })}
-              >
-                <View
-                  style={[
-                    styles.eventLeftBorder,
-                    { backgroundColor: event.color },
-                  ]}
-                />
+              <Pressable key={event.id} style={styles.eventCard} onPress={() => router.push({ pathname: "/add-gift", params: { listId: String(event.id) } })}>
+                <View style={[styles.eventLeftBorder, { backgroundColor: event.color }]} />
                 <View style={styles.eventContent}>
                   <View style={styles.eventDateContainer}>
                     <Text style={styles.eventDateNumber}>{event.date}</Text>
@@ -497,35 +224,16 @@ export default function HomeScreen() {
               <Ionicons name="chevron-forward" size={24} color="black" />
             </Pressable>
           </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.picksScroll}
-          >
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.picksScroll}>
             {topPicks.map((item) => (
               <View key={item.id} style={styles.pickCard}>
                 <View style={styles.pickImageContainer}>
-                  <Image
-                    style={{
-                      height: 147,
-                      width: 180,
-                      borderRadius: 8,
-                    }}
-                    contentFit="contain"
-                    source={item.image}
-                  />
+                  <Image style={{ height: 147, width: 180, borderRadius: 8 }} contentFit="contain" source={item.image} />
                 </View>
                 <Text style={styles.pickName}>{item.name}</Text>
                 <Text style={styles.pickSubtitle}>{item.subtitle}</Text>
                 <Text style={styles.pickPrice}>
-                  <Image
-                    source={require("@/assets/images/dirham.png")}
-                    style={{
-                      width: 14,
-                      marginTop: -1,
-                      height: 12,
-                    }}
-                  />
+                  <Image source={require("@/assets/images/dirham.png")} style={{ width: 14, marginTop: -1, height: 12 }} />
                   {item.price}
                 </Text>
               </View>
@@ -548,14 +256,7 @@ export default function HomeScreen() {
                 <Text style={styles.inspirationSubtitle}>{board.subtitle}</Text>
               </View>
               <View style={styles.inspirationImageContainer}>
-                <Image
-                  style={{
-                    width: 148,
-                    height: 148,
-                  }}
-                  contentFit="cover"
-                  source={board.image}
-                />
+                <Image style={{ width: 148, height: 148 }} contentFit="cover" source={board.image} />
               </View>
             </Pressable>
           ))}
@@ -567,24 +268,12 @@ export default function HomeScreen() {
             <Text style={styles.aiButton}>AI-POWERED</Text>
           </View>
           <Text style={styles.aiTitle}>Meet Genie!</Text>
-          <Text style={styles.aiDescription}>
-            Let our smart assistant suggest the perfect registry items based on
-            your lifestyle, preferences, and needs — saving you time and
-            guesswork!
-          </Text>
+          <Text style={styles.aiDescription}>Let our smart assistant suggest the perfect registry items based on your lifestyle, preferences, and needs — saving you time and guesswork!</Text>
           <Pressable style={styles.aiChatButton}>
             <Ionicons name="chevron-forward" size={32} color="#FFFFFF" />
           </Pressable>
-          <View
-            style={{
-              height: 280,
-            }}
-          >
-            <Image
-              source={require("@/assets/images/robot.png")}
-              style={styles.robotImage}
-              contentFit="contain"
-            />
+          <View style={{ height: 280 }}>
+            <Image source={require("@/assets/images/robot.png")} style={styles.robotImage} contentFit="contain" />
           </View>
         </View>
         <SignOutButton />
