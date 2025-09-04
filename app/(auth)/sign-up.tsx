@@ -1,71 +1,61 @@
 import { useSignUp } from "@clerk/clerk-expo";
-import { Link, useRouter } from "expo-router";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import * as React from "react";
 import {
+  Dimensions,
+  Image,
+  ImageBackground,
   Pressable,
+  SafeAreaView,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();
   const router = useRouter();
+  const { addToList } = useLocalSearchParams<{ addToList?: string }>();
+  const showAddToList = !!addToList && String(addToList).toLowerCase() !== "false";
+  const ctaLabel = showAddToList ? "Add to list" : "Sign up";
 
   const [emailAddress, setEmailAddress] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [firstName, setFirstName] = React.useState("");
   const [lastName, setLastName] = React.useState("");
-  const [dateOfBirth, setDateOfBirth] = React.useState("");
-  const [gender, setGender] = React.useState("");
   const [mobile, setMobile] = React.useState("");
-  const [showGenderPicker, setShowGenderPicker] = React.useState(false);
+  const [marketing, setMarketing] = React.useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
   const [pendingVerification, setPendingVerification] = React.useState(false);
   const [code, setCode] = React.useState("");
   const [error, setError] = React.useState<(string | null)[]>([]);
 
+  const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+
   // Handle submission of sign-up form
   const onSignUpPress = async () => {
     if (!isLoaded) return;
-
-    // Start sign-up process using email and password provided
+    setError([]);
     try {
       await signUp.create({
         emailAddress,
         password,
-        firstName: firstName,
-        lastName: lastName,
+        firstName,
+        lastName,
         unsafeMetadata: {
-          dateOfBirth: dateOfBirth,
-          gender: gender,
-          mobile: mobile,
+          mobile,
+          marketing,
         },
       });
 
-      // Send user an email with verification code
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
-
-      // Set 'pendingVerification' to true to display second form
-      // and capture OTP code
       setPendingVerification(true);
     } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
       console.error(JSON.stringify(err, null, 2));
-      if (
-        typeof err === "object" &&
-        err !== null &&
-        "errors" in err &&
-        Array.isArray((err as any).errors)
-      ) {
-        setError(
-          (err as any).errors.map((e: any) => {
-            return e.longMessage;
-          })
-        );
+      if (typeof err === "object" && err !== null && "errors" in err && Array.isArray((err as any).errors)) {
+        setError((err as any).errors.map((e: any) => e.longMessage));
       } else {
         setError(["An unknown error occurred."]);
       }
@@ -77,36 +67,17 @@ export default function SignUpScreen() {
     if (!isLoaded) return;
     setError([]);
     try {
-      // Use the code the user provided to attempt verification
-      const signUpAttempt = await signUp.attemptEmailAddressVerification({
-        code,
-      });
-
-      // If verification was completed, set the session to active
-      // and redirect the user
+      const signUpAttempt = await signUp.attemptEmailAddressVerification({ code });
       if (signUpAttempt.status === "complete") {
         await setActive({ session: signUpAttempt.createdSessionId });
         router.replace("/");
       } else {
-        // If the status is not complete, check why. User may need to
-        // complete further steps.
         console.error(JSON.stringify(signUpAttempt, null, 2));
       }
     } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
       console.error(JSON.stringify(err, null, 2));
-      if (
-        typeof err === "object" &&
-        err !== null &&
-        "errors" in err &&
-        Array.isArray((err as any).errors)
-      ) {
-        setError(
-          (err as any).errors.map((e: any) => {
-            return e.longMessage;
-          })
-        );
+      if (typeof err === "object" && err !== null && "errors" in err && Array.isArray((err as any).errors)) {
+        setError((err as any).errors.map((e: any) => e.longMessage));
       } else {
         setError(["An unknown error occurred."]);
       }
@@ -115,400 +86,192 @@ export default function SignUpScreen() {
 
   if (pendingVerification) {
     return (
-      <View
-        style={{
-          backgroundColor: "white",
-          display: "flex",
-          gap: 20,
-          padding: 20,
-        }}
+      <ImageBackground
+        source={require("@/assets/images/onboard_image.jpg")}
+        style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
+        imageStyle={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
+        resizeMode="cover"
       >
-        <Text style={{ fontSize: 24, fontWeight: "bold" }}>
-          Verify your email
-        </Text>
-        <TextInput
-          style={{ borderWidth: 1, padding: 10 }}
-          value={code}
-          placeholder="Enter your verification code"
-          onChangeText={(code) => setCode(code)}
-        />
-        <Pressable
-          style={{
-            backgroundColor: "#007AFF",
-            padding: 10,
-            borderRadius: 5,
-            alignItems: "center",
-          }}
-          onPress={onVerifyPress}
-        >
-          <Text>Verify</Text>
-        </Pressable>
-        <View>
-          {error.length > 0 &&
-            error.map((e, i) => (
-              <Text key={i} style={{ color: "red" }}>
-                {e}
-              </Text>
-            ))}
-        </View>
-      </View>
+        <View style={{ position: "absolute", inset: 0, backgroundColor: "rgba(44, 12, 84, 0.6)" }} />
+        <SafeAreaView style={{ flex: 1 }}>
+          <ScrollView contentContainerStyle={{ minHeight: SCREEN_HEIGHT, padding: 20, justifyContent: "center" }}>
+            <View style={{ alignItems: "center", marginBottom: 24 }}>
+              <Image source={require("@/assets/images/yallawish_logo.png")} style={{ width: 148, height: 28, resizeMode: "contain" }} />
+            </View>
+            <View style={{ backgroundColor: "rgba(255,255,255,0.06)", borderRadius: 16, padding: 16 }}>
+              <Text style={{ color: "#FFFFFF", fontSize: 24, fontFamily: "Nunito_700Bold", textAlign: "center", marginBottom: 12 }}>Verify your email</Text>
+              <TextInput
+                style={{ borderWidth: 2, borderColor: "rgba(255,255,255,0.35)", borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, color: "#FFFFFF", fontFamily: "Nunito_400Regular" }}
+                value={code}
+                placeholder="Enter your verification code"
+                placeholderTextColor="rgba(255,255,255,0.6)"
+                onChangeText={setCode}
+              />
+              <Pressable onPress={onVerifyPress} style={{ marginTop: 14, backgroundColor: "#6DF0CB", borderRadius: 12, paddingVertical: 14, alignItems: "center" }}>
+                <Text style={{ color: "#1A1A2E", fontFamily: "Nunito_700Bold", fontSize: 16 }}>Verify</Text>
+              </Pressable>
+              {error.length > 0 && (
+                <View style={{ marginTop: 12 }}>
+                  {error.map((e, i) => (
+                    <Text key={i} style={{ color: "#FFB4B4", fontFamily: "Nunito_400Regular" }}>{e}</Text>
+                  ))}
+                </View>
+              )}
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </ImageBackground>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Header section with logo and toggle buttons */}
-      <View style={styles.header}>
-        <View style={styles.logoContainer}>
-          <Text style={styles.logo}>yallawish</Text>
-        </View>
+    <ImageBackground
+      source={require("@/assets/images/onboard_image.jpg")}
+      style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, overflow: "hidden" }}
+      imageStyle={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
+      resizeMode="cover"
+    >
+      {/* Purple overlay */}
+      <View style={{ position: "absolute", inset: 0, backgroundColor: "rgba(44, 12, 84, 0.85)" }} />
+      <SafeAreaView style={{ flex: 1 }}>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ minHeight: SCREEN_HEIGHT, paddingHorizontal: 20, paddingTop: 24, paddingBottom: 24 }}>
+          {/* Logo */}
+          <View style={{ alignItems: "center", marginBottom: 16 }}>
+            <Image source={require("@/assets/images/yallawish_logo.png")} style={{ width: 148, height: 28, resizeMode: "contain" }} />
+          </View>
 
-        <View style={styles.toggleContainer}>
-          <Link
-            href="/sign-up"
-            style={[styles.toggleButton, styles.activeToggle]}
-          >
-            <Text style={styles.activeToggleText}>Sign-up</Text>
-          </Link>
-          <Link
-            href="/sign-in"
-            style={[styles.toggleButton, styles.inactiveToggle]}
-          >
-            <Text style={styles.inactiveToggleText}>Login</Text>
-          </Link>
-        </View>
-      </View>
+          {/* Segmented toggle */}
+          <View style={{ alignItems: "center", marginBottom: 28 }}>
+            <View style={{ flexDirection: "row", backgroundColor: "rgba(255,255,255,0.75)", borderRadius: 999, padding: 6, width: "100%" }}>
+              <View style={{ flex: 1 }}>
+                <View style={{ backgroundColor: "#FFFFFF", borderRadius: 999, shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, alignItems: "center", paddingVertical: 10 }}>
+                  <Text style={{ color: "#3D1B6A", fontFamily: "Nunito_700Bold", fontSize: 16 }}>Sign-up</Text>
+                </View>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Link href={{ pathname: "/log-in", params: showAddToList ? { addToList: String(addToList) || "1" } : undefined }} asChild>
+                  <Pressable style={{ borderRadius: 999, alignItems: "center", paddingVertical: 10 }}>
+                    <Text style={{ color: "#2E1A4F", fontFamily: "Nunito_700Bold", fontSize: 16, opacity: 0.85 }}>Login</Text>
+                  </Pressable>
+                </Link>
+              </View>
+            </View>
+          </View>
 
-      {/* Main content */}
-      <View style={styles.content}>
-        <Text style={styles.title}>Login or Signup Today</Text>
-        <Text style={styles.subtitle}>Enter your details below</Text>
+          {/* Hero */}
+          <View style={{ paddingHorizontal: 8, marginBottom: 20 }}>
+            <Text style={{ color: "#FFFFFF", fontSize: 32, lineHeight: 38, textAlign: "center", fontFamily: "Nunito_700Bold" }}>Sign up to save{"\n"}this gift</Text>
+            <Text style={{ color: "rgba(255,255,255,0.85)", fontSize: 16, lineHeight: 24, textAlign: "center", marginTop: 12, fontFamily: "Nunito_400Regular" }}>
+              Add it to your list now and start creating your own to share with friends and family.
+            </Text>
+          </View>
 
-        {/* Form fields */}
-        <View style={styles.formContainer}>
-          <View style={styles.nameRow}>
+          {/* Form */}
+          <View style={{ gap: 14 }}>
             <TextInput
-              style={[styles.input, styles.halfInput]}
+              style={{ borderWidth: 2, borderColor: "rgba(255,255,255,0.35)", borderRadius: 16, paddingHorizontal: 20, paddingVertical: 14, color: "#FFFFFF", fontSize: 16, fontFamily: "Nunito_400Regular" }}
               value={firstName}
-              placeholder="First Name"
-              placeholderTextColor="#9ca3af"
+              placeholder="First Name*"
+              placeholderTextColor="rgba(255,255,255,0.6)"
               onChangeText={setFirstName}
             />
             <TextInput
-              style={[styles.input, styles.halfInput]}
+              style={{ borderWidth: 2, borderColor: "rgba(255,255,255,0.35)", borderRadius: 16, paddingHorizontal: 20, paddingVertical: 14, color: "#FFFFFF", fontSize: 16, fontFamily: "Nunito_400Regular" }}
               value={lastName}
-              placeholder="Last Name"
-              placeholderTextColor="#9ca3af"
+              placeholder="Last Name*"
+              placeholderTextColor="rgba(255,255,255,0.6)"
               onChangeText={setLastName}
             />
+
+            {/* WhatsApp row */}
+            <View style={{ borderWidth: 2, borderColor: "rgba(255,255,255,0.35)", borderRadius: 16, paddingHorizontal: 12, paddingVertical: 0, flexDirection: "row", alignItems: "center" }}>
+              <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 8, paddingVertical: 12 }}>
+                <Text style={{ color: "#FFFFFF", fontFamily: "Nunito_700Bold" }}>+971</Text>
+                <View style={{ width: 8 }} />
+                <View style={{ width: 1, height: 18, backgroundColor: "rgba(255,255,255,0.35)" }} />
+              </View>
+              <TextInput
+                style={{ flex: 1, paddingVertical: 12, paddingHorizontal: 8, color: "#FFFFFF", fontSize: 16, fontFamily: "Nunito_400Regular" }}
+                value={mobile}
+                placeholder="WhatsApp Number"
+                placeholderTextColor="rgba(255,255,255,0.6)"
+                keyboardType="phone-pad"
+                onChangeText={setMobile}
+              />
+            </View>
+
+            <TextInput
+              style={{ borderWidth: 2, borderColor: "rgba(255,255,255,0.35)", borderRadius: 16, paddingHorizontal: 20, paddingVertical: 14, color: "#FFFFFF", fontSize: 16, fontFamily: "Nunito_400Regular" }}
+              autoCapitalize="none"
+              value={emailAddress}
+              placeholder="Email*"
+              placeholderTextColor="rgba(255,255,255,0.6)"
+              keyboardType="email-address"
+              onChangeText={setEmailAddress}
+            />
+
+            {/* Marketing checkbox */}
+            <Pressable onPress={() => setMarketing(v => !v)} style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <Text style={{ color: "#FFFFFF", fontFamily: "Nunito_400Regular" }}>Signup for marketing emails</Text>
+              <View style={{ width: 22, height: 22, borderRadius: 4, borderWidth: 2, borderColor: "rgba(255,255,255,0.6)", alignItems: "center", justifyContent: "center", backgroundColor: marketing ? "#FFFFFF" : "transparent" }}>
+                {marketing && <Ionicons name="checkmark" size={16} color="#3D1B6A" />}
+              </View>
+            </Pressable>
+
+            {/* Password with eye */}
+            <View style={{ position: "relative" }}>
+              <TextInput
+                style={{ borderWidth: 2, borderColor: "rgba(255,255,255,0.35)", borderRadius: 16, paddingHorizontal: 20, paddingVertical: 14, color: "#FFFFFF", fontSize: 16, fontFamily: "Nunito_400Regular", paddingRight: 48 }}
+                value={password}
+                placeholder="Password"
+                placeholderTextColor="rgba(255,255,255,0.6)"
+                secureTextEntry={!showPassword}
+                onChangeText={setPassword}
+              />
+              <Pressable onPress={() => setShowPassword(v => !v)} style={{ position: "absolute", right: 16, top: 14, padding: 6 }}>
+                <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={22} color="rgba(255,255,255,0.85)" />
+              </Pressable>
+            </View>
+
+            {/* CTA */}
+            <Pressable onPress={onSignUpPress} style={{ backgroundColor: "#FFFFFF", borderRadius: 16, paddingVertical: 16, alignItems: "center", marginTop: 6 }}>
+              <Text style={{ color: "#3D1B6A", fontFamily: "Nunito_700Bold", fontSize: 16 }}>{ctaLabel}</Text>
+            </Pressable>
           </View>
 
-          <TouchableOpacity
-            style={styles.dropdownInput}
-            onPress={() => {
-              // For now, we'll just show an alert. In a real app, you'd use a date picker
-              console.log("Date picker functionality to be implemented");
-            }}
-          >
-            <TextInput
-              style={[styles.inputText, { flex: 1 }]}
-              value={dateOfBirth}
-              placeholder="Date of Birth"
-              placeholderTextColor="rgba(255, 255, 255, 0.6)"
-              onChangeText={setDateOfBirth}
-              editable={true}
-            />
-            <Text style={styles.chevron}>▼</Text>
-          </TouchableOpacity>
+          {/* OR divider */}
+          <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 18 }}>
+            <View style={{ flex: 1, height: 1, backgroundColor: "rgba(255,255,255,0.25)" }} />
+            <Text style={{ marginHorizontal: 10, color: "rgba(255,255,255,0.85)", fontFamily: "Nunito_600SemiBold" }}>OR</Text>
+            <View style={{ flex: 1, height: 1, backgroundColor: "rgba(255,255,255,0.25)" }} />
+          </View>
 
-          <TouchableOpacity
-            style={styles.dropdownInput}
-            onPress={() => {
-              setShowGenderPicker(!showGenderPicker);
-            }}
-          >
-            <Text style={gender ? styles.inputText : styles.placeholderText}>
-              {gender || "Gender"}
-            </Text>
-            <Text style={styles.chevron}>▼</Text>
-          </TouchableOpacity>
+          {/* Social buttons */}
+          <View style={{ gap: 14 }}>
+            <Pressable style={{ backgroundColor: "#FFFFFF", borderRadius: 12, paddingVertical: 14, paddingHorizontal: 16 }}>
+              <View style={{ position: "relative", width: "100%", minHeight: 24, justifyContent: "center" }}>
+                <AntDesign name="google" size={20} color="#4285F4" style={{ position: "absolute", left: 0 }} />
+                <Text style={{ fontSize: 16, color: "#1F1235", textAlign: "center", fontFamily: "Nunito_700Bold" }}>Continue with Google</Text>
+              </View>
+            </Pressable>
+            <Pressable style={{ backgroundColor: "#FFFFFF", borderRadius: 12, paddingVertical: 14, paddingHorizontal: 16 }}>
+              <View style={{ position: "relative", width: "100%", minHeight: 24, justifyContent: "center" }}>
+                <AntDesign name="apple1" size={22} color="#000000" style={{ position: "absolute", left: 0 }} />
+                <Text style={{ fontSize: 16, color: "#1F1235", textAlign: "center", fontFamily: "Nunito_700Bold" }}>Continue with Apple</Text>
+              </View>
+            </Pressable>
+          </View>
 
-          {showGenderPicker && (
-            <View style={styles.pickerContainer}>
-              <TouchableOpacity
-                style={styles.pickerOption}
-                onPress={() => {
-                  setGender("Male");
-                  setShowGenderPicker(false);
-                }}
-              >
-                <Text style={styles.pickerOptionText}>Male</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.pickerOption}
-                onPress={() => {
-                  setGender("Female");
-                  setShowGenderPicker(false);
-                }}
-              >
-                <Text style={styles.pickerOptionText}>Female</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.pickerOption}
-                onPress={() => {
-                  setGender("Other");
-                  setShowGenderPicker(false);
-                }}
-              >
-                <Text style={styles.pickerOptionText}>Other</Text>
-              </TouchableOpacity>
+          {/* Errors */}
+          {error.length > 0 && (
+            <View style={{ marginTop: 12 }}>
+              {error.map((e, i) => (
+                <Text key={i} style={{ color: "#FFB4B4", fontFamily: "Nunito_400Regular" }}>{e}</Text>
+              ))}
             </View>
           )}
-
-          <TextInput
-            style={styles.input}
-            value={mobile}
-            placeholder="Mobile"
-            placeholderTextColor="#9ca3af"
-            keyboardType="phone-pad"
-            onChangeText={setMobile}
-          />
-
-          <TextInput
-            style={styles.input}
-            autoCapitalize="none"
-            value={emailAddress}
-            placeholder="Email Address"
-            placeholderTextColor="#9ca3af"
-            keyboardType="email-address"
-            onChangeText={setEmailAddress}
-          />
-
-          <TextInput
-            style={styles.input}
-            value={password}
-            placeholder="Password"
-            placeholderTextColor="#9ca3af"
-            secureTextEntry={true}
-            onChangeText={setPassword}
-          />
-
-          <Pressable style={styles.signupButton} onPress={onSignUpPress}>
-            <Text style={styles.signupButtonText}>Signup</Text>
-          </Pressable>
-        </View>
-
-        {/* Social login section */}
-        <View style={styles.socialSection}>
-          <Text style={styles.orText}>Or continue with</Text>
-          <View style={styles.socialButtons}>
-            <TouchableOpacity style={styles.socialButton}>
-              <Text style={styles.socialButtonText}>G</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
-              <Text style={styles.socialButtonText}>f</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
-              <Text style={styles.socialButtonText}>🍎</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Error messages */}
-        {error.length > 0 && (
-          <View style={styles.errorContainer}>
-            {error.map((e, i) => (
-              <Text key={i} style={styles.errorText}>
-                {e}
-              </Text>
-            ))}
-          </View>
-        )}
-      </View>
-    </ScrollView>
+        </ScrollView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#1a1a2e",
-    overflowY: "scroll",
-  },
-  header: {
-    paddingTop: 60,
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-    alignItems: "center",
-  },
-  logoContainer: {
-    marginBottom: 40,
-  },
-  logo: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "white",
-    textAlign: "center",
-  },
-  toggleContainer: {
-    flexDirection: "row",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 25,
-    padding: 4,
-    width: "100%",
-    maxWidth: 300,
-  },
-  toggleButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 20,
-    alignItems: "center",
-    textAlign: "center",
-  },
-  activeToggle: {
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-  },
-  inactiveToggle: {
-    backgroundColor: "transparent",
-  },
-  activeToggleText: {
-    color: "#1a1a2e",
-    fontWeight: "600",
-    fontSize: 16,
-  },
-  inactiveToggleText: {
-    color: "white",
-    fontWeight: "600",
-    fontSize: 16,
-  },
-  content: {
-    flex: 1,
-    backgroundColor: "#2d1b69",
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    paddingHorizontal: 30,
-    paddingTop: 40,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "white",
-    textAlign: "center",
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "rgba(255, 255, 255, 0.7)",
-    textAlign: "center",
-    marginBottom: 40,
-  },
-  formContainer: {
-    gap: 20,
-  },
-  nameRow: {
-    flexDirection: "row",
-    gap: 15,
-  },
-  input: {
-    borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    borderRadius: 25,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    fontSize: 16,
-    color: "white",
-    backgroundColor: "transparent",
-  },
-  halfInput: {
-    flex: 1,
-  },
-  dropdownInput: {
-    borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    borderRadius: 25,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "transparent",
-  },
-  inputText: {
-    fontSize: 16,
-    color: "white",
-  },
-  placeholderText: {
-    fontSize: 16,
-    color: "rgba(255, 255, 255, 0.6)",
-  },
-  chevron: {
-    color: "white",
-    fontSize: 12,
-  },
-  signupButton: {
-    backgroundColor: "#00ffff",
-    borderRadius: 25,
-    paddingVertical: 18,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  signupButtonText: {
-    color: "#1a1a2e",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  socialSection: {
-    marginTop: 40,
-    alignItems: "center",
-  },
-  orText: {
-    color: "rgba(255, 255, 255, 0.7)",
-    fontSize: 16,
-    marginBottom: 20,
-  },
-  socialButtons: {
-    flexDirection: "row",
-    gap: 20,
-  },
-  socialButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "transparent",
-  },
-  socialButtonText: {
-    fontSize: 24,
-    color: "white",
-  },
-  errorContainer: {
-    marginTop: 20,
-  },
-  errorText: {
-    color: "#ff6b6b",
-    fontSize: 14,
-    textAlign: "center",
-    marginBottom: 5,
-  },
-  pickerContainer: {
-    backgroundColor: "#1a1a2e",
-    borderRadius: 15,
-    borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    marginTop: -10,
-    overflow: "hidden",
-  },
-  pickerOption: {
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.1)",
-  },
-  pickerOptionText: {
-    color: "white",
-    fontSize: 16,
-  },
-});

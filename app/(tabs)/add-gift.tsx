@@ -1,9 +1,9 @@
 import { RibbonHeader } from "@/components/RibbonHeader";
+import { ActionsBar, FooterBar, GiftItemCard, HeaderBar, InfoBox, ListCover } from "@/components/list";
 import { api } from "@/convex/_generated/api";
 import { styles } from "@/styles/addGiftStyles";
 import { Ionicons } from "@expo/vector-icons";
 import { useAction, useMutation, useQuery } from "convex/react";
-import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -31,7 +31,7 @@ export default function AddGift() {
 
   useEffect(() => {
     if (listId && Array.isArray(items) && items.length === 0) {
-      seedItem({ list_id: listId as any }).catch(() => {});
+      seedItem({ list_id: listId as any }).catch(() => { });
     }
   }, [items, listId, seedItem]);
 
@@ -63,7 +63,7 @@ export default function AddGift() {
         default: return 0;
       }
     });
-  } catch {}
+  } catch { }
   // @ts-ignore generated after adding convex action
   const scrape = useAction((api as any).scrape.productMetadata);
 
@@ -82,14 +82,12 @@ export default function AddGift() {
         year: "numeric",
       }).format(date);
     } catch {
-      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
     }
   };
 
-  const handleBack = () => {
-    router.back();
-  };
+  const handleBack = () => { router.back(); };
 
   // Bottom sheet + form state
   const [showSheet, setShowSheet] = useState(false);
@@ -163,18 +161,18 @@ export default function AddGift() {
     const url = `https://www.google.com/search?q=${q}&tbm=shop`;
     setBrowserUrl(url);
     setCurrentBrowserUrl(url);
-  // Hide sheet while browsing
-  setShowSheet(false);
-  setShowBrowser(true);
+    // Hide sheet while browsing
+    setShowSheet(false);
+    setShowBrowser(true);
   };
 
   const handleBrowserAdd = async () => {
     if (!currentBrowserUrl) return;
     // Set link field then trigger scrape (will auto-scrape due to effect)
     setLink(currentBrowserUrl);
-  setShowBrowser(false);
-  // Reopen sheet so user can confirm/edit
-  setTimeout(() => setShowSheet(true), 60);
+    setShowBrowser(false);
+    // Reopen sheet so user can confirm/edit
+    setTimeout(() => setShowSheet(true), 60);
   };
 
   // Scrape on link change (debounced)
@@ -190,7 +188,7 @@ export default function AddGift() {
         if (meta.ok) {
           if (!name && meta.title) setName(meta.title);
           if (!price && meta.price) setPrice(meta.price);
-            if (meta.image) setImageUrl(meta.image);
+          if (meta.image) setImageUrl(meta.image);
         } else {
           setScrapeError(meta.error || "Could not extract data");
         }
@@ -201,7 +199,7 @@ export default function AddGift() {
       }
     }, 600);
     return () => { cancelled = true; clearTimeout(t); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [link]);
 
   const handleShare = () => {
@@ -220,108 +218,27 @@ export default function AddGift() {
   const coverUri = list?.coverPhotoUri as string | undefined;
   const privacy = list?.privacy ?? "private";
 
-  const truncate = (text: string, len: number) => (text.length > len ? text.slice(0, len - 1) + "…" : text);
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#330065" />
 
-      <LinearGradient
-        colors={["#330065", "#6600CB"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.header}
-      >
-        <SafeAreaView edges={["top"]}>
-          <View style={styles.headerContent}>
-            <View style={styles.navigation}>
-              <Pressable onPress={handleBack} style={styles.backButton}>
-                <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
-              </Pressable>
-              <Text style={styles.headerTitle}>{title}</Text>
-            </View>
-          </View>
-        </SafeAreaView>
-      </LinearGradient>
+      <HeaderBar title={title} onBack={handleBack} />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.coverContainer}>
-          {coverUri ? (
-            <Image source={{ uri: coverUri }} style={styles.coverImage} />
-          ) : (
-            <Image
-              source={require("@/assets/images/nursery.png")}
-              style={styles.coverImage}
-            />
-          )}
-          <View style={styles.coverOverlay}>
-            <Text style={styles.daysToGo}>{formatEventDate((list?.eventDate ?? undefined) as string | undefined)}</Text>
-          </View>
-        </View>
+        <ListCover imageUri={coverUri} overlayText={formatEventDate((list?.eventDate ?? undefined) as string | undefined)} />
 
         <View style={styles.listInfoContainer}>
           <RibbonHeader title={title} subtitle={subtitle ?? ""} />
         </View>
 
-        <View style={styles.actionsContainer}>
-          <View style={styles.privacyContainer}>
-            <Ionicons name={privacy === "shared" ? "globe-outline" : "lock-closed-outline"} size={24} color="#1C0335" />
-            <View>
-              <Text style={styles.privacyStatus}>
-                {loading ? "Loading..." : privacy === "shared" ? "Shared" : "Private"}
-              </Text>
-              <Text style={styles.privacyDesc}>
-                {loading ? "Fetching privacy" : privacy === "shared" ? "Only people with link" : "Only you can see this"}
-              </Text>
-            </View>
-            <Ionicons name="settings-outline" size={16} color="#1C0335" />
-          </View>
-          <View style={styles.actionButtons}>
-            <Pressable style={styles.iconButton}>
-              <Ionicons name="location-outline" size={24} color="#1C0335" />
-            </Pressable>
-            <Pressable style={styles.iconButton} onPress={() => setShowSortSheet(true)}>
-              <Ionicons name="filter-outline" size={24} color="#1C0335" />
-            </Pressable>
-          </View>
-        </View>
+        <ActionsBar privacy={privacy} loading={loading} onFilterPress={() => setShowSortSheet(true)} />
 
         <View style={styles.addGiftSection}>
-      {displayedItems.length > 0 ? (
+          {displayedItems.length > 0 ? (
             <>
-        {displayedItems.map((item: any) => (
-                <View key={item._id} style={styles.itemCard}>
-                  <View style={styles.itemImageWrap}>
-                    {item.image_url ? (
-                      <Image source={{ uri: item.image_url }} style={styles.itemImage} />
-                    ) : (
-                      <View style={[styles.itemImage, { backgroundColor: '#EEE' }]} />
-                    )}
-                  </View>
-                  <View style={styles.itemContent}>
-                    <Text style={styles.itemName}>{truncate(item.name, 38)}</Text>
-                    <Text style={styles.itemQuantity}>Quantity: <Text style={styles.itemQuantityValue}>{item.quantity}</Text></Text>
-                    <View style={styles.claimBadgeWrap}>
-                      <View style={styles.claimBadge}> 
-                        <Text style={styles.claimBadgeText}>{item.claimed} Claimed</Text>
-                      </View>
-                      <Pressable style={styles.itemChevron}>
-                        <Ionicons name="chevron-forward" size={20} color="#1C0335" />
-                      </Pressable>
-                    </View>
-                    <View style={styles.priceRow}>
-                      <Text style={styles.itemPrice}>AED {item.price}</Text>
-                      {item.buy_url && (
-                        <Pressable>
-                          <Text style={styles.buyNow}>Buy Now</Text>
-                        </Pressable>
-                      )}
-                    </View>
-                    <View style={styles.progressTrack}>
-                      <View style={[styles.progressFill, { width: `${(item.claimed/item.quantity)*100}%` }]} />
-                    </View>
-                  </View>
-                </View>
+              {displayedItems.map((item: any) => (
+                <GiftItemCard key={item._id} item={item} />
               ))}
               <Pressable style={styles.addMoreButton} onPress={handleAddGift}>
                 <Ionicons name="add" size={20} color="#3B0076" />
@@ -342,42 +259,16 @@ export default function AddGift() {
           )}
         </View>
 
-  <View style={styles.infoBox}>
-          <Ionicons
-            name="information-circle-outline"
-            size={24}
-            color="#3B0076"
-          />
-          <Text style={styles.infoText}>
-            To learn more on how to add gifts from web browser,{" "}
-            <Text style={styles.linkText}>click here</Text>
-          </Text>
-          <Ionicons name="close" size={24} color="#3B0076" />
-        </View>
+        <InfoBox>
+          To learn more on how to add gifts from web browser, <Text style={styles.linkText}>click here</Text>
+        </InfoBox>
       </ScrollView>
 
-      <View style={styles.footer}>
-        <Text style={styles.lastUpdated}>
-          Last updated: July 15, 2025 | 08:00PM
-        </Text>
-        <Pressable
-          style={[styles.button, styles.buttonSecondary]}
-          onPress={handleShare}
-        >
-          <Text style={styles.buttonSecondaryText}>Share</Text>
-          <Ionicons name="share-outline" size={20} color="#3B0076" />
-        </Pressable>
-        <Pressable
-          style={[styles.button, styles.buttonPrimary]}
-          onPress={handleManageList}
-        >
-          <Text style={styles.buttonPrimaryText}>Manage List</Text>
-        </Pressable>
-      </View>
+      <FooterBar lastUpdated="Last updated: July 15, 2025 | 08:00PM" onShare={handleShare} onManage={handleManageList} />
       {/** Bottom Sheet **/}
       <Modal visible={showSheet} transparent animationType="none" onRequestClose={closeSheet}>
         <Pressable style={styles.backdrop} onPress={closeSheet} />
-        <Animated.View style={[styles.sheetContainer, { transform: [{ translateY }] }]}> 
+        <Animated.View style={[styles.sheetContainer, { transform: [{ translateY }] }]}>
           <View style={styles.sheetHandle} />
           <ScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
             <Text style={styles.sheetTitle}>Add a gift item</Text>
@@ -407,7 +298,7 @@ export default function AddGift() {
               <Text style={styles.fieldLabel}>Desired quantity</Text>
               <View style={styles.qtyRow}>
                 <Pressable onPress={decQty} style={styles.qtyBtn}><Text style={styles.qtyBtnText}>–</Text></Pressable>
-                <Text style={styles.qtyValue}>{String(quantity).padStart(2,'0')}</Text>
+                <Text style={styles.qtyValue}>{String(quantity).padStart(2, '0')}</Text>
                 <Pressable onPress={incQty} style={styles.qtyBtn}><Text style={styles.qtyBtnText}>+</Text></Pressable>
               </View>
             </View>
@@ -456,7 +347,7 @@ export default function AddGift() {
             <Pressable style={styles.browserHeaderBtn} onPress={() => { setShowBrowser(false); setTimeout(() => setShowSheet(true), 60); }}>
               <Ionicons name="chevron-back" size={24} color="#1C0335" />
             </Pressable>
-            <Text style={styles.browserTitle} numberOfLines={1}>{currentBrowserUrl?.replace(/^https?:\/\//,'')}</Text>
+            <Text style={styles.browserTitle} numberOfLines={1}>{currentBrowserUrl?.replace(/^https?:\/\//, '')}</Text>
             <Pressable style={styles.browserHeaderBtn} onPress={() => setShowBrowser(false)}>
               <Ionicons name="close" size={24} color="#1C0335" />
             </Pressable>
@@ -491,15 +382,15 @@ export default function AddGift() {
                 <Ionicons name="chevron-down" size={20} color="#1C0335" />
               </View>
               {[
-                { key:'default', label:'Default' },
-                { key:'priceAsc', label:'Price Lowest - Highest' },
-                { key:'priceDesc', label:'Price Highest - Lowest' },
-                { key:'newest', label:'Most Recent to Oldest' },
-                { key:'oldest', label:'Oldest to Most Recent' },
+                { key: 'default', label: 'Default' },
+                { key: 'priceAsc', label: 'Price Lowest - Highest' },
+                { key: 'priceDesc', label: 'Price Highest - Lowest' },
+                { key: 'newest', label: 'Most Recent to Oldest' },
+                { key: 'oldest', label: 'Oldest to Most Recent' },
               ].map(o => (
-                <Pressable key={o.key} style={styles.radioRow} onPress={()=>setTempSortBy(o.key as SortOption)}>
-                  <View style={[styles.radioOuter, tempSortBy===o.key && styles.radioOuterActive]}>
-                    {tempSortBy===o.key && <View style={styles.radioInner} />}
+                <Pressable key={o.key} style={styles.radioRow} onPress={() => setTempSortBy(o.key as SortOption)}>
+                  <View style={[styles.radioOuter, tempSortBy === o.key && styles.radioOuterActive]}>
+                    {tempSortBy === o.key && <View style={styles.radioInner} />}
                   </View>
                   <Text style={styles.radioLabel}>{o.label}</Text>
                 </Pressable>
@@ -510,13 +401,13 @@ export default function AddGift() {
                 <Text style={styles.sortSectionTitle}>Filter by Availability</Text>
                 <Ionicons name="chevron-down" size={20} color="#1C0335" />
               </View>
-              <Pressable style={styles.radioRow} onPress={()=>setTempFilterClaimed(v=>!v)}>
+              <Pressable style={styles.radioRow} onPress={() => setTempFilterClaimed(v => !v)}>
                 <View style={[styles.checkboxBox, tempFilterClaimed && styles.checkboxBoxActive]}>
                   {tempFilterClaimed && <Ionicons name="checkmark" size={20} color="#FFFFFF" />}
                 </View>
                 <Text style={styles.radioLabel}>Claimed</Text>
               </Pressable>
-              <Pressable style={styles.radioRow} onPress={()=>setTempFilterUnclaimed(v=>!v)}>
+              <Pressable style={styles.radioRow} onPress={() => setTempFilterUnclaimed(v => !v)}>
                 <View style={[styles.checkboxBox, tempFilterUnclaimed && styles.checkboxBoxActive]}>
                   {tempFilterUnclaimed && <Ionicons name="checkmark" size={20} color="#FFFFFF" />}
                 </View>
