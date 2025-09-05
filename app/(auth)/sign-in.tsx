@@ -1,6 +1,6 @@
 import { useOAuth } from "@clerk/clerk-expo";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
   Dimensions,
@@ -15,6 +15,8 @@ import {
 
 export default function Page() {
   const router = useRouter();
+  const { addToList, returnTo } = useLocalSearchParams<{ addToList?: string; returnTo?: string }>();
+  const decodedReturnTo = returnTo ? decodeURIComponent(String(returnTo)) : undefined;
   const { startOAuthFlow: startGoogle } = useOAuth({ strategy: "oauth_google" });
   const { startOAuthFlow: startApple } = useOAuth({ strategy: "oauth_apple" });
 
@@ -24,7 +26,8 @@ export default function Page() {
     const { createdSessionId, setActive: setActiveOAuth } = await startGoogle();
     if (createdSessionId) {
       await setActiveOAuth?.({ session: createdSessionId });
-      router.replace("/");
+      const target = decodedReturnTo ? (decodedReturnTo as any) : "/";
+      router.replace(target);
     }
   };
 
@@ -32,7 +35,8 @@ export default function Page() {
     const { createdSessionId, setActive: setActiveOAuth } = await startApple();
     if (createdSessionId) {
       await setActiveOAuth?.({ session: createdSessionId });
-      router.replace("/");
+      const target = decodedReturnTo ? (decodedReturnTo as any) : "/";
+      router.replace(target);
     }
   };
 
@@ -96,7 +100,7 @@ export default function Page() {
             </View>
 
             {/* Email navigates to Sign Up */}
-            <Pressable onPress={() => router.push("/sign-up")} style={{ backgroundColor: "#FFFFFF", borderRadius: 12, paddingVertical: 14, paddingHorizontal: 16 }}>
+            <Pressable onPress={() => router.push({ pathname: "/sign-up", params: { ...(addToList ? { addToList: String(addToList) } : {}), ...(decodedReturnTo ? { returnTo: encodeURIComponent(decodedReturnTo) } : {}) } })} style={{ backgroundColor: "#FFFFFF", borderRadius: 12, paddingVertical: 14, paddingHorizontal: 16 }}>
               <View style={{ position: "relative", width: "100%", minHeight: 24, justifyContent: "center" }}>
                 <Ionicons name="mail-outline" size={20} color="#1F1235" style={{ position: "absolute", left: 0 }} />
                 <Text style={{ fontSize: 16, color: "#1F1235", textAlign: "center", fontFamily: "Nunito_700Bold" }}>Continue with Email</Text>

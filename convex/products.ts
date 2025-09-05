@@ -1,6 +1,7 @@
 import { Doc, Id } from "@/convex/_generated/dataModel";
 import { v } from "convex/values";
-import { internalMutation, mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
+import { internalAction, internalMutation, mutation, query } from "./_generated/server";
 
 export const get = query({
   args: { keyword: v.optional(v.string()) },
@@ -51,6 +52,8 @@ export const createList = mutation({
     occasion: v.optional(v.union(v.string(), v.null())),
     coverPhotoUri: v.optional(v.union(v.string(), v.null())),
     privacy: v.union(v.literal("private"), v.literal("shared")),
+    requiresPassword: v.optional(v.boolean()),
+    password: v.optional(v.union(v.string(), v.null())),
     user_id: v.optional(v.union(v.string(), v.null())),
   },
   handler: async (ctx, args) => {
@@ -64,6 +67,8 @@ export const createList = mutation({
       occasion: args.occasion ?? null,
       coverPhotoUri: args.coverPhotoUri ?? null,
       privacy: args.privacy,
+      requiresPassword: args.requiresPassword ?? false,
+      password: args.password ?? null,
       created_at: now,
       updated_at: now,
     });
@@ -99,10 +104,14 @@ export const updateListPrivacy = mutation({
   args: {
     listId: v.id("lists"),
     privacy: v.union(v.literal("private"), v.literal("shared")),
+    requiresPassword: v.optional(v.boolean()),
+    password: v.optional(v.union(v.string(), v.null())),
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.listId, {
       privacy: args.privacy,
+      requiresPassword: args.requiresPassword ?? false,
+      password: args.password ?? null,
       updated_at: new Date().toISOString(),
     });
     return true;
@@ -375,6 +384,103 @@ export const deleteList = mutation({
   },
 });
 
+// Save Expo push token for a user
+export const savePushToken = mutation({
+  args: { user_id: v.string(), token: v.string() },
+  handler: async (ctx, args) => {
+    const now = new Date().toISOString();
+    // Upsert: if token exists for user, skip duplicate
+    const existing = await ctx.db
+      .query("push_tokens")
+      .withIndex("by_user", (q) => q.eq("user_id", args.user_id))
+      .collect();
+    const already = existing.find((t) => t.token === args.token);
+    if (already) {
+      await ctx.db.patch(already._id, { updated_at: now });
+      return true;
+    }
+    await ctx.db.insert("push_tokens", {
+      user_id: args.user_id,
+      token: args.token,
+      created_at: now,
+      updated_at: now,
+    });
+    return true;
+  },
+});
+
+// Internal action: send Expo push notification
+export const sendPush = internalAction({
+  args: { token: v.string(), title: v.string(), body: v.string() },
+  handler: async (_ctx, args) => {
+    try {
+      const res = await fetch("https://exp.host/--/api/v2/push/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          to: args.token,
+          sound: "default",
+          title: args.title,
+          body: args.body,
+        }),
+      });
+      const json = await res.json();
+      console.log("Expo push result:", json);
+      return true;
+    } catch (e) {
+      console.error("Expo push failed", e);
+      return false;
+    }
+  },
+});
+
+// Request list password: stores request and notifies owner
+export const requestListPassword = mutation({
+  args: {
+    list_id: v.id("lists"),
+    firstName: v.string(),
+    lastName: v.string(),
+    email: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const now = new Date().toISOString();
+    // Store request
+    await ctx.db.insert("password_requests", {
+      list_id: args.list_id,
+      firstName: args.firstName,
+      lastName: args.lastName,
+      email: args.email,
+      created_at: now,
+    });
+
+    // Lookup list owner
+    const list = await ctx.db.get(args.list_id);
+    const ownerId = list?.user_id ?? null;
+    if (!ownerId) return true;
+
+    // Fetch owner's push tokens
+    const tokens = await ctx.db
+      .query("push_tokens")
+      .withIndex("by_user", (q) => q.eq("user_id", ownerId))
+      .collect();
+
+    // Fire-and-forget push via internal action
+    const title = "Password requested";
+    const body = `${args.firstName} ${args.lastName} requested your list password`;
+    for (const t of tokens) {
+      await ctx.scheduler.runAfter(0, internal.products.sendPush, {
+        token: t.token,
+        title,
+        body,
+      });
+    }
+    return true;
+  },
+});
+
 export const createListItem = mutation({
   args: {
     list_id: v.id("lists"),
@@ -416,6 +522,13 @@ export const getListItems = query({
   },
 });
 
+export const getListItemById = query({
+  args: { itemId: v.id("list_items") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.itemId);
+  },
+});
+
 export const seedDummyListItem = mutation({
   args: { list_id: v.id("lists") },
   handler: async (ctx, args) => {
@@ -429,9 +542,9 @@ export const seedDummyListItem = mutation({
     const now = new Date().toISOString();
     await ctx.db.insert("list_items", {
       list_id: args.list_id,
-      name: "Apple AirPods Max wireless over-ear headphones", 
+      name: "Apple AirPods Max wireless over-ear headphones",
       description: "High-fidelity audio with Active Noise Cancellation and spatial audio.",
-      image_url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/airpods-max-select-202409-blue?wid=940&hei=1112&fmt=png-alpha&.v=1725380856538", 
+      image_url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/airpods-max-select-202409-blue?wid=940&hei=1112&fmt=png-alpha&.v=1725380856538",
       quantity: 2,
       claimed: 1,
       price: "1899.00",
@@ -442,5 +555,76 @@ export const seedDummyListItem = mutation({
       updated_at: now,
     });
     return "ok";
+  },
+});
+
+export const setListItemClaim = mutation({
+  args: { itemId: v.id("list_items"), claimed: v.number() },
+  handler: async (ctx, args) => {
+    const row = await ctx.db.get(args.itemId);
+    if (!row) return false;
+    const next = Math.max(0, Math.min(args.claimed, row.quantity));
+    await ctx.db.patch(args.itemId, { claimed: next, updated_at: new Date().toISOString() });
+    return true;
+  },
+});
+
+// Increment claimed quantity by a delta; clamps to [0, quantity]
+export const addListItemClaim = mutation({
+  args: { itemId: v.id("list_items"), add: v.number() },
+  handler: async (ctx, args) => {
+    const row = await ctx.db.get(args.itemId);
+    if (!row) return false;
+    const current = Number(row.claimed ?? 0);
+    const qty = Number(row.quantity ?? 0);
+    const next = Math.max(0, Math.min(current + Math.max(0, args.add), qty));
+    await ctx.db.patch(args.itemId, { claimed: next, updated_at: new Date().toISOString() });
+    return true;
+  },
+});
+
+// Purchase list item: records the purchase and increments claimed safely
+export const purchaseListItem = mutation({
+  args: {
+    list_id: v.id("lists"),
+    item_id: v.id("list_items"),
+    quantity: v.number(),
+    deliveredTo: v.union(v.literal("recipient"), v.literal("me")),
+    note: v.optional(v.union(v.string(), v.null())),
+    storeName: v.optional(v.union(v.string(), v.null())),
+    orderNumber: v.optional(v.union(v.string(), v.null())),
+    buyer_user_id: v.optional(v.union(v.string(), v.null())),
+    buyer_name: v.optional(v.union(v.string(), v.null())),
+    buyer_email: v.optional(v.union(v.string(), v.null())),
+  },
+  handler: async (ctx, args) => {
+    const item = await ctx.db.get(args.item_id);
+    if (!item) return false;
+    const now = new Date().toISOString();
+    // Clamp quantity to available
+    const current = Number(item.claimed ?? 0);
+    const maxQty = Number(item.quantity ?? 0);
+    const add = Math.max(0, Math.min(args.quantity, Math.max(0, maxQty - current)));
+    if (add <= 0) return false;
+
+    // Update claimed
+    await ctx.db.patch(args.item_id, { claimed: current + add, updated_at: now });
+
+    // Insert purchase record
+    await ctx.db.insert("purchases", {
+      list_id: args.list_id,
+      item_id: args.item_id,
+      quantity: add,
+      deliveredTo: args.deliveredTo,
+      note: args.note ?? null,
+      storeName: args.storeName ?? null,
+      orderNumber: args.orderNumber ?? null,
+      buyer_user_id: args.buyer_user_id ?? null,
+      buyer_name: args.buyer_name ?? null,
+      buyer_email: args.buyer_email ?? null,
+      created_at: now,
+      updated_at: now,
+    });
+    return true;
   },
 });

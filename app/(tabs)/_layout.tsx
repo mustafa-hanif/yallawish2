@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { Redirect, Tabs } from "expo-router";
+import { Redirect, Tabs, useGlobalSearchParams, usePathname } from "expo-router";
 import React from "react";
 import { Platform, View } from "react-native";
 
@@ -8,13 +8,30 @@ import { HapticTab } from "@/components/HapticTab";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useAuth } from "@clerk/clerk-expo";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { isSignedIn } = useAuth();
-  if (!isSignedIn) {
-    return <Redirect href={"/sign-in"} />;
+  const pathname = usePathname();
+  const params = useGlobalSearchParams();
+  const search = new URLSearchParams();
+  Object.entries(params || {}).forEach(([k, v]) => {
+    if (Array.isArray(v)) {
+      v.forEach((vv) => search.append(k, String(vv)));
+    } else if (v != null) {
+      search.append(k, String(v));
+    }
+  });
+  const qs = search.toString() ? `?${search.toString()}` : "";
+  const returnTo = `${pathname}${qs}`;
+  // Register for push notifications and save token when signed in
+  usePushNotifications();
+  const allowAnonymous = pathname?.includes('/view-list');
+  if (!isSignedIn && !allowAnonymous) {
+    const encoded = encodeURIComponent(returnTo);
+    return <Redirect href={{ pathname: "/sign-in", params: { returnTo: encoded } }} />;
   }
 
   return (
@@ -145,9 +162,27 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="view-list"
+        options={{
+          href: null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
         name="manage-list"
         options={{
           href: null, // Hide manage-list from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="gift-detail"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="purchase-success"
+        options={{
+          href: null,
         }}
       />
     </Tabs>

@@ -17,7 +17,8 @@ import {
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();
   const router = useRouter();
-  const { addToList } = useLocalSearchParams<{ addToList?: string }>();
+  const { addToList, returnTo } = useLocalSearchParams<{ addToList?: string; returnTo?: string }>();
+  const decodedReturnTo = returnTo ? decodeURIComponent(String(returnTo)) : undefined;
   const showAddToList = !!addToList && String(addToList).toLowerCase() !== "false";
   const ctaLabel = showAddToList ? "Add to list" : "Sign up";
 
@@ -70,7 +71,8 @@ export default function SignUpScreen() {
       const signUpAttempt = await signUp.attemptEmailAddressVerification({ code });
       if (signUpAttempt.status === "complete") {
         await setActive({ session: signUpAttempt.createdSessionId });
-        router.replace("/");
+        const target = decodedReturnTo ? (decodedReturnTo as any) : "/";
+        router.replace(target);
       } else {
         console.error(JSON.stringify(signUpAttempt, null, 2));
       }
@@ -149,7 +151,7 @@ export default function SignUpScreen() {
                 </View>
               </View>
               <View style={{ flex: 1 }}>
-                <Link href={{ pathname: "/log-in", params: showAddToList ? { addToList: String(addToList) || "1" } : undefined }} asChild>
+                <Link href={{ pathname: "/log-in", params: { ...(showAddToList ? { addToList: String(addToList) || "1" } : {}), ...(decodedReturnTo ? { returnTo: encodeURIComponent(decodedReturnTo) } : {}) } }} asChild>
                   <Pressable style={{ borderRadius: 999, alignItems: "center", paddingVertical: 10 }}>
                     <Text style={{ color: "#2E1A4F", fontFamily: "Nunito_700Bold", fontSize: 16, opacity: 0.85 }}>Login</Text>
                   </Pressable>

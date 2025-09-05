@@ -8,17 +8,18 @@ type Props = {
   onShare?: () => void;
   onManage?: () => void;
   manageLabel?: string;
+  viewMode?: boolean;
 };
 
-export const FooterBar: React.FC<Props> = ({ lastUpdated, onShare, onManage, manageLabel = "Manage List" }) => (
+export const FooterBar: React.FC<Props> = ({ lastUpdated, onShare, onManage, manageLabel = "Manage List", viewMode }) => (
   <View style={styles.footer}>
     {lastUpdated && <Text style={styles.lastUpdated}>{lastUpdated}</Text>}
-    <Pressable style={[styles.button, styles.buttonSecondary]} onPress={onShare}>
+    {!viewMode ? <View><Pressable style={[styles.button, styles.buttonSecondary]} onPress={onShare}>
       <Text style={styles.buttonSecondaryText}>Share</Text>
       <Ionicons name="share-outline" size={20} color="#3B0076" />
     </Pressable>
-    <Pressable style={[styles.button, styles.buttonPrimary]} onPress={onManage}>
-      <Text style={styles.buttonPrimaryText}>{manageLabel}</Text>
-    </Pressable>
+      <Pressable style={[styles.button, styles.buttonPrimary]} onPress={onManage}>
+        <Text style={styles.buttonPrimaryText}>{manageLabel}</Text>
+      </Pressable></View> : null}
   </View>
 );

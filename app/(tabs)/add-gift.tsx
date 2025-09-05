@@ -232,7 +232,7 @@ export default function AddGift() {
           <RibbonHeader title={title} subtitle={subtitle ?? ""} />
         </View>
 
-        <ActionsBar privacy={privacy} loading={loading} onFilterPress={() => setShowSortSheet(true)} />
+        <ActionsBar privacy={privacy} loading={loading} onFilterPress={() => setShowSortSheet(true)} address={(list?.shippingAddress as string | undefined) ?? null} />
 
         <View style={styles.addGiftSection}>
           {displayedItems.length > 0 ? (

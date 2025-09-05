@@ -19,7 +19,8 @@ export default function LoginScreen() {
   const { isLoaded, signIn, setActive } = useSignIn();
   const { startOAuthFlow: startGoogle } = useOAuth({ strategy: "oauth_google" });
   const { startOAuthFlow: startApple } = useOAuth({ strategy: "oauth_apple" });
-  const { addToList } = useLocalSearchParams<{ addToList?: string }>();
+  const { addToList, returnTo } = useLocalSearchParams<{ addToList?: string; returnTo?: string }>();
+  const decodedReturnTo = returnTo ? decodeURIComponent(String(returnTo)) : undefined;
   const showAddToList = !!addToList && String(addToList).toLowerCase() !== "false";
   const ctaLabel = showAddToList ? "Add to list" : "Log in";
 
@@ -34,7 +35,8 @@ export default function LoginScreen() {
     const { createdSessionId, setActive: setActiveOAuth } = await startGoogle();
     if (createdSessionId) {
       await setActiveOAuth?.({ session: createdSessionId });
-      router.replace("/");
+      const target = decodedReturnTo ? (decodedReturnTo as any) : "/";
+      router.replace(target);
     }
   };
 
@@ -42,7 +44,8 @@ export default function LoginScreen() {
     const { createdSessionId, setActive: setActiveOAuth } = await startApple();
     if (createdSessionId) {
       await setActiveOAuth?.({ session: createdSessionId });
-      router.replace("/");
+      const target = decodedReturnTo ? (decodedReturnTo as any) : "/";
+      router.replace(target);
     }
   };
 
@@ -53,7 +56,8 @@ export default function LoginScreen() {
       const result = await signIn.create({ identifier: emailAddress, password });
       if (result.status === "complete") {
         await setActive?.({ session: result.createdSessionId });
-        router.replace("/");
+        const target = decodedReturnTo ? (decodedReturnTo as any) : "/";
+        router.replace(target);
       }
     } catch (err) {
       console.error(JSON.stringify(err, null, 2));
@@ -86,7 +90,7 @@ export default function LoginScreen() {
           <View style={{ alignItems: "center", marginBottom: 28 }}>
             <View style={{ flexDirection: "row", backgroundColor: "rgba(255,255,255,0.75)", borderRadius: 999, padding: 6, width: "100%" }}>
               <View style={{ flex: 1 }}>
-                <Link href={{ pathname: "/sign-up", params: showAddToList ? { addToList: String(addToList) || "1" } : undefined }} asChild>
+                <Link href={{ pathname: "/sign-up", params: { ...(showAddToList ? { addToList: String(addToList) || "1" } : {}), ...(decodedReturnTo ? { returnTo: encodeURIComponent(decodedReturnTo) } : {}) } }} asChild>
                   <Pressable style={{ borderRadius: 999, alignItems: "center", paddingVertical: 10 }}>
                     <Text style={{ color: "#2E1A4F", fontFamily: "Nunito_700Bold", fontSize: 16, opacity: 0.85 }}>Sign-up</Text>
                   </Pressable>

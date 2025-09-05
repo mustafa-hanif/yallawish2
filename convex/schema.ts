@@ -31,6 +31,8 @@ export default defineSchema({
     occasion: v.optional(v.union(v.string(), v.null())),
     coverPhotoUri: v.optional(v.union(v.string(), v.null())),
     privacy: v.union(v.literal("private"), v.literal("shared")),
+    requiresPassword: v.optional(v.boolean()),
+    password: v.optional(v.union(v.string(), v.null())),
     created_at: v.string(),
     updated_at: v.string(),
   }).index("by_user", ["user_id"]),
@@ -89,6 +91,41 @@ export default defineSchema({
     created_at: v.string(),
     updated_at: v.string(),
   })
-    .index("by_list", ["list_id"]) 
+    .index("by_list", ["list_id"])
     .index("by_list_status", ["list_id", "status"]),
+
+  // Expo push tokens for users
+  push_tokens: defineTable({
+    user_id: v.string(),
+    token: v.string(),
+    created_at: v.string(),
+    updated_at: v.string(),
+  }).index("by_user", ["user_id"]),
+
+  // Requests to view password-protected lists
+  password_requests: defineTable({
+    list_id: v.id("lists"),
+    firstName: v.string(),
+    lastName: v.string(),
+    email: v.string(),
+    created_at: v.string(),
+  }).index("by_list", ["list_id"]),
+
+  // Purchases made for list items
+  purchases: defineTable({
+    list_id: v.id("lists"),
+    item_id: v.id("list_items"),
+    quantity: v.number(),
+    deliveredTo: v.union(v.literal("recipient"), v.literal("me")),
+    note: v.optional(v.union(v.string(), v.null())),
+    storeName: v.optional(v.union(v.string(), v.null())),
+    orderNumber: v.optional(v.union(v.string(), v.null())),
+    buyer_user_id: v.optional(v.union(v.string(), v.null())),
+    buyer_name: v.optional(v.union(v.string(), v.null())),
+    buyer_email: v.optional(v.union(v.string(), v.null())),
+    created_at: v.string(),
+    updated_at: v.string(),
+  })
+    .index("by_item", ["item_id"])
+    .index("by_list", ["list_id"]),
 });

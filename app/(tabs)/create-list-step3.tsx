@@ -188,7 +188,13 @@ export default function CreateListStep3() {
     if (existing?.privacy) {
       setSelectedOption(existing.privacy === "private" ? "private" : "my-people");
     }
-  }, [existing?.privacy]);
+    if ((existing as any)?.requiresPassword) {
+      setRequirePassword(Boolean((existing as any).requiresPassword));
+    }
+    if ((existing as any)?.password) {
+      setPassword(String((existing as any).password ?? ""));
+    }
+  }, [existing]);
 
   // Auto-seed sample data if none exist for this owner
   React.useEffect(() => {
@@ -196,7 +202,7 @@ export default function CreateListStep3() {
     const noGroups = (myGroups ?? []).length === 0;
     const noContacts = (myContacts ?? []).length === 0;
     if (noGroups && noContacts) {
-      seedShareData({ owner_id: existing.user_id }).catch(() => {});
+      seedShareData({ owner_id: existing.user_id }).catch(() => { });
     }
   }, [existing?.user_id, myGroups, myContacts, seedShareData]);
 
@@ -239,7 +245,15 @@ export default function CreateListStep3() {
     try {
       const backendPrivacy: "private" | "shared" =
         selectedOption === "private" ? "private" : "shared";
-      await updatePrivacy({ listId: listId as any, privacy: backendPrivacy });
+      await updatePrivacy({
+        listId: listId as any,
+        privacy: backendPrivacy,
+        requiresPassword: selectedOption === "public" ? requirePassword : false,
+        password:
+          selectedOption === "public" && requirePassword && password.trim()
+            ? password.trim()
+            : null,
+      } as any);
 
       // Persist shares if not private
       if (backendPrivacy === "shared") {

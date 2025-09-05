@@ -1,22 +1,52 @@
 import { RibbonHeader } from "@/components/RibbonHeader";
-import { ActionsBar, FooterBar, GiftItemCard, HeaderBar, InfoBox, ListCover } from "@/components/list";
+import { ActionsBar, FooterBar, GiftItemCard, HeaderBar, ListCover, PasswordGate } from "@/components/list";
 import { api } from "@/convex/_generated/api";
 import { styles } from "@/styles/addGiftStyles";
-import { useQuery } from "convex/react";
-import { router, useLocalSearchParams } from "expo-router";
-import React from "react";
+import { useMutation, useQuery } from "convex/react";
+import { useLocalSearchParams } from "expo-router";
+import React, { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 
 export default function ViewList() {
   const { listId } = useLocalSearchParams<{ listId?: string }>();
   const list = useQuery(api.products.getListById, { listId: listId as any });
   const items = useQuery(api.products.getListItems as any, listId ? ({ list_id: listId } as any) : "skip");
+  const requestPassword = useMutation(api.products.requestListPassword);
   const loading = !list;
 
   const title = list?.title ?? "Your List";
   const subtitle = list?.note ?? "";
   const coverUri = list?.coverPhotoUri as string | undefined;
   const privacy = list?.privacy ?? "private";
+
+  // Password gate
+  const requiresPassword: boolean = Boolean((list as any)?.requiresPassword);
+  const [unlocked, setUnlocked] = useState(false);
+
+  if (requiresPassword && !unlocked) {
+    return (
+      <PasswordGate
+        title={title}
+        listId={listId ?? null}
+        requiresPassword={requiresPassword}
+        passwordValue={(list as any)?.password ?? null}
+        onUnlocked={() => setUnlocked(true)}
+        onRequestPassword={async (data) => {
+          try {
+            if (!listId) return;
+            await requestPassword({
+              list_id: listId as any,
+              firstName: data.firstName,
+              lastName: data.lastName,
+              email: data.email,
+            } as any);
+          } catch (e) {
+            console.error('Failed to submit password request', e);
+          }
+        }}
+      />
+    );
+  }
 
   const formatEventDate = (dateStr?: string) => {
     if (!dateStr) return "";
@@ -34,13 +64,13 @@ export default function ViewList() {
 
   return (
     <View style={styles.container}>
-      <HeaderBar title={title} onBack={() => router.back()} />
+      <HeaderBar title={title} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <ListCover imageUri={coverUri} overlayText={formatEventDate((list?.eventDate ?? undefined) as string | undefined)} />
         <View style={styles.listInfoContainer}>
           <RibbonHeader title={title} subtitle={subtitle ?? ""} />
         </View>
-        <ActionsBar privacy={privacy} loading={loading} />
+        <ActionsBar privacy={privacy} loading={loading} address={(list?.shippingAddress as string | undefined) ?? null} />
 
         <View style={styles.addGiftSection}>
           {Array.isArray(items) && items.length > 0 ? (
@@ -50,12 +80,12 @@ export default function ViewList() {
           )}
         </View>
 
-        <InfoBox>
+        {/* <InfoBox>
           View only mode. Ask the list owner to share edit access if you need to add items.
-        </InfoBox>
+        </InfoBox> */}
       </ScrollView>
 
-      <FooterBar lastUpdated="Last updated: July 15, 2025 | 08:00PM" onShare={() => { }} onManage={() => { }} manageLabel="Close" />
+      <FooterBar viewMode lastUpdated="Last updated: July 15, 2025 | 08:00PM" onShare={() => { }} onManage={() => { }} manageLabel="Close" />
     </View>
   );
 }

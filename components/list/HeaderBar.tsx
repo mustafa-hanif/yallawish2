@@ -16,9 +16,9 @@ export const HeaderBar: React.FC<Props> = ({ title, onBack }) => {
       <SafeAreaView edges={["top"]}>
         <View style={styles.headerContent}>
           <View style={styles.navigation}>
-            <Pressable onPress={onBack} style={styles.backButton}>
+            {onBack ? <Pressable onPress={onBack} style={styles.backButton}>
               <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
-            </Pressable>
+            </Pressable> : null}
             <Text style={styles.headerTitle}>{title}</Text>
           </View>
         </View>
