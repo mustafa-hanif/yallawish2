@@ -54,7 +54,8 @@ export const styles = StyleSheet.create({
   },
   contentScroll: {
     paddingHorizontal: 16,
-    paddingBottom: 24,
+    // Leave room for the fixed footer so content isn't hidden
+    paddingBottom: 140,
   },
   sectionTitle: {
     fontSize: 24,
@@ -160,10 +161,18 @@ export const styles = StyleSheet.create({
     marginTop: 4,
   },
   footer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 16,
-    paddingBottom: 134, // For home indicator + global tab bar
     paddingTop: 16,
+    paddingBottom: 16,
     gap: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E5EA',
+    zIndex: 1000,
   },
   button: {
     borderRadius: 8,

@@ -4,6 +4,7 @@ import { api } from "@/convex/_generated/api";
 import { styles } from "@/styles/addGiftStyles";
 import { Ionicons } from "@expo/vector-icons";
 import { useAction, useMutation, useQuery } from "convex/react";
+import * as Linking from 'expo-linking';
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -11,8 +12,10 @@ import {
   Easing,
   Image,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
+  Share,
   StatusBar,
   Text,
   TextInput,
@@ -202,8 +205,26 @@ export default function AddGift() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [link]);
 
-  const handleShare = () => {
-    console.log("Share list", listId);
+  const handleShare = async () => {
+    try {
+      if (!listId) return;
+      let url = '';
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        const origin = window.location?.origin || '';
+        const qs = `listId=${encodeURIComponent(String(listId))}`;
+        url = `${origin}/view-list?${qs}`;
+        // copy to clipboard
+        await navigator.clipboard.writeText(url).catch(() => { });
+      } else {
+        url = Linking.createURL('view-list', {
+          queryParams: { listId: String(listId) },
+        });
+      }
+
+      await Share.share({ message: url, url });
+    } catch (e) {
+      console.warn('Share failed', e);
+    }
   };
 
   const handleManageList = () => {
@@ -217,6 +238,8 @@ export default function AddGift() {
   const subtitle = list?.note ?? "";
   const coverUri = list?.coverPhotoUri as string | undefined;
   const privacy = list?.privacy ?? "private";
+  const shares = useQuery(api.products.getListShares as any, listId ? ({ list_id: listId } as any) : "skip");
+  const shareCount = Array.isArray(shares) ? shares.length : undefined;
 
 
   return (
@@ -232,7 +255,7 @@ export default function AddGift() {
           <RibbonHeader title={title} subtitle={subtitle ?? ""} />
         </View>
 
-        <ActionsBar privacy={privacy} loading={loading} onFilterPress={() => setShowSortSheet(true)} address={(list?.shippingAddress as string | undefined) ?? null} />
+        <ActionsBar privacy={privacy} loading={loading} onFilterPress={() => setShowSortSheet(true)} address={(list?.shippingAddress as string | undefined) ?? null} shareCount={shareCount} />
 
         <View style={styles.addGiftSection}>
           {displayedItems.length > 0 ? (

@@ -26,6 +26,7 @@ export const GiftItemCard: React.FC<Props> = ({ item, onPress }) => {
     if (onPress) return onPress(item);
     router.push({ pathname: "/gift-detail", params: { itemId: String(item._id), ...(listId ? { listId: String(listId) } : {}) } });
   };
+  const isSoldOut = (Number(item.claimed ?? 0) >= Number(item.quantity ?? 1));
   return (
     <View style={styles.itemCard}>
       <View style={styles.itemImageWrap}>{item.image_url ? <Image source={{ uri: item.image_url }} style={styles.itemImage} /> : <View style={[styles.itemImage, { backgroundColor: "#EEE" }]} />}</View>
@@ -36,16 +37,22 @@ export const GiftItemCard: React.FC<Props> = ({ item, onPress }) => {
             Quantity: <Text style={styles.itemQuantityValue}>{item.quantity}</Text>
           </Text>
           <View style={styles.claimBadgeWrap}>
-            <View style={styles.claimBadge}>
-              <Text style={styles.claimBadgeText}>{item.claimed} Claimed</Text>
-            </View>
+            {isSoldOut ? (
+              <View style={styles.claimBadgeGrey}>
+                <Text style={styles.claimBadgeGreyText}>Claimed</Text>
+              </View>
+            ) : (
+              <View style={styles.claimBadge}>
+                <Text style={styles.claimBadgeText}>{item.claimed} Claimed</Text>
+              </View>
+            )}
           </View>
         </View>
         <View style={styles.priceRow}>
           {item.price != null && <Text style={styles.itemPrice}>AED {item.price}</Text>}
           {item.buy_url ? (
-            <Pressable onPress={goDetail}>
-              <Text style={styles.buyNow}>Buy Now</Text>
+            <Pressable onPress={isSoldOut ? undefined : goDetail} disabled={isSoldOut}>
+              <Text style={[styles.buyNow, isSoldOut && styles.buyNowDisabled]}>Buy Now</Text>
             </Pressable>
           ) : null}
         </View>

@@ -28,7 +28,7 @@ export default function TabLayout() {
   const returnTo = `${pathname}${qs}`;
   // Register for push notifications and save token when signed in
   usePushNotifications();
-  const allowAnonymous = pathname?.includes('/view-list');
+  const allowAnonymous = ['/view-list', '/gift-detail', '/purchase-success'].some((p) => pathname?.includes(p));
   if (!isSignedIn && !allowAnonymous) {
     const encoded = encodeURIComponent(returnTo);
     return <Redirect href={{ pathname: "/sign-in", params: { returnTo: encoded } }} />;
@@ -153,18 +153,28 @@ export default function TabLayout() {
         name="create-list-step3"
         options={{
           href: null, // This hides it from the tab bar
+          tabBarStyle: { display: 'none' },
+        }}
+      />
+      <Tabs.Screen
+        name="select-profile"
+        options={{
+          href: null, // Hide from tab bar
         }}
       />
       <Tabs.Screen
         name="add-gift"
         options={{
           href: null, // This hides it from the tab bar
+          // Hide the TabBar entirely on this screen so fixed footers are not overlapped
+          tabBarStyle: { display: 'none' },
         }}
       />
       <Tabs.Screen
         name="view-list"
         options={{
           href: null, // Hide from tab bar
+          tabBarStyle: { display: 'none' },
         }}
       />
       <Tabs.Screen
@@ -177,12 +187,14 @@ export default function TabLayout() {
         name="gift-detail"
         options={{
           href: null,
+          tabBarStyle: { display: 'none' },
         }}
       />
       <Tabs.Screen
         name="purchase-success"
         options={{
           href: null,
+          tabBarStyle: { display: 'none' },
         }}
       />
     </Tabs>

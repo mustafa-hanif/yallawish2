@@ -24,9 +24,11 @@ export default function CreateListStep1() {
   };
 
   const handleContinue = () => {
-    // Navigate to next step
-    console.log("Continue with option:", selectedOption);
-    router.push("/create-list-step2");
+    if (selectedOption === "someone-else") {
+      router.push("/select-profile");
+    } else {
+      router.push("/create-list-step2");
+    }
   };
 
   const ProgressIndicator = () => (

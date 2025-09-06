@@ -22,6 +22,16 @@ export default function Page() {
 
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
+  // "/gift-detail?listId=j974cp5qz4j7ey0k6wb4jzsxx97nedqk&itemId=jx7bts36hd0kk40vbd0ex8882x7ng36s&action=buy"
+
+  let _returnTo = new URL(`http://www.example.com${returnTo}`);
+  const action = _returnTo.searchParams.get("action");
+  const isBuy = String(action ?? "").toLowerCase() === "buy";
+  const heroTitle = isBuy ? "Sign up to make this gift count" : "This one’s going\non your list!";
+  const heroSubtitle = isBuy
+    ? "Buy the perfect gift from this list or even create your own to share with friends and family."
+    : "Buy the perfect gift from this list or even create your own to share with friends and family.";
+
   const onGoogle = async () => {
     const { createdSessionId, setActive: setActiveOAuth } = await startGoogle();
     if (createdSessionId) {
@@ -66,11 +76,10 @@ export default function Page() {
           {/* Hero Copy */}
           <View style={{ paddingHorizontal: 8, marginBottom: 28 }}>
             <Text style={{ color: "#FFFFFF", fontSize: 32, lineHeight: 38, fontFamily: "Nunito_700Bold", textAlign: "center" }}>
-              This one’s going
-              on your list!
+              {heroTitle}
             </Text>
             <Text style={{ color: "rgba(255,255,255,0.85)", fontSize: 15, lineHeight: 22, textAlign: "center", marginTop: 12, fontFamily: "Nunito_400Regular" }}>
-              Buy the perfect gift from this list or even create your own to share with friends and family.
+              {heroSubtitle}
             </Text>
           </View>
 
@@ -100,7 +109,7 @@ export default function Page() {
             </View>
 
             {/* Email navigates to Sign Up */}
-            <Pressable onPress={() => router.push({ pathname: "/sign-up", params: { ...(addToList ? { addToList: String(addToList) } : {}), ...(decodedReturnTo ? { returnTo: encodeURIComponent(decodedReturnTo) } : {}) } })} style={{ backgroundColor: "#FFFFFF", borderRadius: 12, paddingVertical: 14, paddingHorizontal: 16 }}>
+            <Pressable onPress={() => router.push({ pathname: "/sign-up", params: { ...(addToList ? { addToList: String(addToList) } : {}), ...(decodedReturnTo ? { returnTo: encodeURIComponent(decodedReturnTo) } : {}), ...(action ? { action: String(action) } : {}) } })} style={{ backgroundColor: "#FFFFFF", borderRadius: 12, paddingVertical: 14, paddingHorizontal: 16 }}>
               <View style={{ position: "relative", width: "100%", minHeight: 24, justifyContent: "center" }}>
                 <Ionicons name="mail-outline" size={20} color="#1F1235" style={{ position: "absolute", left: 0 }} />
                 <Text style={{ fontSize: 16, color: "#1F1235", textAlign: "center", fontFamily: "Nunito_700Bold" }}>Continue with Email</Text>

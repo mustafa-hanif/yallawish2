@@ -7,7 +7,7 @@ import { styles } from "@/styles";
 import { SignedIn, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
-import { router } from "expo-router";
+import { Link, router } from "expo-router";
 import { Alert, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import Swiper from "react-native-deck-swiper";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -47,7 +47,7 @@ export default function HomeScreen() {
         try {
           monthStr = new Intl.DateTimeFormat(undefined, { month: "long" }).format(dateObj).toUpperCase();
         } catch {
-          const months = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"]; monthStr = months[dateObj.getMonth()];
+          const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"]; monthStr = months[dateObj.getMonth()];
         }
         return { id: String(l._id), date: dayStr, month: monthStr, title: l.title || "Untitled", subtitle: l.note || (l.occasion ? `Occasion: ${l.occasion}` : ""), color: OCCASION_COLOR[String(l.occasion)] ?? "#AEAEB2", dateValue: dateObj.getTime() };
       })
@@ -110,7 +110,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Swiper action cards */}
-        <View style={{ height: 200, marginBottom: 36 }}>
+        <View style={{ height: 200, marginBottom: 36, overflow: 'hidden', zIndex: 0 }} pointerEvents="box-none">
           <Swiper
             cards={cards}
             stackSize={3}
@@ -123,6 +123,8 @@ export default function HomeScreen() {
             // Removed onSwipedAll reset; cards now loop seamlessly
             cardVerticalMargin={0}
             cardHorizontalMargin={16}
+            containerStyle={{ height: 180, position: 'relative' }}
+            cardStyle={{ borderRadius: 24 }}
             renderCard={(card: any) => {
               if (!card) return <View />;
               return (
@@ -137,21 +139,21 @@ export default function HomeScreen() {
                     alignItems: 'center',
                     justifyContent: 'flex-start',
                     shadowColor: '#000',
-                    shadowOpacity: 0.08,
-                    shadowRadius: 18,
-                    shadowOffset: { width: 0, height: 8 },
+                    shadowOpacity: 0.06,
+                    shadowRadius: 12,
+                    shadowOffset: { width: 0, height: 4 },
                   }}
                 >
-                  <View style={{ width: 80, height: 80, borderRadius: 24, backgroundColor: '#FFFFFF', opacity:0.92, alignItems:'center', justifyContent:'center', marginBottom: 16 }}>
+                  <View style={{ width: 80, height: 80, borderRadius: 24, backgroundColor: '#FFFFFF', opacity: 0.92, alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
                     <Image source={card.image} contentFit="contain" style={{ width: 60, height: 60 }} />
                   </View>
-                  <Text style={[styles.addListTitle, { textAlign:'center', fontSize:18, marginBottom:6 }]}>{card.title}</Text>
-                  <Text style={[styles.addListSubtitle, { textAlign:'center', fontSize:12, lineHeight:16, maxWidth:180 }]} numberOfLines={2}>{card.subtitle}</Text>
+                  <Text style={[styles.addListTitle, { textAlign: 'center', fontSize: 18, marginBottom: 6 }]}>{card.title}</Text>
+                  <Text style={[styles.addListSubtitle, { textAlign: 'center', fontSize: 12, lineHeight: 16, maxWidth: 180 }]} numberOfLines={2}>{card.subtitle}</Text>
                 </Pressable>
               );
             }}
           />
-          <Text style={{ position: 'absolute', bottom: 0, alignSelf:'center', fontSize:12, color:'#6E6E73' }}>Swipe</Text>
+          <Text style={{ position: 'absolute', bottom: 0, alignSelf: 'center', fontSize: 12, color: '#6E6E73' }}>Swipe</Text>
         </View>
 
         {/* Categories */}
@@ -193,25 +195,25 @@ export default function HomeScreen() {
         <View style={styles.eventSection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.eventSectionTitle}>Upcoming events</Text>
-            <Pressable>
-              <Ionicons name="chevron-forward" size={28} color="black" />
-            </Pressable>
+            <Ionicons name="chevron-forward" size={28} color="black" />
           </View>
-          <ScrollView horizontal style={styles.eventsScroll}>
+          <ScrollView horizontal style={styles.eventsScroll} directionalLockEnabled decelerationRate="fast" showsHorizontalScrollIndicator={false}>
             {upcomingEvents.map((event) => (
-              <Pressable key={event.id} style={styles.eventCard} onPress={() => router.push({ pathname: "/add-gift", params: { listId: String(event.id) } })}>
-                <View style={[styles.eventLeftBorder, { backgroundColor: event.color }]} />
-                <View style={styles.eventContent}>
-                  <View style={styles.eventDateContainer}>
-                    <Text style={styles.eventDateNumber}>{event.date}</Text>
-                    <Text style={styles.eventDateMonth}>{event.month}</Text>
+              <Link key={event.id} href={{ pathname: "/add-gift", params: { listId: String(event.id) } }} asChild>
+                <Pressable style={styles.eventCard} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+                  <View style={[styles.eventLeftBorder, { backgroundColor: event.color }]} />
+                  <View style={styles.eventContent}>
+                    <View style={styles.eventDateContainer}>
+                      <Text style={styles.eventDateNumber}>{event.date}</Text>
+                      <Text style={styles.eventDateMonth}>{event.month}</Text>
+                    </View>
+                    <View style={styles.eventInfo}>
+                      <Text style={styles.eventTitle}>{event.title}</Text>
+                      <Text style={styles.eventSubtitle}>{event.subtitle}</Text>
+                    </View>
                   </View>
-                  <View style={styles.eventInfo}>
-                    <Text style={styles.eventTitle}>{event.title}</Text>
-                    <Text style={styles.eventSubtitle}>{event.subtitle}</Text>
-                  </View>
-                </View>
-              </Pressable>
+                </Pressable>
+              </Link>
             ))}
           </ScrollView>
         </View>

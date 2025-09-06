@@ -148,6 +148,42 @@ export const getContacts = query({
   },
 });
 
+export const createContact = mutation({
+  args: {
+    owner_id: v.string(),
+    name: v.string(),
+    email: v.optional(v.string()),
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
+    dateOfBirth: v.optional(v.string()),
+    gender: v.optional(v.string()),
+    phoneCountryCode: v.optional(v.string()),
+    phoneNumber: v.optional(v.string()),
+    relation: v.optional(v.string()),
+    allowEdit: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const now = new Date().toISOString();
+    const id = await ctx.db.insert("contacts", {
+      owner_id: args.owner_id,
+      name: args.name,
+      email: args.email,
+      avatarUrl: null,
+      firstName: args.firstName,
+      lastName: args.lastName,
+      dateOfBirth: args.dateOfBirth,
+      gender: args.gender,
+      phoneCountryCode: args.phoneCountryCode,
+      phoneNumber: args.phoneNumber,
+      relation: args.relation,
+      allowEdit: args.allowEdit,
+      created_at: now,
+      updated_at: now,
+    });
+    return id;
+  },
+});
+
 // Groups
 export const getGroups = query({
   args: { owner_id: v.string() },

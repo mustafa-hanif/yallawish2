@@ -9,9 +9,10 @@ type Props = {
   loading?: boolean;
   onFilterPress?: () => void;
   address?: string | null;
+  shareCount?: number; // number of explicit shares; 0 implies public when privacy === 'shared'
 };
 
-export const ActionsBar: React.FC<Props> = ({ privacy, loading, onFilterPress, address }) => {
+export const ActionsBar: React.FC<Props> = ({ privacy, loading, onFilterPress, address, shareCount }) => {
   const [showAddress, setShowAddress] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
 
@@ -24,13 +25,23 @@ export const ActionsBar: React.FC<Props> = ({ privacy, loading, onFilterPress, a
     } catch { }
   };
 
+  const isShared = privacy === "shared";
+  const isPublic = isShared && (shareCount ?? 0) === 0;
+  const title = loading ? "Loading..." : isShared ? (isPublic ? "Public" : "Shared") : "Private";
+  const desc = loading
+    ? "Fetching privacy"
+    : isShared
+      ? (isPublic ? "Anyone with the link" : "Only people you choose")
+      : "Only you can see this";
+  const iconName = isShared ? (isPublic ? "globe-outline" : "people-outline") : "lock-closed-outline";
+
   return (
     <View style={styles.actionsContainer}>
       <View style={styles.privacyContainer}>
-        <Ionicons name={privacy === "shared" ? "globe-outline" : "lock-closed-outline"} size={24} color="#1C0335" />
+        <Ionicons name={iconName as any} size={24} color="#1C0335" />
         <View>
-          <Text style={styles.privacyStatus}>{loading ? "Loading..." : privacy === "shared" ? "Shared" : "Private"}</Text>
-          <Text style={styles.privacyDesc}>{loading ? "Fetching privacy" : privacy === "shared" ? "Only people with link" : "Only you can see this"}</Text>
+          <Text style={styles.privacyStatus}>{title}</Text>
+          <Text style={styles.privacyDesc}>{desc}</Text>
         </View>
         <Ionicons name="settings-outline" size={16} color="#1C0335" />
       </View>

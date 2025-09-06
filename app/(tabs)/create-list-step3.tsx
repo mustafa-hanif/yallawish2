@@ -183,15 +183,12 @@ export default function CreateListStep3() {
   const setShares = useMutation(api.products.setListShares);
   const seedShareData = useMutation(api.products.seedShareDataPublic);
 
-  // Prefill option based on existing privacy
+  // Prefill password settings from existing
   React.useEffect(() => {
-    if (existing?.privacy) {
-      setSelectedOption(existing.privacy === "private" ? "private" : "my-people");
-    }
-    if ((existing as any)?.requiresPassword) {
+    if ((existing as any)?.requiresPassword != null) {
       setRequirePassword(Boolean((existing as any).requiresPassword));
     }
-    if ((existing as any)?.password) {
+    if ((existing as any)?.password != null) {
       setPassword(String((existing as any).password ?? ""));
     }
   }, [existing]);
@@ -218,6 +215,19 @@ export default function CreateListStep3() {
     setSelectedGroups(groupIds);
     setSelectedFriends(contactIds);
   }, [currentShares]);
+
+  // Prefill selected option based on privacy and whether any shares exist
+  React.useEffect(() => {
+    if (!existing?.privacy) return;
+    // Don’t override if user already picked in this session
+    if (selectedOption !== null) return;
+    if (existing.privacy === 'private') {
+      setSelectedOption('private');
+    } else {
+      const hasShares = (currentShares?.length ?? 0) > 0;
+      setSelectedOption(hasShares ? 'my-people' : 'public');
+    }
+  }, [existing?.privacy, currentShares, selectedOption]);
 
   // Derive lists shown in UI strictly from Convex data (no fallbacks)
   const groups = React.useMemo(() => {
@@ -255,17 +265,24 @@ export default function CreateListStep3() {
             : null,
       } as any);
 
-      // Persist shares if not private
-      if (backendPrivacy === "shared") {
-        await setShares({
-          list_id: listId as unknown as Id<"lists">,
-          group_ids: selectedGroups as unknown as Id<"groups">[],
-          contact_ids: selectedFriends as unknown as Id<"contacts">[],
-        });
+      // Persist shares: clear for 'public', set for 'my-people', clear for 'private'
+      if (backendPrivacy === 'shared') {
+        if (selectedOption === 'public') {
+          await setShares({
+            list_id: listId as unknown as Id<'lists'>,
+            group_ids: [],
+            contact_ids: [],
+          });
+        } else {
+          await setShares({
+            list_id: listId as unknown as Id<'lists'>,
+            group_ids: selectedGroups as unknown as Id<'groups'>[],
+            contact_ids: selectedFriends as unknown as Id<'contacts'>[],
+          });
+        }
       } else {
-        // Clear all shares if set to private
         await setShares({
-          list_id: listId as unknown as Id<"lists">,
+          list_id: listId as unknown as Id<'lists'>,
           group_ids: [],
           contact_ids: [],
         });
@@ -396,7 +413,7 @@ export default function CreateListStep3() {
         </View>
       </ScrollView>
 
-      <View style={styles.footer}>
+      <SafeAreaView edges={["bottom"]} style={styles.footer}>
         <Pressable
           style={[
             styles.button,
@@ -413,7 +430,7 @@ export default function CreateListStep3() {
         >
           <Text style={styles.buttonSecondaryText}>Back</Text>
         </Pressable>
-      </View>
+      </SafeAreaView>
 
       {/* Share Bottom Sheet */}
       <Modal
@@ -513,7 +530,7 @@ export default function CreateListStep3() {
             <Pressable style={[styles.button, styles.buttonPrimary]} onPress={confirmShareAndClose}>
               <Text style={styles.buttonPrimaryText}>Yalla! Let’s add gifts</Text>
             </Pressable>
-            <Pressable style={[styles.button, styles.buttonSecondary]} onPress={() => setShareVisible(false)}>
+            <Pressable style={[styles.button, styles.buttonSecondary, { marginBlockEnd: 20 }]} onPress={() => setShareVisible(false)}>
               <Text style={styles.buttonSecondaryText}>Back</Text>
             </Pressable>
           </ScrollView>

@@ -29,7 +29,7 @@ export const styles = StyleSheet.create({
     letterSpacing: -1,
   },
   scrollContent: {
-    paddingBottom: 200, // Space for footer
+    paddingBottom: 260, // Extra space for footer + bottom tab bar on iOS
   },
   coverContainer: {
     height: 145,
@@ -121,10 +121,14 @@ export const styles = StyleSheet.create({
   claimBadgeWrap: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 },
   claimBadge: { backgroundColor: '#F9E2A7', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 },
   claimBadgeText: { fontSize: 12, fontFamily: 'Nunito_700Bold', color: '#784B00' },
+  // Grey variant for fully claimed items
+  claimBadgeGrey: { backgroundColor: '#E5E5EA', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 },
+  claimBadgeGreyText: { fontSize: 12, fontFamily: 'Nunito_700Bold', color: '#6B7280' },
   itemChevron: { padding: 4 },
   priceRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
   itemPrice: { fontSize: 16, fontFamily: 'Nunito_700Bold', color: '#1C0335' },
   buyNow: { fontSize: 16, fontFamily: 'Nunito_700Bold', color: 'white', backgroundColor: '#0062FF', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 },
+  buyNowDisabled: { backgroundColor: '#D1D1D6' },
   progressTrack: { height: 6, backgroundColor: '#D1D1D6', borderRadius: 3, overflow: 'hidden' },
   progressFill: { backgroundColor: '#3B0076', height: '100%' },
   infoBox: {
@@ -158,6 +162,7 @@ export const styles = StyleSheet.create({
     gap: 16,
     borderTopWidth: 1,
     borderTopColor: "#D1D1D6",
+    zIndex: 1000,
   },
   lastUpdated: {
     textAlign: "center",

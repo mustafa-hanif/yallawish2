@@ -192,6 +192,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: "#330065",
     paddingVertical: 20,
+    zIndex: 1,
   },
   isection: {
     position: "relative",
@@ -204,12 +205,14 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: "#FFF",
     paddingVertical: 20,
+    zIndex: 1,
   },
   topSection: {
     position: "relative",
     paddingHorizontal: 20,
     backgroundColor: "#EEEEEE",
     paddingVertical: 20,
+    zIndex: 1,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -291,11 +294,14 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   eventCard: {
-    backgroundColor: "white",
+    backgroundColor: "#FFFFFF",
     marginRight: 22,
     width: 190,
     overflow: "hidden",
     position: "relative",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
   },
   eventLeftBorder: {
     position: "absolute",
@@ -322,7 +328,10 @@ export const styles = StyleSheet.create({
     fontWeight: "900",
     fontFamily: "Nunito_900Black",
     color: "#1C1C1C",
-    lineHeight: 32,
+    // Prevent clipping on iOS by ensuring lineHeight >= fontSize
+    lineHeight: 44,
+    paddingTop: 2,
+    paddingBottom: 2,
   },
   eventDateMonth: {
     fontSize: 20,
@@ -433,6 +442,7 @@ export const styles = StyleSheet.create({
     padding: 20,
     position: "relative",
     overflow: "hidden",
+    zIndex: 1,
   },
   aiHeader: {
     alignItems: "flex-start",
