@@ -50,11 +50,11 @@ export const GiftItemCard: React.FC<Props> = ({ item, onPress }) => {
         </View>
         <View style={styles.priceRow}>
           {item.price != null && <Text style={styles.itemPrice}>AED {item.price}</Text>}
-          {item.buy_url ? (
-            <Pressable onPress={isSoldOut ? undefined : goDetail} disabled={isSoldOut}>
-              <Text style={[styles.buyNow, isSoldOut && styles.buyNowDisabled]}>Buy Now</Text>
-            </Pressable>
-          ) : null}
+          
+          <Pressable onPress={isSoldOut ? undefined : goDetail} disabled={isSoldOut}>
+            <Text style={[styles.buyNow, isSoldOut && styles.buyNowDisabled]}>Buy Now</Text>
+          </Pressable>
+          
         </View>
         <View style={styles.progressTrack}>
           <View style={[styles.progressFill, { width: `${pct}%` }]} />
