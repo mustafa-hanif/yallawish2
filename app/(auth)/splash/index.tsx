@@ -11,8 +11,8 @@ export default function Page() {
   const router = useRouter();
 
   useEffect(() => {
-    // const timer = setTimeout(() => router.replace("/(auth)/sign-in"), 3000);
-    // return () => clearTimeout(timer);
+    const timer = setTimeout(() => router.replace("/(auth)/sign-in"), 3000);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
