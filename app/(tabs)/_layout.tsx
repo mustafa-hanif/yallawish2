@@ -31,7 +31,7 @@ export default function TabLayout() {
   const allowAnonymous = ['/view-list', '/gift-detail', '/purchase-success'].some((p) => pathname?.includes(p));
   if (!isSignedIn && !allowAnonymous) {
     const encoded = encodeURIComponent(returnTo);
-    return <Redirect href={{ pathname: "/sign-in", params: { returnTo: encoded } }} />;
+    return <Redirect href={{ pathname: "/splash", params: { returnTo: encoded } }} />;
   }
 
   return (
