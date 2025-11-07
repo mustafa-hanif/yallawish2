@@ -2,14 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import {
-  Dimensions,
-  Pressable,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Dimensions, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -44,39 +37,12 @@ export default function CreateListStep1() {
     </View>
   );
 
-  const OptionCard = ({
-    option,
-    icon,
-    title,
-    description,
-    isSelected,
-  }: {
-    option: ListOption;
-    icon: React.ReactNode;
-    title: string;
-    description: string;
-    isSelected: boolean;
-  }) => (
-    <Pressable
-      style={[
-        styles.optionCard,
-        isSelected ? styles.optionCardSelected : styles.optionCardUnselected,
-      ]}
-      onPress={() => setSelectedOption(option)}
-    >
+  const OptionCard = ({ option, icon, title, description, isSelected }: { option: ListOption; icon: React.ReactNode; title: string; description: string; isSelected: boolean }) => (
+    <Pressable style={[styles.optionCard, isSelected ? styles.optionCardSelected : styles.optionCardUnselected]} onPress={() => setSelectedOption(option)}>
       <View style={styles.optionContent}>
         {/* Checkbox */}
         <View style={styles.checkboxContainer}>
-          <View
-            style={[
-              styles.checkbox,
-              isSelected ? styles.checkboxSelected : styles.checkboxUnselected,
-            ]}
-          >
-            {isSelected && (
-              <Ionicons name="checkmark" size={16} color="#FFFFFF" />
-            )}
-          </View>
+          <View style={[styles.checkbox, isSelected ? styles.checkboxSelected : styles.checkboxUnselected]}>{isSelected && <Ionicons name="checkmark" size={16} color="#FFFFFF" />}</View>
         </View>
 
         {/* Icon and Title */}
@@ -96,12 +62,7 @@ export default function CreateListStep1() {
       <StatusBar barStyle="light-content" backgroundColor="#330065" />
 
       {/* Header */}
-      <LinearGradient
-        colors={["#330065", "#6600CB"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.header}
-      >
+      <LinearGradient colors={["#330065", "#6600CB"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
         <SafeAreaView edges={["top"]}>
           <View style={styles.headerContent}>
             {/* Status Bar Spacer */}
@@ -133,50 +94,20 @@ export default function CreateListStep1() {
       {/* Main Content */}
       <View style={styles.content}>
         <Text style={styles.sectionTitle}>Make a list for</Text>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={styles.optionsContainer}>
+            <OptionCard option="myself" icon={<Ionicons name="person-circle-outline" size={40} color="#1C0335" />} title="Myself" description="Build a wish list for your own celebrations, milestones, or just a treat for yourself!" isSelected={selectedOption === "myself"} />
 
-        <View style={styles.optionsContainer}>
-          <OptionCard
-            option="myself"
-            icon={
-              <Ionicons
-                name="person-circle-outline"
-                size={40}
-                color="#1C0335"
-              />
-            }
-            title="Myself"
-            description="Build a wish list for your own celebrations, milestones, or just a treat for yourself!"
-            isSelected={selectedOption === "myself"}
-          />
+            <OptionCard option="someone-else" icon={<Ionicons name="people-circle-outline" size={40} color="#1C0335" />} title="Someone else" description="Create a gift list for your children, pets, or anyone who's your loved one" isSelected={selectedOption === "someone-else"} />
+          </View>
 
-          <OptionCard
-            option="someone-else"
-            icon={
-              <Ionicons
-                name="people-circle-outline"
-                size={40}
-                color="#1C0335"
-              />
-            }
-            title="Someone else"
-            description="Create a gift list for your children, pets, or anyone who's your loved one"
-            isSelected={selectedOption === "someone-else"}
-          />
-        </View>
-
-        {/* Continue Button */}
-        <View style={styles.continueContainer}>
-          <Pressable
-            style={[
-              styles.continueButton,
-              !selectedOption && styles.continueButtonDisabled,
-            ]}
-            onPress={handleContinue}
-            disabled={!selectedOption}
-          >
-            <Text style={styles.continueButtonText}>Continue</Text>
-          </Pressable>
-        </View>
+          {/* Continue Button */}
+          <View style={styles.continueContainer}>
+            <Pressable style={[styles.continueButton, !selectedOption && styles.continueButtonDisabled]} onPress={handleContinue} disabled={!selectedOption}>
+              <Text style={styles.continueButtonText}>Continue</Text>
+            </Pressable>
+          </View>
+        </ScrollView>
       </View>
     </View>
   );
