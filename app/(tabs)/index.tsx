@@ -177,11 +177,11 @@ export default function HomeScreen() {
         {/* Categories */}
         <View style={styles.section}>
           <Text style={styles.sectionTitleCategory}>Browse by categories</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesScroll}>
-            <View style={styles.categoriesContainer}>
-              <View style={styles.categoriesRow}>
+          {/* <ScrollView horizontal showsHorizontalScrollIndicator={false} style={[styles.categoriesScroll]}> */}
+            <View style={[styles.categoriesContainer, {justifyContent:'center' , alignItems:'center' , width:'100%'}]}>
+              <View style={[styles.categoriesRow , {width:'100%'}]}>
                 {categories.slice(0, 3).map((category) => (
-                  <Pressable key={category.id} style={styles.categoryCard}>
+                  <Pressable key={category.id} style={[styles.categoryCard, {width:`32%`}]}>
                     <View style={styles.categoryContent}>
                       <View style={styles.categoryIconContainer}>
                         <Image source={require("@/assets/images/gift.svg")} style={styles.categoryIcon} contentFit="contain" />
@@ -192,9 +192,9 @@ export default function HomeScreen() {
                   </Pressable>
                 ))}
               </View>
-              <View style={styles.categoriesRow}>
+              <View style={[styles.categoriesRow, {width:'100%'}]}>
                 {categories.slice(3, 6).map((category) => (
-                  <Pressable key={category.id} style={styles.categoryCard}>
+                  <Pressable key={category.id} style={[styles.categoryCard, {width:`32%`}]}>
                     <View style={styles.categoryContent}>
                       <View style={styles.categoryIconContainer}>
                         <Image source={require("@/assets/images/gift.svg")} style={styles.categoryIcon} contentFit="contain" />
@@ -206,7 +206,7 @@ export default function HomeScreen() {
                 ))}
               </View>
             </View>
-          </ScrollView>
+          {/* </ScrollView> */}
         </View>
 
         {/* Upcoming Events */}
