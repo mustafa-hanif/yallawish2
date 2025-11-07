@@ -17,7 +17,7 @@ export const SignOutButton = () => {
     }
   };
   return (
-    <Pressable onPress={handleSignOut} style={{ marginBottom: 60 }}>
+    <Pressable onPress={handleSignOut} style={{ backgroundColor:'#ffff', marginBottom: 60 }}>
       <Text>Sign out</Text>
     </Pressable>
   );

@@ -1,14 +1,14 @@
 import { Image } from "expo-image";
 import React, { useMemo } from "react";
 
-import { SignOutButton } from "@/components/SignOutButton";
+import { SignOutButton } from "@/components";
 import { api } from "@/convex/_generated/api";
 import { styles } from "@/styles";
 import { SignedIn, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
 import { Link, router } from "expo-router";
-import { Alert, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Alert, Dimensions, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import Swiper from "react-native-deck-swiper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -25,14 +25,19 @@ const OCCASION_COLOR: Record<string, string> = {
 };
 export default function HomeScreen() {
   const { user } = useUser();
+  const { width: SCREEN_WIDTH } = Dimensions.get("window");
+  const isDesktop = Platform.OS === "web" && SCREEN_WIDTH >= 768;
 
-  const myLists = useQuery(
-    api.products.getMyLists,
-    user?.id ? { user_id: user.id } : "skip"
-  );
+  const myLists = useQuery(api.products.getMyLists, user?.id ? { user_id: user.id } : "skip");
 
   type UpcomingEvent = {
-    id: string; date: string; month: string; title: string; subtitle: string; color: string; dateValue: number;
+    id: string;
+    date: string;
+    month: string;
+    title: string;
+    subtitle: string;
+    color: string;
+    dateValue: number;
   };
 
   const upcomingEvents = useMemo(() => {
@@ -40,14 +45,17 @@ export default function HomeScreen() {
     return myLists
       .filter((l: any) => !!l.eventDate)
       .map((l: any) => {
-        const [y, m, d] = String(l.eventDate).split("-").map((n) => parseInt(n, 10));
+        const [y, m, d] = String(l.eventDate)
+          .split("-")
+          .map((n) => parseInt(n, 10));
         const dateObj = new Date(y, (m ?? 1) - 1, d ?? 1);
         const dayStr = String(d ?? 1).padStart(2, "0");
         let monthStr = "";
         try {
           monthStr = new Intl.DateTimeFormat(undefined, { month: "long" }).format(dateObj).toUpperCase();
         } catch {
-          const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"]; monthStr = months[dateObj.getMonth()];
+          const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+          monthStr = months[dateObj.getMonth()];
         }
         return { id: String(l._id), date: dayStr, month: monthStr, title: l.title || "Untitled", subtitle: l.note || (l.occasion ? `Occasion: ${l.occasion}` : ""), color: OCCASION_COLOR[String(l.occasion)] ?? "#AEAEB2", dateValue: dateObj.getTime() };
       })
@@ -86,14 +94,22 @@ export default function HomeScreen() {
   const cards = initialCards;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={[styles.container, { backgroundColor: "#36016D" }]}>
+      <ScrollView style={{ backgroundColor: "#ffff" }} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <View style={styles.searchContainer}>
-            <Ionicons name="search" size={22} color="#FFFFFF" />
-            <TextInput placeholder="Type your search here..." style={styles.searchInput} placeholderTextColor="#FFFFFF" />
-          </View>
+          {isDesktop ? (
+            <View style={styles.searchContainer}>
+              <Ionicons name="search" size={22} color="#FFFFFF" />
+              <TextInput placeholder="Type your search here..." style={styles.searchInput} placeholderTextColor="#FFFFFF" />
+            </View>
+          ) : (
+            <View style={styles.mobileSearchContainer}>
+              <Ionicons name="search" size={22} color="#FFFFFF" />
+              <TextInput placeholder="Type your search here..." style={styles.searchInput} placeholderTextColor="#FFFFFF" />
+            </View>
+          )}
+
           <SignedIn>
             <Pressable style={styles.profileButton}>
               <View style={styles.profileImage}>
@@ -110,7 +126,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Swiper action cards */}
-        <View style={{ height: 200, marginBottom: 36, overflow: 'hidden', zIndex: 0 }} pointerEvents="box-none">
+        <View style={{ height: 200, marginBottom: 36, overflow: "hidden", zIndex: 0 }} pointerEvents="box-none">
           <Swiper
             cards={cards}
             stackSize={3}
@@ -123,7 +139,7 @@ export default function HomeScreen() {
             // Removed onSwipedAll reset; cards now loop seamlessly
             cardVerticalMargin={0}
             cardHorizontalMargin={16}
-            containerStyle={{ height: 180, position: 'relative' }}
+            containerStyle={{ height: 180, position: "relative" }}
             cardStyle={{ borderRadius: 24 }}
             renderCard={(card: any) => {
               if (!card) return <View />;
@@ -136,24 +152,26 @@ export default function HomeScreen() {
                     paddingHorizontal: 28,
                     paddingVertical: 24,
                     backgroundColor: card.backgroundColor,
-                    alignItems: 'center',
-                    justifyContent: 'flex-start',
-                    shadowColor: '#000',
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    shadowColor: "#000",
                     shadowOpacity: 0.06,
                     shadowRadius: 12,
                     shadowOffset: { width: 0, height: 4 },
                   }}
                 >
-                  <View style={{ width: 80, height: 80, borderRadius: 24, backgroundColor: '#FFFFFF', opacity: 0.92, alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+                  <View style={{ width: 80, height: 80, borderRadius: 24, backgroundColor: "#FFFFFF", opacity: 0.92, alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
                     <Image source={card.image} contentFit="contain" style={{ width: 60, height: 60 }} />
                   </View>
-                  <Text style={[styles.addListTitle, { textAlign: 'center', fontSize: 18, marginBottom: 6 }]}>{card.title}</Text>
-                  <Text style={[styles.addListSubtitle, { textAlign: 'center', fontSize: 12, lineHeight: 16, maxWidth: 180 }]} numberOfLines={2}>{card.subtitle}</Text>
+                  <Text style={[styles.addListTitle, { textAlign: "center", fontSize: 18, marginBottom: 6 }]}>{card.title}</Text>
+                  <Text style={[styles.addListSubtitle, { textAlign: "center", fontSize: 12, lineHeight: 16, maxWidth: 180 }]} numberOfLines={2}>
+                    {card.subtitle}
+                  </Text>
                 </Pressable>
               );
             }}
           />
-          <Text style={{ position: 'absolute', bottom: 0, alignSelf: 'center', fontSize: 12, color: '#6E6E73' }}>Swipe</Text>
+          <Text style={{ position: "absolute", bottom: 0, alignSelf: "center", fontSize: 12, color: "#6E6E73" }}>Swipe</Text>
         </View>
 
         {/* Categories */}
@@ -265,7 +283,7 @@ export default function HomeScreen() {
         </View>
 
         {/* AI Assistant */}
-        <View style={styles.aiSection}>
+        <View style={[styles.aiSection]}>
           <View style={styles.aiHeader}>
             <Text style={styles.aiButton}>AI-POWERED</Text>
           </View>
