@@ -26,7 +26,7 @@ export const GiftItemCard: React.FC<Props> = ({ item, onPress }) => {
     if (onPress) return onPress(item);
     router.push({ pathname: "/gift-detail", params: { itemId: String(item._id), ...(listId ? { listId: String(listId) } : {}) } });
   };
-  const isSoldOut = (Number(item.claimed ?? 0) >= Number(item.quantity ?? 1));
+  const isSoldOut = Number(item.claimed ?? 0) >= Number(item.quantity ?? 1);
   return (
     <View style={styles.itemCard}>
       <View style={styles.itemImageWrap}>{item.image_url ? <Image source={{ uri: item.image_url }} style={styles.itemImage} /> : <View style={[styles.itemImage, { backgroundColor: "#EEE" }]} />}</View>
@@ -48,13 +48,16 @@ export const GiftItemCard: React.FC<Props> = ({ item, onPress }) => {
             )}
           </View>
         </View>
-        <View style={styles.priceRow}>
-          {item.price != null && <Text style={styles.itemPrice}>AED {item.price}</Text>}
-          
+        <View style={[styles.priceRow, { justifyContent: "space-between" }]}>
+          {item.price != null && (
+            <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 4 }}>
+              <Image resizeMode="contain" style={{ width: 16, height: 16 }} source={require("@/assets/images/dirham.png")} />
+              <Text style={styles.itemPrice}>{item.price}</Text>
+            </View>
+          )}
           <Pressable onPress={isSoldOut ? undefined : goDetail} disabled={isSoldOut}>
             <Text style={[styles.buyNow, isSoldOut && styles.buyNowDisabled]}>Buy Now</Text>
           </Pressable>
-          
         </View>
         <View style={styles.progressTrack}>
           <View style={[styles.progressFill, { width: `${pct}%` }]} />
