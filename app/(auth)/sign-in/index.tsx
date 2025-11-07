@@ -64,7 +64,7 @@ export default function Page() {
   return (
     <>
       <StatusBar hidden translucent animated />
-      <ImageBackground resizeMode="cover" source={splash} style={{ flex: 1 }}>
+      <ImageBackground resizeMode="cover" source={splash} style={style.imageContainer}>
         <SafeAreaView style={style.container}>
           <View style={style.headerSection}>
             <Image source={logo} style={style.logo} />

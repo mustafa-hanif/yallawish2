@@ -2,11 +2,14 @@ import { Dimensions, StyleSheet } from "react-native";
 
 const { width } = Dimensions.get("window");
 export const style = StyleSheet.create({
+  imageContainer: {
+    flex: 1,
+    width,
+  },
   container: {
     flex: 1,
     paddingHorizontal: 24,
     paddingBottom: 10,
-    width,
   },
 
   headerSection: {
