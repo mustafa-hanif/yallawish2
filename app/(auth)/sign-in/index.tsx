@@ -6,9 +6,11 @@ import { useOAuth } from "@clerk/clerk-expo";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import { Image, ImageBackground, StatusBar, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { style } from "./style";
 
 const { logo, splash, google, apple, mail } = Images;
+
 export default function Page() {
   const router = useRouter();
   const { addToList, returnTo } = useLocalSearchParams<{ addToList?: string; returnTo?: string }>();
@@ -62,26 +64,27 @@ export default function Page() {
   return (
     <>
       <StatusBar hidden translucent animated />
-      <ImageBackground resizeMode="cover" source={splash} style={style.container}>
-        <View style={style.headerSection}>
-          <Image source={logo} style={style.logo} />
-        </View>
-        <View style={style.contentSection}>
-          <View style={style.textSection}>
-            <View>
-              <Text style={style.mainHeading}>{heroTitle}</Text>
+      <ImageBackground resizeMode="cover" source={splash} style={{ flex: 1 }}>
+        <SafeAreaView style={style.container}>
+          <View style={style.headerSection}>
+            <Image source={logo} style={style.logo} />
+          </View>
+          <View style={style.contentSection}>
+            <View style={style.textSection}>
+              <View>
+                <Text style={style.mainHeading}>{heroTitle}</Text>
+              </View>
+              <View>
+                <Text style={style.splashText}>{heroSubtitle}</Text>
+              </View>
             </View>
-            <View>
-              <Text style={style.splashText}>{heroSubtitle}</Text>
+            <View style={style.socialContainer}>
+              {social?.map((socialItem) => <SocialButton key={socialItem?.id} onPress={socialItem?.onPress} label={socialItem?.label} icon={socialItem?.icon} />)}
+              <Divider text={labels.or} marginVertical={25} />
+              <SocialButton onPress={handleClickContinueWithEmail} label={labels?.continueWithEmail} icon={mail} />
             </View>
           </View>
-          <View style={style.socialContainer}>
-            {social?.map((socialItem) => <SocialButton key={socialItem?.id} onPress={socialItem?.onPress} label={socialItem?.label} icon={socialItem?.icon} />)}
-            <Divider text={labels.or} marginVertical={40} />
-            <SocialButton onPress={handleClickContinueWithEmail} label={labels?.continueWithEmail} icon={mail} />
-          </View>
-        </View>
-        <View style={{ height: 24 }} />
+        </SafeAreaView>
       </ImageBackground>
     </>
   );

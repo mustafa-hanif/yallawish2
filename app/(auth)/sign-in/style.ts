@@ -4,8 +4,8 @@ const { width } = Dimensions.get("window");
 export const style = StyleSheet.create({
   container: {
     flex: 1,
-    paddingBottom: 40,
     paddingHorizontal: 24,
+    paddingBottom: 10,
     width,
   },
 
