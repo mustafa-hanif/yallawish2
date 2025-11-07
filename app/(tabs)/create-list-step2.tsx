@@ -364,6 +364,7 @@ export default function CreateListStep2() {
   const isFormValid =
     formData.eventTitle.trim() !== "" && formData.occasion !== null;
 
+  const headerTitle = listId ? 'Edit Event' : 'Create List'
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#330065" />
@@ -394,7 +395,7 @@ export default function CreateListStep2() {
               <Pressable onPress={handleBack} style={styles.backButton}>
                 <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
               </Pressable>
-              <Text style={styles.headerTitle}>Create List</Text>
+              <Text style={styles.headerTitle}>{headerTitle}</Text>
             </View>
           </View>
         </SafeAreaView>
