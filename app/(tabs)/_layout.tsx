@@ -28,7 +28,7 @@ export default function TabLayout() {
   const returnTo = `${pathname}${qs}`;
   // Register for push notifications and save token when signed in
   usePushNotifications();
-  const allowAnonymous = ['/view-list', '/gift-detail', '/purchase-success'].some((p) => pathname?.includes(p));
+  const allowAnonymous = ['/view-list', '/gift-detail', '/purchase-success', '/profile-setup'].some((p) => pathname?.includes(p));
   if (!isSignedIn && !allowAnonymous) {
     const encoded = encodeURIComponent(returnTo);
     return <Redirect href={{ pathname: "/sign-in", params: { returnTo: encoded } }} />;
@@ -160,6 +160,13 @@ export default function TabLayout() {
         name="select-profile"
         options={{
           href: null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="profile-setup"
+        options={{
+          href: null,
+          tabBarStyle: { display: 'none' },
         }}
       />
       <Tabs.Screen

@@ -82,6 +82,11 @@ Key tables in `convex/schema.ts`:
   - `ActionsBar`: Filter, privacy, share count display
   - `FooterBar`: Share & manage buttons
   - `PasswordGate`: Password entry + request access form
+- **Responsive Layout** (`ResponsiveAuthLayout`): Scalable desktop/mobile auth pages
+  - Split-screen desktop (45% hero image / 55% form)
+  - Full-screen mobile with overlay
+  - Auto-detects via `Platform.OS === 'web' && width >= 768`
+  - Usage: Wrap auth pages with `<ResponsiveAuthLayout>` component
 
 ### Styling Conventions (`styles/`)
 - Centralized style exports: `styles/index.ts`, `styles/addGiftStyles.ts`, `styles/auth.ts`
@@ -192,6 +197,20 @@ text: {
 ### Date Formatting
 See `formatEventDate()` in `view-list.tsx` for ISO date → display format
 
+### Responsive Design Pattern
+**Desktop Detection**:
+```tsx
+const { width } = Dimensions.get("window");
+const isDesktop = Platform.OS === "web" && width >= 768;
+```
+
+**Component Styling**:
+```tsx
+<View style={[styles.input, isDesktop && styles.inputDesktop]} />
+```
+
+**Auth Pages**: Use `ResponsiveAuthLayout` wrapper for automatic desktop/mobile layouts
+
 ## Critical Implementation Notes
 
 ### List Privacy Model
@@ -233,13 +252,14 @@ eas build --platform android      # Android build
 eas submit -p ios                 # Submit to App Store
 ```
 
-## Code Style Preferences
+## When Making Changes
 
-- **Imports**: Use `@/` alias for absolute imports (`@/components`, `@/convex/_generated/api`)
-- **Naming**: camelCase for variables/functions, PascalCase for components
-- **Type Safety**: Use explicit types for Convex queries/mutations (cast with `as any` when needed due to generated types)
-- **Error Handling**: Log errors with `console.error()` or `console.warn()`, display user-friendly messages
-- **Comments**: Inline comments for complex business logic (e.g., privacy checks, password gating)
+1. **New Screens**: Add to `app/(tabs)/` with proper `_layout.tsx` registration
+2. **New Convex Functions**: Export from `convex/products.ts`, import via `api.products.[name]`
+3. **New Styles**: Add to existing `styles/` files or create domain-specific stylesheet
+4. **Auth Changes**: Update both `sign-in.tsx` and `log-in.tsx` for consistency
+5. **Schema Updates**: Modify `convex/schema.ts` → run `npx convex dev` to regenerate types
+6. **Responsive Pages**: Use `ResponsiveAuthLayout` for auth flows; detect desktop via `Platform.OS === 'web' && width >= 768`gating)
 
 ## External Integrations
 

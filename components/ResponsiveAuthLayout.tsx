@@ -1,0 +1,230 @@
+import React, { useEffect, useState } from "react";
+import {
+    Dimensions,
+    Image,
+    ImageBackground,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
+
+type ResponsiveAuthLayoutProps = {
+  children: React.ReactNode;
+  heroTitle?: string;
+  heroSubtitle?: string;
+  showHero?: boolean;
+};
+
+// Background images for carousel (add more as needed)
+const BACKGROUND_IMAGES = [
+  require("@/assets/images/onboard_image.jpg"),
+  // Add more images here when provided
+];
+
+export function ResponsiveAuthLayout({
+  children,
+  heroTitle,
+  heroSubtitle,
+  showHero = false,
+}: ResponsiveAuthLayoutProps) {
+  const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+  const isDesktop = Platform.OS === "web" && SCREEN_WIDTH >= 768;
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Carousel effect for desktop background
+  useEffect(() => {
+    if (!isDesktop || BACKGROUND_IMAGES.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % BACKGROUND_IMAGES.length);
+    }, 5000); // Change image every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [isDesktop]);
+
+  if (isDesktop) {
+    return (
+      <ImageBackground
+        source={BACKGROUND_IMAGES[currentImageIndex]}
+        style={styles.desktopFullBackground}
+        imageStyle={styles.desktopFullBackgroundImage}
+        resizeMode="cover"
+      >
+        <View style={styles.desktopOverlay} />
+        
+        {/* Logo and hero text - positioned on the left */}
+        <View style={styles.desktopHeroContent}>
+          <Image
+            source={require("@/assets/images/yallawish_logo.png")}
+            style={styles.desktopLogo}
+          />
+          <View style={styles.desktopHeroText}>
+            <Text style={styles.desktopHeroTitle}>GIFTING, MADE MEANINGFUL</Text>
+            <Text style={styles.desktopHeroSubtitle}>CELEBRATE EVERYTHING</Text>
+          </View>
+          <Text style={styles.desktopCopyright}>© 2025 YallaWish. All rights reserved</Text>
+        </View>
+
+        {/* Form container - centered/right positioned */}
+        <View style={styles.desktopFormWrapper}>
+          <ScrollView
+            style={styles.desktopScrollView}
+            contentContainerStyle={styles.desktopScrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.desktopFormContainer}>
+              {children}
+            </View>
+          </ScrollView>
+        </View>
+      </ImageBackground>
+    );
+  }
+
+  // Mobile layout (original)
+  return (
+    <ImageBackground
+      source={require("@/assets/images/onboard_image.jpg")}
+      style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, overflow: "hidden" }}
+      imageStyle={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
+      resizeMode="cover"
+    >
+      <View style={{ position: "absolute", inset: 0, backgroundColor: "rgba(44, 12, 84, 0.85)" }} />
+      <SafeAreaView style={{ flex: 1 }}>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{
+            minHeight: SCREEN_HEIGHT,
+            paddingHorizontal: 20,
+            paddingTop: 24,
+            paddingBottom: 24,
+          }}
+        >
+          {/* Logo */}
+          <View style={{ alignItems: "center", marginBottom: 16 }}>
+            <Image
+              source={require("@/assets/images/yallawish_logo.png")}
+              style={{ width: 148, height: 28, resizeMode: "contain" }}
+            />
+          </View>
+
+          {/* Hero text (mobile) */}
+          {showHero && heroTitle && (
+            <View style={{ paddingHorizontal: 8, marginBottom: 20 }}>
+              <Text
+                style={{
+                  color: "#FFFFFF",
+                  fontSize: 32,
+                  lineHeight: 38,
+                  textAlign: "center",
+                  fontFamily: "Nunito_700Bold",
+                }}
+              >
+                {heroTitle}
+              </Text>
+              {heroSubtitle && (
+                <Text
+                  style={{
+                    color: "rgba(255,255,255,0.85)",
+                    fontSize: 16,
+                    lineHeight: 24,
+                    textAlign: "center",
+                    marginTop: 12,
+                    fontFamily: "Nunito_400Regular",
+                  }}
+                >
+                  {heroSubtitle}
+                </Text>
+              )}
+            </View>
+          )}
+
+          {children}
+        </ScrollView>
+      </SafeAreaView>
+    </ImageBackground>
+  );
+}
+
+const styles = StyleSheet.create({
+  // Desktop styles - Full screen background
+  desktopFullBackground: {
+    flex: 1,
+    width: "100%",
+    height: "100vh" as any,
+  },
+  desktopFullBackgroundImage: {
+    width: "100%",
+    height: "100%",
+  },
+  desktopOverlay: {
+    position: "absolute",
+    inset: 0,
+    backgroundColor: "rgba(51, 0, 101, 0.75)",
+  },
+  desktopHeroContent: {
+    position: "absolute",
+    left: 48,
+    top: 48,
+    bottom: 48,
+    width: "35%",
+    justifyContent: "space-between",
+    zIndex: 1,
+  },
+  desktopLogo: {
+    width: 180,
+    height: 34,
+    resizeMode: "contain",
+  },
+  desktopHeroText: {
+    flex: 1,
+    justifyContent: "center",
+    gap: 16,
+  },
+  desktopHeroTitle: {
+    fontSize: 52,
+    lineHeight: 62,
+    fontFamily: "Nunito_700Bold",
+    color: "#FFFFFF",
+    textTransform: "uppercase",
+  },
+  desktopHeroSubtitle: {
+    fontSize: 32,
+    lineHeight: 38,
+    fontFamily: "Nunito_400Regular",
+    color: "#FFFFFF",
+    textTransform: "uppercase",
+    letterSpacing: 2,
+  },
+  desktopCopyright: {
+    fontSize: 14,
+    fontFamily: "Nunito_400Regular",
+    color: "rgba(255, 255, 255, 0.7)",
+  },
+  desktopFormWrapper: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: "50%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  desktopScrollView: {
+    width: "100%",
+  },
+  desktopScrollContent: {
+    minHeight: "100%",
+    justifyContent: "center",
+    paddingVertical: 40,
+  },
+  desktopFormContainer: {
+    maxWidth: 620,
+    width: "100%",
+    alignSelf: "center",
+    paddingHorizontal: 56,
+  },
+});

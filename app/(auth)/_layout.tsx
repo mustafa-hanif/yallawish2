@@ -7,7 +7,7 @@ export default function AuthRoutesLayout() {
   const decodedReturnTo = returnTo ? decodeURIComponent(String(returnTo)) : undefined;
 
   if (isSignedIn) {
-    return <Redirect href={decodedReturnTo ? (decodedReturnTo as any) : "/"} />;
+    return <Redirect href={decodedReturnTo ? (decodedReturnTo as any) : "/profile-setup"} />;
   }
 
   return <Stack screenOptions={{ headerShown: false }} />;
