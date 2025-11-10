@@ -6,12 +6,12 @@ import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import * as React from "react";
 import {
-    Dimensions,
-    Platform,
-    Pressable,
-    Text,
-    TextInput,
-    View,
+  Dimensions,
+  Platform,
+  Pressable,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 
 export default function LoginScreen() {
@@ -116,14 +116,15 @@ export default function LoginScreen() {
           </View>
         </View>
 
-        <Text
+        {isDesktop && (<Text
           style={[
             styles.welcomeTitle,
             isDesktop && styles.welcomeTitleDesktop,
           ]}
         >
           Welcome Back!
-        </Text>
+        </Text>)}
+        
 
         <View style={styles.fieldsStack}>
           <TextInput
@@ -208,7 +209,7 @@ export default function LoginScreen() {
             />
             <SocialButton
               onPress={onApple}
-              icon={<AntDesign name="apple1" size={26} color="#FFFFFF" />}
+              icon={<AntDesign name="apple" size={26} color="#FFFFFF" />}
               variant="icon"
               accessibilityLabel="Continue with Apple"
             />
@@ -228,7 +229,7 @@ export default function LoginScreen() {
             />
             <SocialButton
               onPress={onApple}
-              icon={<AntDesign name="apple1" size={22} color="#000000" />}
+              icon={<AntDesign name="apple" size={22} color="#000000" />}
               label="Continue with Apple"
             />
           </View>
