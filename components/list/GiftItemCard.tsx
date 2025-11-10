@@ -11,6 +11,7 @@ export type GiftItem = {
   claimed: number;
   price?: string | number | null;
   buy_url?: string | null;
+  description?: string | null;
 };
 
 type Props = {

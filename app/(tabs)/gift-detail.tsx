@@ -1,418 +1,1330 @@
+import type { GiftItem as GiftItemType } from "@/components/list/GiftItemCard";
 import { api } from "@/convex/_generated/api";
-import { styles } from "@/styles/addGiftStyles";
-// Clerk
+import { styles as listStyles } from "@/styles/addGiftStyles";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
+import { Image } from "expo-image";
 import { Redirect, router, useLocalSearchParams, usePathname } from "expo-router";
-import React, { useCallback, useMemo, useState } from "react";
-import { Image, Linking, Modal, Pressable, ScrollView, StatusBar, Switch, Text, TextInput, View } from "react-native";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Linking,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+type StoreOption = "suggested" | "custom";
+
+const NOTE_LIMIT = 400;
+const DESKTOP_BREAKPOINT = 1024;
+const FALLBACK_IMAGE = require("@/assets/images/nursery.png");
+
+const COLORS = {
+  background: "#FFFFFF",
+  surface: "#F7F3FB",
+  deepPurple: "#330065",
+  purple: "#3B0076",
+  accent: "#F2994A",
+  textPrimary: "#1C0335",
+  textSecondary: "#6B5E7E",
+  border: "#E5E0EC",
+};
+
+function formatPrice(price: unknown, currency?: string): string | null {
+  if (price == null) return null;
+  const numeric = typeof price === "number" ? price : Number.parseFloat(String(price));
+  if (!Number.isFinite(numeric)) {
+    return typeof price === "string" ? price : null;
+  }
+  const cur = currency || "AED";
+  try {
+    return new Intl.NumberFormat(undefined, { style: "currency", currency: cur }).format(numeric);
+  } catch {
+    return `${cur} ${numeric.toFixed(2)}`;
+  }
+}
+
+function extractHost(url?: string | null): string | null {
+  if (!url) return null;
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
+function storeLabelFromHost(host: string | null): string {
+  if (!host) return "Seller";
+  const segment = host.split(".")[0] ?? host;
+  if (!segment) return host;
+  return segment
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function ownerNameFromTitle(title?: string | null): string {
+  if (!title) return "Recipient";
+  const match = title.match(/^(.+?)'s\b/i);
+  if (match && match[1]) return match[1];
+  return title;
+}
+
+function buildReturnTo(pathname: string, params: Record<string, string | undefined>): string {
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value) search.set(key, value);
+  });
+  const query = search.toString();
+  return query ? `${pathname}?${query}` : pathname;
+}
 
 export default function GiftDetail() {
-  const { itemId, listId, action } = useLocalSearchParams<{ itemId?: string; listId?: string; action?: string }>();
-  const item = useQuery(api.products.getListItemById as any, itemId ? ({ itemId } as any) : "skip");
-  const list = useQuery(api.products.getListById as any, listId ? ({ listId } as any) : "skip");
-  const setClaim = useMutation(api.products.setListItemClaim as any);
+  const { itemId, listId, action } = useLocalSearchParams<{
+    itemId?: string;
+    listId?: string;
+    action?: string;
+  }>();
+  const { width } = useWindowDimensions();
+  const isDesktop = Platform.OS === "web" && width >= DESKTOP_BREAKPOINT;
+
+  const item = useQuery(
+    api.products.getListItemById,
+    itemId ? ({ itemId: itemId as any } as any) : "skip"
+  ) as GiftItemType | undefined | null;
+  const list = useQuery(
+    api.products.getListById,
+    listId ? ({ listId: listId as any } as any) : "skip"
+  ) as any;
+  const listItems = useQuery(
+    api.products.getListItems as any,
+    listId ? ({ list_id: listId } as any) : "skip"
+  ) as GiftItemType[] | undefined;
+
   const purchase = useMutation(api.products.purchaseListItem as any);
   const createItem = useMutation(api.products.createListItem as any);
-  const { user } = useUser();
+
   const { isSignedIn, userId } = useAuth();
+  const { user } = useUser();
   const pathname = usePathname();
 
-  const bought = (item?.claimed ?? 0) > 0;
-  const [marked, setMarked] = useState<boolean>(bought);
-  const [qty, setQty] = useState<number>(Math.max(1, Math.min(item?.claimed ?? 1, item?.quantity ?? 1)));
-  const inc = useCallback(() => setQty(q => Math.min((item?.quantity ?? 1), q + 1)), [item?.quantity]);
-  const dec = useCallback(() => setQty(q => Math.max(1, q - 1)), []);
+  const returnTo = useMemo(
+    () =>
+      buildReturnTo(pathname, {
+        itemId: itemId ? String(itemId) : undefined,
+        listId: listId ? String(listId) : undefined,
+        action: action ? String(action) : undefined,
+      }),
+    [pathname, itemId, listId, action]
+  );
 
-  const [deliveredTo, setDeliveredTo] = useState<'recipient' | 'me'>('recipient');
+  const goToSignIn = useCallback(() => {
+    router.push({
+      pathname: "/sign-in",
+      params: { returnTo: encodeURIComponent(returnTo) },
+    });
+  }, [returnTo]);
+
+  useEffect(() => {
+    if (action === "want" && !isSignedIn) {
+      goToSignIn();
+    }
+  }, [action, isSignedIn, goToSignIn]);
+
+  const buyUrl = item && item.buy_url ? String(item.buy_url) : undefined;
+  const host = useMemo(() => extractHost(buyUrl), [buyUrl]);
+  const storeDisplayName = useMemo(() => storeLabelFromHost(host), [host]);
+  const priceLabel = useMemo(() => formatPrice(item?.price, "AED"), [item?.price]);
+  const listTitle = list?.title ?? "Gift List";
+  const ownerName = useMemo(
+    () => ownerNameFromTitle(list?.title as string | null),
+    [list?.title]
+  );
+
+  const totalQuantity = Math.max(1, Number(item?.quantity ?? 1));
+  const claimed = Math.max(0, Number(item?.claimed ?? 0));
+  const available = Math.max(0, totalQuantity - claimed);
+  const maxQuantity = available > 0 ? available : totalQuantity;
+
+  const [marked, setMarked] = useState(() => action === "buy");
+  useEffect(() => {
+    if (action === "buy") {
+      setMarked(true);
+    }
+  }, [action]);
+
+  const [qty, setQty] = useState(1);
+  useEffect(() => {
+    if (available > 0) {
+      setQty((current) => Math.min(Math.max(1, current), available));
+    } else {
+      setQty(1);
+    }
+  }, [available]);
+
+  const inc = useCallback(
+    () => setQty((current) => Math.min(current + 1, maxQuantity)),
+    [maxQuantity]
+  );
+  const dec = useCallback(() => setQty((current) => Math.max(1, current - 1)), []);
+
+  const [deliveredTo, setDeliveredTo] = useState<"recipient" | "me">("recipient");
   const [note, setNote] = useState("");
-  const [storeName, setStoreName] = useState("");
+  const [storeOption, setStoreOption] = useState<StoreOption>(() =>
+    buyUrl ? "suggested" : "custom"
+  );
+  const [storeName, setStoreName] = useState<string>(() =>
+    buyUrl ? storeDisplayName : ""
+  );
+  useEffect(() => {
+    if (storeOption === "suggested") {
+      setStoreName(storeDisplayName);
+    }
+  }, [storeOption, storeDisplayName]);
+  useEffect(() => {
+    if (!buyUrl) {
+      setStoreOption("custom");
+    }
+  }, [buyUrl]);
   const [orderNumber, setOrderNumber] = useState("");
-  // Copy to my list sheet
   const [showCopySheet, setShowCopySheet] = useState(false);
-  // Buy Now bottom sheet state
   const [showLeaving, setShowLeaving] = useState(false);
   const [countdown, setCountdown] = useState(5);
-  const buyUrl = (item?.buy_url as string | undefined) || undefined;
-  const host = useMemo(() => {
-    try {
-      if (!buyUrl) return "the seller";
-      const u = new URL(buyUrl);
-      return u.hostname.replace(/^www\./, "");
-    } catch { return "the seller"; }
-  }, [buyUrl]);
+  const [submitting, setSubmitting] = useState(false);
 
-  const storeDisplayName = useMemo(() => {
-    try {
-      if (!buyUrl) return 'Seller';
-      const u = new URL(buyUrl);
-      const h = u.hostname.replace(/^www\./, '').toLowerCase();
-      const mappings: { test: RegExp; name: string }[] = [
-        { test: /amazon|amzn\.to/, name: 'Amazon' },
-        { test: /noon/, name: 'Noon' },
-        { test: /etsy/, name: 'Etsy' },
-        { test: /ikea/, name: 'IKEA' },
-        { test: /carrefour/, name: 'Carrefour' },
-        { test: /shein/, name: 'SHEIN' },
-        { test: /decathlon/, name: 'Decathlon' },
-        { test: /walmart/, name: 'Walmart' },
-        { test: /target/, name: 'Target' },
-        { test: /apple\.com|store\.apple\.com/, name: 'Apple' },
-      ];
-      for (const m of mappings) {
-        if (m.test.test(h)) return m.name;
-      }
-      const first = h.split('.')[0];
-      return first ? first.charAt(0).toUpperCase() + first.slice(1) : 'Seller';
-    } catch {
-      return 'Seller';
+  useEffect(() => {
+    if (action === "want" && isSignedIn) {
+      setShowCopySheet(true);
     }
-  }, [buyUrl]);
+  }, [action, isSignedIn]);
 
-  const ownerName = useMemo(() => {
-    // Try to parse from list title like "Bilal's Birthday"
-    const title = (list?.title ?? '').trim();
-    const m = title.match(/^(.+?)'s\b/i);
-    if (m && m[1]) return m[1];
-    // If current user owns the list, use their name
-    if (list?.user_id && user?.id && list.user_id === user.id) {
-      return user.firstName || user.username || 'Me';
-    }
-    return 'Recipient';
-  }, [list?.title, list?.user_id, user?.firstName, user?.id, user?.username]);
+  useEffect(() => {
+    if (!showLeaving) return;
+    setCountdown(5);
+  }, [showLeaving]);
 
-  const canSubmit = marked ? qty > 0 : true;
-
-  // If returned from sign-in with action=buy, show the leaving sheet automatically
-  React.useEffect(() => {
-    if (action === 'buy' && buyUrl) {
-      setShowLeaving(true);
-      setCountdown(5);
-    }
-  }, [action, buyUrl]);
-
-  // Countdown effect to open external link
-  React.useEffect(() => {
+  useEffect(() => {
     if (!showLeaving) return;
     if (countdown <= 0) {
-      if (buyUrl) Linking.openURL(buyUrl).catch(() => { });
+      if (buyUrl) {
+        Linking.openURL(buyUrl);
+      }
+      setShowLeaving(false);
       return;
     }
-    const t = setTimeout(() => setCountdown((c) => c - 1), 1000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setCountdown((value) => value - 1), 1000);
+    return () => clearTimeout(timer);
   }, [showLeaving, countdown, buyUrl]);
 
-  const computeReturnTo = () => {
-    const parts: string[] = [];
-    if (listId) parts.push(`listId=${encodeURIComponent(String(listId))}`);
-    if (itemId) parts.push(`itemId=${encodeURIComponent(String(itemId))}`);
-    return `${pathname}${parts.length ? `?${parts.join('&')}` : ''}`;
-  };
+  const handleMarkedChange = useCallback(
+    (value: boolean) => {
+      if (value && !isSignedIn) {
+        goToSignIn();
+        return;
+      }
+      setMarked(value);
+    },
+    [isSignedIn, goToSignIn]
+  );
 
-  const onBuyNow = () => {
+  const onBack = useCallback(() => {
+    router.back();
+  }, []);
+
+  const onBuyNow = useCallback(() => {
     if (!buyUrl) return;
     if (!isSignedIn) {
-      const returnTo = `${computeReturnTo()}${computeReturnTo().includes('?') ? '&' : '?'}action=buy`;
-      router.push({ pathname: '/sign-in', params: { returnTo: encodeURIComponent(returnTo) } });
+      goToSignIn();
       return;
     }
     setShowLeaving(true);
-    setCountdown(5);
-  };
+  }, [buyUrl, isSignedIn, goToSignIn]);
 
-  const onIWantThisToo = () => {
+  const onIWantThisToo = useCallback(() => {
     if (!isSignedIn) {
-      const returnTo = `${computeReturnTo()}${computeReturnTo().includes('?') ? '&' : '?'}action=want`;
-      router.push({ pathname: '/sign-in', params: { returnTo: encodeURIComponent(returnTo) } });
+      goToSignIn();
       return;
     }
     setShowCopySheet(true);
-  };
+  }, [isSignedIn, goToSignIn]);
 
-  const onSubmit = async () => {
-    try {
-      if (!itemId) return;
-      if (marked) {
-        await purchase({
-          list_id: (listId as any) ?? (item?.list_id as any),
-          item_id: itemId as any,
-          quantity: qty,
-          deliveredTo,
-          note: note || null,
-          storeName: storeName || null,
-          orderNumber: orderNumber || null,
-          buyer_user_id: user?.id ?? null,
-          buyer_name: user?.fullName || user?.username || null,
-          buyer_email: user?.primaryEmailAddress?.emailAddress || null,
-        });
-      } else {
-        await setClaim({ itemId, claimed: 0 } as any);
-      }
-      // Navigate to success
-      const params: any = {};
-      if (listId) params.listId = String(listId);
-      router.replace({ pathname: "/purchase-success", params });
-    } catch (e) {
-      console.warn('Failed to update purchase', e);
+  const hasStoreName =
+    storeOption === "suggested" || storeName.trim().length > 0;
+
+  const canSubmit =
+    marked &&
+    !submitting &&
+    Boolean(listId) &&
+    Boolean(itemId) &&
+    available > 0 &&
+    qty > 0 &&
+    qty <= maxQuantity &&
+    hasStoreName;
+
+  const onSubmit = useCallback(async () => {
+    if (!listId || !itemId) return;
+    if (!marked) return;
+    if (!isSignedIn) {
+      goToSignIn();
+      return;
     }
-  };
-  const onBack = () => {
-    router.back();
-  };
+    if (available <= 0) return;
+    if (storeOption === "custom" && !storeName.trim()) return;
 
-  const price = useMemo(() => {
-    if (item?.price == null) return null;
-    const p = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
-    if (Number.isFinite(p)) return `AED ${p.toFixed(2)}`;
-    return `AED ${item.price}`;
-  }, [item?.price]);
+    try {
+      setSubmitting(true);
+      await purchase({
+        list_id: listId as any,
+        item_id: itemId as any,
+        quantity: qty,
+        deliveredTo,
+        note: note.trim() ? note.trim() : null,
+        storeName:
+          storeOption === "suggested"
+            ? storeDisplayName
+            : storeName.trim() || null,
+        orderNumber: orderNumber.trim() || null,
+        buyer_user_id: userId ?? null,
+        buyer_name: user?.fullName ?? user?.firstName ?? null,
+        buyer_email: user?.primaryEmailAddress?.emailAddress ?? null,
+      } as any);
+      router.replace({
+        pathname: "/purchase-success",
+        params: listId ? { listId: String(listId) } : undefined,
+      });
+    } catch (error) {
+      console.warn("Failed to record purchase", error);
+    } finally {
+      setSubmitting(false);
+    }
+  }, [
+    listId,
+    itemId,
+    marked,
+    isSignedIn,
+    goToSignIn,
+    available,
+    storeOption,
+    storeName,
+    storeDisplayName,
+    purchase,
+    qty,
+    deliveredTo,
+    note,
+    orderNumber,
+    userId,
+    user,
+  ]);
+
+  const currentItemId = item ? String((item as any)._id) : itemId ? String(itemId) : "";
+  const moreItems = useMemo<GiftItemType[]>(() => {
+    if (!Array.isArray(listItems)) return [];
+    return (listItems as any[])
+      .filter((entry) => String(entry._id) !== currentItemId)
+      .slice(0, isDesktop ? 4 : 3) as GiftItemType[];
+  }, [listItems, currentItemId, isDesktop]);
+
+  const onSelectItem = useCallback(
+    (targetId: string) => {
+      router.replace({
+        pathname: "/gift-detail",
+        params: {
+          itemId: targetId,
+          ...(listId ? { listId: String(listId) } : {}),
+        },
+      });
+    },
+    [listId]
+  );
+
+  const onSeeAll = useCallback(() => {
+    if (!listId) return;
+    router.push({ pathname: "/view-list", params: { listId: String(listId) } });
+  }, [listId]);
+
+  const handleCopy = useCallback(
+    async (targetListIds: string[]) => {
+      if (!item) return false;
+      try {
+        for (const target of targetListIds) {
+          await createItem({
+            list_id: target as any,
+            name: item.name,
+            description: item.description ?? null,
+            image_url: item.image_url ?? null,
+            quantity: 1,
+            price: item.price ?? null,
+            currency: "AED",
+            buy_url: item.buy_url ?? null,
+          } as any);
+        }
+        return true;
+      } catch (error) {
+        console.warn("Failed to copy gift item", error);
+        return false;
+      }
+    },
+    [item, createItem]
+  );
+
+  if (item === undefined) {
+    return (
+      <View style={listStyles.container}>
+        <View style={sharedStyles.loadingContainer}>
+          <Text style={sharedStyles.loadingText}>Loading gift details…</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (!item) {
+    return (
+      <View style={listStyles.container}>
+        <View style={sharedStyles.loadingContainer}>
+          <Text style={sharedStyles.loadingText}>Gift not found.</Text>
+        </View>
+      </View>
+    );
+  }
+
+  const layout = isDesktop ? (
+    <DesktopLayout
+      item={item}
+      price={priceLabel}
+      listTitle={listTitle}
+      buyUrl={buyUrl}
+      marked={marked}
+      onToggleMarked={handleMarkedChange}
+      qty={qty}
+      inc={inc}
+      dec={dec}
+      maxQuantity={maxQuantity}
+      deliveredTo={deliveredTo}
+      setDeliveredTo={setDeliveredTo}
+      note={note}
+      setNote={(value) => setNote(value.slice(0, NOTE_LIMIT))}
+      storeOption={storeOption}
+      setStoreOption={setStoreOption}
+      storeDisplayName={storeDisplayName}
+      storeName={storeName}
+      setStoreName={setStoreName}
+      orderNumber={orderNumber}
+      setOrderNumber={setOrderNumber}
+      canSubmit={canSubmit}
+      onSubmit={onSubmit}
+      onBack={onBack}
+      onBuyNow={onBuyNow}
+      onIWantThisToo={onIWantThisToo}
+      ownerName={ownerName}
+      host={host ?? "the seller"}
+      moreItems={moreItems}
+      onSelectItem={onSelectItem}
+      onSeeAll={onSeeAll}
+      available={available}
+      submitting={submitting}
+    />
+  ) : (
+    <MobileLayout
+      item={item}
+      price={priceLabel}
+      buyUrl={buyUrl}
+      marked={marked}
+      onToggleMarked={handleMarkedChange}
+      qty={qty}
+      inc={inc}
+      dec={dec}
+      maxQuantity={maxQuantity}
+      deliveredTo={deliveredTo}
+      setDeliveredTo={setDeliveredTo}
+      note={note}
+      setNote={(value) => setNote(value.slice(0, NOTE_LIMIT))}
+      storeOption={storeOption}
+      setStoreOption={setStoreOption}
+      storeDisplayName={storeDisplayName}
+      storeName={storeName}
+      setStoreName={setStoreName}
+      orderNumber={orderNumber}
+      setOrderNumber={setOrderNumber}
+      canSubmit={canSubmit}
+      onSubmit={onSubmit}
+      onBack={onBack}
+      onBuyNow={onBuyNow}
+      onIWantThisToo={onIWantThisToo}
+      ownerName={ownerName}
+      moreItems={moreItems}
+      onSelectItem={onSelectItem}
+      onSeeAll={onSeeAll}
+      available={available}
+      submitting={submitting}
+    />
+  );
+
+  const shouldShowCopySheet = Boolean(showCopySheet && isSignedIn);
+
+  if (list && list.privacy === "private") {
+    const isOwner =
+      userId && list.user_id && String(list.user_id) === String(userId);
+    if (!isSignedIn) {
+      return (
+        <Redirect
+          href={{
+            pathname: "/sign-in",
+            params: { returnTo: encodeURIComponent(returnTo) },
+          }}
+        />
+      );
+    }
+    if (!isOwner) {
+      return (
+        <View style={listStyles.container}>
+          <View style={sharedStyles.loadingContainer}>
+            <Text style={sharedStyles.privateTitle}>Private List</Text>
+            <Text style={sharedStyles.privateBody}>
+              Only the list owner can view these gift details.
+            </Text>
+          </View>
+        </View>
+      );
+    }
+  }
 
   return (
-    <View style={styles.container}>
-      {/* Private list guard: only owner can view */}
-      {list && list.privacy === 'private' && (() => {
-        const isOwner = userId && list.user_id && String(userId) === String(list.user_id);
-        const qsParts: string[] = [];
-        if (listId) qsParts.push(`listId=${encodeURIComponent(String(listId))}`);
-        if (itemId) qsParts.push(`itemId=${encodeURIComponent(String(itemId))}`);
-        const qs = qsParts.length ? `?${qsParts.join('&')}` : '';
-        const returnTo = `${pathname}${qs}`;
-        if (!isSignedIn) {
-          return <Redirect href={{ pathname: "/sign-in", params: { returnTo: encodeURIComponent(returnTo) } }} />;
-        }
-        if (!isOwner) {
-          return (
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-              <Text style={{ fontFamily: 'Nunito_700Bold', color: '#1C0335', fontSize: 18, textAlign: 'center' }}>
-                This list is private and only visible to its owner.
-              </Text>
-            </View>
-          );
-        }
-        return null;
-      })()}
-      <StatusBar barStyle="light-content" backgroundColor="#330065" />
-      <View style={{ backgroundColor: '#4B0082', paddingTop: 14, paddingBottom: 18, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center' }}>
-        <Pressable onPress={onBack}>
-          <Ionicons name="chevron-back" size={24} color="#FFF" />
-        </Pressable>
-        <Text numberOfLines={1} style={{ color: '#FFF', fontSize: 20, fontFamily: 'Nunito_700Bold', marginLeft: 8, flex: 1 }}>{item?.name ?? 'Gift'}</Text>
-      </View>
+    <View style={isDesktop ? desktopStyles.root : mobileStyles.root}>
+      {layout}
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={{ padding: 16 }}>
-          {item?.image_url ? (
-            <Image source={{ uri: item.image_url }} style={{ width: '100%', height: 220, borderRadius: 12 }} />
-          ) : null}
-          <Text style={{ marginTop: 12, color: '#1C0335', fontSize: 24, lineHeight: 30, fontFamily: 'Nunito_700Bold' }}>{item?.name ?? ''}</Text>
-          {price && <Text style={{ color: '#4B0082', fontSize: 18, fontFamily: 'Nunito_700Bold', marginTop: 6 }}>{price}</Text>}
-          {item?.quantity != null && (
-            <Text style={{ color: '#4B0082', marginTop: 4 }}>Quantity: <Text style={{ fontFamily: 'Nunito_700Bold' }}>{item.quantity}</Text></Text>
-          )}
-          {item?.description && (
-            <Text style={{ color: '#7A6F88', marginTop: 8 }}>{item.description}</Text>
-          )}
-
-          {/* CTA row: I want this too | Buy Now */}
-          <View style={{ flexDirection: 'row', gap: 12, marginTop: 16 }}>
-            <Pressable onPress={onIWantThisToo} style={{ flex: 1, height: 56, borderRadius: 12, borderWidth: 2, borderColor: '#3B0076', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF' }}>
-              <Text style={{ color: '#3B0076', fontFamily: 'Nunito_700Bold', fontSize: 16 }}>I want this too</Text>
-            </Pressable>
-            <Pressable disabled={!buyUrl} onPress={onBuyNow} style={{ flex: 1, height: 56, borderRadius: 12, backgroundColor: '#3B0076', alignItems: 'center', justifyContent: 'center', opacity: buyUrl ? 1 : 0.5 }}>
-              <Text style={{ color: '#FFFFFF', fontFamily: 'Nunito_700Bold', fontSize: 16 }}>Buy Now</Text>
-            </Pressable>
-          </View>
-        </View>
-
-        <View style={{ backgroundColor: '#F7F3FB', marginHorizontal: 16, borderRadius: 16, overflow: 'hidden', paddingBottom: 16 }}>
-          <View style={{ padding: 16 }}>
-            <Text style={{ color: '#1C0335', fontSize: 18, fontFamily: 'Nunito_700Bold', marginBottom: 8 }}>Did you buy this gift?</Text>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={{ color: '#1C0335' }}>Mark as purchased</Text>
-              <Switch value={marked} onValueChange={setMarked} trackColor={{ true: '#7C3AED' }} thumbColor={marked ? '#FFF' : undefined} />
-            </View>
-          </View>
-          {marked && (
-            <View style={{ paddingHorizontal: 16 }}>
-              <Text style={{ color: '#1C0335', marginBottom: 8 }}>I bought</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: '#E5E0EC', borderRadius: 12, paddingHorizontal: 12, height: 56 }}>
-                <Pressable onPress={dec} style={{ width: 44, height: 36, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: '#F0E9FA' }}>
-                  <Text style={{ color: '#4B0082', fontSize: 18 }}>–</Text>
-                </Pressable>
-                <Text style={{ color: '#4B0082', fontSize: 20, fontFamily: 'Nunito_700Bold' }}>{String(qty).padStart(2, '0')}</Text>
-                <Pressable onPress={inc} style={{ width: 44, height: 36, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: '#F0E9FA' }}>
-                  <Text style={{ color: '#4B0082', fontSize: 18 }}>+</Text>
-                </Pressable>
-              </View>
-
-              <Text style={{ color: '#1C0335', marginTop: 16, marginBottom: 8 }}>Delivered to</Text>
-              <View style={{ gap: 12 }}>
-                <Pressable onPress={() => setDeliveredTo('recipient')} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Text style={{ color: '#1C0335' }}>{ownerName}</Text>
-                  <View style={{ width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: '#4B0082', alignItems: 'center', justifyContent: 'center' }}>
-                    {deliveredTo === 'recipient' && <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#4B0082' }} />}
-                  </View>
-                </Pressable>
-                <Pressable onPress={() => setDeliveredTo('me')} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Text style={{ color: '#1C0335' }}>My Home</Text>
-                  <View style={{ width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: '#4B0082', alignItems: 'center', justifyContent: 'center' }}>
-                    {deliveredTo === 'me' && <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#4B0082' }} />}
-                  </View>
-                </Pressable>
-              </View>
-
-              <Text style={{ color: '#8E8E93', marginTop: 16 }}>Add a note</Text>
-              <View style={{ borderWidth: 1, borderColor: '#E5E0EC', borderRadius: 12, padding: 12, minHeight: 92 }}>
-                <TextInput
-                  value={note}
-                  onChangeText={setNote}
-                  placeholder="Hears a little gift to make your day better! Can’t wait to celebrate 🎉"
-                  placeholderTextColor="#B1A6C4"
-                  multiline
-                  style={{ color: '#1C0335' }}
-                />
-                <Text style={{ color: '#B1A6C4', textAlign: 'right' }}>{`${Math.max(0, 400 - note.length)}/400`}</Text>
-              </View>
-
-              <Text style={{ color: '#1C0335', fontSize: 18, fontFamily: 'Nunito_700Bold', marginTop: 20, marginBottom: 10 }}>Where did you buy this?</Text>
-              <View style={{ flexDirection: 'row', gap: 12 }}>
-                <View style={{ flex: 1, height: 64, borderRadius: 12, borderWidth: 1, borderColor: '#E5E0EC', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFF' }}>
-                  <Text style={{ color: '#1C0335' }}>{storeDisplayName}</Text>
-                </View>
-                <View style={{ flex: 1, height: 64, borderRadius: 12, borderWidth: 2, borderColor: '#4B0082', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F7F3FB' }}>
-                  <Text style={{ color: '#4B0082', fontFamily: 'Nunito_700Bold' }}>Another Store</Text>
-                </View>
-              </View>
-
-              <View style={{ marginTop: 12 }}>
-                <Text style={{ color: '#8E8E93' }}>Store Name</Text>
-                <View style={{ borderWidth: 1, borderColor: '#E5E0EC', borderRadius: 12, paddingHorizontal: 12, height: 48, justifyContent: 'center' }}>
-                  <TextInput value={storeName} onChangeText={setStoreName} placeholder="Macy’s" placeholderTextColor="#B1A6C4" style={{ color: '#1C0335' }} />
-                </View>
-              </View>
-
-              <View style={{ marginTop: 12 }}>
-                <Text style={{ color: '#8E8E93' }}>Order Number (if known)</Text>
-                <View style={{ borderWidth: 1, borderColor: '#E5E0EC', borderRadius: 12, paddingHorizontal: 12, height: 48, justifyContent: 'center' }}>
-                  <TextInput value={orderNumber} onChangeText={setOrderNumber} placeholder="#8393847589347" placeholderTextColor="#B1A6C4" style={{ color: '#1C0335' }} />
-                </View>
-              </View>
-
-            </View>
-          )}
-        </View>
-
-        <View style={{ height: 24 }} />
-      </ScrollView>
-
-      <View style={{ padding: 16 }}>
-        <Pressable onPress={onSubmit} style={{ height: 56, borderRadius: 12, backgroundColor: '#4B0082', alignItems: 'center', justifyContent: 'center', opacity: canSubmit ? 1 : 0.6 }} disabled={!canSubmit}>
-          <Text style={{ color: '#FFF', fontFamily: 'Nunito_700Bold', fontSize: 18 }}>Submit</Text>
-        </Pressable>
-      </View>
-
-      {/* Leaving Yallawish bottom sheet */}
       <Modal
         visible={showLeaving}
         transparent
         animationType="fade"
         onRequestClose={() => setShowLeaving(false)}
       >
-        <Pressable onPress={() => setShowLeaving(false)} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' }}>
-          <Pressable onPress={(e) => e.stopPropagation()} style={{ position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 20 }}>
-            <View style={{ alignSelf: 'center', width: 44, height: 5, borderRadius: 3, backgroundColor: '#E2DAF0', marginBottom: 12 }} />
-            <Text style={{ color: '#1C0335', fontSize: 28, fontFamily: 'Nunito_700Bold', textAlign: 'center' }}>Leaving Yallawish</Text>
-            <Text style={{ color: '#6B5E7E', textAlign: 'center', marginTop: 8 }}>
-              You’re about to visit the seller’s site. After buying, come back and mark this gift as purchased.
+        <Pressable
+          onPress={() => setShowLeaving(false)}
+          style={modalStyles.backdrop}
+        >
+          <Pressable
+            onPress={(event) => event.stopPropagation()}
+            style={modalStyles.sheet}
+          >
+            <View style={modalStyles.handle} />
+            <Text style={modalStyles.sheetTitle}>Leaving YallaWish</Text>
+            <Text style={modalStyles.sheetBody}>
+              You’re about to visit the seller’s site. After purchasing, come
+              back to mark this gift as completed.
             </Text>
-            <View style={{ alignItems: 'center', marginTop: 16 }}>
-              <Text style={{ color: '#1C0335' }}>Redirecting to</Text>
-              <Text style={{ color: '#1C0335', fontFamily: 'Nunito_700Bold', fontSize: 24, marginTop: 6 }}>{host}</Text>
-              <Text style={{ color: '#1C0335', marginTop: 8 }}>You’ll be redirected in</Text>
-              <Text style={{ color: '#4B0082', fontFamily: 'Nunito_700Bold', fontSize: 40, marginTop: 4 }}>{countdown}s</Text>
+            <View style={modalStyles.redirectContainer}>
+              <Text style={modalStyles.redirectLabel}>Redirecting to</Text>
+              <Text style={modalStyles.redirectHost}>{host ?? "the seller"}</Text>
+              <Text style={modalStyles.redirectLabel}>Continuing in</Text>
+              <Text style={modalStyles.countdown}>{countdown}s</Text>
             </View>
-            <View style={{ marginTop: 16, gap: 12 }}>
-              <Pressable onPress={() => buyUrl && Linking.openURL(buyUrl)} style={{ height: 56, borderRadius: 12, backgroundColor: '#3B0076', alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ color: '#FFFFFF', fontFamily: 'Nunito_700Bold', fontSize: 16 }}>Proceed Now</Text>
+            <View style={modalStyles.buttonStack}>
+              <Pressable
+                onPress={() => {
+                  if (buyUrl) Linking.openURL(buyUrl);
+                  setShowLeaving(false);
+                }}
+                style={[modalStyles.primaryButton, !buyUrl && modalStyles.disabledButton]}
+                disabled={!buyUrl}
+              >
+                <Text style={modalStyles.primaryButtonText}>Proceed now</Text>
               </Pressable>
-              <Pressable onPress={() => setShowLeaving(false)} style={{ height: 56, borderRadius: 12, borderWidth: 1, borderColor: '#3B0076', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF' }}>
-                <Text style={{ color: '#3B0076', fontFamily: 'Nunito_700Bold', fontSize: 16 }}>Stay Here</Text>
+              <Pressable
+                onPress={() => setShowLeaving(false)}
+                style={modalStyles.secondaryButton}
+              >
+                <Text style={modalStyles.secondaryButtonText}>Stay here</Text>
               </Pressable>
             </View>
           </Pressable>
         </Pressable>
       </Modal>
 
-      {/* Copy to my list bottom sheet */}
       <CopyToMyListSheet
-        visible={(() => {
-          if (showCopySheet) return true;
-          // Auto-open after sign-in if action=want
-          if (action === 'want' && isSignedIn) return true;
-          return false;
-        })()}
-        onClose={() => {
-          setShowCopySheet(false);
-          // Clear action param is optional; leaving as-is keeps idempotent behavior
-        }}
+        visible={shouldShowCopySheet}
+        onClose={() => setShowCopySheet(false)}
         userId={userId ?? null}
-        item={item as any}
-        onAdd={async (targetListIds: string[]) => {
-          if (!item) return false;
-          try {
-            // Copy to each selected list as quantity 1 by default
-            const payloads = targetListIds.map((lid) => ({
-              list_id: lid as any,
-              name: item.name,
-              description: item.description ?? null,
-              image_url: item.image_url ?? null,
-              quantity: 1,
-              price: item.price ?? null,
-              currency: item.currency ?? 'AED',
-              buy_url: item.buy_url ?? null,
-            }));
-            for (const p of payloads) {
-              await createItem(p as any);
-            }
-            return true;
-          } catch (e) {
-            console.warn('Failed to copy item', e);
-            return false;
-          }
-        }}
+        item={item}
+        onAdd={handleCopy}
         onCreateNewList={() => {
-          // Navigate to create list flow; keep a returnTo back here with action=want to reopen
-          const rt = `${computeReturnTo()}${computeReturnTo().includes('?') ? '&' : '?'}action=want`;
-          router.push({ pathname: '/create-list-step1', params: { returnTo: encodeURIComponent(rt) } });
+          router.push({
+            pathname: "/create-list-step1",
+            params: { returnTo: encodeURIComponent(returnTo) },
+          });
         }}
       />
     </View>
   );
 }
 
-// Bottom sheet component for copying item to user's lists
-function CopyToMyListSheet({
+type MobileLayoutProps = {
+  item: GiftItemType;
+  price: string | null;
+  buyUrl?: string;
+  marked: boolean;
+  onToggleMarked: (value: boolean) => void;
+  qty: number;
+  inc: () => void;
+  dec: () => void;
+  maxQuantity: number;
+  deliveredTo: "recipient" | "me";
+  setDeliveredTo: (value: "recipient" | "me") => void;
+  note: string;
+  setNote: (value: string) => void;
+  storeOption: StoreOption;
+  setStoreOption: (value: StoreOption) => void;
+  storeDisplayName: string;
+  storeName: string;
+  setStoreName: (value: string) => void;
+  orderNumber: string;
+  setOrderNumber: (value: string) => void;
+  canSubmit: boolean;
+  onSubmit: () => void;
+  onBack: () => void;
+  onBuyNow: () => void;
+  onIWantThisToo: () => void;
+  ownerName: string;
+  moreItems: GiftItemType[];
+  onSelectItem: (id: string) => void;
+  onSeeAll: () => void;
+  available: number;
+  submitting: boolean;
+};
+
+const MobileLayout: React.FC<MobileLayoutProps> = ({
+  item,
+  price,
+  buyUrl,
+  marked,
+  onToggleMarked,
+  qty,
+  inc,
+  dec,
+  maxQuantity,
+  deliveredTo,
+  setDeliveredTo,
+  note,
+  setNote,
+  storeOption,
+  setStoreOption,
+  storeDisplayName,
+  storeName,
+  setStoreName,
+  orderNumber,
+  setOrderNumber,
+  canSubmit,
+  onSubmit,
+  onBack,
+  onBuyNow,
+  onIWantThisToo,
+  ownerName,
+  moreItems,
+  onSelectItem,
+  onSeeAll,
+  available,
+  submitting,
+}) => {
+  const remainingChars = Math.max(0, NOTE_LIMIT - note.length);
+
+  return (
+    <View style={mobileStyles.container}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.deepPurple} />
+      <View style={mobileStyles.header}>
+        <Pressable onPress={onBack} style={mobileStyles.backButton}>
+          <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+        </Pressable>
+        <Text numberOfLines={1} style={mobileStyles.headerTitle}>
+          {item.name}
+        </Text>
+      </View>
+
+      <ScrollView contentContainerStyle={mobileStyles.scrollContent}>
+        <View style={mobileStyles.productCard}>
+          <Image
+            source={item.image_url ? { uri: item.image_url } : FALLBACK_IMAGE}
+            style={mobileStyles.productImage}
+            contentFit="cover"
+          />
+          <Text style={mobileStyles.productTitle}>{item.name}</Text>
+          {price && <Text style={mobileStyles.productPrice}>{price}</Text>}
+          <Text style={mobileStyles.productMeta}>
+            Quantity: {" "}
+            <Text style={mobileStyles.productMetaStrong}>
+              {String(item.quantity ?? 1).padStart(2, "0")}
+            </Text>
+          </Text>
+          {item.description && (
+            <Text style={mobileStyles.productDescription}>{item.description}</Text>
+          )}
+
+          <View style={mobileStyles.actionRow}>
+            <Pressable style={mobileStyles.secondaryButton} onPress={onIWantThisToo}>
+              <Text style={mobileStyles.secondaryButtonText}>I want this too</Text>
+            </Pressable>
+            <Pressable
+              style={[
+                mobileStyles.primaryButton,
+                !buyUrl && mobileStyles.primaryButtonDisabled,
+              ]}
+              onPress={onBuyNow}
+              disabled={!buyUrl}
+            >
+              <Text style={mobileStyles.primaryButtonText}>Buy now</Text>
+            </Pressable>
+          </View>
+          {available <= 0 && (
+            <Text style={mobileStyles.notice}>
+              This gift has already been fully claimed.
+            </Text>
+          )}
+        </View>
+
+        <View style={mobileStyles.sectionCard}>
+          <View style={mobileStyles.switchRow}>
+            <Text style={mobileStyles.sectionTitle}>Mark as purchased</Text>
+            <Switch
+              value={marked}
+              onValueChange={onToggleMarked}
+              trackColor={{ false: "#D7CEE9", true: "#7C3AED" }}
+              thumbColor="#FFFFFF"
+            />
+          </View>
+
+          {marked && (
+            <>
+              <Text style={mobileStyles.sectionLabel}>I bought</Text>
+              <View style={mobileStyles.stepper}>
+                <Pressable
+                  onPress={dec}
+                  disabled={qty <= 1}
+                  style={[
+                    mobileStyles.stepperButton,
+                    qty <= 1 && mobileStyles.stepperButtonDisabled,
+                  ]}
+                >
+                  <Text style={mobileStyles.stepperButtonText}>−</Text>
+                </Pressable>
+                <Text style={mobileStyles.stepperValue}>
+                  {String(qty).padStart(2, "0")}
+                </Text>
+                <Pressable
+                  onPress={inc}
+                  disabled={qty >= maxQuantity}
+                  style={[
+                    mobileStyles.stepperButton,
+                    qty >= maxQuantity && mobileStyles.stepperButtonDisabled,
+                  ]}
+                >
+                  <Text style={mobileStyles.stepperButtonText}>+</Text>
+                </Pressable>
+              </View>
+
+              <Text style={mobileStyles.sectionLabel}>Delivered to</Text>
+              <View style={mobileStyles.radioGroup}>
+                <Pressable
+                  onPress={() => setDeliveredTo("recipient")}
+                  style={mobileStyles.radioRow}
+                >
+                  <View
+                    style={[
+                      mobileStyles.radioOuter,
+                      deliveredTo === "recipient" && mobileStyles.radioOuterActive,
+                    ]}
+                  >
+                    {deliveredTo === "recipient" && <View style={mobileStyles.radioInner} />}
+                  </View>
+                  <Text style={mobileStyles.radioLabel}>{ownerName}</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => setDeliveredTo("me")}
+                  style={mobileStyles.radioRow}
+                >
+                  <View
+                    style={[
+                      mobileStyles.radioOuter,
+                      deliveredTo === "me" && mobileStyles.radioOuterActive,
+                    ]}
+                  >
+                    {deliveredTo === "me" && <View style={mobileStyles.radioInner} />}
+                  </View>
+                  <Text style={mobileStyles.radioLabel}>My home</Text>
+                </Pressable>
+              </View>
+
+              <Text style={mobileStyles.sectionLabel}>Add a note</Text>
+              <View style={mobileStyles.noteField}>
+                <TextInput
+                  value={note}
+                  onChangeText={setNote}
+                  placeholder="Here’s a little gift to make your day better! 🎉"
+                  placeholderTextColor="#B1A6C4"
+                  multiline
+                  style={mobileStyles.noteInput}
+                />
+                <Text style={mobileStyles.charCounter}>
+                  {remainingChars}/{NOTE_LIMIT}
+                </Text>
+              </View>
+
+              <Text style={mobileStyles.sectionLabel}>Where did you buy this?</Text>
+              <View style={mobileStyles.storeRow}>
+                <Pressable
+                  onPress={() => setStoreOption("suggested")}
+                  disabled={!buyUrl}
+                  style={[
+                    mobileStyles.storeOption,
+                    storeOption === "suggested" && mobileStyles.storeOptionActive,
+                    !buyUrl && mobileStyles.storeOptionDisabled,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      mobileStyles.storeOptionText,
+                      storeOption === "suggested" && mobileStyles.storeOptionTextActive,
+                    ]}
+                  >
+                    {storeDisplayName.toUpperCase()}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    setStoreOption("custom");
+                    if (!storeName || storeName === storeDisplayName) {
+                      setStoreName("");
+                    }
+                  }}
+                  style={[
+                    mobileStyles.storeOption,
+                    storeOption === "custom" && mobileStyles.storeOptionActive,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      mobileStyles.storeOptionText,
+                      storeOption === "custom" && mobileStyles.storeOptionTextActive,
+                    ]}
+                  >
+                    Another store
+                  </Text>
+                </Pressable>
+              </View>
+
+              {storeOption === "custom" && (
+                <View style={mobileStyles.inputField}>
+                  <Text style={mobileStyles.inputLabel}>Store name</Text>
+                  <View style={mobileStyles.inputWrapper}>
+                    <TextInput
+                      value={storeName}
+                      onChangeText={setStoreName}
+                      placeholder="Macy’s"
+                      placeholderTextColor="#B1A6C4"
+                      style={mobileStyles.textInput}
+                    />
+                  </View>
+                </View>
+              )}
+
+              <View style={mobileStyles.inputField}>
+                <Text style={mobileStyles.inputLabel}>Order number (optional)</Text>
+                <View style={mobileStyles.inputWrapper}>
+                  <TextInput
+                    value={orderNumber}
+                    onChangeText={setOrderNumber}
+                    placeholder="#123456789"
+                    placeholderTextColor="#B1A6C4"
+                    style={mobileStyles.textInput}
+                  />
+                </View>
+              </View>
+            </>
+          )}
+        </View>
+
+        {moreItems.length > 0 && (
+          <View style={mobileStyles.moreSection}>
+            <Text style={mobileStyles.moreTitle}>More items in this list</Text>
+            {moreItems.map((entry) => (
+              <Pressable
+                key={String(entry._id)}
+                onPress={() => onSelectItem(String(entry._id))}
+                style={mobileStyles.moreCard}
+              >
+                <Image
+                  source={entry.image_url ? { uri: entry.image_url } : FALLBACK_IMAGE}
+                  style={mobileStyles.moreImage}
+                  contentFit="cover"
+                />
+                <View style={mobileStyles.moreContent}>
+                  <Text style={mobileStyles.moreName}>{entry.name}</Text>
+                  {entry.price != null && (
+                    <Text style={mobileStyles.morePrice}>
+                      {formatPrice(entry.price, "AED") ?? ""}
+                    </Text>
+                  )}
+                  <Text style={mobileStyles.moreMeta}>
+                    {Number(entry.claimed ?? 0)} of {Number(entry.quantity ?? 1)} claimed
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={COLORS.purple} />
+              </Pressable>
+            ))}
+            <Pressable style={mobileStyles.seeAll} onPress={onSeeAll}>
+              <Text style={mobileStyles.seeAllText}>See all</Text>
+            </Pressable>
+          </View>
+        )}
+
+        <View style={{ height: 16 }} />
+      </ScrollView>
+
+      <View style={mobileStyles.submitBar}>
+        <Pressable
+          onPress={onSubmit}
+          disabled={!canSubmit}
+          style={[
+            mobileStyles.submitButton,
+            (!canSubmit || submitting) && mobileStyles.submitButtonDisabled,
+          ]}
+        >
+          <Text style={mobileStyles.submitButtonText}>
+            {submitting ? "Submitting…" : "Submit"}
+          </Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+};
+
+type DesktopLayoutProps = {
+  item: GiftItemType;
+  price: string | null;
+  listTitle: string;
+  buyUrl?: string;
+  marked: boolean;
+  onToggleMarked: (value: boolean) => void;
+  qty: number;
+  inc: () => void;
+  dec: () => void;
+  maxQuantity: number;
+  deliveredTo: "recipient" | "me";
+  setDeliveredTo: (value: "recipient" | "me") => void;
+  note: string;
+  setNote: (value: string) => void;
+  storeOption: StoreOption;
+  setStoreOption: (value: StoreOption) => void;
+  storeDisplayName: string;
+  storeName: string;
+  setStoreName: (value: string) => void;
+  orderNumber: string;
+  setOrderNumber: (value: string) => void;
+  canSubmit: boolean;
+  onSubmit: () => void;
+  onBack: () => void;
+  onBuyNow: () => void;
+  onIWantThisToo: () => void;
+  ownerName: string;
+  host: string;
+  moreItems: GiftItemType[];
+  onSelectItem: (id: string) => void;
+  onSeeAll: () => void;
+  available: number;
+  submitting: boolean;
+};
+
+const DesktopLayout: React.FC<DesktopLayoutProps> = ({
+  item,
+  price,
+  listTitle,
+  buyUrl,
+  marked,
+  onToggleMarked,
+  qty,
+  inc,
+  dec,
+  maxQuantity,
+  deliveredTo,
+  setDeliveredTo,
+  note,
+  setNote,
+  storeOption,
+  setStoreOption,
+  storeDisplayName,
+  storeName,
+  setStoreName,
+  orderNumber,
+  setOrderNumber,
+  canSubmit,
+  onSubmit,
+  onBack,
+  onBuyNow,
+  onIWantThisToo,
+  ownerName,
+  host,
+  moreItems,
+  onSelectItem,
+  onSeeAll,
+  available,
+  submitting,
+}) => {
+  const remainingChars = Math.max(0, NOTE_LIMIT - note.length);
+
+  return (
+    <SafeAreaView style={desktopStyles.safeArea} edges={Platform.OS === "web" ? [] : ["top"]}>
+      <ScrollView contentContainerStyle={desktopStyles.scrollContent}>
+        <View style={desktopStyles.maxWidth}>
+          <View style={desktopStyles.breadcrumbRow}>
+            <Pressable style={desktopStyles.backPill} onPress={onBack}>
+              <Ionicons name="chevron-back" size={18} color={COLORS.purple} />
+              <Text style={desktopStyles.backPillText}>Back</Text>
+            </Pressable>
+            <Text style={desktopStyles.breadcrumbText}>
+              Home / {listTitle} / Gift detail
+            </Text>
+          </View>
+
+          <View style={desktopStyles.columns}>
+            <View style={desktopStyles.productCard}>
+              <Image
+                source={item.image_url ? { uri: item.image_url } : FALLBACK_IMAGE}
+                style={desktopStyles.productImage}
+                contentFit="cover"
+              />
+              <View style={desktopStyles.productBody}>
+                <Text style={desktopStyles.productTitle}>{item.name}</Text>
+                {price && <Text style={desktopStyles.productPrice}>{price}</Text>}
+                <Text style={desktopStyles.productMeta}>
+                  Quantity: {String(item.quantity ?? 1).padStart(2, "0")}
+                </Text>
+                {item.description && (
+                  <Text style={desktopStyles.productDescription}>{item.description}</Text>
+                )}
+                <View style={desktopStyles.productActions}>
+                  <Pressable
+                    onPress={onBuyNow}
+                    disabled={!buyUrl}
+                    style={[
+                      desktopStyles.primaryButton,
+                      !buyUrl && desktopStyles.primaryButtonDisabled,
+                    ]}
+                  >
+                    <Text style={desktopStyles.primaryButtonText}>Buy now</Text>
+                  </Pressable>
+                  <Pressable style={desktopStyles.secondaryButton} onPress={onIWantThisToo}>
+                    <Text style={desktopStyles.secondaryButtonText}>I want this too</Text>
+                  </Pressable>
+                </View>
+                {available <= 0 && (
+                  <Text style={desktopStyles.notice}>
+                    This gift has already been fully claimed.
+                  </Text>
+                )}
+              </View>
+            </View>
+
+            <View style={desktopStyles.detailCard}>
+              <Text style={desktopStyles.detailTitle}>Purchase details</Text>
+              <Text style={desktopStyles.detailSubtitle}>
+                Share a few details to coordinate with other gifters.
+              </Text>
+
+              <View style={desktopStyles.toggleRow}>
+                <Pressable
+                  onPress={() => onToggleMarked(false)}
+                  style={[
+                    desktopStyles.toggleButton,
+                    !marked && desktopStyles.toggleButtonActive,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      desktopStyles.toggleButtonText,
+                      !marked && desktopStyles.toggleButtonTextActive,
+                    ]}
+                  >
+                    Not yet
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => onToggleMarked(true)}
+                  style={[
+                    desktopStyles.toggleButton,
+                    marked && desktopStyles.toggleButtonActive,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      desktopStyles.toggleButtonText,
+                      marked && desktopStyles.toggleButtonTextActive,
+                    ]}
+                  >
+                    Yes, I did
+                  </Text>
+                </Pressable>
+              </View>
+
+              {marked ? (
+                <>
+                  <View style={desktopStyles.fieldBlock}>
+                    <Text style={desktopStyles.fieldLabel}>I bought</Text>
+                    <View style={desktopStyles.stepper}>
+                      <Pressable
+                        onPress={dec}
+                        disabled={qty <= 1}
+                        style={[
+                          desktopStyles.stepperButton,
+                          qty <= 1 && desktopStyles.stepperButtonDisabled,
+                        ]}
+                      >
+                        <Text style={desktopStyles.stepperButtonText}>−</Text>
+                      </Pressable>
+                      <Text style={desktopStyles.stepperValue}>
+                        {String(qty).padStart(2, "0")}
+                      </Text>
+                      <Pressable
+                        onPress={inc}
+                        disabled={qty >= maxQuantity}
+                        style={[
+                          desktopStyles.stepperButton,
+                          qty >= maxQuantity && desktopStyles.stepperButtonDisabled,
+                        ]}
+                      >
+                        <Text style={desktopStyles.stepperButtonText}>+</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+
+                  <View style={desktopStyles.fieldBlock}>
+                    <Text style={desktopStyles.fieldLabel}>Delivered to</Text>
+                    <View style={desktopStyles.radioGroup}>
+                      <Pressable
+                        onPress={() => setDeliveredTo("recipient")}
+                        style={desktopStyles.radioOption}
+                      >
+                        <View
+                          style={[
+                            desktopStyles.radioOuter,
+                            deliveredTo === "recipient" && desktopStyles.radioOuterActive,
+                          ]}
+                        >
+                          {deliveredTo === "recipient" && <View style={desktopStyles.radioInner} />}
+                        </View>
+                        <Text style={desktopStyles.radioLabel}>{ownerName}</Text>
+                      </Pressable>
+                      <Pressable
+                        onPress={() => setDeliveredTo("me")}
+                        style={desktopStyles.radioOption}
+                      >
+                        <View
+                          style={[
+                            desktopStyles.radioOuter,
+                            deliveredTo === "me" && desktopStyles.radioOuterActive,
+                          ]}
+                        >
+                          {deliveredTo === "me" && <View style={desktopStyles.radioInner} />}
+                        </View>
+                        <Text style={desktopStyles.radioLabel}>My home</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+
+                  <View style={desktopStyles.fieldBlock}>
+                    <Text style={desktopStyles.fieldLabel}>Add a note</Text>
+                    <View style={desktopStyles.noteField}>
+                      <TextInput
+                        value={note}
+                        onChangeText={setNote}
+                        placeholder="Here’s a little gift to make your day better! 🎉"
+                        placeholderTextColor="#B1A6C4"
+                        multiline
+                        style={desktopStyles.noteInput}
+                      />
+                      <Text style={desktopStyles.charCounter}>
+                        {remainingChars}/{NOTE_LIMIT}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={desktopStyles.fieldBlock}>
+                    <Text style={desktopStyles.fieldLabel}>Where did you buy this?</Text>
+                    <View style={desktopStyles.storeRow}>
+                      <Pressable
+                        onPress={() => setStoreOption("suggested")}
+                        disabled={!buyUrl}
+                        style={[
+                          desktopStyles.storeOption,
+                          storeOption === "suggested" && desktopStyles.storeOptionActive,
+                          !buyUrl && desktopStyles.storeOptionDisabled,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            desktopStyles.storeOptionText,
+                            storeOption === "suggested" && desktopStyles.storeOptionTextActive,
+                          ]}
+                        >
+                          {storeDisplayName.toUpperCase()}
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        onPress={() => {
+                          setStoreOption("custom");
+                          if (!storeName || storeName === storeDisplayName) {
+                            setStoreName("");
+                          }
+                        }}
+                        style={[
+                          desktopStyles.storeOption,
+                          storeOption === "custom" && desktopStyles.storeOptionActive,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            desktopStyles.storeOptionText,
+                            storeOption === "custom" && desktopStyles.storeOptionTextActive,
+                          ]}
+                        >
+                          Another store
+                        </Text>
+                      </Pressable>
+                    </View>
+                    {storeOption === "custom" && (
+                      <View style={desktopStyles.inputField}>
+                        <Text style={desktopStyles.inputLabel}>Store name</Text>
+                        <View style={desktopStyles.inputWrapper}>
+                          <TextInput
+                            value={storeName}
+                            onChangeText={setStoreName}
+                            placeholder="Macy’s"
+                            placeholderTextColor="#B1A6C4"
+                            style={desktopStyles.textInput}
+                          />
+                        </View>
+                      </View>
+                    )}
+                  </View>
+
+                  <View style={desktopStyles.fieldBlock}>
+                    <Text style={desktopStyles.fieldLabel}>Order number (optional)</Text>
+                    <View style={desktopStyles.inputWrapper}>
+                      <TextInput
+                        value={orderNumber}
+                        onChangeText={setOrderNumber}
+                        placeholder="#123456789"
+                        placeholderTextColor="#B1A6C4"
+                        style={desktopStyles.textInput}
+                      />
+                    </View>
+                  </View>
+                </>
+              ) : (
+                <Text style={desktopStyles.notice}>
+                  Toggle “Yes, I did” after you complete the purchase.
+                </Text>
+              )}
+
+              <Pressable
+                onPress={onSubmit}
+                disabled={!canSubmit}
+                style={[
+                  desktopStyles.submitButton,
+                  (!canSubmit || submitting) && desktopStyles.submitButtonDisabled,
+                ]}
+              >
+                <Text style={desktopStyles.submitButtonText}>
+                  {submitting ? "Submitting…" : "Submit"}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+
+          {moreItems.length > 0 && (
+            <View style={desktopStyles.moreSection}>
+              <View style={desktopStyles.moreHeader}>
+                <Text style={desktopStyles.moreTitle}>More items in this list</Text>
+                <Pressable onPress={onSeeAll}>
+                  <Text style={desktopStyles.moreSeeAll}>See all</Text>
+                </Pressable>
+              </View>
+              <View style={desktopStyles.moreGrid}>
+                {moreItems.map((entry) => (
+                  <Pressable
+                    key={String(entry._id)}
+                    onPress={() => onSelectItem(String(entry._id))}
+                    style={desktopStyles.moreCard}
+                  >
+                    <Image
+                      source={entry.image_url ? { uri: entry.image_url } : FALLBACK_IMAGE}
+                      style={desktopStyles.moreImage}
+                      contentFit="cover"
+                    />
+                    <View style={desktopStyles.moreBody}>
+                      <Text style={desktopStyles.moreName}>{entry.name}</Text>
+                      {entry.price != null && (
+                        <Text style={desktopStyles.morePrice}>
+                          {formatPrice(entry.price, "AED") ?? ""}
+                        </Text>
+                      )}
+                      <Text style={desktopStyles.moreMeta}>
+                        {Number(entry.claimed ?? 0)} of {Number(entry.quantity ?? 1)} claimed
+                      </Text>
+                    </View>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
+type CopyToMyListSheetProps = {
+  visible: boolean;
+  onClose: () => void;
+  userId: string | null;
+  item: GiftItemType | null;
+  onAdd: (targetListIds: string[]) => Promise<boolean>;
+  onCreateNewList: () => void;
+};
+
+const CopyToMyListSheet: React.FC<CopyToMyListSheetProps> = ({
   visible,
   onClose,
   userId,
   item,
   onAdd,
   onCreateNewList,
-}: {
-  visible: boolean;
-  onClose: () => void;
-  userId: string | null;
-  item: any;
-  onAdd: (ids: string[]) => Promise<boolean>;
-  onCreateNewList: () => void;
-}) {
-  const myLists = useQuery(api.products.getMyLists as any, userId ? ({ user_id: userId } as any) : 'skip');
+}) => {
+  const myLists = useQuery(
+    api.products.getMyLists,
+    userId ? ({ user_id: userId } as any) : "skip"
+  ) as any[] | undefined;
   const [selected, setSelected] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    if (!visible) {
+      setSelected([]);
+      setSaving(false);
+    }
+  }, [visible]);
+
+  if (!visible || !item) return null;
+
   const toggle = (id: string) => {
-    setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((value) => value !== id) : [...prev, id]
+    );
   };
 
   const handleAdd = async () => {
@@ -421,55 +1333,1051 @@ function CopyToMyListSheet({
       setSaving(true);
       const ok = await onAdd(selected);
       if (ok) {
-        onClose();
         setSelected([]);
+        onClose();
       }
     } finally {
       setSaving(false);
     }
   };
 
+  const lists = myLists ?? [];
+  const loading = myLists === undefined;
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable onPress={onClose} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' }}>
-        <Pressable onPress={(e) => e.stopPropagation()} style={{ position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 20, maxHeight: '80%' }}>
-          <View style={{ alignSelf: 'center', width: 44, height: 5, borderRadius: 3, backgroundColor: '#E2DAF0', marginBottom: 12 }} />
-          <Text style={{ color: '#1C0335', fontSize: 24, fontFamily: 'Nunito_700Bold' }}>Copy Item to your list</Text>
-          <Text style={{ color: '#6B5E7E', marginTop: 6 }}>Choose a list to add this item to</Text>
+      <Pressable onPress={onClose} style={sheetStyles.backdrop}>
+        <Pressable onPress={(event) => event.stopPropagation()} style={sheetStyles.sheet}>
+          <View style={sheetStyles.handle} />
+          <Text style={sheetStyles.title}>Copy item to your list</Text>
+          <Text style={sheetStyles.subtitle}>Choose one or more lists to add this gift.</Text>
 
-          <ScrollView style={{ marginTop: 12 }} contentContainerStyle={{ paddingBottom: 16 }}>
-            {Array.isArray(myLists) && myLists.length > 0 ? (
-              myLists.map((l: any) => {
-                const checked = selected.includes(String(l._id));
+          <ScrollView style={sheetStyles.list} contentContainerStyle={{ paddingBottom: 16 }}>
+            {loading ? (
+              <View style={sheetStyles.emptyState}>
+                <Text style={sheetStyles.emptyStateText}>Loading your lists…</Text>
+              </View>
+            ) : lists.length === 0 ? (
+              <View style={sheetStyles.emptyState}>
+                <Text style={sheetStyles.emptyStateText}>You don’t have any lists yet.</Text>
+              </View>
+            ) : (
+              lists.map((entry) => {
+                const id = String(entry._id);
+                const checked = selected.includes(id);
                 return (
-                  <Pressable key={String(l._id)} onPress={() => toggle(String(l._id))} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#EEE' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                      <View style={{ width: 4, height: 28, borderRadius: 2, backgroundColor: '#FFC857' }} />
-                      <Text style={{ color: '#1C0335', fontFamily: 'Nunito_700Bold', fontSize: 16 }}>{l.title}</Text>
+                  <Pressable
+                    key={id}
+                    onPress={() => toggle(id)}
+                    style={sheetStyles.listItem}
+                  >
+                    <View style={sheetStyles.listLeft}>
+                      <View style={sheetStyles.listAccent} />
+                      <Text style={sheetStyles.listTitle}>{entry.title || "Untitled list"}</Text>
                     </View>
-                    <View style={{ width: 22, height: 22, borderRadius: 4, borderWidth: 2, borderColor: checked ? '#3B0076' : '#CFC7DD', alignItems: 'center', justifyContent: 'center', backgroundColor: checked ? '#3B0076' : 'transparent' }}>
-                      {checked && <Ionicons name="checkmark" size={14} color="#FFFFFF" />}
+                    <View
+                      style={[
+                        sheetStyles.checkbox,
+                        checked && sheetStyles.checkboxChecked,
+                      ]}
+                    >
+                      {checked && <Ionicons name="checkmark" size={16} color="#FFFFFF" />}
                     </View>
                   </Pressable>
                 );
               })
-            ) : (
-              <View style={{ paddingVertical: 16 }}>
-                <Text style={{ color: '#6B5E7E' }}>You don’t have any lists yet.</Text>
-              </View>
             )}
           </ScrollView>
 
-          <View style={{ gap: 12 }}>
-            <Pressable onPress={handleAdd} disabled={selected.length === 0 || saving} style={{ height: 56, borderRadius: 12, backgroundColor: '#3B0076', alignItems: 'center', justifyContent: 'center', opacity: selected.length === 0 || saving ? 0.6 : 1 }}>
-              <Text style={{ color: '#FFFFFF', fontFamily: 'Nunito_700Bold', fontSize: 16 }}>{saving ? 'Adding...' : 'Add to selected lists'}</Text>
+          <View style={sheetStyles.actions}>
+            <Pressable
+              onPress={handleAdd}
+              disabled={selected.length === 0 || saving}
+              style={[
+                sheetStyles.primary,
+                (selected.length === 0 || saving) && sheetStyles.primaryDisabled,
+              ]}
+            >
+              <Text style={sheetStyles.primaryText}>
+                {saving ? "Adding…" : "Add to selected lists"}
+              </Text>
             </Pressable>
-            <Pressable onPress={onCreateNewList} style={{ height: 56, borderRadius: 12, borderWidth: 1, borderColor: '#3B0076', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF' }}>
-              <Text style={{ color: '#3B0076', fontFamily: 'Nunito_700Bold', fontSize: 16 }}>Create a new list</Text>
+            <Pressable onPress={onCreateNewList} style={sheetStyles.secondary}>
+              <Text style={sheetStyles.secondaryText}>Create a new list</Text>
             </Pressable>
           </View>
         </Pressable>
       </Pressable>
     </Modal>
   );
-}
+};
+
+const sharedStyles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+  },
+  loadingText: {
+    color: COLORS.textSecondary,
+    fontFamily: "Nunito_600SemiBold",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  privateTitle: {
+    fontFamily: "Nunito_700Bold",
+    fontSize: 20,
+    color: COLORS.textPrimary,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  privateBody: {
+    fontFamily: "Nunito_500Medium",
+    fontSize: 16,
+    color: COLORS.textSecondary,
+    textAlign: "center",
+  },
+}) as Record<string, any>;
+
+const mobileStyles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  container: {
+    flex: 1,
+  },
+  header: {
+    backgroundColor: COLORS.deepPurple,
+    paddingTop: 18,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  backButton: {
+    padding: 4,
+  },
+  headerTitle: {
+    flex: 1,
+    color: "#FFFFFF",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 20,
+  },
+  scrollContent: {
+    paddingBottom: 32,
+  },
+  productCard: {
+    margin: 16,
+    backgroundColor: COLORS.background,
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: "#15072C",
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 2,
+  },
+  productImage: {
+    width: "100%",
+    height: 220,
+    borderRadius: 16,
+    backgroundColor: COLORS.surface,
+  },
+  productTitle: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 24,
+    marginTop: 16,
+  },
+  productPrice: {
+    color: COLORS.purple,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 18,
+    marginTop: 8,
+  },
+  productMeta: {
+    color: COLORS.textSecondary,
+    fontFamily: "Nunito_500Medium",
+    marginTop: 4,
+  },
+  productMetaStrong: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_700Bold",
+  },
+  productDescription: {
+    color: COLORS.textSecondary,
+    marginTop: 10,
+    lineHeight: 22,
+    fontFamily: "Nunito_500Medium",
+  },
+  actionRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 18,
+  },
+  primaryButton: {
+    flex: 1,
+    height: 56,
+    borderRadius: 14,
+    backgroundColor: COLORS.purple,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  primaryButtonDisabled: {
+    opacity: 0.5,
+  },
+  primaryButtonText: {
+    color: "#FFFFFF",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
+  },
+  secondaryButton: {
+    flex: 1,
+    height: 56,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: COLORS.purple,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.background,
+  },
+  secondaryButtonText: {
+    color: COLORS.purple,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
+  },
+  notice: {
+    marginTop: 14,
+    color: COLORS.accent,
+    fontFamily: "Nunito_600SemiBold",
+  },
+  sectionCard: {
+    marginHorizontal: 16,
+    marginTop: 12,
+    backgroundColor: COLORS.surface,
+    borderRadius: 18,
+    padding: 20,
+  },
+  switchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  sectionTitle: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 18,
+  },
+  sectionLabel: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_600SemiBold",
+    marginTop: 18,
+    marginBottom: 8,
+  },
+  stepper: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 58,
+  },
+  stepperButton: {
+    width: 44,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#EFE7FF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  stepperButtonDisabled: {
+    opacity: 0.4,
+  },
+  stepperButtonText: {
+    color: COLORS.purple,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 20,
+  },
+  stepperValue: {
+    color: COLORS.purple,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 20,
+  },
+  radioGroup: {
+    gap: 14,
+  },
+  radioRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  radioOuter: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: COLORS.border,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  radioOuterActive: {
+    borderColor: COLORS.purple,
+  },
+  radioInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: COLORS.purple,
+  },
+  radioLabel: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_600SemiBold",
+  },
+  noteField: {
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 14,
+    padding: 14,
+    minHeight: 110,
+    backgroundColor: COLORS.background,
+  },
+  noteInput: {
+    color: COLORS.textPrimary,
+    minHeight: 60,
+    fontFamily: "Nunito_500Medium",
+  },
+  charCounter: {
+    textAlign: "right",
+    color: "#B1A6C4",
+    marginTop: 6,
+  },
+  storeRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 12,
+  },
+  storeOption: {
+    flex: 1,
+    height: 60,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.background,
+    paddingHorizontal: 12,
+  },
+  storeOptionActive: {
+    borderColor: COLORS.purple,
+    backgroundColor: "#ECE6FF",
+  },
+  storeOptionDisabled: {
+    opacity: 0.4,
+  },
+  storeOptionText: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_700Bold",
+    textAlign: "center",
+  },
+  storeOptionTextActive: {
+    color: COLORS.purple,
+  },
+  inputField: {
+    marginTop: 16,
+  },
+  inputLabel: {
+    color: COLORS.textSecondary,
+    fontFamily: "Nunito_500Medium",
+    marginBottom: 6,
+  },
+  inputWrapper: {
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 52,
+    justifyContent: "center",
+    backgroundColor: COLORS.background,
+  },
+  textInput: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_500Medium",
+  },
+  moreSection: {
+    marginHorizontal: 16,
+    marginTop: 28,
+    gap: 14,
+  },
+  moreTitle: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 18,
+  },
+  moreCard: {
+    flexDirection: "row",
+    backgroundColor: COLORS.background,
+    borderRadius: 16,
+    padding: 14,
+    alignItems: "center",
+    gap: 14,
+    shadowColor: "#15072C",
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+  },
+  moreImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 14,
+    backgroundColor: COLORS.surface,
+  },
+  moreContent: {
+    flex: 1,
+    gap: 4,
+  },
+  moreName: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
+  },
+  morePrice: {
+    color: COLORS.accent,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 15,
+  },
+  moreMeta: {
+    color: COLORS.textSecondary,
+    fontFamily: "Nunito_500Medium",
+    fontSize: 12,
+  },
+  seeAll: {
+    alignSelf: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: COLORS.purple,
+  },
+  seeAllText: {
+    color: COLORS.purple,
+    fontFamily: "Nunito_700Bold",
+  },
+  submitBar: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#EDE4FF",
+    backgroundColor: COLORS.background,
+  },
+  submitButton: {
+    height: 56,
+    borderRadius: 14,
+    backgroundColor: COLORS.purple,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  submitButtonDisabled: {
+    opacity: 0.6,
+  },
+  submitButtonText: {
+    color: "#FFFFFF",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 18,
+  },
+}) as Record<string, any>;
+
+const desktopStyles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: "#F8F4FF",
+  },
+  safeArea: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 48,
+    alignItems: "center",
+  },
+  maxWidth: {
+    width: "100%",
+    maxWidth: 1120,
+    paddingHorizontal: 32,
+    paddingTop: 32,
+  },
+  breadcrumbRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 24,
+  },
+  backPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 999,
+    backgroundColor: "#ECE4FF",
+  },
+  backPillText: {
+    color: COLORS.purple,
+    fontFamily: "Nunito_600SemiBold",
+  },
+  breadcrumbText: {
+    flex: 1,
+    textAlign: "right",
+    marginLeft: 16,
+    color: COLORS.textSecondary,
+    fontFamily: "Nunito_500Medium",
+  },
+  columns: {
+    flexDirection: "row",
+    gap: 32,
+    alignItems: "flex-start",
+  },
+  productCard: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+    borderRadius: 24,
+    padding: 24,
+    shadowColor: "#200A40",
+    shadowOpacity: 0.06,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 12 },
+  },
+  productImage: {
+    width: "100%",
+    height: 320,
+    borderRadius: 20,
+    backgroundColor: COLORS.surface,
+  },
+  productBody: {
+    marginTop: 20,
+    gap: 10,
+  },
+  productTitle: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 28,
+  },
+  productPrice: {
+    color: COLORS.purple,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 22,
+  },
+  productMeta: {
+    color: COLORS.textSecondary,
+    fontFamily: "Nunito_600SemiBold",
+  },
+  productDescription: {
+    color: COLORS.textSecondary,
+    lineHeight: 24,
+    fontFamily: "Nunito_500Medium",
+  },
+  productActions: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 12,
+  },
+  primaryButton: {
+    flex: 1,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: COLORS.purple,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  primaryButtonDisabled: {
+    opacity: 0.5,
+  },
+  primaryButtonText: {
+    color: "#FFFFFF",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
+  },
+  secondaryButton: {
+    flex: 1,
+    height: 56,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: COLORS.purple,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.background,
+  },
+  secondaryButtonText: {
+    color: COLORS.purple,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
+  },
+  detailCard: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+    borderRadius: 24,
+    padding: 28,
+    shadowColor: "#200A40",
+    shadowOpacity: 0.06,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 12 },
+  },
+  detailTitle: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 26,
+  },
+  detailSubtitle: {
+    color: COLORS.textSecondary,
+    fontFamily: "Nunito_500Medium",
+    marginTop: 6,
+  },
+  toggleRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 24,
+  },
+  toggleButton: {
+    flex: 1,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    paddingVertical: 14,
+    alignItems: "center",
+    backgroundColor: "#F4EEFF",
+  },
+  toggleButtonActive: {
+    borderColor: COLORS.purple,
+    backgroundColor: "#E8DEFF",
+  },
+  toggleButtonText: {
+    color: COLORS.textSecondary,
+    fontFamily: "Nunito_600SemiBold",
+  },
+  toggleButtonTextActive: {
+    color: COLORS.purple,
+  },
+  fieldBlock: {
+    marginTop: 20,
+  },
+  fieldLabel: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_600SemiBold",
+    marginBottom: 10,
+  },
+  stepper: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    height: 60,
+    gap: 16,
+  },
+  stepperButton: {
+    width: 46,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: "#EEE6FF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  stepperButtonDisabled: {
+    opacity: 0.4,
+  },
+  stepperButtonText: {
+    color: COLORS.purple,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 22,
+  },
+  stepperValue: {
+    flex: 1,
+    textAlign: "center",
+    color: COLORS.purple,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 20,
+  },
+  radioGroup: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  radioOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  radioOuter: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: COLORS.border,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  radioOuterActive: {
+    borderColor: COLORS.purple,
+  },
+  radioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: COLORS.purple,
+  },
+  radioLabel: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_600SemiBold",
+  },
+  noteField: {
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 16,
+    padding: 16,
+    minHeight: 140,
+    backgroundColor: COLORS.background,
+  },
+  noteInput: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_500Medium",
+    minHeight: 80,
+  },
+  charCounter: {
+    color: "#B1A6C4",
+    textAlign: "right",
+    marginTop: 8,
+  },
+  storeRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 12,
+  },
+  storeOption: {
+    flex: 1,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    paddingVertical: 16,
+    alignItems: "center",
+    backgroundColor: COLORS.background,
+  },
+  storeOptionActive: {
+    borderColor: COLORS.purple,
+    backgroundColor: "#ECE4FF",
+  },
+  storeOptionDisabled: {
+    opacity: 0.4,
+  },
+  storeOptionText: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_700Bold",
+  },
+  storeOptionTextActive: {
+    color: COLORS.purple,
+  },
+  inputField: {
+    marginTop: 14,
+  },
+  inputLabel: {
+    color: COLORS.textSecondary,
+    marginBottom: 6,
+    fontFamily: "Nunito_500Medium",
+  },
+  inputWrapper: {
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 52,
+    justifyContent: "center",
+    backgroundColor: COLORS.background,
+  },
+  textInput: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_500Medium",
+  },
+  submitButton: {
+    marginTop: 28,
+    height: 58,
+    borderRadius: 16,
+    backgroundColor: COLORS.purple,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  submitButtonDisabled: {
+    opacity: 0.6,
+  },
+  submitButtonText: {
+    color: "#FFFFFF",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 18,
+  },
+  notice: {
+    marginTop: 14,
+    color: COLORS.textSecondary,
+    fontFamily: "Nunito_500Medium",
+  },
+  moreSection: {
+    marginTop: 40,
+    gap: 20,
+  },
+  moreHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  moreTitle: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 22,
+  },
+  moreSeeAll: {
+    color: COLORS.purple,
+    fontFamily: "Nunito_700Bold",
+  },
+  moreGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 20,
+  },
+  moreCard: {
+    flexBasis: "48%",
+    maxWidth: "48%",
+    backgroundColor: COLORS.background,
+    borderRadius: 20,
+    padding: 16,
+    shadowColor: "#15072C",
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+  },
+  moreImage: {
+    width: "100%",
+    height: 160,
+    borderRadius: 16,
+    backgroundColor: COLORS.surface,
+  },
+  moreBody: {
+    marginTop: 12,
+    gap: 6,
+  },
+  moreName: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
+  },
+  morePrice: {
+    color: COLORS.accent,
+    fontFamily: "Nunito_700Bold",
+  },
+  moreMeta: {
+    color: COLORS.textSecondary,
+    fontFamily: "Nunito_500Medium",
+    fontSize: 13,
+  },
+}) as Record<string, any>;
+
+const modalStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    backgroundColor: COLORS.background,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 24,
+    paddingTop: 18,
+    paddingBottom: 28,
+  },
+  handle: {
+    alignSelf: "center",
+    width: 48,
+    height: 5,
+    borderRadius: 999,
+    backgroundColor: "#E2DAF0",
+    marginBottom: 18,
+  },
+  sheetTitle: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 24,
+    textAlign: "center",
+  },
+  sheetBody: {
+    color: COLORS.textSecondary,
+    fontFamily: "Nunito_500Medium",
+    textAlign: "center",
+    marginTop: 8,
+    lineHeight: 22,
+  },
+  redirectContainer: {
+    alignItems: "center",
+    marginTop: 20,
+    gap: 6,
+  },
+  redirectLabel: {
+    color: COLORS.textSecondary,
+    fontFamily: "Nunito_500Medium",
+  },
+  redirectHost: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 24,
+  },
+  countdown: {
+    color: COLORS.purple,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 36,
+  },
+  buttonStack: {
+    marginTop: 22,
+    gap: 14,
+  },
+  primaryButton: {
+    height: 56,
+    borderRadius: 14,
+    backgroundColor: COLORS.purple,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  primaryButtonText: {
+    color: "#FFFFFF",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
+  },
+  secondaryButton: {
+    height: 56,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: COLORS.purple,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.background,
+  },
+  secondaryButtonText: {
+    color: COLORS.purple,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
+  },
+}) as Record<string, any>;
+
+const sheetStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    backgroundColor: COLORS.background,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 24,
+    paddingTop: 18,
+    paddingBottom: 24,
+    maxHeight: "80%",
+  },
+  handle: {
+    alignSelf: "center",
+    width: 48,
+    height: 5,
+    borderRadius: 999,
+    backgroundColor: "#E2DAF0",
+    marginBottom: 16,
+  },
+  title: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 22,
+  },
+  subtitle: {
+    color: COLORS.textSecondary,
+    fontFamily: "Nunito_500Medium",
+    marginTop: 6,
+  },
+  list: {
+    marginTop: 16,
+  },
+  listItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#EEE7FF",
+  },
+  listLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  listAccent: {
+    width: 6,
+    height: 32,
+    borderRadius: 4,
+    backgroundColor: COLORS.accent,
+  },
+  listTitle: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: "#CFC7DD",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxChecked: {
+    backgroundColor: COLORS.purple,
+    borderColor: COLORS.purple,
+  },
+  emptyState: {
+    paddingVertical: 20,
+  },
+  emptyStateText: {
+    color: COLORS.textSecondary,
+    fontFamily: "Nunito_500Medium",
+  },
+  actions: {
+    gap: 12,
+  },
+  primary: {
+    height: 56,
+    borderRadius: 14,
+    backgroundColor: COLORS.purple,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  primaryDisabled: {
+    opacity: 0.6,
+  },
+  primaryText: {
+    color: "#FFFFFF",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
+  },
+  secondary: {
+    height: 56,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: COLORS.purple,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.background,
+  },
+  secondaryText: {
+    color: COLORS.purple,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
+  },
+}) as Record<string, any>;

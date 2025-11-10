@@ -18,11 +18,11 @@ import {
   Text,
   TextInput,
   View,
+  useWindowDimensions,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Stable, top-level FormField component
 type FormFieldProps = {
   label: string;
   value: string;
@@ -31,7 +31,10 @@ type FormFieldProps = {
   rightIcon?: React.ReactNode;
   placeholder?: string;
   style?: any;
+  inputStyle?: any;
+  labelStyle?: any;
 };
+
 const FormField = React.memo(
   ({
     label,
@@ -41,6 +44,8 @@ const FormField = React.memo(
     rightIcon,
     placeholder,
     style,
+    inputStyle,
+    labelStyle,
   }: FormFieldProps) => (
     <View style={[styles.fieldContainer, style]}>
       <View style={styles.fieldWrapper}>
@@ -49,6 +54,7 @@ const FormField = React.memo(
             styles.textInput,
             multiline && styles.textInputMultiline,
             !value && styles.textInputEmpty,
+            inputStyle,
           ]}
           value={value}
           onChangeText={onChangeText}
@@ -57,7 +63,7 @@ const FormField = React.memo(
           placeholderTextColor="#D1D1D6"
         />
         <View style={styles.floatingLabel}>
-          <Text style={styles.floatingLabelText}>{label}</Text>
+          <Text style={[styles.floatingLabelText, labelStyle]}>{label}</Text>
         </View>
         {rightIcon && <View style={styles.rightIconContainer}>{rightIcon}</View>}
       </View>
@@ -67,6 +73,14 @@ const FormField = React.memo(
 FormField.displayName = "FormField";
 
 const { width: screenWidth } = Dimensions.get("window");
+const DESKTOP_BREAKPOINT = 1024;
+
+type StepStatus = "complete" | "current" | "upcoming";
+
+type StepItem = {
+  label: string;
+  status: StepStatus;
+};
 
 type Occasion =
   | "birthday"
@@ -88,6 +102,66 @@ interface FormData {
   coverPhotoUri: string | null;
 }
 
+type OccasionOption = {
+  id: Exclude<Occasion, null>;
+  title: string;
+  borderColor: string;
+  icon: (color: string, size: number) => React.ReactNode;
+};
+
+const OCCASION_OPTIONS: OccasionOption[] = [
+  {
+    id: "birthday",
+    title: "Birthday",
+    borderColor: "#FC0",
+    icon: (color, size) => <Ionicons name="gift" size={size} color={color} />,
+  },
+  {
+    id: "wedding",
+    title: "Wedding",
+    borderColor: "#FF3B30",
+    icon: (color, size) => <Ionicons name="heart" size={size} color={color} />,
+  },
+  {
+    id: "baby-shower",
+    title: "Baby Shower",
+    borderColor: "#91DA93",
+    icon: (color, size) => <Ionicons name="person" size={size} color={color} />,
+  },
+  {
+    id: "graduation",
+    title: "Graduation",
+    borderColor: "#32ADE6",
+    icon: (color, size) => <Ionicons name="school" size={size} color={color} />,
+  },
+  {
+    id: "new-home",
+    title: "New Home",
+    borderColor: "#A2845E",
+    icon: (color, size) => <Ionicons name="home" size={size} color={color} />,
+  },
+  {
+    id: "retirement",
+    title: "Retirement",
+    borderColor: "#FF9500",
+    icon: (color, size) => <Ionicons name="person" size={size} color={color} />,
+  },
+  {
+    id: "no-occasion",
+    title: "No Occasion",
+    borderColor: "#4D4D4D",
+    icon: (color, size) => (
+      <Ionicons name="document-text" size={size} color={color} />
+    ),
+  },
+  {
+    id: "other",
+    title: "Other",
+    borderColor: "#D1D1D6",
+    icon: (color, size) => <Ionicons name="gift" size={size} color={color} />,
+  },
+];
+
 export default function CreateListStep2() {
   const [formData, setFormData] = useState<FormData>({
     eventTitle: "",
@@ -97,13 +171,17 @@ export default function CreateListStep2() {
     occasion: null,
     coverPhotoUri: null,
   });
-
   const [characterCount, setCharacterCount] = useState(0);
+  const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+
   const createList = useMutation(api.products.createList);
   const updateListDetails = useMutation(api.products.updateListDetails);
   const { user } = useUser();
   const { listId } = useLocalSearchParams<{ listId?: string }>();
-  const existing = useQuery(api.products.getListById, listId ? { listId: listId as any } : "skip");
+  const existing = useQuery(
+    api.products.getListById,
+    listId ? { listId: listId as any } : "skip"
+  );
 
   React.useEffect(() => {
     if (existing) {
@@ -119,8 +197,20 @@ export default function CreateListStep2() {
     }
   }, [existing]);
 
-  // Date picker state & handlers
-  const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+  const updateFormData = (field: keyof FormData, value: string | Occasion) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleNoteChange = (text: string) => {
+    if (text.length <= 400) {
+      updateFormData("eventNote", text);
+      setCharacterCount(text.length);
+    }
+  };
+
   const showDatePicker = () => {
     if (Platform.OS === "web") {
       try {
@@ -154,9 +244,10 @@ export default function CreateListStep2() {
     }
     setDatePickerVisible(true);
   };
+
   const hideDatePicker = () => setDatePickerVisible(false);
+
   const handleDateConfirm = (date: Date) => {
-    // Store as YYYY-MM-DD
     const formatted = date.toISOString().split("T")[0];
     updateFormData("eventDate", formatted);
     hideDatePicker();
@@ -169,7 +260,6 @@ export default function CreateListStep2() {
   const handleContinue = async () => {
     try {
       if (listId) {
-        // Editing existing list: update and then continue to step 3
         await updateListDetails({
           listId: listId as any,
           title: formData.eventTitle,
@@ -179,10 +269,13 @@ export default function CreateListStep2() {
           occasion: formData.occasion || null,
           coverPhotoUri: formData.coverPhotoUri || null,
         });
-        router.push({ pathname: "/create-list-step3", params: { listId: String(listId) } });
+        router.push({
+          pathname: "/create-list-step3",
+          params: { listId: String(listId) },
+        });
         return;
       }
-      // Save a draft list with default privacy 'private'; step 3 can update it later if needed
+
       const newListId = await createList({
         title: formData.eventTitle,
         note: formData.eventNote || null,
@@ -193,28 +286,16 @@ export default function CreateListStep2() {
         privacy: "private",
         user_id: user?.id ?? null,
       });
-      router.push({ pathname: "/create-list-step3", params: { listId: String(newListId) } });
+      router.push({
+        pathname: "/create-list-step3",
+        params: { listId: String(newListId) },
+      });
     } catch (e) {
       console.error("Failed to save list", e);
       Alert.alert("Error", "Could not save your list. Please try again.");
     }
   };
 
-  const updateFormData = (field: keyof FormData, value: string | Occasion) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handleNoteChange = (text: string) => {
-    if (text.length <= 400) {
-      updateFormData("eventNote", text);
-      setCharacterCount(text.length);
-    }
-  };
-
-  // Image picker for cover photo upload
   const handlePickImage = async () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -266,110 +347,371 @@ export default function CreateListStep2() {
     }
   };
 
+  const isFormValid =
+    formData.eventTitle.trim().length > 0 && formData.occasion !== null;
+
+  const headerTitle = listId ? "Edit Event" : "Create Gift List";
+  const steps: StepItem[] = [
+    { label: "Who is this list for?", status: "complete" },
+    { label: "Giftlist Details", status: "current" },
+    { label: "Who can see this list?", status: "upcoming" },
+  ];
+
+  const { width } = useWindowDimensions();
+  const isDesktop = Platform.OS === "web" && width >= DESKTOP_BREAKPOINT;
+
+  const onOccasionSelect = (occasionId: OccasionOption["id"]) =>
+    updateFormData("occasion", occasionId);
+
+  const datePicker = (
+    <DateTimePickerModal
+      isVisible={isDatePickerVisible}
+      mode="date"
+      onConfirm={handleDateConfirm}
+      onCancel={hideDatePicker}
+      display={Platform.OS === "ios" ? "inline" : "default"}
+    />
+  );
+
+  const layoutProps: SharedLayoutProps = {
+    headerTitle,
+    formData,
+    characterCount,
+    updateFormData,
+    handleNoteChange,
+    handleBack,
+    handleContinue,
+    showDatePicker,
+    handlePickImage,
+    isFormValid,
+    occasions: OCCASION_OPTIONS,
+    onOccasionSelect,
+  };
+
+  if (isDesktop) {
+    return (
+      <>
+        <DesktopLayout steps={steps} {...layoutProps} />
+        {datePicker}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <MobileLayout {...layoutProps} />
+      {datePicker}
+    </>
+  );
+}
+
+type SharedLayoutProps = {
+  headerTitle: string;
+  formData: FormData;
+  characterCount: number;
+  updateFormData: (field: keyof FormData, value: string | Occasion) => void;
+  handleNoteChange: (text: string) => void;
+  handleBack: () => void;
+  handleContinue: () => void;
+  showDatePicker: () => void;
+  handlePickImage: () => void;
+  isFormValid: boolean;
+  occasions: OccasionOption[];
+  onOccasionSelect: (occasionId: OccasionOption["id"]) => void;
+};
+
+type DesktopLayoutProps = SharedLayoutProps & {
+  steps: StepItem[];
+};
+
+function DesktopLayout({
+  headerTitle,
+  formData,
+  characterCount,
+  updateFormData,
+  handleNoteChange,
+  handleBack,
+  handleContinue,
+  showDatePicker,
+  handlePickImage,
+  isFormValid,
+  occasions,
+  onOccasionSelect,
+  steps,
+}: DesktopLayoutProps) {
+  return (
+    <SafeAreaView style={styles.desktopSafeArea} edges={["top"]}>
+      <StatusBar barStyle="dark-content" />
+      <View style={styles.desktopWrapper}>
+        <View style={styles.desktopSidebar}>
+          <Pressable onPress={handleBack} style={styles.desktopBackLink}>
+            <Ionicons name="chevron-back" size={20} color="#4B0082" />
+            <Text style={styles.desktopBackText}>Back</Text>
+          </Pressable>
+          <Text style={styles.desktopTitle}>{headerTitle}</Text>
+          <Text style={styles.desktopSubtitle}>
+            To create your gift list, please provide the following details:
+          </Text>
+          <View style={styles.desktopStepList}>
+            {steps.map((step, index) => {
+              const isLast = index === steps.length - 1;
+              return (
+                <View key={step.label} style={styles.desktopStepItem}>
+                  <View style={styles.desktopStepIndicator}>
+                    <View
+                      style={[
+                        styles.desktopStepCircle,
+                        step.status === "complete" &&
+                          styles.desktopStepCircleComplete,
+                        step.status === "current" &&
+                          styles.desktopStepCircleCurrent,
+                      ]}
+                    >
+                      {step.status === "complete" ? (
+                        <Ionicons name="checkmark" size={16} color="#FFFFFF" />
+                      ) : (
+                        <Text
+                          style={[
+                            styles.desktopStepNumber,
+                            step.status === "current"
+                              ? styles.desktopStepNumberActive
+                              : styles.desktopStepNumberInactive,
+                          ]}
+                        >
+                          {index + 1}
+                        </Text>
+                      )}
+                    </View>
+                    {!isLast && <View style={styles.desktopStepConnector} />}
+                  </View>
+                  <Text
+                    style={[
+                      styles.desktopStepLabel,
+                      step.status === "current" &&
+                        styles.desktopStepLabelActive,
+                      step.status === "complete" &&
+                        styles.desktopStepLabelComplete,
+                    ]}
+                  >
+                    {step.label}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        </View>
+        <ScrollView
+          contentContainerStyle={styles.desktopContentScroll}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.desktopContent}>
+            <Text style={styles.desktopSectionHeading}>Giftlist Details</Text>
+            <View style={styles.desktopCoverSection}>
+              <Text style={styles.desktopCoverLabel}>
+                Cover Photo (optional)
+              </Text>
+              <Pressable
+                style={[
+                  styles.uploadArea,
+                  styles.desktopUploadArea,
+                  formData.coverPhotoUri && styles.uploadAreaPreview,
+                ]}
+                onPress={handlePickImage}
+              >
+                {formData.coverPhotoUri ? (
+                  <Image
+                    source={{ uri: formData.coverPhotoUri }}
+                    style={styles.desktopCoverPhotoImage}
+                  />
+                ) : (
+                  <View style={styles.desktopUploadContent}>
+                    <Ionicons
+                      name="cloud-upload-outline"
+                      size={20}
+                      color="#4B0082"
+                    />
+                    <Text style={styles.desktopUploadText}>
+                      Upload cover photo
+                    </Text>
+                  </View>
+                )}
+              </Pressable>
+              <Text style={styles.desktopUploadInfo}>
+                Max size: 4MB. Only JPG, JPEG and PNG with a ratio of 16:9
+              </Text>
+            </View>
+
+            <View style={styles.desktopFieldGrid}>
+              <View style={styles.desktopFieldColumn}>
+                <Text style={styles.desktopFieldLabel}>Event Title</Text>
+                <TextInput
+                  style={styles.desktopTextInput}
+                  value={formData.eventTitle}
+                  onChangeText={(text) => updateFormData("eventTitle", text)}
+                  placeholder="Event Title"
+                  placeholderTextColor="#8E8EA9"
+                />
+              </View>
+              <View style={styles.desktopFieldColumn}>
+                <Text style={styles.desktopFieldLabel}>
+                  Event Date (optional)
+                </Text>
+                <Pressable
+                  onPress={showDatePicker}
+                  style={styles.desktopDateInput}
+                >
+                  <Text
+                    style={[
+                      styles.desktopDateText,
+                      !formData.eventDate && styles.desktopDatePlaceholder,
+                    ]}
+                  >
+                    {formData.eventDate || "DD/MM/YYYY"}
+                  </Text>
+                  <Ionicons
+                    name="calendar-outline"
+                    size={20}
+                    color="#AEAEB2"
+                  />
+                </Pressable>
+              </View>
+            </View>
+
+            <View style={[styles.desktopFieldGrid, styles.desktopFieldGridGap]}>
+              <View style={styles.desktopFieldColumn}>
+                <Text style={styles.desktopFieldLabel}>
+                  Shipping Address (optional)
+                </Text>
+                <TextInput
+                  style={styles.desktopTextInput}
+                  value={formData.shippingAddress}
+                  onChangeText={(text) =>
+                    updateFormData("shippingAddress", text)
+                  }
+                  placeholder="Apt/house #, building/community area, city..."
+                  placeholderTextColor="#8E8EA9"
+                />
+              </View>
+              <View style={styles.desktopFieldColumn}>
+                <Text style={styles.desktopFieldLabel}>
+                  Add Note (optional)
+                </Text>
+                <TextInput
+                  style={[styles.desktopTextInput, styles.desktopNoteInput]}
+                  value={formData.eventNote}
+                  onChangeText={handleNoteChange}
+                  placeholder="Share a sweet message, special instructions, or anything you'd like your guests to know"
+                  placeholderTextColor="#8E8EA9"
+                  multiline
+                />
+                <Text style={styles.desktopCharacterCount}>
+                  {characterCount}/400
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.desktopOccasionSection}>
+              <Text style={styles.desktopSectionHeading}>Choose Occasion</Text>
+              <View style={styles.desktopOccasionGrid}>
+                {occasions.map((option) => (
+                  <DesktopOccasionCard
+                    key={option.id}
+                    option={option}
+                    selected={formData.occasion === option.id}
+                    onPress={() => onOccasionSelect(option.id)}
+                  />
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.desktopActions}>
+              <Pressable onPress={handleBack} style={styles.desktopBackButton}>
+                <Text style={styles.desktopBackButtonText}>Back</Text>
+              </Pressable>
+              <Pressable
+                onPress={handleContinue}
+                disabled={!isFormValid}
+                style={[
+                  styles.desktopContinueButton,
+                  !isFormValid && styles.desktopContinueButtonDisabled,
+                ]}
+              >
+                <Text style={styles.desktopContinueButtonText}>Continue</Text>
+              </Pressable>
+            </View>
+          </View>
+        </ScrollView>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+type DesktopOccasionCardProps = {
+  option: OccasionOption;
+  selected: boolean;
+  onPress: () => void;
+};
+
+function DesktopOccasionCard({
+  option,
+  selected,
+  onPress,
+}: DesktopOccasionCardProps) {
+  const accentColor = option.borderColor;
+  return (
+    <Pressable
+      onPress={onPress}
+      style={[
+        styles.desktopOccasionCard,
+        { borderColor: accentColor },
+        selected && styles.desktopOccasionCardSelected,
+      ]}
+    >
+      <View style={styles.desktopOccasionHeader}>
+        <View style={styles.desktopOccasionInfo}>
+          {option.icon("#330065", 28)}
+          <Text style={styles.desktopOccasionTitle}>{option.title}</Text>
+        </View>
+        <View
+          style={[
+            styles.desktopOccasionRadio,
+            selected && styles.desktopOccasionRadioSelected,
+          ]}
+        >
+          {selected && <View style={styles.desktopOccasionRadioDot} />}
+        </View>
+      </View>
+    </Pressable>
+  );
+}
+
+function MobileLayout({
+  headerTitle,
+  formData,
+  characterCount,
+  updateFormData,
+  handleNoteChange,
+  handleBack,
+  handleContinue,
+  showDatePicker,
+  handlePickImage,
+  isFormValid,
+  occasions,
+  onOccasionSelect,
+}: SharedLayoutProps) {
   const ProgressIndicator = () => (
     <View style={styles.progressContainer}>
       <View style={styles.progressBarContainer}>
-        {/* Step 1 - Completed */}
         <View style={[styles.progressSegment, styles.progressActive]} />
-        {/* Step 2 - Active */}
         <View style={[styles.progressSegment, styles.progressActive]} />
-        {/* Step 3 - Inactive */}
         <View style={[styles.progressSegment, styles.progressInactive]} />
       </View>
     </View>
   );
 
-  const OccasionItem = ({
-    occasion,
-    icon,
-    title,
-    borderColor,
-    isSelected,
-  }: {
-    occasion: Occasion;
-    icon: React.ReactNode;
-    title: string;
-    borderColor: string;
-    isSelected: boolean;
-  }) => (
-    <Pressable
-      style={[styles.occasionItem, { borderLeftColor: borderColor }]}
-      onPress={() => updateFormData("occasion", occasion)}
-    >
-      <View style={styles.occasionContent}>
-        <View style={styles.occasionLeft}>
-          {icon}
-          <Text style={styles.occasionTitle}>{title}</Text>
-        </View>
-        <View
-          style={[styles.radioButton, isSelected && styles.radioButtonSelected]}
-        >
-          {isSelected && <View style={styles.radioButtonInner} />}
-        </View>
-      </View>
-    </Pressable>
-  );
-
-  const occasions = [
-    {
-      id: "birthday" as Occasion,
-      title: "Birthday",
-      icon: <Ionicons name="gift" size={24} color="#1C0335" />,
-      borderColor: "#FC0",
-    },
-    {
-      id: "wedding" as Occasion,
-      title: "Wedding",
-      icon: <Ionicons name="heart" size={24} color="#1C0335" />,
-      borderColor: "#FF3B30",
-    },
-    {
-      id: "baby-shower" as Occasion,
-      title: "Baby shower",
-      icon: <Ionicons name="person" size={24} color="#1C0335" />,
-      borderColor: "#91DA93",
-    },
-    {
-      id: "graduation" as Occasion,
-      title: "Graduation",
-      icon: <Ionicons name="school" size={24} color="#1C0335" />,
-      borderColor: "#32ADE6",
-    },
-    {
-      id: "new-home" as Occasion,
-      title: "New home",
-      icon: <Ionicons name="home" size={24} color="#1C0335" />,
-      borderColor: "#A2845E",
-    },
-    {
-      id: "retirement" as Occasion,
-      title: "Retirement",
-      icon: <Ionicons name="person" size={24} color="#1C0335" />,
-      borderColor: "#FF9500",
-    },
-    {
-      id: "no-occasion" as Occasion,
-      title: "No Occasion",
-      icon: <Ionicons name="document-text" size={24} color="#1C0335" />,
-      borderColor: "#4D4D4D",
-    },
-    {
-      id: "other" as Occasion,
-      title: "Other",
-      icon: <Ionicons name="gift" size={24} color="#1C0335" />,
-      borderColor: "#D1D1D6",
-    },
-  ];
-
-  const isFormValid =
-    formData.eventTitle.trim() !== "" && formData.occasion !== null;
-
-  const headerTitle = listId ? 'Edit Event' : 'Create List'
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#330065" />
-
-      {/* Header */}
       <LinearGradient
         colors={["#330065", "#6600CB"]}
         start={{ x: 0, y: 0 }}
@@ -378,7 +720,6 @@ export default function CreateListStep2() {
       >
         <SafeAreaView edges={["top"]}>
           <View style={styles.headerContent}>
-            {/* Status Bar */}
             <View style={styles.statusBar}>
               <Text style={styles.timeText}>12:48</Text>
               <View style={styles.statusIcons}>
@@ -390,7 +731,6 @@ export default function CreateListStep2() {
               </View>
             </View>
 
-            {/* Navigation */}
             <View style={styles.navigation}>
               <Pressable onPress={handleBack} style={styles.backButton}>
                 <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
@@ -401,14 +741,12 @@ export default function CreateListStep2() {
         </SafeAreaView>
       </LinearGradient>
 
-      {/* Progress Indicator */}
       <ProgressIndicator />
 
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
-        {/* Giftlist Details Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Giftlist details</Text>
 
@@ -435,14 +773,11 @@ export default function CreateListStep2() {
                   </Text>
                 </View>
                 <View style={styles.characterCount}>
-                  <Text style={styles.characterCountText}>
-                    {characterCount}
-                  </Text>
+                  <Text style={styles.characterCountText}>{characterCount}</Text>
                 </View>
               </View>
             </View>
 
-            {/* Event Date - Date Picker */}
             <View style={styles.fieldContainer}>
               <Pressable onPress={showDatePicker} style={styles.fieldWrapper}>
                 <Text
@@ -462,13 +797,6 @@ export default function CreateListStep2() {
                 </View>
               </Pressable>
             </View>
-            <DateTimePickerModal
-              isVisible={isDatePickerVisible}
-              mode="date"
-              onConfirm={handleDateConfirm}
-              onCancel={hideDatePicker}
-              display={Platform.OS === "ios" ? "inline" : "default"}
-            />
 
             <FormField
               label="Shipping Address (optional)"
@@ -484,7 +812,6 @@ export default function CreateListStep2() {
               }
             />
 
-            {/* Cover Photo Upload */}
             <View style={styles.coverPhotoSection}>
               <Text style={styles.coverPhotoLabel}>Cover photo (optional)</Text>
 
@@ -517,46 +844,67 @@ export default function CreateListStep2() {
           </View>
         </View>
 
-        {/* Choose Occasion Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Choose occassion</Text>
 
           <View style={styles.occasionsContainer}>
-            {occasions.map((occasion) => (
+            {occasions.map((option) => (
               <OccasionItem
-                key={occasion.id}
-                occasion={occasion.id}
-                icon={occasion.icon}
-                title={occasion.title}
-                borderColor={occasion.borderColor}
-                isSelected={formData.occasion === occasion.id}
+                key={option.id}
+                option={option}
+                isSelected={formData.occasion === option.id}
+                onSelect={onOccasionSelect}
               />
             ))}
           </View>
         </View>
 
-        {/* Bottom Buttons */}
-        <View style={styles.bottomButtons}>
-          <Pressable
-            style={[
-              styles.continueButton,
-              !isFormValid && styles.continueButtonDisabled,
-            ]}
-            onPress={handleContinue}
-            // disabled={!isFormValid}
-          >
-            <Text style={styles.continueButtonText}>Continue</Text>
-          </Pressable>
-
-          <Pressable style={styles.backButtonBottom} onPress={handleBack}>
-            <Text style={styles.backButtonText}>Back</Text>
-          </Pressable>
-        </View>
-
-        {/* Bottom space for global tab bar */}
         <View style={styles.tabBarSpacer} />
       </ScrollView>
+
+      <View style={styles.bottomButtons}>
+        <Pressable onPress={handleBack} style={styles.backButtonBottom}>
+          <Text style={styles.backButtonText}>Back</Text>
+        </Pressable>
+        <Pressable
+          style={[
+            styles.continueButton,
+            !isFormValid && styles.continueButtonDisabled,
+          ]}
+          onPress={handleContinue}
+          disabled={!isFormValid}
+        >
+          <Text style={styles.continueButtonText}>Continue</Text>
+        </Pressable>
+      </View>
     </View>
+  );
+}
+
+type OccasionItemProps = {
+  option: OccasionOption;
+  isSelected: boolean;
+  onSelect: (occasionId: OccasionOption["id"]) => void;
+};
+
+function OccasionItem({ option, isSelected, onSelect }: OccasionItemProps) {
+  return (
+    <Pressable
+      style={[styles.occasionItem, { borderLeftColor: option.borderColor }]}
+      onPress={() => onSelect(option.id)}
+    >
+      <View style={styles.occasionContent}>
+        <View style={styles.occasionLeft}>
+          {option.icon("#1C0335", 24)}
+          <Text style={styles.occasionTitle}>{option.title}</Text>
+        </View>
+        <View
+          style={[styles.radioButton, isSelected && styles.radioButtonSelected]}
+        >
+          {isSelected && <View style={styles.radioButtonInner} />}
+        </View>
+      </View>
+    </Pressable>
   );
 }
 
@@ -644,8 +992,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   section: {
+    marginBottom: 32,
     paddingHorizontal: 16,
-    marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 24,
@@ -656,21 +1004,21 @@ const styles = StyleSheet.create({
     lineHeight: 28,
   },
   formContainer: {
-    gap: 40,
+    gap: 24,
   },
   fieldContainer: {
-    position: "relative",
+    minHeight: 135,
   },
   fieldWrapper: {
     borderWidth: 1,
     borderColor: "#AEAEB2",
     borderRadius: 8,
-    backgroundColor: "#FFFFFF",
-    minHeight: 56,
+    overflow: "hidden",
     position: "relative",
+    backgroundColor: "#FFFFFF",
   },
   noteFieldWrapper: {
-    minHeight: 135,
+    minHeight: 160,
   },
   textInput: {
     padding: 16,
@@ -855,6 +1203,305 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   tabBarSpacer: {
-    height: 100, // Space for global tab bar
+    height: 100,
+  },
+  desktopSafeArea: {
+    flex: 1,
+    backgroundColor: "#F8F5FF",
+  },
+  desktopWrapper: {
+    flex: 1,
+    flexDirection: "row",
+  },
+  desktopSidebar: {
+    width: 320,
+    paddingVertical: 56,
+    paddingHorizontal: 48,
+    backgroundColor: "#FBF8FF",
+    borderRightWidth: 1,
+    borderRightColor: "#E7DCF6",
+  },
+  desktopBackLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 32,
+  },
+  desktopBackText: {
+    fontSize: 16,
+    fontFamily: "Nunito_600SemiBold",
+    color: "#4B0082",
+  },
+  desktopTitle: {
+    fontSize: 32,
+    fontFamily: "Nunito_700Bold",
+    color: "#330065",
+    marginBottom: 12,
+  },
+  desktopSubtitle: {
+    fontSize: 16,
+    fontFamily: "Nunito_400Regular",
+    color: "#4A3B66",
+    lineHeight: 24,
+    marginBottom: 40,
+  },
+  desktopStepList: {
+    gap: 24,
+  },
+  desktopStepItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 16,
+  },
+  desktopStepIndicator: {
+    alignItems: "center",
+    position: "relative",
+  },
+  desktopStepCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: "#D8C9F6",
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  desktopStepCircleComplete: {
+    backgroundColor: "#4B0082",
+    borderColor: "#4B0082",
+  },
+  desktopStepCircleCurrent: {
+    borderColor: "#4B0082",
+    backgroundColor: "#F5EDFF",
+  },
+  desktopStepNumber: {
+    fontSize: 18,
+    fontFamily: "Nunito_700Bold",
+  },
+  desktopStepNumberActive: {
+    color: "#4B0082",
+  },
+  desktopStepNumberInactive: {
+    color: "#8E8EA9",
+  },
+  desktopStepConnector: {
+    position: "absolute",
+    top: 44,
+    left: 19,
+    width: 2,
+    height: 48,
+    backgroundColor: "#E7DCF6",
+  },
+  desktopStepLabel: {
+    fontSize: 18,
+    fontFamily: "Nunito_600SemiBold",
+    color: "#8E8EA9",
+    flex: 1,
+  },
+  desktopStepLabelActive: {
+    color: "#330065",
+  },
+  desktopStepLabelComplete: {
+    color: "#4B0082",
+  },
+  desktopContentScroll: {
+    flexGrow: 1,
+    paddingVertical: 56,
+    paddingHorizontal: 64,
+  },
+  desktopContent: {
+    flex: 1,
+    gap: 40,
+  },
+  desktopSectionHeading: {
+    fontSize: 28,
+    fontFamily: "Nunito_700Bold",
+    color: "#330065",
+  },
+  desktopCoverSection: {
+    gap: 16,
+  },
+  desktopCoverLabel: {
+    fontSize: 18,
+    fontFamily: "Nunito_700Bold",
+    color: "#330065",
+  },
+  desktopUploadArea: {
+    height: 180,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: "#D8C9F6",
+    borderStyle: "dashed",
+    backgroundColor: "#FFFFFF",
+  },
+  desktopUploadContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  desktopUploadText: {
+    fontSize: 16,
+    fontFamily: "Nunito_600SemiBold",
+    color: "#4B0082",
+  },
+  desktopUploadInfo: {
+    fontSize: 14,
+    fontFamily: "Nunito_400Regular",
+    color: "#6B5C87",
+  },
+  desktopCoverPhotoImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+  desktopFieldGrid: {
+    flexDirection: "row",
+    gap: 32,
+  },
+  desktopFieldGridGap: {
+    marginTop: 8,
+  },
+  desktopFieldColumn: {
+    flex: 1,
+  },
+  desktopFieldLabel: {
+    fontSize: 16,
+    fontFamily: "Nunito_600SemiBold",
+    color: "#4A3B66",
+    marginBottom: 12,
+  },
+  desktopTextInput: {
+    borderWidth: 1,
+    borderColor: "#D8C9F6",
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    fontSize: 16,
+    fontFamily: "Nunito_400Regular",
+    color: "#330065",
+    backgroundColor: "#FFFFFF",
+  },
+  desktopDateInput: {
+    borderWidth: 1,
+    borderColor: "#D8C9F6",
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#FFFFFF",
+  },
+  desktopDateText: {
+    fontSize: 16,
+    fontFamily: "Nunito_400Regular",
+    color: "#330065",
+  },
+  desktopDatePlaceholder: {
+    color: "#8E8EA9",
+  },
+  desktopNoteInput: {
+    minHeight: 140,
+    textAlignVertical: "top",
+  },
+  desktopCharacterCount: {
+    marginTop: 8,
+    textAlign: "right",
+    fontSize: 12,
+    fontFamily: "Nunito_400Regular",
+    color: "#8E8EA9",
+  },
+  desktopOccasionSection: {
+    gap: 24,
+  },
+  desktopOccasionGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 20,
+  },
+  desktopOccasionCard: {
+    flexGrow: 1,
+    minWidth: 240,
+    maxWidth: 320,
+    borderWidth: 2,
+    borderRadius: 16,
+    padding: 24,
+    backgroundColor: "#FFFFFF",
+  },
+  desktopOccasionCardSelected: {
+    borderColor: "#4B0082",
+    backgroundColor: "#F5EDFF",
+    shadowColor: "#4B0082",
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 4,
+  },
+  desktopOccasionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  desktopOccasionInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  desktopOccasionTitle: {
+    fontSize: 20,
+    fontFamily: "Nunito_700Bold",
+    color: "#330065",
+  },
+  desktopOccasionRadio: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: "#D8C9F6",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  desktopOccasionRadioSelected: {
+    borderColor: "#4B0082",
+  },
+  desktopOccasionRadioDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#4B0082",
+  },
+  desktopActions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 24,
+  },
+  desktopBackButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#4B0082",
+    backgroundColor: "#FFFFFF",
+  },
+  desktopBackButtonText: {
+    fontSize: 16,
+    fontFamily: "Nunito_600SemiBold",
+    color: "#4B0082",
+  },
+  desktopContinueButton: {
+    paddingVertical: 16,
+    paddingHorizontal: 36,
+    borderRadius: 10,
+    backgroundColor: "#4B0082",
+  },
+  desktopContinueButtonDisabled: {
+    backgroundColor: "#CDB8EC",
+  },
+  desktopContinueButtonText: {
+    fontSize: 16,
+    fontFamily: "Nunito_700Bold",
+    color: "#FFFFFF",
   },
 });

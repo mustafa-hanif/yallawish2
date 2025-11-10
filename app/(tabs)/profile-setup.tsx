@@ -148,8 +148,11 @@ export default function ProfileSetupScreen() {
   };
 
   const goToApp = () => {
-    const target = decodedReturnTo ? (decodedReturnTo as any) : "/";
-    router.replace(target);
+    if (decodedReturnTo) {
+      router.replace(decodedReturnTo as any);
+      return;
+    }
+    router.replace("/create-list-step1");
   };
 
   const handleContinue = async () => {

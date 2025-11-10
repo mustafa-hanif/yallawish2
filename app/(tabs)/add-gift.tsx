@@ -1,12 +1,13 @@
 import { RibbonHeader } from "@/components/RibbonHeader";
 import { ActionsBar, FooterBar, GiftItemCard, HeaderBar, InfoBox, ListCover } from "@/components/list";
+import type { GiftItem as GiftItemType } from "@/components/list/GiftItemCard";
 import { api } from "@/convex/_generated/api";
-import { styles } from "@/styles/addGiftStyles";
+import { desktopStyles, styles } from "@/styles/addGiftStyles";
 import { Ionicons } from "@expo/vector-icons";
 import { useAction, useMutation, useQuery } from "convex/react";
 import * as Linking from 'expo-linking';
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
   Easing,
@@ -19,10 +20,48 @@ import {
   StatusBar,
   Text,
   TextInput,
-  View
+  View,
+  useWindowDimensions
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView } from 'react-native-webview';
+
+type SortOption = 'default' | 'priceAsc' | 'priceDesc' | 'newest' | 'oldest';
+
+const SORT_OPTIONS: { key: SortOption; label: string }[] = [
+  { key: 'default', label: 'Default' },
+  { key: 'priceAsc', label: 'Price: Low to High' },
+  { key: 'priceDesc', label: 'Price: High to Low' },
+  { key: 'newest', label: 'Newest' },
+  { key: 'oldest', label: 'Oldest' },
+];
+
+const DESKTOP_BREAKPOINT = 1024;
+const FALLBACK_COVER = require("@/assets/images/nursery.png");
+
+const getPrivacyDisplay = (privacy: string, loading: boolean, shareCount?: number) => {
+  if (loading) {
+    return {
+      label: "Loading...",
+      description: "Fetching privacy",
+      icon: "lock-closed-outline" as const,
+    };
+  }
+  const isShared = privacy === "shared";
+  const isPublic = isShared && (shareCount ?? 0) === 0;
+  if (isShared) {
+    return {
+      label: isPublic ? "Public" : "Shared",
+      description: isPublic ? "Anyone with the link" : "Only people you choose",
+      icon: isPublic ? ("globe-outline" as const) : ("people-outline" as const),
+    };
+  }
+  return {
+    label: "Private",
+    description: "Only you can see this",
+    icon: "lock-closed-outline" as const,
+  };
+};
 
 export default function AddGift() {
   const { listId } = useLocalSearchParams<{ listId?: string }>();
@@ -39,25 +78,26 @@ export default function AddGift() {
   }, [items, listId, seedItem]);
 
   // All list items
-  const giftItems = Array.isArray(items) ? [...items] : [];
+  const giftItems: GiftItemType[] = useMemo(() => (Array.isArray(items) ? [...items] : []), [items]);
 
   // Sort & Filter state
-  type SortOption = 'default' | 'priceAsc' | 'priceDesc' | 'newest' | 'oldest';
   const [sortBy, setSortBy] = useState<SortOption>('default');
   const [filterClaimed, setFilterClaimed] = useState(false);
   const [filterUnclaimed, setFilterUnclaimed] = useState(false);
 
   // Derived displayed items
-  let displayedItems = giftItems;
+  let displayedItems: GiftItemType[] = giftItems;
   if (filterClaimed && !filterUnclaimed) {
-    displayedItems = displayedItems.filter((i: any) => (i.claimed ?? 0) >= (i.quantity ?? 1));
+    displayedItems = displayedItems.filter((i) => (i.claimed ?? 0) >= (i.quantity ?? 1));
   } else if (filterUnclaimed && !filterClaimed) {
-    displayedItems = displayedItems.filter((i: any) => (i.claimed ?? 0) < (i.quantity ?? 1));
+    displayedItems = displayedItems.filter((i) => (i.claimed ?? 0) < (i.quantity ?? 1));
   }
   try {
-    displayedItems = [...displayedItems].sort((a: any, b: any) => {
-      const aPrice = parseFloat(a.price) || 0; const bPrice = parseFloat(b.price) || 0;
-      const ad = a.created_at || ""; const bd = b.created_at || "";
+    displayedItems = [...displayedItems].sort((a, b) => {
+      const aPrice = parseFloat(String(a.price ?? 0)) || 0;
+      const bPrice = parseFloat(String(b.price ?? 0)) || 0;
+      const ad = (a as any)?.created_at || "";
+      const bd = (b as any)?.created_at || "";
       switch (sortBy) {
         case 'priceAsc': return aPrice - bPrice;
         case 'priceDesc': return bPrice - aPrice;
@@ -89,6 +129,85 @@ export default function AddGift() {
       return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
     }
   };
+
+  const { width } = useWindowDimensions();
+  const isDesktop = Platform.OS === "web" && width >= DESKTOP_BREAKPOINT;
+
+  const availability = useMemo<"all" | "claimed" | "unclaimed">(() => {
+    if (filterClaimed && !filterUnclaimed) return "claimed";
+    if (filterUnclaimed && !filterClaimed) return "unclaimed";
+    return "all";
+  }, [filterClaimed, filterUnclaimed]);
+
+  const handleAvailabilityChange = useCallback((value: "all" | "claimed" | "unclaimed") => {
+    switch (value) {
+      case "claimed":
+        setFilterClaimed(true);
+        setFilterUnclaimed(false);
+        break;
+      case "unclaimed":
+        setFilterClaimed(false);
+        setFilterUnclaimed(true);
+        break;
+      default:
+        setFilterClaimed(false);
+        setFilterUnclaimed(false);
+        break;
+    }
+  }, [setFilterClaimed, setFilterUnclaimed]);
+
+  const totals = useMemo(() => {
+    return giftItems.reduce(
+      (acc, item) => {
+        const quantity = Number(item.quantity ?? 1);
+        const claimed = Number(item.claimed ?? 0);
+        acc.totalItems += 1;
+        acc.totalQuantity += quantity;
+        acc.claimedUnits += Math.min(quantity, claimed);
+        if (claimed >= quantity) {
+          acc.fullyClaimed += 1;
+        } else if (claimed > 0) {
+          acc.claimedCount += 1;
+        } else {
+          acc.unclaimedCount += 1;
+        }
+        return acc;
+      },
+      { totalItems: 0, totalQuantity: 0, fullyClaimed: 0, claimedCount: 0, unclaimedCount: 0, claimedUnits: 0 }
+    );
+  }, [giftItems]);
+
+  const eventDateStr = (list?.eventDate as string | undefined) ?? undefined;
+  const formattedEventDate = formatEventDate(eventDateStr);
+  const daysToGoText = useMemo(() => {
+    if (!eventDateStr) return null;
+    const parts = eventDateStr.split("-").map((p) => parseInt(p, 10));
+    if (parts.length !== 3 || parts.some((n) => Number.isNaN(n))) return null;
+    const [yyyy, mm, dd] = parts;
+    const eventDate = new Date(yyyy, (mm ?? 1) - 1, dd ?? 1);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffMs = eventDate.getTime() - today.getTime();
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+    if (Number.isNaN(diffDays)) return null;
+    if (diffDays > 1) return `${String(diffDays).padStart(2, "0")} days to go`;
+    if (diffDays === 1) return "1 day to go";
+    if (diffDays === 0) return "Event is today";
+    return "Event passed";
+  }, [eventDateStr]);
+
+  const lastUpdatedLabel = "Last updated: July 15, 2025 | 08:00PM";
+  const listIdString = listId ? String(listId) : undefined;
+
+  const handleOpenGift = useCallback((item: GiftItemType) => {
+    router.push({
+      pathname: "/gift-detail",
+      params: {
+        itemId: String(item._id),
+        ...(listIdString ? { listId: listIdString } : {}),
+      },
+    });
+  }, [listIdString]);
 
   const handleBack = () => { router.back(); };
 
@@ -125,6 +244,20 @@ export default function AddGift() {
   const [tempSortBy, setTempSortBy] = useState<SortOption>('default');
   const [tempFilterClaimed, setTempFilterClaimed] = useState(false);
   const [tempFilterUnclaimed, setTempFilterUnclaimed] = useState(false);
+  const openSortSheet = useCallback(() => {
+    setTempSortBy(sortBy);
+    setTempFilterClaimed(filterClaimed);
+    setTempFilterUnclaimed(filterUnclaimed);
+    setShowSortSheet(true);
+  }, [filterClaimed, filterUnclaimed, sortBy]);
+
+  useEffect(() => {
+    if (!showSortSheet) {
+      setTempSortBy(sortBy);
+      setTempFilterClaimed(filterClaimed);
+      setTempFilterUnclaimed(filterUnclaimed);
+    }
+  }, [showSortSheet, sortBy, filterClaimed, filterUnclaimed]);
   const DESCRIPTION_LIMIT = 400;
   const canSave = !!listId && (link.trim().length > 0 || name.trim().length > 0) && quantity > 0 && !saving;
 
@@ -240,54 +373,59 @@ export default function AddGift() {
   const privacy = list?.privacy ?? "private";
   const shares = useQuery(api.products.getListShares as any, listId ? ({ list_id: listId } as any) : "skip");
   const shareCount = Array.isArray(shares) ? shares.length : undefined;
+  const address = (list?.shippingAddress as string | undefined) ?? null;
+  const ribbonSubtitle = subtitle || formattedEventDate || "";
 
+
+  const layout = isDesktop ? (
+    <DesktopLayout
+      title={title}
+      subtitle={subtitle}
+      ribbonSubtitle={ribbonSubtitle}
+      coverUri={coverUri}
+      formattedEventDate={formattedEventDate}
+      daysToGo={daysToGoText}
+      totals={totals}
+      totalItemsCount={giftItems.length}
+      availability={availability}
+      onAvailabilityChange={handleAvailabilityChange}
+      sortBy={sortBy}
+      onSelectSort={setSortBy}
+      displayedItems={displayedItems}
+      onAddGift={handleAddGift}
+      onShare={handleShare}
+      onManage={handleManageList}
+      onOpenGift={handleOpenGift}
+      privacy={privacy}
+      shareCount={shareCount}
+      loading={loading}
+      address={address}
+      lastUpdated={lastUpdatedLabel}
+    />
+  ) : (
+    <MobileLayout
+      title={title}
+      subtitle={ribbonSubtitle}
+      coverUri={coverUri}
+      overlayText={formattedEventDate}
+      displayedItems={displayedItems}
+      onAddGift={handleAddGift}
+      onOpenSortSheet={openSortSheet}
+      listId={listIdString}
+      onShare={handleShare}
+      onManage={handleManageList}
+      handleBack={handleBack}
+      privacy={privacy}
+      loading={loading}
+      shareCount={shareCount}
+      address={address}
+      lastUpdated={lastUpdatedLabel}
+    />
+  );
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#330065" />
-
-      <HeaderBar title={title} onBack={handleBack} />
-
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <ListCover imageUri={coverUri} overlayText={formatEventDate((list?.eventDate ?? undefined) as string | undefined)} />
-
-        <View style={styles.listInfoContainer}>
-          <RibbonHeader title={title} subtitle={subtitle ?? ""} />
-        </View>
-
-        <ActionsBar privacy={privacy} loading={loading} onFilterPress={() => setShowSortSheet(true)} address={(list?.shippingAddress as string | undefined) ?? null} shareCount={shareCount} />
-
-        <View style={styles.addGiftSection}>
-          {displayedItems.length > 0 ? (
-            <>
-              {displayedItems.map((item: any) => (
-                <GiftItemCard key={item._id} item={item} />
-              ))}
-              <Pressable style={styles.addMoreButton} onPress={handleAddGift}>
-                <Ionicons name="add" size={20} color="#3B0076" />
-                <Text style={styles.addMoreButtonText}>Add more gifts</Text>
-              </Pressable>
-            </>
-          ) : (
-            <>
-              <Text style={styles.addGiftTitle}>Add your first gift item</Text>
-              <Pressable style={styles.addGiftButton} onPress={handleAddGift}>
-                <Ionicons name="add" size={24} color="#3B0076" />
-                <Text style={styles.addGiftButtonText}>Add a gift</Text>
-              </Pressable>
-              {listId && (
-                <Text style={{ textAlign: 'center', color: '#8E8E93' }}>Working on list: {String(listId)}</Text>
-              )}
-            </>
-          )}
-        </View>
-
-        <InfoBox>
-          To learn more on how to add gifts from web browser, <Text style={styles.linkText}>click here</Text>
-        </InfoBox>
-      </ScrollView>
-
-      <FooterBar lastUpdated="Last updated: July 15, 2025 | 08:00PM" onShare={handleShare} onManage={handleManageList} />
+    <View style={isDesktop ? desktopStyles.container : styles.container}>
+      {layout}
       {/** Bottom Sheet **/}
       <Modal visible={showSheet} transparent animationType="none" onRequestClose={closeSheet}>
         <Pressable style={styles.backdrop} onPress={closeSheet} />
@@ -454,6 +592,474 @@ export default function AddGift() {
           </View>
         </View>
       </Modal>
+    </View>
+  );
+}
+
+type Totals = {
+  totalItems: number;
+  totalQuantity: number;
+  fullyClaimed: number;
+  claimedCount: number;
+  unclaimedCount: number;
+  claimedUnits: number;
+};
+
+type MobileLayoutProps = {
+  title: string;
+  subtitle: string;
+  coverUri?: string;
+  overlayText: string;
+  displayedItems: GiftItemType[];
+  onAddGift: () => void;
+  onOpenSortSheet: () => void;
+  listId?: string;
+  onShare: () => void;
+  onManage: () => void;
+  handleBack: () => void;
+  privacy: string;
+  loading: boolean;
+  shareCount?: number;
+  address?: string | null;
+  lastUpdated: string;
+};
+
+function MobileLayout({
+  title,
+  subtitle,
+  coverUri,
+  overlayText,
+  displayedItems,
+  onAddGift,
+  onOpenSortSheet,
+  listId,
+  onShare,
+  onManage,
+  handleBack,
+  privacy,
+  loading,
+  shareCount,
+  address,
+  lastUpdated,
+}: MobileLayoutProps) {
+  return (
+    <>
+      <StatusBar barStyle="light-content" backgroundColor="#330065" />
+      <HeaderBar title={title} onBack={handleBack} />
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ListCover imageUri={coverUri} overlayText={overlayText} />
+
+        <View style={styles.listInfoContainer}>
+          <RibbonHeader title={title} subtitle={subtitle} />
+        </View>
+
+        <ActionsBar
+          privacy={privacy}
+          loading={loading}
+          onFilterPress={onOpenSortSheet}
+          address={address}
+          shareCount={shareCount}
+        />
+
+        <View style={styles.addGiftSection}>
+          {displayedItems.length > 0 ? (
+            <>
+              {displayedItems.map((item) => (
+                <GiftItemCard key={item._id} item={item} />
+              ))}
+              <Pressable style={styles.addMoreButton} onPress={onAddGift}>
+                <Ionicons name="add" size={20} color="#3B0076" />
+                <Text style={styles.addMoreButtonText}>Add more gifts</Text>
+              </Pressable>
+            </>
+          ) : (
+            <>
+              <Text style={styles.addGiftTitle}>Add your first gift item</Text>
+              <Pressable style={styles.addGiftButton} onPress={onAddGift}>
+                <Ionicons name="add" size={24} color="#3B0076" />
+                <Text style={styles.addGiftButtonText}>Add a gift</Text>
+              </Pressable>
+              {listId && (
+                <Text style={{ textAlign: "center", color: "#8E8E93" }}>Working on list: {listId}</Text>
+              )}
+            </>
+          )}
+        </View>
+
+        <InfoBox>
+          To learn more on how to add gifts from web browser, <Text style={styles.linkText}>click here</Text>
+        </InfoBox>
+      </ScrollView>
+
+      <FooterBar lastUpdated={lastUpdated} onShare={onShare} onManage={onManage} />
+    </>
+  );
+}
+
+type DesktopLayoutProps = {
+  title: string;
+  subtitle: string;
+  ribbonSubtitle: string;
+  coverUri?: string;
+  formattedEventDate: string;
+  daysToGo: string | null;
+  totals: Totals;
+  totalItemsCount: number;
+  availability: "all" | "claimed" | "unclaimed";
+  onAvailabilityChange: (value: "all" | "claimed" | "unclaimed") => void;
+  sortBy: SortOption;
+  onSelectSort: (value: SortOption) => void;
+  displayedItems: GiftItemType[];
+  onAddGift: () => void;
+  onShare: () => void;
+  onManage: () => void;
+  onOpenGift: (item: GiftItemType) => void;
+  privacy: string;
+  shareCount?: number;
+  loading: boolean;
+  address?: string | null;
+  lastUpdated: string;
+};
+
+function DesktopLayout({
+  title,
+  subtitle,
+  ribbonSubtitle,
+  coverUri,
+  formattedEventDate,
+  daysToGo,
+  totals,
+  totalItemsCount,
+  availability,
+  onAvailabilityChange,
+  sortBy,
+  onSelectSort,
+  displayedItems,
+  onAddGift,
+  onShare,
+  onManage,
+  onOpenGift,
+  privacy,
+  shareCount,
+  loading,
+  address,
+  lastUpdated,
+}: DesktopLayoutProps) {
+  const privacyDisplay = getPrivacyDisplay(privacy, loading, shareCount);
+  const availabilityOptions: { value: "all" | "claimed" | "unclaimed"; label: string }[] = [
+    { value: "all", label: "All" },
+    { value: "claimed", label: "Claimed" },
+    { value: "unclaimed", label: "Unclaimed" },
+  ];
+  const availabilityLabel = availabilityOptions.find((opt) => opt.value === availability)?.label ?? "All";
+  const sortLabel = SORT_OPTIONS.find((opt) => opt.key === sortBy)?.label ?? "Default";
+  const visibilityText = React.useMemo(() => {
+    if (loading) return "Loading privacy";
+    if (privacy === "shared") {
+      return (shareCount ?? 0) === 0 ? "Visible to Everyone" : "Visible to My People";
+    }
+    if (privacy === "public") return "Visible to Everyone";
+    return "Only Me";
+  }, [loading, privacy, shareCount]);
+  const [showAvailabilityMenu, setShowAvailabilityMenu] = React.useState(false);
+  const [showSortMenu, setShowSortMenu] = React.useState(false);
+
+  return (
+    <SafeAreaView style={desktopStyles.safeArea} edges={Platform.OS === "web" ? [] : ["top"]}>
+      <StatusBar barStyle="dark-content" />
+      <ScrollView contentContainerStyle={desktopStyles.scrollContent}>
+        <View style={desktopStyles.maxWidth}>
+          <View style={desktopStyles.topBar}>
+            <Text style={desktopStyles.breadcrumbText}>
+              Home / My List / <Text style={desktopStyles.breadcrumbCurrent}>{title}</Text>
+            </Text>
+            <View style={desktopStyles.topActions}>
+              <Pressable style={desktopStyles.manageButton} onPress={onManage}>
+                <Ionicons name="settings-outline" size={18} color="#3B0076" />
+                <Text style={desktopStyles.manageButtonText}>Manage List</Text>
+              </Pressable>
+              <Pressable style={desktopStyles.addButton} onPress={onAddGift}>
+                <Ionicons name="add" size={20} color="#FFFFFF" />
+                <Text style={desktopStyles.addButtonText}>Add a Gift</Text>
+              </Pressable>
+            </View>
+          </View>
+
+          <View style={desktopStyles.heroCard}>
+            <Image source={coverUri ? { uri: coverUri } : FALLBACK_COVER} style={desktopStyles.heroImage} />
+            <View style={desktopStyles.heroOverlay}>
+              <Pressable style={desktopStyles.changeCoverButton} onPress={onManage}>
+                <Text style={desktopStyles.changeCoverText}>Change cover photo</Text>
+              </Pressable>
+              <View style={desktopStyles.ribbonContainer}>
+                <RibbonHeader
+                  title={title}
+                  subtitle={[ribbonSubtitle, daysToGo].filter(Boolean).join(" - ")}
+                />
+              </View>
+            </View>
+          </View>
+
+          <View style={desktopStyles.controlsRow}>
+            <Pressable style={desktopStyles.visibilityTrigger} onPress={onManage}>
+              <Ionicons name={privacyDisplay.icon === "globe-outline" ? "eye-outline" : privacyDisplay.icon} size={18} color="#3B0076" />
+              <Text style={desktopStyles.visibilityText}>{visibilityText}</Text>
+              <Ionicons name="chevron-down" size={16} color="#3B0076" />
+            </Pressable>
+
+            <View style={desktopStyles.filterCluster}>
+              <View style={desktopStyles.filterGroup}>
+                <Text style={desktopStyles.filterLabel}>Availability:</Text>
+                <Pressable
+                  style={desktopStyles.filterButton}
+                  onPress={() => setShowAvailabilityMenu(true)}
+                >
+                  <Text style={desktopStyles.filterButtonText}>{availabilityLabel}</Text>
+                  <Ionicons name="chevron-down" size={14} color="#3B0076" />
+                </Pressable>
+              </View>
+              <View style={desktopStyles.filterGroup}>
+                <Text style={desktopStyles.filterLabel}>Sort</Text>
+                <Pressable
+                  style={desktopStyles.filterButton}
+                  onPress={() => setShowSortMenu(true)}
+                >
+                  <Text style={desktopStyles.filterButtonText}>{sortLabel}</Text>
+                  <Ionicons name="chevron-down" size={14} color="#3B0076" />
+                </Pressable>
+              </View>
+            </View>
+
+            <Pressable style={desktopStyles.shareLink} onPress={onShare}>
+              <Ionicons name="share-social-outline" size={18} color="#3B0076" />
+              <Text style={desktopStyles.shareLinkText}>Share List</Text>
+            </Pressable>
+          </View>
+
+          <View style={desktopStyles.sectionDivider} />
+
+          {!!address && (
+            <View style={desktopStyles.addressNotice}>
+              <Ionicons name="location-outline" size={18} color="#3B0076" />
+              <Text style={desktopStyles.addressText} numberOfLines={1}>
+                {address}
+              </Text>
+            </View>
+          )}
+
+          <View style={desktopStyles.listSummaryRow}>
+            <View style={desktopStyles.listSummaryLeft}>
+              <Text style={desktopStyles.listSummaryLabel}>Total items in list:</Text>
+              <View style={desktopStyles.listSummaryBadge}>
+                <Text style={desktopStyles.listSummaryBadgeText}>{totalItemsCount}</Text>
+              </View>
+            </View>
+            <Pressable style={desktopStyles.summaryShare} onPress={onShare}>
+              <Text style={desktopStyles.summaryShareText}>Share List</Text>
+              <Ionicons name="share-social-outline" size={16} color="#3B0076" />
+            </Pressable>
+          </View>
+
+          <View style={desktopStyles.sectionDivider} />
+
+          <View style={desktopStyles.itemsColumn}>
+            {displayedItems.length > 0 ? (
+              displayedItems.map((item, index) => (
+                <DesktopGiftItemRow key={item._id} item={item} onPress={onOpenGift} index={index} />
+              ))
+            ) : (
+              <View style={desktopStyles.emptyState}>
+                <Text style={desktopStyles.emptyTitle}>No gifts yet</Text>
+                <Text style={desktopStyles.emptySubtitle}>
+                  Start adding items to make this list shine.
+                </Text>
+                <Pressable style={desktopStyles.addButtonSecondary} onPress={onAddGift}>
+                  <Ionicons name="add" size={18} color="#3B0076" />
+                  <Text style={desktopStyles.addButtonSecondaryText}>Add a gift</Text>
+                </Pressable>
+              </View>
+            )}
+          </View>
+
+          <Text style={desktopStyles.lastUpdated}>{lastUpdated}</Text>
+        </View>
+      </ScrollView>
+
+      <Modal
+        visible={showAvailabilityMenu}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowAvailabilityMenu(false)}
+      >
+        <Pressable style={desktopStyles.menuBackdrop} onPress={() => setShowAvailabilityMenu(false)}>
+          <View style={desktopStyles.menuCard}>
+            {availabilityOptions.map((option) => (
+              <Pressable
+                key={option.value}
+                style={desktopStyles.menuRow}
+                onPress={() => {
+                  setShowAvailabilityMenu(false);
+                  onAvailabilityChange(option.value);
+                }}
+              >
+                <Text style={desktopStyles.menuLabel}>{option.label}</Text>
+                {availability === option.value && (
+                  <Ionicons name="checkmark" size={18} color="#3B0076" />
+                )}
+              </Pressable>
+            ))}
+          </View>
+        </Pressable>
+      </Modal>
+
+      <Modal
+        visible={showSortMenu}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowSortMenu(false)}
+      >
+        <Pressable style={desktopStyles.menuBackdrop} onPress={() => setShowSortMenu(false)}>
+          <View style={desktopStyles.menuCard}>
+            {SORT_OPTIONS.map((option) => (
+              <Pressable
+                key={option.key}
+                style={desktopStyles.menuRow}
+                onPress={() => {
+                  setShowSortMenu(false);
+                  onSelectSort(option.key);
+                }}
+              >
+                <Text style={desktopStyles.menuLabel}>{option.label}</Text>
+                {sortBy === option.key && (
+                  <Ionicons name="checkmark" size={18} color="#3B0076" />
+                )}
+              </Pressable>
+            ))}
+          </View>
+        </Pressable>
+      </Modal>
+    </SafeAreaView>
+  );
+}
+
+type DesktopGiftItemRowProps = {
+  item: GiftItemType;
+  onPress: (item: GiftItemType) => void;
+  index: number;
+};
+
+function DesktopGiftItemRow({ item, onPress, index }: DesktopGiftItemRowProps) {
+  const quantity = Math.max(1, Number(item.quantity ?? 1));
+  const claimed = Math.max(0, Number(item.claimed ?? 0));
+  const claimedPct = Math.min(100, Math.round((claimed / quantity) * 100));
+  const isSoldOut = claimed >= quantity;
+  const hasClaims = claimed > 0 && !isSoldOut;
+  const statusLabel = isSoldOut ? "All Claimed" : hasClaims ? `${claimed} Claimed` : "Unclaimed";
+  const badgeStyle = isSoldOut
+    ? desktopStyles.statusBadgeSuccess
+    : hasClaims
+      ? desktopStyles.statusBadgeWarning
+      : desktopStyles.statusBadgeNeutral;
+  const badgeTextStyle = isSoldOut
+    ? desktopStyles.statusBadgeSuccessText
+    : hasClaims
+      ? desktopStyles.statusBadgeWarningText
+      : desktopStyles.statusBadgeNeutralText;
+  const quantityLabel = String(quantity).padStart(2, "0");
+  let currencyLabel = "AED";
+
+  if (typeof item.price === "string") {
+    const match = item.price.trim().match(/^([A-Za-z]{3})/);
+    if (match && match[1]) {
+      currencyLabel = match[1].toUpperCase();
+    }
+  }
+
+  const formatPriceNumber = (value: number) => {
+    try {
+      return new Intl.NumberFormat(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(value);
+    } catch {
+      return value.toFixed(2);
+    }
+  };
+
+  let formattedPrice: string | null = null;
+  if (item.price != null && item.price !== "") {
+    if (typeof item.price === "number" && Number.isFinite(item.price)) {
+      formattedPrice = formatPriceNumber(item.price);
+    } else if (typeof item.price === "string") {
+      const numericPart = item.price.replace(/[^0-9.,-]/g, "").replace(/,/g, "");
+      const parsed = Number(numericPart);
+      if (!Number.isNaN(parsed) && numericPart.length > 0) {
+        formattedPrice = formatPriceNumber(parsed);
+      } else {
+        formattedPrice = item.price.trim().replace(/^([A-Za-z]{3})\s*/, "");
+      }
+    }
+  }
+
+  return (
+    <View style={desktopStyles.itemRow}>
+      <View style={desktopStyles.itemIndexBubble}>
+        <Text style={desktopStyles.itemIndexText}>{String(index + 1).padStart(2, "0")}</Text>
+      </View>
+      <View style={desktopStyles.itemImageWrapper}>
+        {item.image_url ? (
+          <Image source={{ uri: item.image_url }} style={desktopStyles.itemImage} />
+        ) : (
+          <View style={desktopStyles.itemImagePlaceholder} />
+        )}
+      </View>
+      <View style={desktopStyles.itemDetails}>
+        <View style={desktopStyles.itemHeaderRow}>
+          <View style={desktopStyles.itemTitleBlock}>
+            <Text style={desktopStyles.itemName} numberOfLines={2}>
+              {item.name}
+            </Text>
+            {item.description && (
+              <Text style={desktopStyles.itemDescription} numberOfLines={2}>
+                {item.description}
+              </Text>
+            )}
+          </View>
+          <View style={desktopStyles.itemActionsColumn}>
+            <Pressable
+              style={[desktopStyles.buyButton, isSoldOut && desktopStyles.buyButtonDisabled]}
+              onPress={() => onPress(item)}
+              disabled={isSoldOut}
+            >
+              <Text
+                style={[desktopStyles.buyButtonText, isSoldOut && desktopStyles.buyButtonTextDisabled]}
+              >
+                Buy Now
+              </Text>
+            </Pressable>
+            <Pressable style={desktopStyles.deleteButton}>
+              <Ionicons name="trash-outline" size={20} color="#E54848" />
+            </Pressable>
+          </View>
+        </View>
+
+        <View style={desktopStyles.itemMetaRow}>
+          {formattedPrice && (
+            <View style={desktopStyles.priceRow}>
+              <Text style={desktopStyles.priceCurrency}>{currencyLabel}</Text>
+              <Text style={desktopStyles.priceText}>{formattedPrice}</Text>
+            </View>
+          )}
+          <Text style={desktopStyles.quantityText}>Quantity: {quantityLabel}</Text>
+          <View style={[desktopStyles.statusBadge, badgeStyle]}>
+            <Text style={[desktopStyles.statusBadgeText, badgeTextStyle]}>{statusLabel}</Text>
+          </View>
+        </View>
+
+        <View style={desktopStyles.progressTrack}>
+          <View style={[desktopStyles.progressFill, { width: `${claimedPct}%` }]} />
+        </View>
+      </View>
     </View>
   );
 }
