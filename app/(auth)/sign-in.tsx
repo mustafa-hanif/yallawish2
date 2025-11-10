@@ -28,7 +28,7 @@ export default function Page() {
   }
 
   const isBuy = String(actionParam ?? "").toLowerCase() === "buy";
-  const heroTitle = isBuy ? "Sign up to make this gift count" : "This one’s going\non your list!";
+  const heroTitle = isBuy ? "Sign up to make this gift count" : "Gifting made \n personal.";
   const heroSubtitle = isBuy
     ? "Buy the perfect gift from this list or even create your own to share with friends and family."
     : "Buy the perfect gift from this list or even create your own to share with friends and family.";
@@ -64,7 +64,7 @@ export default function Page() {
       <View
         style={[
           styles.formContainer,
-          isDesktop ? styles.formContainerDesktop : styles.formContainerMobile,
+          isDesktop ? styles.formContainerDesktop : [styles.formContainerMobile, {paddingBottom:20}],
         ]}
       >
         {isDesktop && (
@@ -98,7 +98,7 @@ export default function Page() {
             />
             <SocialButton
               onPress={onApple}
-              icon={<AntDesign name="apple1" size={26} color="#FFFFFF" />}
+              icon={<AntDesign name="apple" size={26} color="#FFFFFF" />}
               variant="icon"
               accessibilityLabel="Continue with Apple"
             />
@@ -110,7 +110,7 @@ export default function Page() {
             />
           </View>
         ) : (
-          <View style={styles.socialStack}>
+          <View style={[styles.socialStack, { marginTop:50 }]}>
             <SocialButton
               onPress={onGoogle}
               icon={<AntDesign name="google" size={20} color="#4285F4" />}
@@ -118,7 +118,7 @@ export default function Page() {
             />
             <SocialButton
               onPress={onApple}
-              icon={<AntDesign name="apple1" size={22} color="#000000" />}
+              icon={<AntDesign name="apple" size={22} color="#000000" />}
               label="Continue with Apple"
             />
           </View>

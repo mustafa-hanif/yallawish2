@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import {
-    Dimensions,
-    Image,
-    ImageBackground,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  Dimensions,
+  Image,
+  ImageBackground,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 type ResponsiveAuthLayoutProps = {
@@ -101,48 +101,52 @@ export function ResponsiveAuthLayout({
             paddingHorizontal: 20,
             paddingTop: 24,
             paddingBottom: 24,
+            // flexDirection:''
+            justifyContent:'space-between'
           }}
         >
           {/* Logo */}
-          <View style={{ alignItems: "center", marginBottom: 16 }}>
+          <View style={{ alignItems: "center", marginBottom: 16, }}>
             <Image
               source={require("@/assets/images/yallawish_logo.png")}
               style={{ width: 148, height: 28, resizeMode: "contain" }}
             />
           </View>
 
-          {/* Hero text (mobile) */}
-          {showHero && heroTitle && (
-            <View style={{ paddingHorizontal: 8, marginBottom: 20 }}>
-              <Text
-                style={{
-                  color: "#FFFFFF",
-                  fontSize: 32,
-                  lineHeight: 38,
-                  textAlign: "center",
-                  fontFamily: "Nunito_700Bold",
-                }}
-              >
-                {heroTitle}
-              </Text>
-              {heroSubtitle && (
+          <View>
+            {/* Hero text (mobile) */}
+            {showHero && heroTitle && (
+              <View style={{ paddingHorizontal: 8, marginBottom: 20 }}>
                 <Text
                   style={{
-                    color: "rgba(255,255,255,0.85)",
-                    fontSize: 16,
-                    lineHeight: 24,
+                    color: "#FFFFFF",
+                    fontSize: 32,
+                    lineHeight: 38,
                     textAlign: "center",
-                    marginTop: 12,
-                    fontFamily: "Nunito_400Regular",
+                    fontFamily: "Nunito_700Bold",
                   }}
                 >
-                  {heroSubtitle}
+                  {heroTitle}
                 </Text>
-              )}
-            </View>
-          )}
-
+                {heroSubtitle && (
+                  <Text
+                    style={{
+                      color: "rgba(255,255,255,0.85)",
+                      fontSize: 16,
+                      lineHeight: 24,
+                      textAlign: "center",
+                      marginTop: 12,
+                      fontFamily: "Nunito_400Regular",
+                    }}
+                  >
+                    {heroSubtitle}
+                  </Text>
+                )}
+              </View>
+            )}
           {children}
+          </View>
+
         </ScrollView>
       </SafeAreaView>
     </ImageBackground>
