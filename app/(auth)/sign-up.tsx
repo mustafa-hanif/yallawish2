@@ -72,7 +72,7 @@ export default function SignUpScreen() {
   return (
     <ResponsiveAuthLayout
       showHero={!isDesktop}
-      heroTitle="Sign up to save{'\n'}this gift"
+      heroTitle={`Sign up to save \n this gift`}
       heroSubtitle="Add it to your list now and start creating your own to share with friends and family."
     >
       <View style={[
@@ -111,15 +111,16 @@ export default function SignUpScreen() {
             </Link>
           </View>
         </View>
-
-        <Text
-          style={[
-            styles.welcomeTitle,
-            isDesktop && styles.welcomeTitleDesktop,
-          ]}
-        >
-          Welcome to YallaWish
-        </Text>
+        {isDesktop && (<>
+          <Text
+            style={[
+              styles.welcomeTitle,
+              isDesktop && styles.welcomeTitleDesktop,
+            ]}
+          >
+            Welcome to YallaWish
+          </Text>
+        </>)}
 
         <View style={styles.fieldsStack}>
           <View style={[styles.nameRow, isDesktop && styles.nameRowDesktop]}>
@@ -221,7 +222,7 @@ export default function SignUpScreen() {
             />
             <SocialButton
               onPress={() => {}}
-              icon={<AntDesign name="apple1" size={26} color="#FFFFFF" />}
+              icon={<AntDesign name="apple" size={26} color="#FFFFFF" />}
               variant="icon"
               accessibilityLabel="Continue with Apple"
             />
@@ -241,7 +242,7 @@ export default function SignUpScreen() {
             />
             <SocialButton
               onPress={() => {}}
-              icon={<AntDesign name="apple1" size={22} color="#000000" />}
+              icon={<AntDesign name="apple" size={22} color="#000000" />}
               label="Continue with Apple"
             />
           </View>

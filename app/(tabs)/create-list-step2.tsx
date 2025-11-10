@@ -543,7 +543,7 @@ function DesktopLayout({
 
             <View style={styles.desktopFieldGrid}>
               <View style={styles.desktopFieldColumn}>
-                <Text style={styles.desktopFieldLabel}>Event Title</Text>
+                <Text style={styles.desktopFieldLabel}>Event Title *</Text>
                 <TextInput
                   style={styles.desktopTextInput}
                   value={formData.eventTitle}
@@ -611,7 +611,7 @@ function DesktopLayout({
             </View>
 
             <View style={styles.desktopOccasionSection}>
-              <Text style={styles.desktopSectionHeading}>Choose Occasion</Text>
+              <Text style={styles.desktopSectionHeading}>Choose Occasion *</Text>
               <View style={styles.desktopOccasionGrid}>
                 {occasions.map((option) => (
                   <DesktopOccasionCard
@@ -752,7 +752,7 @@ function MobileLayout({
 
           <View style={styles.formContainer}>
             <FormField
-              label="Event title"
+              label="Event title *"
               value={formData.eventTitle}
               onChangeText={(text) => updateFormData("eventTitle", text)}
             />
@@ -845,7 +845,7 @@ function MobileLayout({
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Choose occassion</Text>
+          <Text style={styles.sectionTitle}>Choose Occasion *</Text>
 
           <View style={styles.occasionsContainer}>
             {occasions.map((option) => (
