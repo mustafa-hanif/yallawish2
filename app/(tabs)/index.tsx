@@ -180,7 +180,7 @@ export default function HomeScreen() {
           <Text style={styles.sectionTitleCategory}>Browse by categories</Text>
           {/* <ScrollView horizontal showsHorizontalScrollIndicator={false} style={[styles.categoriesScroll]}> */}
             <View style={[styles.categoriesContainer, {justifyContent:'center' , alignItems:'center' , width:'100%'}]}>
-              <View style={[styles.categoriesRow , {width:'100%'}]}>
+              <View style={[styles.categoriesRow , {width:'100%' , alignItems:'center' , justifyContent:'center'}]}>
                 {categories.slice(0, 3).map((category) => (
                   <Pressable key={category.id} style={[styles.categoryCard, {width:`32%`}]}>
                     <View style={styles.categoryContent}>
@@ -193,7 +193,7 @@ export default function HomeScreen() {
                   </Pressable>
                 ))}
               </View>
-              <View style={[styles.categoriesRow, {width:'100%'}]}>
+              <View style={[styles.categoriesRow, {width:'100%',  alignItems:'center' , justifyContent:'center'}]}>
                 {categories.slice(3, 6).map((category) => (
                   <Pressable key={category.id} style={[styles.categoryCard, {width:`32%`}]}>
                     <View style={styles.categoryContent}>
