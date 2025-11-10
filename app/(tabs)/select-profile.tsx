@@ -147,7 +147,9 @@ export default function SelectProfile() {
           <Pressable style={{ ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.3)" }} onPress={() => setCreateVisible(false)} />
           <View style={{ backgroundColor: "#FFF", borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: "88%" }}>
             <View style={{ alignItems: "center", paddingTop: 8 }}>
-              <View style={{ width: 48, height: 5, borderRadius: 2.5, backgroundColor: "#E5E0EC" }} />
+              <Pressable onPress={() => setCreateVisible(false)}>
+                <View style={{ width: 48, height: 5, borderRadius: 2.5, backgroundColor: "#E5E0EC" }} />
+              </Pressable>
             </View>
             <ScrollView contentContainerStyle={{ padding: 16 }} showsVerticalScrollIndicator={false}>
               <Text style={{ fontSize: 22, fontFamily: "Nunito_700Bold", color: "#1C0335" }}>Create a profile for someone else</Text>

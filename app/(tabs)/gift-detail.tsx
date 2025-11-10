@@ -507,19 +507,14 @@ export default function GiftDetail() {
         animationType="fade"
         onRequestClose={() => setShowLeaving(false)}
       >
-        <Pressable
-          onPress={() => setShowLeaving(false)}
-          style={modalStyles.backdrop}
-        >
-          <Pressable
-            onPress={(event) => event.stopPropagation()}
-            style={modalStyles.sheet}
-          >
-            <View style={modalStyles.handle} />
-            <Text style={modalStyles.sheetTitle}>Leaving YallaWish</Text>
-            <Text style={modalStyles.sheetBody}>
-              You’re about to visit the seller’s site. After purchasing, come
-              back to mark this gift as completed.
+        <Pressable onPress={() => setShowLeaving(false)} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' }}>
+          <Pressable onPress={(e) => e.stopPropagation()} style={{ position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 20 }}>
+            <Pressable onPress={() => setShowLeaving(false)}>
+              <View style={{ alignSelf: 'center', width: 44, height: 5, borderRadius: 3, backgroundColor: '#E2DAF0', marginBottom: 12 }} />
+            </Pressable>
+            <Text style={{ color: '#1C0335', fontSize: 28, fontFamily: 'Nunito_700Bold', textAlign: 'center' }}>Leaving Yallawish</Text>
+            <Text style={{ color: '#6B5E7E', textAlign: 'center', marginTop: 8 }}>
+              You’re about to visit the seller’s site. After buying, come back and mark this gift as purchased.
             </Text>
             <View style={modalStyles.redirectContainer}>
               <Text style={modalStyles.redirectLabel}>Redirecting to</Text>
@@ -1346,11 +1341,13 @@ const CopyToMyListSheet: React.FC<CopyToMyListSheetProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable onPress={onClose} style={sheetStyles.backdrop}>
-        <Pressable onPress={(event) => event.stopPropagation()} style={sheetStyles.sheet}>
-          <View style={sheetStyles.handle} />
-          <Text style={sheetStyles.title}>Copy item to your list</Text>
-          <Text style={sheetStyles.subtitle}>Choose one or more lists to add this gift.</Text>
+      <Pressable onPress={onClose} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' }}>
+        <Pressable onPress={(e) => e.stopPropagation()} style={{ position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 20, maxHeight: '80%' }}>
+          <Pressable onPress={onClose}>
+            <View style={{ alignSelf: 'center', width: 44, height: 5, borderRadius: 3, backgroundColor: '#E2DAF0', marginBottom: 12 }} />
+          </Pressable>
+          <Text style={{ color: '#1C0335', fontSize: 24, fontFamily: 'Nunito_700Bold' }}>Copy Item to your list</Text>
+          <Text style={{ color: '#6B5E7E', marginTop: 6 }}>Choose a list to add this item to</Text>
 
           <ScrollView style={sheetStyles.list} contentContainerStyle={{ paddingBottom: 16 }}>
             {loading ? (
