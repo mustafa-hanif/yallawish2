@@ -292,7 +292,9 @@ export default function AddGift() {
       <Modal visible={showSheet} transparent animationType="none" onRequestClose={closeSheet}>
         <Pressable style={styles.backdrop} onPress={closeSheet} />
         <Animated.View style={[styles.sheetContainer, { transform: [{ translateY }] }]}>
-          <View style={styles.sheetHandle} />
+          <Pressable onPress={closeSheet}>
+            <View style={styles.sheetHandle} />
+          </Pressable>
           <ScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
             <Text style={styles.sheetTitle}>Add a gift item</Text>
             <View style={styles.fieldGroup}>
@@ -395,7 +397,9 @@ export default function AddGift() {
       <Modal visible={showSortSheet} transparent animationType="fade" onRequestClose={() => setShowSortSheet(false)}>
         <Pressable style={styles.backdrop} onPress={() => setShowSortSheet(false)} />
         <View style={styles.sortSheetContainer}>
-          <View style={styles.sortSheetHandle} />
+          <Pressable onPress={() => setShowSortSheet(false)}>
+            <View style={styles.sortSheetHandle} />
+          </Pressable>
           <ScrollView contentContainerStyle={styles.sortSheetContent} showsVerticalScrollIndicator={false}>
             <Text style={styles.sortSheetTitle}>Sort & Filter</Text>
             <View style={styles.sortDivider} />
