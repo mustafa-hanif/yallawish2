@@ -83,6 +83,7 @@ export default function HomeScreen() {
   ];
 
   const handleCreateWishlist = () => router.push("/create-list-step1");
+  const handlePressProfile = () => router.push('/profile-setup')
 
   const initialCards = [
     { id: 0, title: "Add List", subtitle: "Create a new wishlist for any occasion", image: require("@/assets/images/addList.png"), backgroundColor: "#F3ECFE", action: handleCreateWishlist },
@@ -111,7 +112,7 @@ export default function HomeScreen() {
           )}
 
           <SignedIn>
-            <Pressable style={styles.profileButton}>
+            <Pressable style={styles.profileButton} onPress={handlePressProfile}>
               <View style={styles.profileImage}>
                 <Image source={require("@/assets/images/girlUser.png")} style={{ width: 48, height: 48 }} />
               </View>
