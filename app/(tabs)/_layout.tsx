@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Redirect, Tabs, useGlobalSearchParams, usePathname } from "expo-router";
 import React from "react";
-import { Platform, View } from "react-native";
+import { Platform, View, useWindowDimensions } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import TabBarBackground from "@/components/ui/TabBarBackground";
@@ -11,11 +11,29 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useAuth } from "@clerk/clerk-expo";
 
+const DESKTOP_BREAKPOINT = 1024;
+
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { isSignedIn } = useAuth();
   const pathname = usePathname();
   const params = useGlobalSearchParams();
+  const { width } = useWindowDimensions();
+  const isDesktopWeb = Platform.OS === "web" && width >= DESKTOP_BREAKPOINT;
+
+  const baseTabBarStyle = Platform.select({
+    ios: {
+      position: "absolute",
+      height: 100,
+      paddingTop: 30,
+      paddingBottom: 10,
+    },
+    default: {
+      height: 100,
+      paddingTop: 30,
+      paddingBottom: 10,
+    },
+  });
   const search = new URLSearchParams();
   Object.entries(params || {}).forEach(([k, v]) => {
     if (Array.isArray(v)) {
@@ -41,20 +59,7 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: "absolute",
-            height: 100,
-            paddingTop: 30,
-            paddingBottom: 10,
-          },
-          default: {
-            height: 100,
-            paddingTop: 30,
-            paddingBottom: 10,
-          },
-        }),
+        tabBarStyle: isDesktopWeb ? { display: "none" } : baseTabBarStyle,
       }}
     >
       <Tabs.Screen

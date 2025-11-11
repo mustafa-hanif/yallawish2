@@ -4,13 +4,15 @@ import React, { useMemo } from "react";
 import { SignOutButton } from "@/components";
 import { api } from "@/convex/_generated/api";
 import { styles } from "@/styles";
-import { SignedIn, useUser } from "@clerk/clerk-expo";
+import { SignedIn, SignedOut, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
-import { Link, router } from "expo-router";
-import { Alert, Dimensions, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Link, router, usePathname } from "expo-router";
+import { Alert, Dimensions, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import Swiper from "react-native-deck-swiper";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const DESKTOP_BREAKPOINT = 1024;
 
 // Occasion -> color map for event left border
 const OCCASION_COLOR: Record<string, string> = {
@@ -23,10 +25,174 @@ const OCCASION_COLOR: Record<string, string> = {
   other: "#4D4D4D",
   "no-occasion": "#4D4D4D",
 };
+
+const responsiveStyles = StyleSheet.create({
+  pageContainer: {
+    paddingBottom: 48,
+  },
+  headerWrapper: {
+    width: "100%",
+  },
+  navBarDesktop: {
+    width: "100%",
+    maxWidth: 1180,
+    alignSelf: "center",
+    paddingHorizontal: 20,
+  },
+  header: {
+    paddingHorizontal: 0,
+    justifyContent: "center",
+  },
+  headerInner: {
+    width: "100%",
+    maxWidth: 1180,
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  headerInnerDesktop: {
+    paddingVertical: 6,
+  },
+  headerSearch: {
+    maxWidth: 520,
+  },
+  profileButtonDesktop: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    marginLeft: 20,
+  },
+  heroSectionDesktop: {
+    width: "100%",
+    maxWidth: 1180,
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "stretch",
+    paddingHorizontal: 20,
+    paddingTop: 48,
+    paddingBottom: 32,
+  },
+  heroContentDesktop: {
+    flex: 1,
+    paddingRight: 48,
+  },
+  heroVisualDesktop: {
+    flex: 1.1,
+    paddingLeft: 32,
+    justifyContent: "center",
+  },
+  heroSwiperDesktop: {
+    justifyContent: "center",
+    width: "100%",
+  },
+  section: {
+    paddingHorizontal: 0,
+  },
+  sectionInner: {
+    width: "100%",
+    maxWidth: 1180,
+    alignSelf: "center",
+    paddingHorizontal: 20,
+  },
+  lifeMomentGridDesktop: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "flex-start",
+  },
+  lifeMomentCardDesktop: {
+    width: "31%",
+    minWidth: 260,
+    marginBottom: 24,
+    marginRight: 24,
+  },
+  lifeMomentCardMobile: {
+    width: 220,
+    marginRight: 16,
+  },
+  lifeMomentScrollContent: {
+    paddingHorizontal: 20,
+  },
+  eventsDesktopList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "flex-start",
+  },
+  eventCardDesktop: {
+    width: "31%",
+    minWidth: 250,
+    marginBottom: 24,
+    marginRight: 24,
+  },
+  picksDesktopList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "flex-start",
+  },
+  pickCardDesktop: {
+    width: "31%",
+    minWidth: 240,
+    marginBottom: 24,
+    marginRight: 24,
+  },
+  inspirationDesktopList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "flex-start",
+  },
+  inspirationCardDesktop: {
+    width: "48%",
+    minWidth: 340,
+    marginBottom: 24,
+    marginRight: 24,
+  },
+  aiSectionOuter: {
+    padding: 0,
+    backgroundColor: "transparent",
+    marginHorizontal: 0,
+    marginTop: 0,
+  },
+  aiSectionDesktopWrapper: {
+    width: "100%",
+    maxWidth: 1180,
+    alignSelf: "center",
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+  },
+  aiSectionDesktop: {
+    borderRadius: 32,
+    paddingHorizontal: 40,
+    paddingVertical: 40,
+    flexDirection: "row",
+    alignItems: "center",
+    overflow: "hidden",
+    backgroundColor: "#330065",
+  },
+  aiContentDesktop: {
+    flex: 1,
+    marginRight: 32,
+  },
+  aiRobotDesktop: {
+    flex: 1,
+    alignItems: "flex-end",
+  },
+  robotImageDesktop: {
+    width: 340,
+    height: 260,
+  },
+  signOutWrapper: {
+    width: "100%",
+    maxWidth: 1180,
+    alignSelf: "center",
+    paddingHorizontal: 20,
+    marginTop: 24,
+  },
+});
 export default function HomeScreen() {
   const { user } = useUser();
   const { width: SCREEN_WIDTH } = Dimensions.get("window");
-  const isDesktop = Platform.OS === "web" && SCREEN_WIDTH >= 768;
+  const isDesktop = Platform.OS === "web" && SCREEN_WIDTH >= DESKTOP_BREAKPOINT;
+  const pathname = usePathname();
 
   const myLists = useQuery(api.products.getMyLists, user?.id ? { user_id: user.id } : "skip");
 
@@ -62,14 +228,104 @@ export default function HomeScreen() {
       .sort((a: UpcomingEvent, b: UpcomingEvent) => a.dateValue - b.dateValue);
   }, [myLists]);
 
-  const categories = [
-    { id: 1, name: "Wedding", color: "#00D4AA" },
-    { id: 2, name: "Birthday", color: "#00C4F0" },
-    { id: 3, name: "New Home", color: "#FFD700" },
-    { id: 4, name: "Graduation", color: "#FF69B4" },
-    { id: 5, name: "Baby Shower", color: "#9966CC" },
-    { id: 6, name: "Retirement", color: "#FF4500" },
+  type LifeMomentCard = {
+    id: string;
+    title: string;
+    caption: string;
+    background: string;
+    accent: string;
+    textColor?: string;
+    href?: string;
+  };
+
+  const navLinks = [
+    { id: "home", label: "Home", href: "/" },
+    { id: "my-lists", label: "My lists", href: "/manage-list" },
+    { id: "discover", label: "Discover", href: "/global" },
+    { id: "messages", label: "Messages", href: "/messages" },
   ];
+
+  const lifeMomentsPrimary: LifeMomentCard[] = [
+    {
+      id: "baby",
+      title: "New arrival",
+      caption: "Curate nursery must-haves",
+      background: "#FDF2FF",
+      accent: "#F472B6",
+    },
+    {
+      id: "birthday",
+      title: "Birthday bash",
+      caption: "Throw an unforgettable party",
+      background: "#FFF7ED",
+      accent: "#FB923C",
+    },
+    {
+      id: "wedding",
+      title: "Wedding bliss",
+      caption: "Celebrate the happy couple",
+      background: "#F0FDFA",
+      accent: "#34D399",
+    },
+    {
+      id: "graduation",
+      title: "Graduation glow",
+      caption: "Honor their big milestone",
+      background: "#EFF6FF",
+      accent: "#60A5FA",
+    },
+    {
+      id: "housewarming",
+      title: "Housewarming",
+      caption: "Warm up their new space",
+      background: "#F9F5FF",
+      accent: "#A855F7",
+    },
+    {
+      id: "anniversary",
+      title: "Anniversary",
+      caption: "Plan a heartfelt surprise",
+      background: "#FFF1F2",
+      accent: "#FB7185",
+    },
+  ];
+
+  const lifeMomentsSecondary: LifeMomentCard[] = [
+    {
+      id: "team-celebration",
+      title: "Team wins",
+      caption: "Recognize workplace heroes",
+      background: "#381176",
+      accent: "#7B61FF",
+      textColor: "#FFFFFF",
+    },
+    {
+      id: "just-because",
+      title: "Just because",
+      caption: "Share a spontaneous smile",
+      background: "#2B0C57",
+      accent: "#6EE7B7",
+      textColor: "#FFFFFF",
+    },
+    {
+      id: "faith-festivities",
+      title: "Faith & festivities",
+      caption: "Curate seasonal traditions",
+      background: "#311463",
+      accent: "#FDE68A",
+      textColor: "#FFFFFF",
+    },
+    {
+      id: "self-care",
+      title: "Self care",
+      caption: "Treat yourself kindly",
+      background: "#240948",
+      accent: "#F9A8D4",
+      textColor: "#FFFFFF",
+    },
+  ];
+
+  const heroTags = lifeMomentsPrimary.slice(0, 3);
 
   const topPicks = [
     { id: 1, name: "Nike Air Jester 1", subtitle: "Sonic Green", price: "325.32", image: require("@/assets/images/nikeShoes.png") },
@@ -83,7 +339,7 @@ export default function HomeScreen() {
   ];
 
   const handleCreateWishlist = () => router.push("/create-list-step1");
-  const handlePressProfile = () => router.push('/profile-setup')
+  const handlePressProfile = () => router.push("/profile-setup");
 
   const initialCards = [
     { id: 0, title: "Add List", subtitle: "Create a new wishlist for any occasion", image: require("@/assets/images/addList.png"), backgroundColor: "#F3ECFE", action: handleCreateWishlist },
@@ -94,210 +350,423 @@ export default function HomeScreen() {
   // Cards array static for infinite loop (no state mutation needed)
   const cards = initialCards;
 
-  return (
-    <SafeAreaView style={[styles.container, { backgroundColor: "#36016D" }]}>
-      <ScrollView style={{ backgroundColor: "#ffff" }} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          {isDesktop ? (
-            <View style={styles.searchContainer}>
-              <Ionicons name="search" size={22} color="#FFFFFF" />
-              <TextInput placeholder="Type your search here..." style={styles.searchInput} placeholderTextColor="#FFFFFF" />
-            </View>
-          ) : (
-            <View style={styles.mobileSearchContainer}>
-              <Ionicons name="search" size={22} color="#FFFFFF" />
-              <TextInput placeholder="Type your search here..." style={styles.searchInput} placeholderTextColor="#FFFFFF" />
-            </View>
-          )}
+  const mergeStyles = (...styleInputs: any[]) => StyleSheet.flatten(styleInputs.filter(Boolean));
 
-          <SignedIn>
-            <Pressable style={styles.profileButton} onPress={handlePressProfile}>
-              <View style={styles.profileImage}>
-                <Image source={require("@/assets/images/girlUser.png")} style={{ width: 48, height: 48 }} />
-              </View>
-            </Pressable>
-          </SignedIn>
-        </View>
-
-        {/* Welcome Section */}
-        <View style={styles.welcomeSection}>
-          <Text style={styles.welcomeTitle}>Hi {user?.firstName}!</Text>
-          <Text style={styles.welcomeSubtitle}>Ready to make someone smile?</Text>
-        </View>
-
-        {/* Swiper action cards */}
-        <View style={{ height: 200, marginBottom: 36, overflow: "hidden", zIndex: 0 }} pointerEvents="box-none">
-          <Swiper
-            cards={cards}
-            stackSize={3}
-            stackSeparation={-22}
-            backgroundColor="transparent"
-            disableTopSwipe
-            disableBottomSwipe
-            // Enable infinite looping so user can't swipe past last card
-            infinite
-            // Removed onSwipedAll reset; cards now loop seamlessly
-            cardVerticalMargin={0}
-            cardHorizontalMargin={16}
-            containerStyle={{ height: 180, position: "relative" }}
-            cardStyle={{ borderRadius: 24 }}
-            renderCard={(card: any) => {
-              if (!card) return <View />;
-              return (
-                <Pressable
-                  onPress={card.action}
+  const renderActionCards = () => (
+    <View style={mergeStyles(styles.heroSwiperContainer, isDesktop ? responsiveStyles.heroSwiperDesktop : null)}>
+      <View style={{ height: 220, overflow: "hidden" }} pointerEvents="box-none">
+        <Swiper
+          cards={cards}
+          stackSize={3}
+          stackSeparation={-20}
+          backgroundColor="transparent"
+          disableTopSwipe
+          disableBottomSwipe
+          infinite
+          cardVerticalMargin={0}
+          cardHorizontalMargin={isDesktop ? 0 : 16}
+          containerStyle={{ height: 200, position: "relative" }}
+          cardStyle={{ borderRadius: 28 }}
+          renderCard={(card: any) => {
+            if (!card) return <View />;
+            return (
+              <Pressable
+                onPress={card.action}
+                style={{
+                  height: 190,
+                  borderRadius: 28,
+                  paddingHorizontal: 28,
+                  paddingVertical: 24,
+                  backgroundColor: card.backgroundColor,
+                  alignItems: "flex-start",
+                  justifyContent: "flex-start",
+                  shadowColor: "#000",
+                  shadowOpacity: 0.08,
+                  shadowRadius: 16,
+                  shadowOffset: { width: 0, height: 6 },
+                }}
+              >
+                <View
                   style={{
-                    height: 180,
-                    borderRadius: 32,
-                    paddingHorizontal: 28,
-                    paddingVertical: 24,
-                    backgroundColor: card.backgroundColor,
+                    width: 82,
+                    height: 82,
+                    borderRadius: 26,
+                    backgroundColor: "#FFFFFF",
+                    opacity: 0.94,
                     alignItems: "center",
-                    justifyContent: "flex-start",
-                    shadowColor: "#000",
-                    shadowOpacity: 0.06,
-                    shadowRadius: 12,
-                    shadowOffset: { width: 0, height: 4 },
+                    justifyContent: "center",
+                    marginBottom: 18,
                   }}
                 >
-                  <View style={{ width: 80, height: 80, borderRadius: 24, backgroundColor: "#FFFFFF", opacity: 0.92, alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-                    <Image source={card.image} contentFit="contain" style={{ width: 60, height: 60 }} />
-                  </View>
-                  <Text style={[styles.addListTitle, { textAlign: "center", fontSize: 18, marginBottom: 6 }]}>{card.title}</Text>
-                  <Text style={[styles.addListSubtitle, { textAlign: "center", fontSize: 12, lineHeight: 16, maxWidth: 180 }]} numberOfLines={2}>
-                    {card.subtitle}
-                  </Text>
-                </Pressable>
-              );
-            }}
-          />
-          <Text style={{ position: "absolute", bottom: 0, alignSelf: "center", fontSize: 12, color: "#6E6E73" }}>Swipe</Text>
-        </View>
+                  <Image source={card.image} contentFit="contain" style={{ width: 56, height: 56 }} />
+                </View>
+                <Text style={mergeStyles(styles.addListTitle, styles.heroCardTitle)}>{card.title}</Text>
+                <Text style={mergeStyles(styles.addListSubtitle, styles.heroCardSubtitle)} numberOfLines={2}>
+                  {card.subtitle}
+                </Text>
+              </Pressable>
+            );
+          }}
+        />
+        <Text style={styles.heroSwipeLabel}>Swipe</Text>
+      </View>
+    </View>
+  );
 
-        {/* Categories */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitleCategory}>Browse by categories</Text>
-          {/* <ScrollView horizontal showsHorizontalScrollIndicator={false} style={[styles.categoriesScroll]}> */}
-            <View style={[styles.categoriesContainer, {justifyContent:'center' , alignItems:'center' , width:'100%'}]}>
-              <View style={[styles.categoriesRow , {width:'100%' , alignItems:'center' , justifyContent:'center'}]}>
-                {categories.slice(0, 3).map((category) => (
-                  <Pressable key={category.id} style={[styles.categoryCard, {width:`32%`}]}>
-                    <View style={styles.categoryContent}>
-                      <View style={styles.categoryIconContainer}>
-                        <Image source={require("@/assets/images/gift.svg")} style={styles.categoryIcon} contentFit="contain" />
-                      </View>
-                      <Text style={styles.categoryName}>{category.name}</Text>
-                    </View>
-                    <View style={[styles.categoryBorder, { backgroundColor: category.color }]} />
-                  </Pressable>
-                ))}
+  const renderLifeMomentCard = (moment: LifeMomentCard, variant: "primary" | "secondary") => {
+    const textColor = moment.textColor ?? "#1C0335";
+    return (
+      <Pressable
+        key={moment.id}
+        style={mergeStyles(
+          styles.lifeMomentCard,
+          {
+            backgroundColor: moment.background,
+            borderColor: moment.accent,
+          },
+          variant === "secondary" ? styles.lifeMomentCardSecondary : null,
+          isDesktop ? responsiveStyles.lifeMomentCardDesktop : responsiveStyles.lifeMomentCardMobile,
+        )}
+        onPress={() => {
+          if (moment.href) {
+            router.push(moment.href);
+            return;
+          }
+          Alert.alert("Coming soon", "More curated experiences are on the way!");
+        }}
+      >
+        <View style={mergeStyles(styles.lifeMomentBadge, { backgroundColor: moment.accent, opacity: variant === "secondary" ? 0.32 : 0.16 })} />
+        <View>
+          <Text style={mergeStyles(styles.lifeMomentTitle, { color: textColor })}>{moment.title}</Text>
+          <Text style={mergeStyles(styles.lifeMomentCaption, { color: variant === "secondary" ? "#EDE9FF" : "#5B5569" })}>{moment.caption}</Text>
+        </View>
+      </Pressable>
+    );
+  };
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: "#2C0077" }]}> 
+      <ScrollView
+        style={{ backgroundColor: "#FFFFFF" }}
+        contentContainerStyle={mergeStyles(responsiveStyles.pageContainer)}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={mergeStyles(styles.headerWrapper, isDesktop ? responsiveStyles.headerWrapper : null)}>
+          <View style={mergeStyles(styles.navBar, isDesktop ? responsiveStyles.navBarDesktop : null)}>
+            <Pressable onPress={() => router.replace("/")} style={styles.navBrandRow}>
+              <Image source={require("@/assets/images/yallawish_logo.png")} style={styles.navBrandLogo} contentFit="contain" />
+            </Pressable>
+
+            {isDesktop ? (
+              <View
+                style={mergeStyles(
+                  styles.searchContainer,
+                  responsiveStyles.headerSearch,
+                )}
+              >
+                <Ionicons name="search" size={20} color="#FFFFFF" />
+                <TextInput
+                  placeholder="Search for gifts, lists or inspirations..."
+                  style={styles.searchInput}
+                  placeholderTextColor="#D9CCFF"
+                />
               </View>
-              <View style={[styles.categoriesRow, {width:'100%',  alignItems:'center' , justifyContent:'center'}]}>
-                {categories.slice(3, 6).map((category) => (
-                  <Pressable key={category.id} style={[styles.categoryCard, {width:`32%`}]}>
-                    <View style={styles.categoryContent}>
-                      <View style={styles.categoryIconContainer}>
-                        <Image source={require("@/assets/images/gift.svg")} style={styles.categoryIcon} contentFit="contain" />
-                      </View>
-                      <Text style={styles.categoryName}>{category.name}</Text>
-                    </View>
-                    <View style={[styles.categoryBorder, { backgroundColor: category.color }]} />
-                  </Pressable>
-                ))}
+            ) : null}
+
+            <View style={styles.navActions}>
+              <SignedOut>
+                <Pressable onPress={() => router.push("/sign-up")}>
+                  <Text style={styles.navAuthLink}>Sign up</Text>
+                </Pressable>
+                <Pressable onPress={() => router.push("/log-in")}>
+                  <Text style={styles.navAuthLink}>Login</Text>
+                </Pressable>
+              </SignedOut>
+              <SignedIn>
+                <Pressable
+                  style={mergeStyles(styles.profileButton, isDesktop ? responsiveStyles.profileButtonDesktop : null)}
+                  onPress={handlePressProfile}
+                >
+                  <View style={styles.profileImage}>
+                    <Image source={require("@/assets/images/girlUser.png")} style={{ width: 48, height: 48 }} />
+                  </View>
+                </Pressable>
+              </SignedIn>
+            </View>
+          </View>
+
+          {!isDesktop ? (
+            <View style={styles.header}>
+              <View style={mergeStyles(responsiveStyles.headerInner, responsiveStyles.headerInnerDesktop)}>
+                <View style={styles.mobileSearchContainer}>
+                  <Ionicons name="search" size={20} color="#FFFFFF" />
+                  <TextInput
+                    placeholder="Search for gifts, lists or inspirations..."
+                    style={styles.searchInput}
+                    placeholderTextColor="#D9CCFF"
+                  />
+                </View>
               </View>
             </View>
-          {/* </ScrollView> */}
+          ) : null}
+        </View>
+
+        {/* Hero */}
+        <View style={mergeStyles(styles.heroSection, isDesktop ? responsiveStyles.heroSectionDesktop : null)}>
+          <View style={mergeStyles(styles.heroContent, isDesktop ? responsiveStyles.heroContentDesktop : null)}>
+            <Text style={styles.heroEyebrow}>Hi {user?.firstName ?? "there"}, let&apos;s celebrate</Text>
+            <Text style={styles.welcomeTitle}>What brings you joy today?</Text>
+            <Text style={styles.welcomeSubtitle}>Pick a life moment and we&apos;ll help you build a wishlist that feels personal, thoughtful, and easy to share.</Text>
+            <View style={styles.heroActions}>
+              <Pressable style={styles.heroPrimaryButton} onPress={handleCreateWishlist}>
+                <Text style={styles.heroPrimaryButtonText}>Create a wishlist</Text>
+              </Pressable>
+              <Pressable style={styles.heroSecondaryButton} onPress={() => router.push("/global")}>
+                <Text style={styles.heroSecondaryButtonText}>Explore inspiration</Text>
+              </Pressable>
+            </View>
+            <View style={styles.heroTagRow}>
+              {heroTags.map((tag) => (
+                <Pressable key={tag.id} style={styles.heroTag} onPress={() => Alert.alert(tag.title, tag.caption)}>
+                  <Text style={styles.heroTagText}>{tag.title}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
+          {isDesktop ? <View style={mergeStyles(styles.heroVisual, responsiveStyles.heroVisualDesktop)}>{renderActionCards()}</View> : null}
+        </View>
+
+        {!isDesktop ? renderActionCards() : null}
+
+        {/* Life moments */}
+        <View style={mergeStyles(styles.lifeMomentsSection, isDesktop ? responsiveStyles.section : null)}>
+          <View style={isDesktop ? responsiveStyles.sectionInner : undefined}>
+            <View style={styles.lifeMomentsHeader}>
+              <View>
+                <Text style={styles.lifeMomentsEyebrow}>Life moments</Text>
+                <Text style={styles.lifeMomentsTitle}>Browse by life moments</Text>
+              </View>
+              <Pressable style={styles.sectionAction} onPress={() => router.push("/global")}>
+                <Text style={styles.sectionActionText}>View all</Text>
+                <Ionicons name="arrow-forward" size={18} color="#6F6B89" />
+              </Pressable>
+            </View>
+            {isDesktop ? (
+              <View style={mergeStyles(styles.lifeMomentsGrid, responsiveStyles.lifeMomentGridDesktop)}>
+                {lifeMomentsPrimary.map((moment) => renderLifeMomentCard(moment, "primary"))}
+              </View>
+            ) : (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={responsiveStyles.lifeMomentScrollContent}
+                style={styles.lifeMomentsScroll}
+              >
+                {lifeMomentsPrimary.map((moment) => renderLifeMomentCard(moment, "primary"))}
+              </ScrollView>
+            )}
+          </View>
+        </View>
+
+        <View style={mergeStyles(styles.lifeMomentsSecondarySection, isDesktop ? responsiveStyles.section : null)}>
+          <View style={isDesktop ? responsiveStyles.sectionInner : undefined}>
+            <View style={styles.lifeMomentsSecondaryHeader}>
+              <Text style={styles.lifeMomentsSecondaryTitle}>Need something more specific?</Text>
+              <Text style={styles.lifeMomentsSecondarySubtitle}>Tap into curated collections tailored for every type of gifter.</Text>
+            </View>
+            {isDesktop ? (
+              <View style={mergeStyles(styles.lifeMomentsGrid, responsiveStyles.lifeMomentGridDesktop)}>
+                {lifeMomentsSecondary.map((moment) => renderLifeMomentCard(moment, "secondary"))}
+              </View>
+            ) : (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={responsiveStyles.lifeMomentScrollContent}
+                style={styles.lifeMomentsScroll}
+              >
+                {lifeMomentsSecondary.map((moment) => renderLifeMomentCard(moment, "secondary"))}
+              </ScrollView>
+            )}
+          </View>
         </View>
 
         {/* Upcoming Events */}
-        <View style={styles.eventSection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.eventSectionTitle}>Upcoming events</Text>
-            <Ionicons name="chevron-forward" size={28} color="black" />
+        <View style={mergeStyles(styles.eventSection, isDesktop ? responsiveStyles.section : null)}>
+          <View style={isDesktop ? responsiveStyles.sectionInner : undefined}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.eventSectionTitle}>Upcoming events</Text>
+              <Ionicons name="chevron-forward" size={28} color="black" />
+            </View>
+            {isDesktop ? (
+              <View style={responsiveStyles.eventsDesktopList}>
+                {upcomingEvents.map((event) => (
+                  <Link key={event.id} href={{ pathname: "/add-gift", params: { listId: String(event.id) } }} asChild>
+                    <Pressable style={mergeStyles(styles.eventCard, responsiveStyles.eventCardDesktop)} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+                      <View style={[styles.eventLeftBorder, { backgroundColor: event.color }]} />
+                      <View style={styles.eventContent}>
+                        <View style={styles.eventDateContainer}>
+                          <Text style={styles.eventDateNumber}>{event.date}</Text>
+                          <Text style={styles.eventDateMonth}>{event.month}</Text>
+                        </View>
+                        <View style={styles.eventInfo}>
+                          <Text style={styles.eventTitle}>{event.title}</Text>
+                          <Text style={styles.eventSubtitle}>{event.subtitle}</Text>
+                        </View>
+                      </View>
+                    </Pressable>
+                  </Link>
+                ))}
+              </View>
+            ) : (
+              <ScrollView horizontal style={styles.eventsScroll} directionalLockEnabled decelerationRate="fast" showsHorizontalScrollIndicator={false}>
+                {upcomingEvents.map((event) => (
+                  <Link key={event.id} href={{ pathname: "/add-gift", params: { listId: String(event.id) } }} asChild>
+                    <Pressable style={styles.eventCard} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+                      <View style={[styles.eventLeftBorder, { backgroundColor: event.color }]} />
+                      <View style={styles.eventContent}>
+                        <View style={styles.eventDateContainer}>
+                          <Text style={styles.eventDateNumber}>{event.date}</Text>
+                          <Text style={styles.eventDateMonth}>{event.month}</Text>
+                        </View>
+                        <View style={styles.eventInfo}>
+                          <Text style={styles.eventTitle}>{event.title}</Text>
+                          <Text style={styles.eventSubtitle}>{event.subtitle}</Text>
+                        </View>
+                      </View>
+                    </Pressable>
+                  </Link>
+                ))}
+              </ScrollView>
+            )}
           </View>
-          <ScrollView horizontal style={styles.eventsScroll} directionalLockEnabled decelerationRate="fast" showsHorizontalScrollIndicator={false}>
-            {upcomingEvents.map((event) => (
-              <Link key={event.id} href={{ pathname: "/add-gift", params: { listId: String(event.id) } }} asChild>
-                <Pressable style={styles.eventCard} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
-                  <View style={[styles.eventLeftBorder, { backgroundColor: event.color }]} />
-                  <View style={styles.eventContent}>
-                    <View style={styles.eventDateContainer}>
-                      <Text style={styles.eventDateNumber}>{event.date}</Text>
-                      <Text style={styles.eventDateMonth}>{event.month}</Text>
-                    </View>
-                    <View style={styles.eventInfo}>
-                      <Text style={styles.eventTitle}>{event.title}</Text>
-                      <Text style={styles.eventSubtitle}>{event.subtitle}</Text>
-                    </View>
-                  </View>
-                </Pressable>
-              </Link>
-            ))}
-          </ScrollView>
         </View>
 
         {/* Top Picks */}
-        <View style={styles.topSection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Top picks for you...</Text>
-            <Pressable>
-              <Ionicons name="chevron-forward" size={24} color="black" />
-            </Pressable>
-          </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.picksScroll}>
-            {topPicks.map((item) => (
-              <View key={item.id} style={styles.pickCard}>
-                <View style={styles.pickImageContainer}>
-                  <Image style={{ height: 147, width: 180, borderRadius: 8 }} contentFit="contain" source={item.image} />
-                </View>
-                <Text style={styles.pickName}>{item.name}</Text>
-                <Text style={styles.pickSubtitle}>{item.subtitle}</Text>
-                <Text style={styles.pickPrice}>
-                  <Image source={require("@/assets/images/dirham.png")} style={{ width: 14, marginTop: -1, height: 12 }} />
-                  {item.price}
-                </Text>
+        <View style={mergeStyles(styles.topSection, isDesktop ? responsiveStyles.section : null)}>
+          <View style={isDesktop ? responsiveStyles.sectionInner : undefined}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Top picks for you...</Text>
+              <Pressable>
+                <Ionicons name="chevron-forward" size={24} color="black" />
+              </Pressable>
+            </View>
+            {isDesktop ? (
+              <View style={responsiveStyles.picksDesktopList}>
+                {topPicks.map((item) => (
+                  <View key={item.id} style={mergeStyles(styles.pickCard, responsiveStyles.pickCardDesktop)}>
+                    <View style={styles.pickImageContainer}>
+                      <Image style={{ height: 147, width: 180, borderRadius: 8 }} contentFit="contain" source={item.image} />
+                    </View>
+                    <Text style={styles.pickName}>{item.name}</Text>
+                    <Text style={styles.pickSubtitle}>{item.subtitle}</Text>
+                    <View style={styles.pickPriceRow}>
+                      <Image source={require("@/assets/images/dirham.png")} style={{ width: 14, height: 12, marginRight: 6 }} />
+                      <Text style={styles.pickPrice}>{item.price}</Text>
+                    </View>
+                  </View>
+                ))}
               </View>
-            ))}
-          </ScrollView>
+            ) : (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.picksScroll}>
+                {topPicks.map((item) => (
+                  <View key={item.id} style={styles.pickCard}>
+                    <View style={styles.pickImageContainer}>
+                      <Image style={{ height: 147, width: 180, borderRadius: 8 }} contentFit="contain" source={item.image} />
+                    </View>
+                    <Text style={styles.pickName}>{item.name}</Text>
+                    <Text style={styles.pickSubtitle}>{item.subtitle}</Text>
+                    <View style={styles.pickPriceRow}>
+                      <Image source={require("@/assets/images/dirham.png")} style={{ width: 14, height: 12, marginRight: 6 }} />
+                      <Text style={styles.pickPrice}>{item.price}</Text>
+                    </View>
+                  </View>
+                ))}
+              </ScrollView>
+            )}
+          </View>
         </View>
 
         {/* Inspiration Boards */}
-        <View style={styles.isection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Inspiration boards</Text>
-            <Pressable>
-              <Ionicons name="chevron-forward" size={24} color="black" />
-            </Pressable>
+        <View style={mergeStyles(styles.isection, isDesktop ? responsiveStyles.section : null)}>
+          <View style={isDesktop ? responsiveStyles.sectionInner : undefined}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Inspiration boards</Text>
+              <Pressable>
+                <Ionicons name="chevron-forward" size={24} color="black" />
+              </Pressable>
+            </View>
+            {isDesktop ? (
+              <View style={responsiveStyles.inspirationDesktopList}>
+                {inspirationBoards.map((board) => (
+                  <Pressable key={board.id} style={mergeStyles(styles.inspirationCard, responsiveStyles.inspirationCardDesktop)}>
+                    <View style={styles.inspirationContent}>
+                      <Text style={styles.inspirationTitle}>{board.title}</Text>
+                      <Text style={styles.inspirationSubtitle}>{board.subtitle}</Text>
+                    </View>
+                    <View style={styles.inspirationImageContainer}>
+                      <Image style={{ width: 148, height: 148 }} contentFit="cover" source={board.image} />
+                    </View>
+                  </Pressable>
+                ))}
+              </View>
+            ) : (
+              inspirationBoards.map((board) => (
+                <Pressable key={board.id} style={styles.inspirationCard}>
+                  <View style={styles.inspirationContent}>
+                    <Text style={styles.inspirationTitle}>{board.title}</Text>
+                    <Text style={styles.inspirationSubtitle}>{board.subtitle}</Text>
+                  </View>
+                  <View style={styles.inspirationImageContainer}>
+                    <Image style={{ width: 148, height: 148 }} contentFit="cover" source={board.image} />
+                  </View>
+                </Pressable>
+              ))
+            )}
           </View>
-          {inspirationBoards.map((board) => (
-            <Pressable key={board.id} style={styles.inspirationCard}>
-              <View style={styles.inspirationContent}>
-                <Text style={styles.inspirationTitle}>{board.title}</Text>
-                <Text style={styles.inspirationSubtitle}>{board.subtitle}</Text>
-              </View>
-              <View style={styles.inspirationImageContainer}>
-                <Image style={{ width: 148, height: 148 }} contentFit="cover" source={board.image} />
-              </View>
-            </Pressable>
-          ))}
         </View>
 
         {/* AI Assistant */}
-        <View style={[styles.aiSection]}>
-          <View style={styles.aiHeader}>
-            <Text style={styles.aiButton}>AI-POWERED</Text>
-          </View>
-          <Text style={styles.aiTitle}>Meet Genie!</Text>
-          <Text style={styles.aiDescription}>Let our smart assistant suggest the perfect registry items based on your lifestyle, preferences, and needs — saving you time and guesswork!</Text>
-          <Pressable style={styles.aiChatButton}>
-            <Ionicons name="chevron-forward" size={32} color="#FFFFFF" />
-          </Pressable>
-          <View style={{ height: 280 }}>
-            <Image source={require("@/assets/images/robot.png")} style={styles.robotImage} contentFit="contain" />
-          </View>
+        <View style={mergeStyles(styles.aiSection, isDesktop ? responsiveStyles.aiSectionOuter : null)}>
+          {isDesktop ? (
+            <View style={responsiveStyles.aiSectionDesktopWrapper}>
+              <View style={responsiveStyles.aiSectionDesktop}>
+                <View style={responsiveStyles.aiContentDesktop}>
+                  <View style={styles.aiHeader}>
+                    <Text style={styles.aiButton}>AI-POWERED</Text>
+                  </View>
+                  <Text style={styles.aiTitle}>Meet Genie!</Text>
+                  <Text style={styles.aiDescription}>Let our smart assistant suggest the perfect registry items based on your lifestyle, preferences, and needs — saving you time and guesswork!</Text>
+                  <Pressable style={styles.aiChatButton}>
+                    <Ionicons name="chevron-forward" size={32} color="#FFFFFF" />
+                  </Pressable>
+                </View>
+                <View style={responsiveStyles.aiRobotDesktop}>
+                  <Image source={require("@/assets/images/robot.png")} style={mergeStyles(styles.robotImage, responsiveStyles.robotImageDesktop)} contentFit="contain" />
+                </View>
+              </View>
+            </View>
+          ) : (
+            <>
+              <View style={styles.aiHeader}>
+                <Text style={styles.aiButton}>AI-POWERED</Text>
+              </View>
+              <Text style={styles.aiTitle}>Meet Genie!</Text>
+              <Text style={styles.aiDescription}>Let our smart assistant suggest the perfect registry items based on your lifestyle, preferences, and needs — saving you time and guesswork!</Text>
+              <Pressable style={styles.aiChatButton}>
+                <Ionicons name="chevron-forward" size={32} color="#FFFFFF" />
+              </Pressable>
+              <View style={{ height: 280 }}>
+                <Image source={require("@/assets/images/robot.png")} style={styles.robotImage} contentFit="contain" />
+              </View>
+            </>
+          )}
         </View>
-        <SignOutButton />
+        <View style={isDesktop ? responsiveStyles.signOutWrapper : { paddingHorizontal: 20, marginTop: 24 }}>
+          <SignOutButton />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
