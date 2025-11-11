@@ -84,6 +84,12 @@ export const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
+  },
+  profileAvatarImage: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
   },
   profileText: {
     fontSize: 20,

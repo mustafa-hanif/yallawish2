@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import {
-  Dimensions,
-  Image,
-  ImageBackground,
-  Platform,
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    Dimensions,
+    Image,
+    ImageBackground,
+    Platform,
+    Pressable,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 
 type ResponsiveAuthLayoutProps = {
@@ -69,7 +69,15 @@ export function ResponsiveAuthLayout({
             <Text style={styles.desktopHeroSubtitle}>CELEBRATE EVERYTHING</Text>
           </View>
           <View style={styles.sliderButtonContainer}>
-            {Array.from({length:3})?.map((item, index) => <Pressable onPress={() => setCurrentImageIndex(index)} style={[styles.sliderButton, currentImageIndex === index && {backgroundColor:'#03FFEE'}]}></Pressable>)}
+            {Array.from({ length: BACKGROUND_IMAGES.length }).map((_, index) => (
+              <Pressable
+                key={`hero-carousel-dot-${index}`}
+                onPress={() => setCurrentImageIndex(index)}
+                style={[styles.sliderButton, currentImageIndex === index && styles.sliderButtonActive]}
+                accessibilityRole="button"
+                accessibilityLabel={`Show hero slide ${index + 1}`}
+              />
+            ))}
           </View>
           <Text style={styles.desktopCopyright}>© 2025 YallaWish. All rights reserved</Text>
         </View>
@@ -254,5 +262,8 @@ const styles = StyleSheet.create({
     height: 7.9,
     backgroundColor:'#EEEEEE',
     borderRadius: 50
+  },
+  sliderButtonActive: {
+    backgroundColor: "#03FFEE",
   }
 });

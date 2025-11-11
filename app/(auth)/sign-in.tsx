@@ -22,7 +22,8 @@ export default function Page() {
     try {
       const parsedReturnTo = new URL(returnTo, "http://www.example.com");
       actionParam = parsedReturnTo.searchParams.get("action") ?? undefined;
-    } catch (err) {
+    } catch (parseError) {
+      console.warn("Invalid returnTo URL, falling back to default action", parseError);
       actionParam = undefined;
     }
   }

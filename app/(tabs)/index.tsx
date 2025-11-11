@@ -7,7 +7,7 @@ import { styles } from "@/styles";
 import { SignedIn, SignedOut, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
-import { Link, router, usePathname } from "expo-router";
+import { Link, router } from "expo-router";
 import { Alert, Dimensions, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import Swiper from "react-native-deck-swiper";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -192,7 +192,28 @@ export default function HomeScreen() {
   const { user } = useUser();
   const { width: SCREEN_WIDTH } = Dimensions.get("window");
   const isDesktop = Platform.OS === "web" && SCREEN_WIDTH >= DESKTOP_BREAKPOINT;
-  const pathname = usePathname();
+
+  const profilePhoto = user?.imageUrl ?? (typeof user?.unsafeMetadata?.profileImageUrl === "string" ? (user.unsafeMetadata.profileImageUrl as string) : undefined);
+
+  const profileInitials = useMemo(() => {
+    const name = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
+    if (name) {
+      return name
+        .split(" ")
+        .filter(Boolean)
+        .map((part) => part[0]?.toUpperCase() ?? "")
+        .join("")
+        .slice(0, 2) || "YW";
+    }
+
+    const email = user?.emailAddresses?.[0]?.emailAddress ?? "";
+    if (email) {
+      const letters = email.replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase();
+      return letters || "YW";
+    }
+
+    return "YW";
+  }, [user?.firstName, user?.lastName, user?.emailAddresses]);
 
   const myLists = useQuery(api.products.getMyLists, user?.id ? { user_id: user.id } : "skip");
 
@@ -237,13 +258,6 @@ export default function HomeScreen() {
     textColor?: string;
     href?: string;
   };
-
-  const navLinks = [
-    { id: "home", label: "Home", href: "/" },
-    { id: "my-lists", label: "My lists", href: "/manage-list" },
-    { id: "discover", label: "Discover", href: "/global" },
-    { id: "messages", label: "Messages", href: "/messages" },
-  ];
 
   const lifeMomentsPrimary: LifeMomentCard[] = [
     {
@@ -488,9 +502,25 @@ export default function HomeScreen() {
                   style={mergeStyles(styles.profileButton, isDesktop ? responsiveStyles.profileButtonDesktop : null)}
                   onPress={handlePressProfile}
                 >
-                  <View style={styles.profileImage}>
-                    <Image source={require("@/assets/images/girlUser.png")} style={{ width: 48, height: 48 }} />
-                  </View>
+                  {profilePhoto ? (
+                    <Image
+                      source={{ uri: profilePhoto }}
+                      style={mergeStyles(
+                        styles.profileAvatarImage,
+                        isDesktop ? { width: 48, height: 48, borderRadius: 24 } : null,
+                      )}
+                      contentFit="cover"
+                    />
+                  ) : (
+                    <View
+                      style={mergeStyles(
+                        styles.profileImage,
+                        isDesktop ? { width: 48, height: 48, borderRadius: 24 } : null,
+                      )}
+                    >
+                      <Text style={styles.profileText}>{profileInitials}</Text>
+                    </View>
+                  )}
                 </Pressable>
               </SignedIn>
             </View>
