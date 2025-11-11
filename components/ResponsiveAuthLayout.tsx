@@ -4,6 +4,7 @@ import {
   Image,
   ImageBackground,
   Platform,
+  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -20,7 +21,9 @@ type ResponsiveAuthLayoutProps = {
 
 // Background images for carousel (add more as needed)
 const BACKGROUND_IMAGES = [
-  require("@/assets/images/onboard_image.jpg"),
+  require("@/assets/images/onBoarding1.png"),
+  require("@/assets/images/onBoarding2.png"),
+  require("@/assets/images/onBoarding3.png"),
   // Add more images here when provided
 ];
 
@@ -53,7 +56,7 @@ export function ResponsiveAuthLayout({
         imageStyle={styles.desktopFullBackgroundImage}
         resizeMode="cover"
       >
-        <View style={styles.desktopOverlay} />
+        {/* <View style={styles.desktopOverlay} /> */}
         
         {/* Logo and hero text - positioned on the left */}
         <View style={styles.desktopHeroContent}>
@@ -64,6 +67,9 @@ export function ResponsiveAuthLayout({
           <View style={styles.desktopHeroText}>
             <Text style={styles.desktopHeroTitle}>GIFTING, MADE MEANINGFUL</Text>
             <Text style={styles.desktopHeroSubtitle}>CELEBRATE EVERYTHING</Text>
+          </View>
+          <View style={styles.sliderButtonContainer}>
+            {Array.from({length:3})?.map((item, index) => <Pressable onPress={() => setCurrentImageIndex(index)} style={[styles.sliderButton, currentImageIndex === index && {backgroundColor:'#03FFEE'}]}></Pressable>)}
           </View>
           <Text style={styles.desktopCopyright}>© 2025 YallaWish. All rights reserved</Text>
         </View>
@@ -159,6 +165,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     height: "100vh" as any,
+    backgroundColor:'#330065'
   },
   desktopFullBackgroundImage: {
     width: "100%",
@@ -231,4 +238,21 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     paddingHorizontal: 56,
   },
+  sliderButtonContainer:{
+    width:79.69,
+    height:32,
+    backgroundColor:'#1C1C1C' ,
+    marginBottom:32,
+    borderRadius:26,
+    justifyContent:'center',
+    alignItems:'center',
+    flexDirection:'row',
+    gap:8
+  },
+  sliderButton: {
+    width: 7.9,
+    height: 7.9,
+    backgroundColor:'#EEEEEE',
+    borderRadius: 50
+  }
 });
