@@ -364,7 +364,7 @@ export default function ProfileSetupScreen() {
       router.replace(decodedReturnTo as any);
       return;
     }
-    router.replace("/create-list-step1");
+    router.replace("/");
   };
 
   const handleContinue = async () => {
