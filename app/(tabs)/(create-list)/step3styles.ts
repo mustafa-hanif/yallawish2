@@ -53,9 +53,13 @@ export const styles = StyleSheet.create({
     backgroundColor: "#DDD7E4",
   },
   contentScroll: {
-    paddingHorizontal: 16,
+    // paddingHorizontal: 16,
     // Leave room for the fixed footer so content isn't hidden
-    paddingBottom: 140,
+    paddingBottom: 160,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 16,
   },
   sectionTitle: {
     fontSize: 24,
