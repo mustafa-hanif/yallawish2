@@ -140,9 +140,9 @@ export default function TabLayout() {
           ),
         }}
       />
-
+      <Tabs.Screen name="(create-list)" options={{ href: null }} />
       {/* Gift and List journey screens - hidden from tab bar but included in this navigator */}
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="create-list-step1"
         options={{
           href: null, // This hides it from the tab bar
@@ -160,20 +160,16 @@ export default function TabLayout() {
           href: null, // This hides it from the tab bar
           tabBarStyle: { display: 'none' },
         }}
-      />
-      <Tabs.Screen
-        name="select-profile"
-        options={{
-          href: null, // Hide from tab bar
-        }}
-      />
-      <Tabs.Screen
+      /> */}
+      
+      {/* <Tabs.Screen
         name="profile-setup"
         options={{
           href: null,
           tabBarStyle: { display: 'none' },
         }}
-      />
+      /> */}
+
       <Tabs.Screen
         name="add-gift"
         options={{

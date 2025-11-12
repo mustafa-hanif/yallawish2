@@ -515,57 +515,57 @@ function MobileLayout({
       </LinearGradient>
 
       <ProgressIndicator />
-
-      <ScrollView
-        contentContainerStyle={styles.contentScroll}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={styles.content}>
         <Text style={styles.sectionTitle}>Who can see this list?</Text>
-
-        <View style={styles.optionsContainer}>
-          <OptionCard
-            option="private"
-            icon={<Ionicons name="lock-closed-outline" size={40} color="#1C0335" />}
-            title="Private"
-            description="Only visible to you"
-            isSelected={selectedOption === "private"}
-            styles={styles}
-            setSelectedOption={setSelectedOption}
-          />
-
-          <OptionCard
-            option="my-people"
-            icon={<Ionicons name="people-outline" size={40} color="#1C0335" />}
-            title="My People"
-            description="Visible only to selected groups or individuals in your YallaWish Circle."
-            isSelected={selectedOption === "my-people"}
-            onPress={() => {
-              setSelectedOption("my-people");
-              openShareModal();
-            }}
-            styles={styles}
-            setSelectedOption={setSelectedOption}
-          />
-
-          <OptionCard
-            option="public"
-            icon={<Ionicons name="globe-outline" size={40} color="#1C0335" />}
-            title="Public"
-            description="Visible to anyone with the link, on Google, or on YallaWish"
-            isSelected={selectedOption === "public"}
-            styles={styles}
-            setSelectedOption={setSelectedOption}
-          >
-            <PublicPasswordSettings
-              requirePassword={requirePassword}
-              setRequirePassword={setRequirePassword}
-              password={password}
-              setPassword={setPassword}
+        <ScrollView
+          contentContainerStyle={styles.contentScroll}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.optionsContainer}>
+            <OptionCard
+              option="private"
+              icon={<Ionicons name="lock-closed-outline" size={40} color="#1C0335" />}
+              title="Private"
+              description="Only visible to you"
+              isSelected={selectedOption === "private"}
               styles={styles}
+              setSelectedOption={setSelectedOption}
             />
-          </OptionCard>
-        </View>
-      </ScrollView>
+
+            <OptionCard
+              option="my-people"
+              icon={<Ionicons name="people-outline" size={40} color="#1C0335" />}
+              title="My People"
+              description="Visible only to selected groups or individuals in your YallaWish Circle."
+              isSelected={selectedOption === "my-people"}
+              onPress={() => {
+                setSelectedOption("my-people");
+                openShareModal();
+              }}
+              styles={styles}
+              setSelectedOption={setSelectedOption}
+            />
+
+            <OptionCard
+              option="public"
+              icon={<Ionicons name="globe-outline" size={40} color="#1C0335" />}
+              title="Public"
+              description="Visible to anyone with the link, on Google, or on YallaWish"
+              isSelected={selectedOption === "public"}
+              styles={styles}
+              setSelectedOption={setSelectedOption}
+            >
+              <PublicPasswordSettings
+                requirePassword={requirePassword}
+                setRequirePassword={setRequirePassword}
+                password={password}
+                setPassword={setPassword}
+                styles={styles}
+              />
+            </OptionCard>
+          </View>
+        </ScrollView>
+      </View>
 
       <SafeAreaView edges={["bottom"]} style={styles.footer}>
         <Pressable
