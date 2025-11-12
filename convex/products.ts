@@ -1,6 +1,6 @@
-import { Doc, Id } from "@/convex/_generated/dataModel";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
+import { Doc, Id } from "./_generated/dataModel";
 import { internalAction, internalMutation, mutation, query } from "./_generated/server";
 
 export const get = query({
@@ -11,6 +11,96 @@ export const get = query({
       .query("products")
       .withIndex("by_keyword", (q) => q.eq("keyword", keyword))
       .collect();
+  },
+});
+
+export const upsertUserProfile = mutation({
+  args: {
+    user_id: v.string(),
+    displayName: v.optional(v.string()),
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
+    contactEmail: v.optional(v.string()),
+    phoneCountryCode: v.optional(v.string()),
+    phoneNumber: v.optional(v.string()),
+    gender: v.optional(v.string()),
+    dateOfBirth: v.optional(v.string()),
+    location: v.optional(v.string()),
+    persona: v.optional(v.string()),
+    giftOccasions: v.array(v.string()),
+    shareUpdates: v.boolean(),
+    giftInterests: v.array(v.string()),
+    giftShoppingStyle: v.optional(v.union(v.string(), v.null())),
+    giftBudgetRange: v.optional(v.union(v.string(), v.null())),
+    giftDiscoveryChannels: v.array(v.string()),
+    favoriteStores: v.array(v.string()),
+    reminderOptIn: v.boolean(),
+    aiIdeasOptIn: v.boolean(),
+    communityUpdatesOptIn: v.boolean(),
+    profileImageUrl: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const now = new Date().toISOString();
+    const existing = await ctx.db
+      .query("user_profiles")
+      .withIndex("by_user", (q) => q.eq("user_id", args.user_id))
+      .first();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        displayName: args.displayName ?? null,
+        firstName: args.firstName ?? null,
+        lastName: args.lastName ?? null,
+        contactEmail: args.contactEmail ?? null,
+        phoneCountryCode: args.phoneCountryCode ?? null,
+        phoneNumber: args.phoneNumber ?? null,
+        gender: args.gender ?? null,
+        dateOfBirth: args.dateOfBirth ?? null,
+        location: args.location ?? null,
+        persona: args.persona ?? null,
+        giftOccasions: args.giftOccasions,
+        shareUpdates: args.shareUpdates,
+        giftInterests: args.giftInterests,
+        giftShoppingStyle: args.giftShoppingStyle ?? null,
+        giftBudgetRange: args.giftBudgetRange ?? null,
+        giftDiscoveryChannels: args.giftDiscoveryChannels,
+        favoriteStores: args.favoriteStores,
+        reminderOptIn: args.reminderOptIn,
+        aiIdeasOptIn: args.aiIdeasOptIn,
+        communityUpdatesOptIn: args.communityUpdatesOptIn,
+        profileImageUrl: args.profileImageUrl ?? null,
+        updated_at: now,
+      });
+      return existing._id;
+    }
+
+    const id = await ctx.db.insert("user_profiles", {
+      user_id: args.user_id,
+      displayName: args.displayName ?? null,
+      firstName: args.firstName ?? null,
+      lastName: args.lastName ?? null,
+      contactEmail: args.contactEmail ?? null,
+      phoneCountryCode: args.phoneCountryCode ?? null,
+      phoneNumber: args.phoneNumber ?? null,
+      gender: args.gender ?? null,
+      dateOfBirth: args.dateOfBirth ?? null,
+      location: args.location ?? null,
+      persona: args.persona ?? null,
+      giftOccasions: args.giftOccasions,
+      shareUpdates: args.shareUpdates,
+      giftInterests: args.giftInterests,
+      giftShoppingStyle: args.giftShoppingStyle ?? null,
+      giftBudgetRange: args.giftBudgetRange ?? null,
+      giftDiscoveryChannels: args.giftDiscoveryChannels,
+      favoriteStores: args.favoriteStores,
+      reminderOptIn: args.reminderOptIn,
+      aiIdeasOptIn: args.aiIdeasOptIn,
+      communityUpdatesOptIn: args.communityUpdatesOptIn,
+      profileImageUrl: args.profileImageUrl ?? null,
+      created_at: now,
+      updated_at: now,
+    });
+    return id;
   },
 });
 

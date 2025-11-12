@@ -1,10 +1,12 @@
 import { Colors } from "@/constants/Colors";
+import { api } from "@/convex/_generated/api";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useUser } from "@clerk/clerk-expo";
+import { useMutation } from "convex/react";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { JSX, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -124,6 +126,7 @@ export default function ProfileSetupScreen() {
   const decodedReturnTo = returnTo ? decodeURIComponent(String(returnTo)) : undefined;
   const { width } = useWindowDimensions();
   const isDesktop = Platform.OS === "web" && width >= DESKTOP_BREAKPOINT;
+  const upsertUserProfile = useMutation(api.products.upsertUserProfile);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -372,23 +375,33 @@ export default function ProfileSetupScreen() {
     setIsSubmitting(true);
     setError(null);
     try {
+      const trimmedFirstName = firstName.trim();
+      const trimmedLastName = lastName.trim();
+      const trimmedEmail = email.trim();
+      const trimmedPhoneCode = phoneCountryCode.trim();
+      const trimmedPhoneNumber = phoneNumber.trim();
+      const trimmedGender = gender.trim();
+      const trimmedDob = dateOfBirth.trim();
+      const trimmedLocation = location.trim();
+      const displayName = `${trimmedFirstName} ${trimmedLastName}`.trim() || trimmedEmail;
+
       await user.update({
-        firstName: firstName.trim() || undefined,
-        lastName: lastName.trim() || undefined,
+        firstName: trimmedFirstName || undefined,
+        lastName: trimmedLastName || undefined,
         unsafeMetadata: {
           ...user.unsafeMetadata,
           persona,
           giftOccasions: selectedOccasions,
           shareUpdates,
-          displayName: `${firstName} ${lastName}`.trim() || email.trim(),
-          firstName: firstName.trim() || undefined,
-          lastName: lastName.trim() || undefined,
-          contactEmail: email.trim() || undefined,
-          phoneCountryCode: phoneCountryCode.trim() || undefined,
-          phoneNumber: phoneNumber.trim() || undefined,
-          gender: gender.trim() || undefined,
-          dateOfBirth: dateOfBirth.trim() || undefined,
-          location: location.trim() || undefined,
+          displayName,
+          firstName: trimmedFirstName || undefined,
+          lastName: trimmedLastName || undefined,
+          contactEmail: trimmedEmail || undefined,
+          phoneCountryCode: trimmedPhoneCode || undefined,
+          phoneNumber: trimmedPhoneNumber || undefined,
+          gender: trimmedGender || undefined,
+          dateOfBirth: trimmedDob || undefined,
+          location: trimmedLocation || undefined,
           giftInterests,
           giftShoppingStyle: giftShoppingStyle ?? undefined,
           giftBudgetRange: giftBudgetRange ?? undefined,
@@ -399,6 +412,31 @@ export default function ProfileSetupScreen() {
           communityUpdatesOptIn,
           profileImageUrl: profileImagePreview,
         },
+      });
+
+      await upsertUserProfile({
+        user_id: user.id,
+        displayName,
+        firstName: trimmedFirstName || undefined,
+        lastName: trimmedLastName || undefined,
+        contactEmail: trimmedEmail || undefined,
+        phoneCountryCode: trimmedPhoneCode || undefined,
+        phoneNumber: trimmedPhoneNumber || undefined,
+        gender: trimmedGender || undefined,
+        dateOfBirth: trimmedDob || undefined,
+        location: trimmedLocation || undefined,
+        persona,
+        giftOccasions: selectedOccasions,
+        shareUpdates,
+        giftInterests,
+        giftShoppingStyle: giftShoppingStyle ?? null,
+        giftBudgetRange: giftBudgetRange ?? null,
+        giftDiscoveryChannels,
+        favoriteStores,
+        reminderOptIn,
+        aiIdeasOptIn,
+        communityUpdatesOptIn,
+        profileImageUrl: profileImagePreview ?? undefined,
       });
       if (currentStepIndex < STEPS.length - 1) {
         setCurrentStepIndex((prev) => prev + 1);

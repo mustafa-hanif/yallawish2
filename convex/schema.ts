@@ -111,6 +111,33 @@ export default defineSchema({
     updated_at: v.string(),
   }).index("by_user", ["user_id"]),
 
+  user_profiles: defineTable({
+    user_id: v.string(),
+    displayName: v.optional(v.union(v.string(), v.null())),
+    firstName: v.optional(v.union(v.string(), v.null())),
+    lastName: v.optional(v.union(v.string(), v.null())),
+    contactEmail: v.optional(v.union(v.string(), v.null())),
+    phoneCountryCode: v.optional(v.union(v.string(), v.null())),
+    phoneNumber: v.optional(v.union(v.string(), v.null())),
+    gender: v.optional(v.union(v.string(), v.null())),
+    dateOfBirth: v.optional(v.union(v.string(), v.null())),
+    location: v.optional(v.union(v.string(), v.null())),
+    persona: v.optional(v.union(v.string(), v.null())),
+    giftOccasions: v.array(v.string()),
+    shareUpdates: v.boolean(),
+    giftInterests: v.array(v.string()),
+    giftShoppingStyle: v.optional(v.union(v.string(), v.null())),
+    giftBudgetRange: v.optional(v.union(v.string(), v.null())),
+    giftDiscoveryChannels: v.array(v.string()),
+    favoriteStores: v.array(v.string()),
+    reminderOptIn: v.boolean(),
+    aiIdeasOptIn: v.boolean(),
+    communityUpdatesOptIn: v.boolean(),
+    profileImageUrl: v.optional(v.union(v.string(), v.null())),
+    created_at: v.string(),
+    updated_at: v.string(),
+  }).index("by_user", ["user_id"]),
+
   // Requests to view password-protected lists
   password_requests: defineTable({
     list_id: v.id("lists"),

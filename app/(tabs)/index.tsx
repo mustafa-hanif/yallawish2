@@ -443,7 +443,7 @@ export default function HomeScreen() {
         )}
         onPress={() => {
           if (moment.href) {
-            router.push(moment.href);
+            router.push(moment.href as any);
             return;
           }
           Alert.alert("Coming soon", "More curated experiences are on the way!");
