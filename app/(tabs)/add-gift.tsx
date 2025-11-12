@@ -244,6 +244,8 @@ export default function AddGift() {
   const [tempSortBy, setTempSortBy] = useState<SortOption>('default');
   const [tempFilterClaimed, setTempFilterClaimed] = useState(false);
   const [tempFilterUnclaimed, setTempFilterUnclaimed] = useState(false);
+  const [isUrlValid, setIsUrlValid] = useState(true);
+
   const openSortSheet = useCallback(() => {
     setTempSortBy(sortBy);
     setTempFilterClaimed(filterClaimed);
@@ -258,8 +260,22 @@ export default function AddGift() {
       setTempFilterUnclaimed(filterUnclaimed);
     }
   }, [showSortSheet, sortBy, filterClaimed, filterUnclaimed]);
+
+  useEffect(() => {
+    if (link.trim().length === 0) {
+      setIsUrlValid(true);
+      return;
+    }
+    setIsUrlValid(validateUrl(link));
+  }, [link]);
+
   const DESCRIPTION_LIMIT = 400;
-  const canSave = !!listId && (link.trim().length > 0 || name.trim().length > 0) && quantity > 0 && !saving;
+  const canSave = !!listId && (link.trim().length > 0 || name.trim().length > 0) && quantity > 0 && !saving && (link.trim().length === 0 || isUrlValid); ;
+
+  const validateUrl = (value: string) => {
+    const urlPattern = /^(https?:\/\/[^\s$.?#].[^\s]*)$/i;
+    return urlPattern.test(value.trim());
+  };
 
   const handleAddGift = () => setShowSheet(true);
   const closeSheet = () => setShowSheet(false);
@@ -441,6 +457,8 @@ export default function AddGift() {
                 <TextInput value={link} onChangeText={setLink} style={styles.input} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="https://" />
                 {scraping ? <Text style={styles.scrapeStatus}>…</Text> : <Ionicons name="open-outline" size={20} color="#7A6F88" />}
               </View>
+              {!isUrlValid && link.trim().length > 0 && (<Text style={styles.errorText}>Invalid URL</Text>)}
+
               {scrapeError && <Text style={styles.errorText}>{scrapeError}</Text>}
             </View>
             <View style={styles.orDivider}>
