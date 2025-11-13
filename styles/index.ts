@@ -97,7 +97,7 @@ export const styles = StyleSheet.create({
     color: "#330065",
   },
   heroSection: {
-    backgroundColor: "#F6F0FF",
+    // backgroundColor: "#F6F0FF",
     paddingHorizontal: 20,
     paddingTop: 32,
     paddingBottom: 24,
@@ -114,12 +114,27 @@ export const styles = StyleSheet.create({
     marginBottom: 12,
   },
   welcomeTitle: {
-    fontSize: 44,
-    fontFamily: "Nunito_900Black",
-    color: "#1C0335",
-    lineHeight: 50,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 62,
+    color: "#330065",
+    marginTop: 8,
+    textAlign:'center',
   },
+  welcomeTitleMobile: {
+    fontSize: 32,
+    textAlign:'left',
+  },
+
+
   welcomeSubtitle: {
+    fontSize: 32,
+    fontFamily: "Nunito_400Regular",
+    color: "#514A6E",
+    marginTop: 16,
+    lineHeight: 26,
+    textAlign:'center'
+  },
+  welcomeSubtitleMobile : {
     fontSize: 18,
     fontFamily: "Nunito_400Regular",
     color: "#514A6E",
@@ -376,7 +391,7 @@ export const styles = StyleSheet.create({
     height: 277,
   },
   categoryCardMobile : {
-    width: '33%',
+    width: 140,
     height: 120,
     borderTopEndRadius: 8,
     borderTopStartRadius: 8,

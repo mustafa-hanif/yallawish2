@@ -1,7 +1,8 @@
 import { Image } from "expo-image";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { SignOutButton } from "@/components";
+import { HeroSwiper } from "@/components/HeroSwiper";
 import { api } from "@/convex/_generated/api";
 import { styles } from "@/styles";
 import { SignedIn, SignedOut, useUser } from "@clerk/clerk-expo";
@@ -9,8 +10,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
 import { Link, router } from "expo-router";
 import { Alert, Dimensions, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import Swiper from "react-native-deck-swiper";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 
 const DESKTOP_BREAKPOINT = 1024;
 
@@ -65,11 +66,13 @@ const responsiveStyles = StyleSheet.create({
   },
   heroSectionDesktop: {
     width: "100%",
-    maxWidth: 1180,
-    alignSelf: "center",
-    flexDirection: "row",
-    alignItems: "stretch",
-    paddingHorizontal: 20,
+    maxWidth: 1900,
+    justifyContent:'center',
+    alignItems:'center',
+    // alignSelf: "center",
+    // flexDirection: "row",
+    // alignItems: "stretch",
+    paddingHorizontal: 100,
     paddingTop: 48,
     paddingBottom: 32,
   },
@@ -199,9 +202,32 @@ const responsiveStyles = StyleSheet.create({
   },
 });
 export default function HomeScreen() {
+  const [scrollX, setScrollX] = useState(0);
+  const scrollInterval = useRef(null);
   const { user } = useUser();
   const { width: SCREEN_WIDTH } = Dimensions.get("window");
   const isDesktop = Platform.OS === "web" && SCREEN_WIDTH >= DESKTOP_BREAKPOINT;
+   const scrollRef1 = useRef(null);
+  const scrollRef2 = useRef(null);
+  
+
+  useEffect(() => {
+    const delayTimeout = setTimeout(() => {
+      scrollInterval.current = setInterval(() => {
+        setScrollX((prev) => {
+          const next = prev + 100; // adjust scroll speed/distance
+          scrollRef1.current?.scrollTo({ x: next, animated: true });
+          scrollRef2.current?.scrollTo({ x: next, animated: true });
+          return next;
+        });
+      }, 4000); // every 4 seconds
+    }, 7000); // start after 7 seconds
+
+    return () => {
+      clearInterval(scrollInterval.current);
+      clearTimeout(delayTimeout);
+    };
+  }, []);
 
   const profilePhoto = user?.imageUrl ?? (typeof user?.unsafeMetadata?.profileImageUrl === "string" ? (user.unsafeMetadata.profileImageUrl as string) : undefined);
 
@@ -384,41 +410,7 @@ export default function HomeScreen() {
      },
   ];
 
-  
-  const lifeMomentsSecondary: LifeMomentCard[] = [
-    {
-      id: "team-celebration",
-      title: "Team wins",
-      caption: "Recognize workplace heroes",
-      background: "#381176",
-      accent: "#7B61FF",
-      textColor: "#FFFFFF",
-    },
-    {
-      id: "just-because",
-      title: "Just because",
-      caption: "Share a spontaneous smile",
-      background: "#2B0C57",
-      accent: "#6EE7B7",
-      textColor: "#FFFFFF",
-    },
-    {
-      id: "faith-festivities",
-      title: "Faith & festivities",
-      caption: "Curate seasonal traditions",
-      background: "#311463",
-      accent: "#FDE68A",
-      textColor: "#FFFFFF",
-    },
-    {
-      id: "self-care",
-      title: "Self care",
-      caption: "Treat yourself kindly",
-      background: "#240948",
-      accent: "#F9A8D4",
-      textColor: "#FFFFFF",
-    },
-  ];
+
 
   const heroTags = lifeMomentsPrimary.slice(0, 3);
 
@@ -436,77 +428,43 @@ export default function HomeScreen() {
   const handleCreateWishlist = () => router.push("/create-list-step1");
   const handlePressProfile = () => router.push("/profile-setup");
 
-  const initialCards = [
-    { id: 0, title: "Add List", subtitle: "Create a new wishlist for any occasion", image: require("@/assets/images/addList.png"), backgroundColor: "#F3ECFE", action: handleCreateWishlist },
-    { id: 1, title: "Share List", subtitle: "Invite friends & family to view your list", image: require("@/assets/images/shareList.png"), backgroundColor: "#E9FFE2", action: () => Alert.alert("Share", "Sharing coming soon") },
-    { id: 2, title: "Community Lists", subtitle: "See popular public registries", image: require("@/assets/images/community.png"), backgroundColor: "#C2D9FF", action: () => Alert.alert("Community", "Community lists coming soon") },
-  ];
+  // const initialCards = [
+  //   { id: 0, title: "Create List", subtitle: "Create a new wishlist for any occasion", image: require("@/assets/images/addList.png"), backgroundColor: "#F3ECFE", action: handleCreateWishlist },
+  //   { id: 1, title: "Share List", subtitle: "Invite friends & family to view your list", image: require("@/assets/images/shareList.png"), backgroundColor: "#E9FFE2", action: () => Alert.alert("Share", "Sharing coming soon") },
+  //   { id: 2, title: "Add Community", subtitle: "See popular public registries", image: require("@/assets/images/community.png"), backgroundColor: "#C2D9FF", action: () => Alert.alert("Community", "Community lists coming soon") },
+  // ];
 
+  const initialCards = [
+    {
+      id: "0",
+      title: "Create List",
+      subtitle: "Create a new wishlist for any occasion",
+      image: require("@/assets/images/createList.svg"),
+      backgroundColor: "#F3ECFE",
+      action: handleCreateWishlist,
+    },
+    {
+      id: "1",
+      title: "Share List",
+      subtitle: "Invite friends & family to view your list",
+      image: require("@/assets/images/shareList.svg"),
+      backgroundColor: "#E9FFE2",
+      action: () => Alert.alert("Share", "Sharing coming soon"),
+    },
+  
+    {
+      id: "2",
+      title: "Add Community",
+      subtitle: "See popular public registries",
+      image: require("@/assets/images/addCommunity.svg"),
+      backgroundColor: "#C2D9FF",
+      action: () => Alert.alert("Community", "Community lists coming soon"),
+    },
+  ];
   // Cards array static for infinite loop (no state mutation needed)
   const cards = initialCards;
 
   const mergeStyles = (...styleInputs: any[]) => StyleSheet.flatten(styleInputs.filter(Boolean));
-
-  const renderActionCards = () => (
-    <View style={mergeStyles(styles.heroSwiperContainer, isDesktop ? responsiveStyles.heroSwiperDesktop : null)}>
-      <View style={{ height: 220, overflow: "hidden" }} pointerEvents="box-none">
-        <Swiper
-          cards={cards}
-          stackSize={3}
-          stackSeparation={-20}
-          backgroundColor="transparent"
-          disableTopSwipe
-          disableBottomSwipe
-          infinite
-          cardVerticalMargin={0}
-          cardHorizontalMargin={isDesktop ? 0 : 16}
-          containerStyle={{ height: 200, position: "relative" }}
-          cardStyle={{ borderRadius: 28 }}
-          renderCard={(card: any) => {
-            if (!card) return <View />;
-            return (
-              <Pressable
-                onPress={card.action}
-                style={{
-                  height: 190,
-                  borderRadius: 28,
-                  paddingHorizontal: 28,
-                  paddingVertical: 24,
-                  backgroundColor: card.backgroundColor,
-                  alignItems: "flex-start",
-                  justifyContent: "flex-start",
-                  shadowColor: "#000",
-                  shadowOpacity: 0.08,
-                  shadowRadius: 16,
-                  shadowOffset: { width: 0, height: 6 },
-                }}
-              >
-                <View
-                  style={{
-                    width: 82,
-                    height: 82,
-                    borderRadius: 26,
-                    backgroundColor: "#FFFFFF",
-                    opacity: 0.94,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginBottom: 18,
-                  }}
-                >
-                  <Image source={card.image} contentFit="contain" style={{ width: 56, height: 56 }} />
-                </View>
-                <Text style={mergeStyles(styles.addListTitle, styles.heroCardTitle)}>{card.title}</Text>
-                <Text style={mergeStyles(styles.addListSubtitle, styles.heroCardSubtitle)} numberOfLines={2}>
-                  {card.subtitle}
-                </Text>
-              </Pressable>
-            );
-          }}
-        />
-        <Text style={styles.heroSwipeLabel}>Swipe</Text>
-      </View>
-    </View>
-  );
 
   const renderLifeMomentCard = (moment: LifeMomentCard, variant: "primary" | "secondary") => {
     const textColor = moment.textColor ?? "#1C0335";
@@ -640,31 +598,19 @@ export default function HomeScreen() {
 
         {/* Hero */}
         <View style={mergeStyles(styles.heroSection, isDesktop ? responsiveStyles.heroSectionDesktop : null)}>
-          <View style={mergeStyles(styles.heroContent, isDesktop ? responsiveStyles.heroContentDesktop : null)}>
-            <Text style={styles.heroEyebrow}>Hi {user?.firstName ?? "there"}, let&apos;s celebrate</Text>
-            <Text style={styles.welcomeTitle}>What brings you joy today?</Text>
-            <Text style={styles.welcomeSubtitle}>Pick a life moment and we&apos;ll help you build a wishlist that feels personal, thoughtful, and easy to share.</Text>
-            <View style={styles.heroActions}>
-              <Pressable style={styles.heroPrimaryButton} onPress={handleCreateWishlist}>
-                <Text style={styles.heroPrimaryButtonText}>Create a wishlist</Text>
-              </Pressable>
-              <Pressable style={styles.heroSecondaryButton} onPress={() => router.push("/global")}>
-                <Text style={styles.heroSecondaryButtonText}>Explore inspiration</Text>
-              </Pressable>
-            </View>
-            <View style={styles.heroTagRow}>
-              {heroTags.map((tag) => (
-                <Pressable key={tag.id} style={styles.heroTag} onPress={() => Alert.alert(tag.title, tag.caption)}>
-                  <Text style={styles.heroTagText}>{tag.title}</Text>
-                </Pressable>
-              ))}
+          <View style={isDesktop ? responsiveStyles.sectionInner : undefined}>
+             <View style={[styles.lifeMomentsHeader]}>
+              <View style={{width:'100%'}}>
+                <Text style={[styles.welcomeTitle, !isDesktop ? styles.welcomeTitleMobile : {} ]}>What brings you joy today?</Text>
+                <Text style={[styles.welcomeSubtitle, !isDesktop ? styles.welcomeSubtitleMobile : {} ]}>Create, share, and discover the perfect gifts</Text>
+              </View>
             </View>
           </View>
-
-          {isDesktop ? <View style={mergeStyles(styles.heroVisual, responsiveStyles.heroVisualDesktop)}>{renderActionCards()}</View> : null}
+        
+          <HeroSwiper initialCards={cards} />
         </View>
 
-        {!isDesktop ? renderActionCards() : null}
+        {/* {!isDesktop ? renderActionCards() : null} */}
 
         {/* Life moments */}
         <View style={mergeStyles(styles.lifeMomentsSection, isDesktop ? responsiveStyles.section : null)}>
@@ -707,9 +653,25 @@ export default function HomeScreen() {
                 </>
               ) : (
                 <>
-                  <View style={[styles.categoriesRow, !isDesktop ? styles.categoriesRowMobile : null]}>{categories.slice(0, 3).map((category) => renderCategoryCard(category))}</View>
-                  <View style={[styles.categoriesRow, !isDesktop ? styles.categoriesRowMobile : null]}>{categories.slice(3, 6).map((category) => renderCategoryCard(category))}</View>
-                  <View style={[styles.categoriesRow, !isDesktop ? styles.categoriesRowMobile : null]}>{categories.slice(6, 9).map((category) => renderCategoryCard(category))}</View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={responsiveStyles.lifeMomentScrollContent}
+                style={styles.lifeMomentsScroll}
+                ref={scrollRef1}
+              >
+                <View style={[styles.categoriesRow, !isDesktop ? styles.categoriesRowMobile : null]}>{categories.slice(0, 4).map((category) => renderCategoryCard(category))}</View>
+              </ScrollView>
+               <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={responsiveStyles.lifeMomentScrollContent}
+                style={styles.lifeMomentsScroll}
+                ref={scrollRef2}
+              >
+                
+                <View style={[styles.categoriesRow, !isDesktop ? styles.categoriesRowMobile : null]}>{categories.slice(4, 8).map((category) => renderCategoryCard(category))}</View>
+              </ScrollView>
                 </>
               )}
             </View>
