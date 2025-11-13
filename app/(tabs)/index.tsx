@@ -91,27 +91,37 @@ const responsiveStyles = StyleSheet.create({
   },
   sectionInner: {
     width: "100%",
-    maxWidth: 1180,
+    maxWidth: 1900,
     alignSelf: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: 100,
   },
   lifeMomentGridDesktop: {
     flexDirection: "row",
     flexWrap: "wrap",
+    justifyContent: "space-between",
+    alignItems:'center',
+    rowGap: 54.5
+  },
+   lifeMomentGridMobile: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "flex-start",
+    rowGap: 20
   },
   lifeMomentCardDesktop: {
-    width: "31%",
+    width: '23%',
+    height: 276,
     minWidth: 260,
-    marginBottom: 24,
-    marginRight: 24,
+    // marginBottom: 24,
+    justifyContent:'center'
   },
   lifeMomentCardMobile: {
-    width: 220,
-    marginRight: 16,
+    width: 300,
+    // marginRight: 16,
   },
   lifeMomentScrollContent: {
     paddingHorizontal: 20,
+    gap: 20
   },
   eventsDesktopList: {
     flexDirection: "row",
@@ -257,53 +267,124 @@ export default function HomeScreen() {
     accent: string;
     textColor?: string;
     href?: string;
+    icon? : any
   };
 
   const lifeMomentsPrimary: LifeMomentCard[] = [
     {
-      id: "baby",
-      title: "New arrival",
-      caption: "Curate nursery must-haves",
-      background: "#FDF2FF",
-      accent: "#F472B6",
-    },
-    {
       id: "birthday",
-      title: "Birthday bash",
-      caption: "Throw an unforgettable party",
-      background: "#FFF7ED",
-      accent: "#FB923C",
+      title: "Birthday",
+      caption: "150+ curated templates",
+      background: "#FEFBEB",
+      accent: "#F5B400",
+      icon: require("@/assets/images/birthday.svg")
     },
     {
-      id: "wedding",
-      title: "Wedding bliss",
-      caption: "Celebrate the happy couple",
-      background: "#F0FDFA",
-      accent: "#34D399",
+      id: "baby",
+      title: "Baby Shower",
+      caption: "150+ curated templates",
+      background: "#EEF6FF",
+      accent: "#92C5FD",
+      icon: require("@/assets/images/babyShower.svg")
+    },
+     {
+      id: "bridal",
+      title: "Bridal Shower",
+      caption: "150+ curated templates",
+      background: "#FDF1F8",
+      accent: "#F8A8D4",
+      icon: require("@/assets/images/bridalShower.svg")
     },
     {
       id: "graduation",
-      title: "Graduation glow",
-      caption: "Honor their big milestone",
-      background: "#EFF6FF",
-      accent: "#60A5FA",
+      title: "Graduation",
+      caption: "150+ curated templates",
+      background: "#EDFFEE",
+      accent: "#C4FD74",
+      icon: require("@/assets/images/graduation.svg")
+    },
+    {
+      id: "wedding",
+      title: "Wedding",
+      caption: "150+ curated templates",
+      background: "#FAF5FF",
+      accent: "#D8B3FE",
+      icon: require("@/assets/images/wedding.svg")
+    },
+    {
+      id: "retirement",
+      title: "Retirement",
+      caption: "150+ curated templates",
+      background: "#F9FAFB",
+      accent: "#D5D9DE",
+      icon: require("@/assets/images/retirement.svg")
     },
     {
       id: "housewarming",
-      title: "Housewarming",
-      caption: "Warm up their new space",
-      background: "#F9F5FF",
-      accent: "#A855F7",
+      title: "House Warming",
+      caption: "150+ curated templates",
+      background: "#EFFDFA",
+      accent: "#5EEAD3",
+      icon: require("@/assets/images/houseWarming.svg")
     },
     {
-      id: "anniversary",
-      title: "Anniversary",
-      caption: "Plan a heartfelt surprise",
-      background: "#FFF1F2",
-      accent: "#FB7185",
+      id: "viewmore",
+      title: "View More",
+      caption: "Explore other moments",
+      background: "#DCDCDC",
+      accent: "#C4C4C4",
+      icon: require("@/assets/images/viewMore.svg")
     },
   ];
 
+  const categories = [
+    { id: 1,
+      name: "Wedding",
+      icon: require("@/assets/images/wedding2.svg",),
+      color: "#FF3B30"
+     },
+     { id: 2,
+      name: "Baby Shower",
+      icon: require("@/assets/images/babyShower2.svg",),
+      color: "#00C7BE"
+     },
+    { id: 3,
+      name: "Birthday",
+      icon: require("@/assets/images/birthday2.svg",),
+      color: "#FFCC00"
+     },
+      { id: 4,
+      name: "Graduation",
+      icon: require("@/assets/images/graduation2.svg",),
+      color: "#32ADE6"
+     },
+
+      { id: 5,
+      name: "Bridal Shower",
+      icon: require("@/assets/images/bridalShower2.svg",),
+      color: "#AF52DE"
+     },
+
+    { id: 6,
+      name: "House Warming",
+      icon: require("@/assets/images/newHome2.svg",),
+      color: "#5856D6"
+     },
+   
+    
+    { id: 7,
+      name: "Retirement",
+      icon: require("@/assets/images/retirement2.svg",),
+      color: "#FF9500"
+     },
+    { id: 7,
+      name: "Retirement",
+      icon: require("@/assets/images/other2.svg",),
+      color: "#A2845E"
+     },
+  ];
+
+  
   const lifeMomentsSecondary: LifeMomentCard[] = [
     {
       id: "team-celebration",
@@ -449,10 +530,25 @@ export default function HomeScreen() {
           Alert.alert("Coming soon", "More curated experiences are on the way!");
         }}
       >
-        <View style={mergeStyles(styles.lifeMomentBadge, { backgroundColor: moment.accent, opacity: variant === "secondary" ? 0.32 : 0.16 })} />
+        {moment?.icon ? <Image source={moment?.icon} style={styles.renderLifeMomentCardIcon} /> : null}
         <View>
-          <Text style={mergeStyles(styles.lifeMomentTitle, { color: textColor })}>{moment.title}</Text>
-          <Text style={mergeStyles(styles.lifeMomentCaption, { color: variant === "secondary" ? "#EDE9FF" : "#5B5569" })}>{moment.caption}</Text>
+          <Text style={mergeStyles(styles.lifeMomentTitle, { color: textColor }, !isDesktop ? styles.lifeMomentTitleMobile : {})}>{moment.title}</Text>
+          <Text style={mergeStyles(styles.lifeMomentCaption, !isDesktop ? styles.lifeMomentCaptionMobile : {}, { color: variant === "secondary" ? "#EDE9FF" : "#5B5569" })}>{moment.caption}</Text>
+        </View>
+
+        <Image source={require("@/assets/images/arrowRightGrey.svg")} style={styles.renderLifeMomentCardArrowIcon} />
+      </Pressable>
+    );
+  };
+
+  const renderCategoryCard = (category: any) => {
+    return (
+      <Pressable key={category.id} style={mergeStyles(styles.categoryCard, isDesktop ? styles.categoryCardDesktop : styles.categoryCardMobile, { borderColor: category.color })}>
+        <View style={!isDesktop ? styles.categoryContentMobile : styles.categoryContent}>
+          {category?.icon && <Image source={category?.icon} style={!isDesktop ? styles.categoryIconMobile : styles.categoryIcon} contentFit="contain" />}
+
+          <Text style={!isDesktop ? styles.categoryNameMobile : styles.categoryName}>{category.name}</Text>
+          <Image style={!isDesktop ? styles.arrowWhiteIconMobile : styles.arrowWhiteIconDesktop} source={require("@/assets/images/arrowRightWhite.svg")} />
         </View>
       </Pressable>
     );
@@ -573,15 +669,10 @@ export default function HomeScreen() {
         {/* Life moments */}
         <View style={mergeStyles(styles.lifeMomentsSection, isDesktop ? responsiveStyles.section : null)}>
           <View style={isDesktop ? responsiveStyles.sectionInner : undefined}>
-            <View style={styles.lifeMomentsHeader}>
-              <View>
-                <Text style={styles.lifeMomentsEyebrow}>Life moments</Text>
-                <Text style={styles.lifeMomentsTitle}>Browse by life moments</Text>
+            <View style={[styles.lifeMomentsHeader]}>
+              <View style={{width:'100%'}}>
+                <Text style={[styles.lifeMomentsTitle, !isDesktop ? styles.lifeMomentsTitleMobile : {} ]}>Browse by life moments</Text>
               </View>
-              <Pressable style={styles.sectionAction} onPress={() => router.push("/global")}>
-                <Text style={styles.sectionActionText}>View all</Text>
-                <Ionicons name="arrow-forward" size={18} color="#6F6B89" />
-              </Pressable>
             </View>
             {isDesktop ? (
               <View style={mergeStyles(styles.lifeMomentsGrid, responsiveStyles.lifeMomentGridDesktop)}>
@@ -600,26 +691,28 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        {/* Categories */}
         <View style={mergeStyles(styles.lifeMomentsSecondarySection, isDesktop ? responsiveStyles.section : null)}>
           <View style={isDesktop ? responsiveStyles.sectionInner : undefined}>
-            <View style={styles.lifeMomentsSecondaryHeader}>
-              <Text style={styles.lifeMomentsSecondaryTitle}>Need something more specific?</Text>
-              <Text style={styles.lifeMomentsSecondarySubtitle}>Tap into curated collections tailored for every type of gifter.</Text>
-            </View>
-            {isDesktop ? (
-              <View style={mergeStyles(styles.lifeMomentsGrid, responsiveStyles.lifeMomentGridDesktop)}>
-                {lifeMomentsSecondary.map((moment) => renderLifeMomentCard(moment, "secondary"))}
+            <View style={styles.lifeMomentsHeader}>
+              <View style={{ width: "100%" }}>
+                <Text style={[styles.lifeMomentsSecondaryTitle, !isDesktop ? styles.lifeMomentsSecondaryTitleMobile : {}]}>Browse by Categories</Text>
               </View>
-            ) : (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={responsiveStyles.lifeMomentScrollContent}
-                style={styles.lifeMomentsScroll}
-              >
-                {lifeMomentsSecondary.map((moment) => renderLifeMomentCard(moment, "secondary"))}
-              </ScrollView>
-            )}
+            </View>
+            <View style={mergeStyles(styles.categoryCardsGrid, !isDesktop ? responsiveStyles.lifeMomentGridMobile : responsiveStyles?.lifeMomentGridDesktop)}>
+              {isDesktop ? (
+                <>
+                  <View style={[styles.categoriesRow]}>{categories.slice(0, 4).map((category) => renderCategoryCard(category))}</View>
+                  <View style={[styles.categoriesRow]}>{categories.slice(4, 8).map((category) => renderCategoryCard(category))}</View>
+                </>
+              ) : (
+                <>
+                  <View style={[styles.categoriesRow, !isDesktop ? styles.categoriesRowMobile : null]}>{categories.slice(0, 3).map((category) => renderCategoryCard(category))}</View>
+                  <View style={[styles.categoriesRow, !isDesktop ? styles.categoriesRowMobile : null]}>{categories.slice(3, 6).map((category) => renderCategoryCard(category))}</View>
+                  <View style={[styles.categoriesRow, !isDesktop ? styles.categoriesRowMobile : null]}>{categories.slice(6, 9).map((category) => renderCategoryCard(category))}</View>
+                </>
+              )}
+            </View>
           </View>
         </View>
 
