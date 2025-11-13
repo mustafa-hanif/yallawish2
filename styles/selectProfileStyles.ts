@@ -408,6 +408,7 @@ const selectProfileStyles = StyleSheet.create({
     shadowRadius: 32,
     shadowOffset: { width: 0, height: 18 },
     elevation: 12,
+    overflow: "visible",
   },
   modalSheet: {
     borderTopLeftRadius: 28,
@@ -416,14 +417,23 @@ const selectProfileStyles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 12,
+    overflow: "visible",
   },
   desktopModalScroll: {
     gap: 20,
     paddingBottom: 16,
+    overflow: "visible",
   },
   mobileModalScroll: {
     gap: 20,
     paddingBottom: 24,
+    overflow: "visible",
+  },
+  desktopModalScrollContainer: {
+    overflow: "visible",
+  },
+  mobileModalScrollContainer: {
+    overflow: "visible",
   },
   modalTitleDesktop: {
     fontFamily: "Nunito_700Bold",
@@ -449,6 +459,8 @@ const selectProfileStyles = StyleSheet.create({
   },
   fieldRow: {
     gap: 16,
+    overflow: "visible",
+    position: "relative",
   },
   fieldRowDesktop: {
     flexDirection: "row",
@@ -457,6 +469,8 @@ const selectProfileStyles = StyleSheet.create({
     flex: 1,
     gap: 8,
     position: "relative",
+    overflow: "visible",
+    zIndex: 0,
   },
   fieldHalf: {
     flex: 1,
@@ -496,7 +510,9 @@ const selectProfileStyles = StyleSheet.create({
     color: "#B1A6C4",
   },
   fieldDropdownActive: {
-    zIndex: 10,
+    zIndex: 20,
+    position: "relative",
+    elevation: 16,
   },
   dropdown: {
     position: "absolute",
@@ -512,6 +528,46 @@ const selectProfileStyles = StyleSheet.create({
     shadowRadius: 18,
     shadowOffset: { width: 0, height: 12 },
     elevation: 8,
+    zIndex: 60,
+  },
+  dropdownRowRaised: {
+    zIndex: 40,
+    position: "relative",
+    elevation: 20,
+  },
+  webDatePicker: {
+    position: "absolute",
+    top: 60,
+    left: 0,
+    right: 0,
+    borderRadius: 14,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E4DBF6",
+    shadowColor: "#2A174C",
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 8,
+    zIndex: 3200,
+    padding: 16,
+    gap: 12,
+  },
+  webDateActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 12,
+  },
+  webDateAction: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: "#EFE5FF",
+  },
+  webDateActionText: {
+    fontFamily: "Nunito_600SemiBold",
+    fontSize: 13,
+    color: "#4B0082",
   },
   dropdownItem: {
     paddingHorizontal: 16,
@@ -617,6 +673,18 @@ const selectProfileStyles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: 0.7,
+  },
+  webSelectWrapper: {
+    height: 52,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#E5E0EC",
+    paddingHorizontal: 16,
+    justifyContent: "center",
+    backgroundColor: "#FFFFFF",
+  },
+  webSelectWrapperDesktop: {
+    height: 54,
   },
 });
 

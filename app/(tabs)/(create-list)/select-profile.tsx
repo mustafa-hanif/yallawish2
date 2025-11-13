@@ -1,3 +1,4 @@
+import { DropdownKey, ProfileModalContent } from "@/components/createList/ProfileModalContent";
 import { api } from "@/convex/_generated/api";
 import { Doc } from "@/convex/_generated/dataModel";
 import { useAuth } from "@clerk/clerk-expo";
@@ -14,9 +15,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  Switch,
   Text,
-  TextInput,
   View,
   useWindowDimensions
 } from "react-native";
@@ -51,7 +50,6 @@ const STEP_ITEMS = [
 ];
 
 type ContactDoc = Doc<"contacts">;
-type DropdownKey = "gender" | "relation";
 
 type Params = {
   profileId?: string | string[];
@@ -120,9 +118,42 @@ export default function SelectProfileScreen() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [formMessage, setFormMessage] = useState<string | null>(null);
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+  const [isWebDatePickerOpen, setWebDatePickerOpen] = useState(false);
 
   const formattedBirthDate = birthDate ? formatDisplayDate(birthDate) : "";
   const showEmptyState = !isLoadingProfiles && profiles.length === 0;
+
+  const closeWebDatePicker = () => {
+    setWebDatePickerOpen(false);
+    setActiveDropdown(null);
+  };
+
+  const handleOpenDatePicker = () => {
+    setActiveDropdown(null);
+    if (Platform.OS === "web") {
+      setWebDatePickerOpen((prev) => !prev);
+      return;
+    }
+    setDatePickerVisible(true);
+  };
+
+  const handleToggleDropdown = (key: DropdownKey) => {
+    if (Platform.OS === "web") {
+      return;
+    }
+    setWebDatePickerOpen(false);
+    setActiveDropdown((prev) => (prev === key ? null : key));
+  };
+
+  const handleSelectGender = (value: string) => {
+    setGender(value);
+    setActiveDropdown(null);
+  };
+
+  const handleSelectRelation = (value: string) => {
+    setRelation(value);
+    setActiveDropdown(null);
+  };
 
   const resetForm = (clearMessages = true) => {
     setFirstName("");
@@ -135,6 +166,7 @@ export default function SelectProfileScreen() {
     setPhoneNumber("");
     setAllowEdit(true);
     setActiveDropdown(null);
+    setWebDatePickerOpen(false);
     if (clearMessages) {
       setSubmitError(null);
       setFormMessage(null);
@@ -149,10 +181,6 @@ export default function SelectProfileScreen() {
   const closeModal = () => {
     setModalVisible(false);
     resetForm();
-  };
-
-  const toggleDropdown = (key: DropdownKey) => {
-    setActiveDropdown((prev) => (prev === key ? null : key));
   };
 
   const handleSelectProfile = (profile: ContactDoc) => {
@@ -176,10 +204,19 @@ export default function SelectProfileScreen() {
     router.push({ pathname: "/create-list-step2", params: nextParams });
   };
 
-  const handleDateConfirm = (date: Date) => {
+  const handleDateChange = (date: Date | null) => {
     setBirthDate(date);
     setDatePickerVisible(false);
+    setWebDatePickerOpen(false);
     setActiveDropdown(null);
+  };
+
+  const handleNativeDateConfirm = (date: Date) => {
+    handleDateChange(date);
+  };
+
+  const handleClearBirthDate = () => {
+    handleDateChange(null);
   };
 
   const handleSaveProfile = async (navigateNext: boolean) => {
@@ -478,209 +515,6 @@ export default function SelectProfileScreen() {
     </View>
   );
 
-  const renderDropdown = (options: string[], onSelect: (value: string) => void) => (
-    <View style={styles.dropdown}>
-      {options.map((option) => (
-        <Pressable
-          key={option}
-          onPress={() => {
-            onSelect(option);
-            setActiveDropdown(null);
-          }}
-          style={styles.dropdownItem}
-        >
-          <Text style={styles.dropdownItemText}>{option}</Text>
-        </Pressable>
-      ))}
-    </View>
-  );
-
-  const renderModalContent = () => (
-    <ScrollView
-      contentContainerStyle={
-        isDesktop ? styles.desktopModalScroll : styles.mobileModalScroll
-      }
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
-    >
-      <Text style={isDesktop ? styles.modalTitleDesktop : styles.modalTitle}>
-        Create a profile for someone else
-      </Text>
-      <Text
-        style={
-          isDesktop ? styles.modalSubtitleDesktop : styles.modalSubtitle
-        }
-      >
-        Add a child, partner, parent, or friend and build their wishlist on their behalf.
-      </Text>
-
-      <View style={[styles.fieldRow, isDesktop && styles.fieldRowDesktop]}>
-        <View style={[styles.field, isDesktop && styles.fieldHalf]}>
-          <Text style={styles.fieldLabel}>First name</Text>
-          <TextInput
-            value={firstName}
-            onChangeText={setFirstName}
-            placeholder="John"
-            placeholderTextColor="#B1A6C4"
-            style={[styles.input, isDesktop && styles.inputDesktop]}
-          />
-        </View>
-        <View style={[styles.field, isDesktop && styles.fieldHalf]}>
-          <Text style={styles.fieldLabel}>Last name</Text>
-          <TextInput
-            value={lastName}
-            onChangeText={setLastName}
-            placeholder="Doe"
-            placeholderTextColor="#B1A6C4"
-            style={[styles.input, isDesktop && styles.inputDesktop]}
-          />
-        </View>
-      </View>
-
-      <View style={[styles.fieldRow, isDesktop && styles.fieldRowDesktop]}>
-        <View style={[styles.field, isDesktop && styles.fieldHalf]}>
-          <Text style={styles.fieldLabel}>Date of birth</Text>
-          <Pressable
-            onPress={() => {
-              setDatePickerVisible(true);
-              setActiveDropdown(null);
-            }}
-            style={[styles.input, styles.inputPressable, isDesktop && styles.inputDesktop]}
-          >
-            <Text style={formattedBirthDate ? styles.inputValue : styles.inputPlaceholder}>
-              {formattedBirthDate || "Select date"}
-            </Text>
-            <Ionicons name="calendar-outline" size={18} color="#6F5F8F" />
-          </Pressable>
-        </View>
-        <View
-          style={[
-            styles.field,
-            isDesktop && styles.fieldHalf,
-            activeDropdown === "gender" && styles.fieldDropdownActive,
-          ]}
-        >
-          <Text style={styles.fieldLabel}>Gender</Text>
-          <Pressable
-            onPress={() => toggleDropdown("gender")}
-            style={[styles.input, styles.inputPressable, isDesktop && styles.inputDesktop]}
-          >
-            <Text style={gender ? styles.inputValue : styles.inputPlaceholder}>
-              {gender || "Select"}
-            </Text>
-            <Ionicons name="chevron-down" size={18} color="#6F5F8F" />
-          </Pressable>
-          {activeDropdown === "gender"
-            ? renderDropdown(GENDER_OPTIONS, setGender)
-            : null}
-        </View>
-      </View>
-
-      <View style={[styles.fieldRow, isDesktop && styles.fieldRowDesktop]}>
-        <View style={[styles.field, isDesktop && styles.fieldHalf]}>
-          <Text style={styles.fieldLabel}>Email address</Text>
-          <TextInput
-            value={email}
-            onChangeText={setEmail}
-            placeholder="john.doe@mail.com"
-            placeholderTextColor="#B1A6C4"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            style={[styles.input, isDesktop && styles.inputDesktop]}
-          />
-        </View>
-        <View style={[styles.field, isDesktop && styles.fieldHalf]}>
-          <Text style={styles.fieldLabel}>Mobile number (optional)</Text>
-          <View style={styles.phoneRow}>
-            <TextInput
-              value={countryCode}
-              onChangeText={setCountryCode}
-              placeholder="+971"
-              placeholderTextColor="#B1A6C4"
-              style={[styles.input, styles.countryInput, isDesktop && styles.inputDesktop]}
-            />
-            <TextInput
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              placeholder="521 123 456"
-              placeholderTextColor="#B1A6C4"
-              keyboardType="phone-pad"
-              style={[styles.input, styles.phoneInput, isDesktop && styles.inputDesktop]}
-            />
-          </View>
-        </View>
-      </View>
-
-      <View style={[styles.field, activeDropdown === "relation" && styles.fieldDropdownActive]}>
-        <Text style={styles.fieldLabel}>Relation with this person (optional)</Text>
-        <Pressable
-          onPress={() => toggleDropdown("relation")}
-          style={[styles.input, styles.inputPressable, isDesktop && styles.inputDesktop]}
-        >
-          <Text style={relation ? styles.inputValue : styles.inputPlaceholder}>
-            {relation || "Select"}
-          </Text>
-          <Ionicons name="chevron-down" size={18} color="#6F5F8F" />
-        </Pressable>
-        {activeDropdown === "relation"
-          ? renderDropdown(RELATION_OPTIONS, setRelation)
-          : null}
-      </View>
-
-      <View style={styles.toggleRow}>
-        <View style={styles.toggleTexts}>
-          <Text style={styles.toggleTitle}>Allow them to edit</Text>
-          <Text style={styles.toggleSubtitle}>
-            They can add or update items on this list.
-          </Text>
-        </View>
-        <Switch
-          value={allowEdit}
-          onValueChange={setAllowEdit}
-          trackColor={{ false: "#D9D3E5", true: "#22C55E" }}
-          thumbColor="#FFFFFF"
-        />
-      </View>
-
-      {submitError ? <Text style={styles.errorText}>{submitError}</Text> : null}
-      {formMessage ? <Text style={styles.successText}>{formMessage}</Text> : null}
-
-      <View
-        style={[
-          styles.modalButtonRow,
-          isDesktop && styles.modalButtonRowDesktop,
-        ]}
-      >
-        <Pressable
-          style={[styles.secondaryButton, isSaving && styles.buttonDisabled]}
-          onPress={closeModal}
-          disabled={isSaving}
-        >
-          <Text style={styles.secondaryButtonText}>Cancel</Text>
-        </Pressable>
-        <Pressable
-          style={[styles.primaryButton, isSaving && styles.buttonDisabled]}
-          onPress={() => handleSaveProfile(true)}
-          disabled={isSaving}
-        >
-          {isSaving ? (
-            <ActivityIndicator color="#FFFFFF" size="small" />
-          ) : (
-            <Text style={styles.primaryButtonText}>Save & Continue</Text>
-          )}
-        </Pressable>
-      </View>
-
-      <Pressable
-        style={[styles.ghostButton, isSaving && styles.buttonDisabled]}
-        onPress={() => handleSaveProfile(false)}
-        disabled={isSaving}
-      >
-        <Text style={styles.ghostButtonText}>Save & add another</Text>
-      </Pressable>
-    </ScrollView>
-  );
-
   return (
     <Fragment>
       {isDesktop ? renderProfilesDesktop() : renderProfilesMobile()}
@@ -689,13 +523,50 @@ export default function SelectProfileScreen() {
         isDesktop={isDesktop}
         onRequestClose={closeModal}
       >
-        {renderModalContent()}
+        <ProfileModalContent
+          isDesktop={isDesktop}
+          firstName={firstName}
+          lastName={lastName}
+          email={email}
+          countryCode={countryCode}
+          phoneNumber={phoneNumber}
+          gender={gender}
+          relation={relation}
+          birthDate={birthDate}
+          formattedBirthDate={formattedBirthDate}
+          allowEdit={allowEdit}
+          submitError={submitError}
+          formMessage={formMessage}
+          isSaving={isSaving}
+          activeDropdown={activeDropdown}
+          genderOptions={GENDER_OPTIONS}
+          relationOptions={RELATION_OPTIONS}
+          onChangeFirstName={setFirstName}
+          onChangeLastName={setLastName}
+          onOpenDatePicker={handleOpenDatePicker}
+          onToggleDropdown={handleToggleDropdown}
+          onSelectGender={handleSelectGender}
+          onSelectRelation={handleSelectRelation}
+          onChangeEmail={setEmail}
+          onChangeCountryCode={setCountryCode}
+          onChangePhoneNumber={setPhoneNumber}
+          onToggleAllowEdit={setAllowEdit}
+          onCancel={closeModal}
+          onSave={handleSaveProfile}
+          isWebDatePickerOpen={isWebDatePickerOpen}
+          onSelectDate={handleDateChange}
+          onCloseWebDatePicker={closeWebDatePicker}
+          onClearDate={handleClearBirthDate}
+        />
       </ProfileModal>
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"
-        onConfirm={handleDateConfirm}
-        onCancel={() => setDatePickerVisible(false)}
+        onConfirm={handleNativeDateConfirm}
+        onCancel={() => {
+          setDatePickerVisible(false);
+          setActiveDropdown(null);
+        }}
         display={Platform.OS === "ios" ? "inline" : "default"}
         maximumDate={new Date()}
       />
