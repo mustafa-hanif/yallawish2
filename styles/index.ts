@@ -60,7 +60,7 @@ export const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.4)",
     borderRadius: 999,
     paddingHorizontal: 18,
-    paddingVertical: 12,
+    // paddingVertical: 12,
   },
   searchInput: {
     flex: 1,
@@ -78,8 +78,8 @@ export const styles = StyleSheet.create({
     backgroundColor: "rgba(51, 0, 101, 0.12)",
   },
   profileImage: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     borderRadius: 22,
     backgroundColor: "#FFFFFF",
     alignItems: "center",
@@ -87,8 +87,8 @@ export const styles = StyleSheet.create({
     overflow: "hidden",
   },
   profileAvatarImage: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     borderRadius: 22,
   },
   profileText: {

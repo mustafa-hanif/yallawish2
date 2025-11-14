@@ -533,69 +533,20 @@ export default function HomeScreen() {
       >
         {/* Header */}
         <View style={mergeStyles(styles.headerWrapper, isDesktop ? responsiveStyles.headerWrapper : null)}>
-          <View style={mergeStyles(styles.navBar, isDesktop ? responsiveStyles.navBarDesktop : null)}>
-            <Pressable onPress={() => router.replace("/")} style={styles.navBrandRow}>
-              <Image source={require("@/assets/images/yallawish_logo.png")} style={styles.navBrandLogo} contentFit="contain" />
-            </Pressable>
+          {isDesktop ?
+          <>
+            <View style={mergeStyles(styles.navBar, isDesktop ? responsiveStyles.navBarDesktop : null)}>
+              <Pressable onPress={() => router.replace("/")} style={styles.navBrandRow}>
+                <Image source={require("@/assets/images/yallawish_logo.png")} style={styles.navBrandLogo} contentFit="contain" />
+              </Pressable>
 
-            {isDesktop ? (
-              <View
-                style={mergeStyles(
-                  styles.searchContainer,
-                  responsiveStyles.headerSearch,
-                )}
-              >
-                <Ionicons name="search" size={20} color="#FFFFFF" />
-                <TextInput
-                  placeholder="Search for gifts, lists or inspirations..."
-                  style={styles.searchInput}
-                  placeholderTextColor="#D9CCFF"
-                />
-              </View>
-            ) : null}
-
-            <View style={styles.navActions}>
-              <SignedOut>
-                <Pressable onPress={() => router.push("/sign-up")}>
-                  <Text style={styles.navAuthLink}>Sign up</Text>
-                </Pressable>
-                <Pressable onPress={() => router.push("/log-in")}>
-                  <Text style={styles.navAuthLink}>Login</Text>
-                </Pressable>
-              </SignedOut>
-              <SignedIn>
-                <Pressable
-                  style={mergeStyles(styles.profileButton, isDesktop ? responsiveStyles.profileButtonDesktop : null)}
-                  onPress={handlePressProfile}
-                >
-                  {profilePhoto ? (
-                    <Image
-                      source={{ uri: profilePhoto }}
-                      style={mergeStyles(
-                        styles.profileAvatarImage,
-                        isDesktop ? { width: 48, height: 48, borderRadius: 24 } : null,
-                      )}
-                      contentFit="cover"
-                    />
-                  ) : (
-                    <View
-                      style={mergeStyles(
-                        styles.profileImage,
-                        isDesktop ? { width: 48, height: 48, borderRadius: 24 } : null,
-                      )}
-                    >
-                      <Text style={styles.profileText}>{profileInitials}</Text>
-                    </View>
+              {isDesktop ? (
+                <View
+                  style={mergeStyles(
+                    styles.searchContainer,
+                    responsiveStyles.headerSearch,
                   )}
-                </Pressable>
-              </SignedIn>
-            </View>
-          </View>
-
-          {!isDesktop ? (
-            <View style={styles.header}>
-              <View style={mergeStyles(responsiveStyles.headerInner, responsiveStyles.headerInnerDesktop)}>
-                <View style={styles.mobileSearchContainer}>
+                >
                   <Ionicons name="search" size={20} color="#FFFFFF" />
                   <TextInput
                     placeholder="Search for gifts, lists or inspirations..."
@@ -603,6 +554,83 @@ export default function HomeScreen() {
                     placeholderTextColor="#D9CCFF"
                   />
                 </View>
+              ) : null}
+
+              <View style={styles.navActions}>
+                <SignedOut>
+                  <Pressable onPress={() => router.push("/sign-up")}>
+                    <Text style={styles.navAuthLink}>Sign up</Text>
+                  </Pressable>
+                  <Pressable onPress={() => router.push("/log-in")}>
+                    <Text style={styles.navAuthLink}>Login</Text>
+                  </Pressable>
+                </SignedOut>
+                <SignedIn>
+                  <Pressable
+                    style={mergeStyles(styles.profileButton, isDesktop ? responsiveStyles.profileButtonDesktop : null)}
+                    onPress={handlePressProfile}
+                  >
+                    {profilePhoto ? (
+                      <Image
+                        source={{ uri: profilePhoto }}
+                        style={mergeStyles(
+                          styles.profileAvatarImage,
+                          isDesktop ? { width: 48, height: 48, borderRadius: 24 } : null,
+                        )}
+                        contentFit="cover"
+                      />
+                    ) : (
+                      <View
+                        style={mergeStyles(
+                          styles.profileImage,
+                          isDesktop ? { width: 48, height: 48, borderRadius: 24 } : null,
+                        )}
+                      >
+                        <Text style={styles.profileText}>{profileInitials}</Text>
+                      </View>
+                    )}
+                  </Pressable>
+                </SignedIn>
+              </View>
+            </View>
+        
+          </> : null}
+
+          {!isDesktop ? (
+            <View style={[styles.header , {paddingHorizontal : 0, paddingVertical: 20}]}>
+              <View style={mergeStyles(responsiveStyles.headerInner, {  gap:30 })}>
+                <View style={[styles.mobileSearchContainer, {height: 40}]}>
+                  <Ionicons name="search" size={20} color="#FFFFFF" />
+                  <TextInput
+                    placeholder="Type your search here..."
+                    style={styles.searchInput}
+                    placeholderTextColor="#EFECF266"
+                  />
+                </View>
+                <Pressable
+                    style={mergeStyles(styles.profileButton, isDesktop ? responsiveStyles.profileButtonDesktop : null)}
+                    onPress={handlePressProfile}
+                  >
+                    {profilePhoto ? (
+                      <Image
+                        source={{ uri: profilePhoto }}
+                        style={mergeStyles(
+                          styles.profileAvatarImage,
+                          isDesktop ? { width: 48, height: 48, borderRadius: 24 } : null,
+                        )}
+                        contentFit="cover"
+                      />
+                    ) : (
+                      <View
+                        style={mergeStyles(
+                          styles.profileImage,
+                          isDesktop ? { width: 48, height: 48, borderRadius: 24 } : null,
+                        )}
+                      >
+                        <Text style={styles.profileText}>{profileInitials}</Text>
+                      </View>
+                    )}
+                  </Pressable>
               </View>
             </View>
           ) : null}
