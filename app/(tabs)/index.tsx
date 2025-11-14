@@ -202,32 +202,44 @@ const responsiveStyles = StyleSheet.create({
   },
 });
 export default function HomeScreen() {
-  const [scrollX, setScrollX] = useState(0);
-  const scrollInterval = useRef(null);
+
   const { user } = useUser();
   const { width: SCREEN_WIDTH } = Dimensions.get("window");
   const isDesktop = Platform.OS === "web" && SCREEN_WIDTH >= DESKTOP_BREAKPOINT;
-   const scrollRef1 = useRef(null);
-  const scrollRef2 = useRef(null);
-  
+  const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
+  const [scrollDir, setScrollDir] = useState(1);
+  const scrollRef = useRef(null);
+  const TOTAL_PAGES = 2; 
+
 
   useEffect(() => {
-    const delayTimeout = setTimeout(() => {
-      scrollInterval.current = setInterval(() => {
-        setScrollX((prev) => {
-          const next = prev + 100; // adjust scroll speed/distance
-          scrollRef1.current?.scrollTo({ x: next, animated: true });
-          scrollRef2.current?.scrollTo({ x: next, animated: true });
-          return next;
-        });
-      }, 4000); // every 4 seconds
-    }, 7000); // start after 7 seconds
+    const interval = setInterval(() => {
+      setCurrentCategoryIndex(prev => {
+        let next = prev + scrollDir;
 
-    return () => {
-      clearInterval(scrollInterval.current);
-      clearTimeout(delayTimeout);
-    };
-  }, []);
+        // reverse direction when reaching edges
+        if (next >= TOTAL_PAGES) {
+          next = TOTAL_PAGES - 1;
+          setScrollDir(-1);
+        } else if (next < 0) {
+          next = 0;
+          setScrollDir(1);
+        }
+
+        scrollRef.current?.scrollTo({
+          x: next * SCREEN_WIDTH,
+          animated: true,
+        });
+
+        return next;
+      });
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [scrollDir]);
+
+
+
 
   const profilePhoto = user?.imageUrl ?? (typeof user?.unsafeMetadata?.profileImageUrl === "string" ? (user.unsafeMetadata.profileImageUrl as string) : undefined);
 
@@ -403,7 +415,7 @@ export default function HomeScreen() {
       icon: require("@/assets/images/retirement2.svg",),
       color: "#FF9500"
      },
-    { id: 7,
+    { id: 8,
       name: "Retirement",
       icon: require("@/assets/images/other2.svg",),
       color: "#A2845E"
@@ -654,27 +666,54 @@ export default function HomeScreen() {
               ) : (
                 <>
               <ScrollView
+                ref={scrollRef}
                 horizontal
+                pagingEnabled
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={responsiveStyles.lifeMomentScrollContent}
-                style={styles.lifeMomentsScroll}
-                ref={scrollRef1}
+                scrollEventThrottle={16}
+                onScroll={(e) => {
+                  const x = e.nativeEvent.contentOffset.x;
+                  const pageIndex = Math.round(x / SCREEN_WIDTH);
+                  setCurrentCategoryIndex(pageIndex);
+                }}
               >
-                <View style={[styles.categoriesRow, !isDesktop ? styles.categoriesRowMobile : null]}>{categories.slice(0, 4).map((category) => renderCategoryCard(category))}</View>
-              </ScrollView>
-               <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={responsiveStyles.lifeMomentScrollContent}
-                style={styles.lifeMomentsScroll}
-                ref={scrollRef2}
-              >
-                
-                <View style={[styles.categoriesRow, !isDesktop ? styles.categoriesRowMobile : null]}>{categories.slice(4, 8).map((category) => renderCategoryCard(category))}</View>
+                {/* PAGE 1 */}
+                <View style={{ width: SCREEN_WIDTH }}>
+                  <View style={[styles.categoriesRow, !isDesktop && styles.categoriesRowMobile]}>
+                    {categories.slice(0, 4).map(renderCategoryCard)}
+                  </View>
+                  <View style={[styles.categoriesRow, !isDesktop && styles.categoriesRowMobile]}>
+                    {categories.slice(4, 8).map(renderCategoryCard)}
+                  </View>
+                </View>
+
               </ScrollView>
                 </>
               )}
             </View>
+            {!isDesktop ?
+              <>
+              <View style={{ flexDirection: "row", justifyContent: "center", marginTop: 30 }}>
+                {[...Array(TOTAL_PAGES)].map((_, index) => (
+                  <View
+                    key={index}
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: 5,
+                      marginHorizontal: 5,
+                      backgroundColor: currentCategoryIndex !== index ? "#ffff" : "#ffffff",
+                      opacity: currentCategoryIndex !== index ? 1 : 0.3,
+                    }}
+                  />
+                ))}
+              </View>
+              </> :
+              <>
+
+              </>
+              }
+
           </View>
         </View>
 
