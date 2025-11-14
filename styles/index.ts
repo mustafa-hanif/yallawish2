@@ -253,7 +253,7 @@ export const styles = StyleSheet.create({
   },
   lifeMomentsTitle: {
     fontFamily: "Nunito_700Bold",
-    fontSize: 60,
+    fontSize: 50,
     color: "#330065",
     marginTop: 8,
     textAlign:'center',
@@ -298,7 +298,7 @@ export const styles = StyleSheet.create({
   lifeMomentsSecondaryTitle: {
     color: "#FFFFFF",
     fontFamily: "Nunito_700Bold",
-    fontSize: 60,
+    fontSize: 50,
     marginTop: 8,
     textAlign:'center',
     lineHeight: 23.33,
@@ -388,7 +388,7 @@ export const styles = StyleSheet.create({
 
   categoryCardDesktop: {
     width: '23%',
-    height: 277,
+    height: 220,
   },
   categoryCardMobile : {
     width: 140,
@@ -402,7 +402,7 @@ export const styles = StyleSheet.create({
     justifyContent:'center',
     alignItems:'center',
     height:'100%',
-    gap: 36
+    gap: 30
   },
   categoryContentMobile: {
     justifyContent:'center',
@@ -412,8 +412,8 @@ export const styles = StyleSheet.create({
   },
 
  categoryIcon: {
-    width: 72,
-    height: 72,
+    width: 40,
+    height: 40,
   },
   categoryIconMobile: {
     width: 24,
@@ -428,7 +428,7 @@ export const styles = StyleSheet.create({
     fontWeight: "500",
   },
   categoryName: {
-    fontSize: 31,
+    fontSize: 20,
     fontFamily: "Nunito_700Bold",
     color: "#FFFFFF",
     textAlign: "center",
@@ -436,8 +436,8 @@ export const styles = StyleSheet.create({
   },
 
   arrowWhiteIconDesktop : {
-    width: 18,
-    height: 17,
+    width: 16,
+    height: 15,
     objectFit: "contain"
   },
    arrowWhiteIconMobile : {

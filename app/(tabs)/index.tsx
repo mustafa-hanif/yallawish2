@@ -94,9 +94,9 @@ const responsiveStyles = StyleSheet.create({
   },
   sectionInner: {
     width: "100%",
-    maxWidth: 1900,
+    maxWidth: 1800,
     alignSelf: "center",
-    paddingHorizontal: 100,
+    paddingHorizontal: 150,
   },
   lifeMomentGridDesktop: {
     flexDirection: "row",
@@ -113,9 +113,8 @@ const responsiveStyles = StyleSheet.create({
   },
   lifeMomentCardDesktop: {
     width: '23%',
-    height: 276,
+    height: 246,
     minWidth: 260,
-    // marginBottom: 24,
     justifyContent:'center'
   },
   lifeMomentCardMobile: {
@@ -463,7 +462,6 @@ export default function HomeScreen() {
       backgroundColor: "#E9FFE2",
       action: () => Alert.alert("Share", "Sharing coming soon"),
     },
-  
     {
       id: "2",
       title: "Add Community",
