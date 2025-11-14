@@ -30,6 +30,7 @@ export default defineSchema({
     shippingAddress: v.optional(v.union(v.string(), v.null())),
     occasion: v.optional(v.union(v.string(), v.null())),
     coverPhotoUri: v.optional(v.union(v.string(), v.null())),
+    coverPhotoStorageId: v.optional(v.union(v.string(), v.null())),
     privacy: v.union(v.literal("private"), v.literal("shared")),
     requiresPassword: v.optional(v.boolean()),
     password: v.optional(v.union(v.string(), v.null())),

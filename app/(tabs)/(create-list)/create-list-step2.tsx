@@ -2,11 +2,13 @@ import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
+import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Dimensions,
   Image,
@@ -18,7 +20,7 @@ import {
   Text,
   TextInput,
   View,
-  useWindowDimensions,
+  useWindowDimensions
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -100,6 +102,7 @@ interface FormData {
   shippingAddress: string;
   occasion: Occasion;
   coverPhotoUri: string | null;
+  coverPhotoStorageId: string | null;
 }
 
 type OccasionOption = {
@@ -170,12 +173,18 @@ export default function CreateListStep2() {
     shippingAddress: "",
     occasion: null,
     coverPhotoUri: null,
+    coverPhotoStorageId: null,
   });
   const [characterCount, setCharacterCount] = useState(0);
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
 
   const createList = useMutation(api.products.createList);
   const updateListDetails = useMutation(api.products.updateListDetails);
+  const generateCoverUploadUrl = useMutation(
+    api.products.generateListCoverUploadUrl as any,
+  );
+  const getCoverUrl = useMutation(api.products.getListCoverUrl as any);
   const { user } = useUser();
   const { listId } = useLocalSearchParams<{ listId?: string }>();
   const existing = useQuery(
@@ -192,12 +201,16 @@ export default function CreateListStep2() {
         shippingAddress: existing.shippingAddress ?? "",
         occasion: (existing.occasion as Occasion) ?? null,
         coverPhotoUri: (existing.coverPhotoUri as string | null) ?? null,
+        coverPhotoStorageId: (existing as any)?.coverPhotoStorageId ?? null,
       });
       setCharacterCount((existing.note ?? "").length);
     }
   }, [existing]);
 
-  const updateFormData = (field: keyof FormData, value: string | Occasion) => {
+  const updateFormData = (
+    field: keyof FormData,
+    value: string | Occasion | null,
+  ) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -268,6 +281,7 @@ export default function CreateListStep2() {
           shippingAddress: formData.shippingAddress || null,
           occasion: formData.occasion || null,
           coverPhotoUri: formData.coverPhotoUri || null,
+          coverPhotoStorageId: formData.coverPhotoStorageId || null,
         });
         router.push({
           pathname: "/create-list-step3",
@@ -283,6 +297,7 @@ export default function CreateListStep2() {
         shippingAddress: formData.shippingAddress || null,
         occasion: formData.occasion || null,
         coverPhotoUri: formData.coverPhotoUri || null,
+        coverPhotoStorageId: formData.coverPhotoStorageId || null,
         privacy: "private",
         user_id: user?.id ?? null,
       });
@@ -298,30 +313,53 @@ export default function CreateListStep2() {
 
   const handlePickImage = async () => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission required",
-          "Please allow photo library access to upload a cover photo."
-        );
+      console.log("[ImageUpload] Starting image picker...");
+      if (isUploadingCover) {
+        console.log("[ImageUpload] Already uploading, skipping");
         return;
       }
 
+      if (Platform.OS !== "web") {
+        const { status } =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert(
+            "Permission required",
+            "Please allow photo library access to upload a cover photo.",
+          );
+          return;
+        }
+      }
+
+      console.log("[ImageUpload] Launching image library...");
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [16, 9],
+        mediaTypes: ["images"],
+        allowsEditing: Platform.OS !== "web", // Disable editing on web as it may cause issues
+        aspect: Platform.OS !== "web" ? [16, 9] : undefined,
         quality: 0.9,
       });
 
-      if (result.canceled) return;
+      console.log("[ImageUpload] Image picker result:", result);
+
+      if (result.canceled) {
+        console.log("[ImageUpload] User canceled");
+        return;
+      }
 
       const asset = result.assets?.[0];
-      if (!asset) return;
+      console.log("[ImageUpload] Selected asset:", asset);
+      
+      if (!asset?.uri) {
+        console.error("[ImageUpload] No asset URI found");
+        Alert.alert("Error", "Failed to get image. Please try again.");
+        return;
+      }
 
       const uri = asset.uri;
       const mime = asset.mimeType ?? "";
       const ext = uri.split(".").pop()?.toLowerCase();
+      console.log("[ImageUpload] URI:", uri, "MIME:", mime, "EXT:", ext);
+      
       const isValidType =
         mime.startsWith("image/jpeg") ||
         mime.startsWith("image/png") ||
@@ -330,20 +368,141 @@ export default function CreateListStep2() {
         ext === "png";
 
       if (!isValidType) {
+        console.error("[ImageUpload] Invalid file type");
         Alert.alert("Unsupported file", "Please select a JPG or PNG image.");
         return;
       }
 
       const sizeBytes = asset.fileSize;
+      console.log("[ImageUpload] File size:", sizeBytes);
       if (typeof sizeBytes === "number" && sizeBytes > 4 * 1024 * 1024) {
+        console.error("[ImageUpload] File too large");
         Alert.alert("File too large", "Please choose an image under 4MB.");
         return;
       }
 
-      updateFormData("coverPhotoUri", uri);
+      console.log("[ImageUpload] Starting upload process...");
+      setIsUploadingCover(true);
+
+      console.log("[ImageUpload] Generating upload URL...");
+      const uploadUrl = await generateCoverUploadUrl();
+      console.log("[ImageUpload] Upload URL:", uploadUrl);
+      
+      if (typeof uploadUrl !== "string" || uploadUrl.length === 0) {
+        throw new Error("Failed to get upload URL");
+      }
+
+      let storageId: string | undefined;
+
+      if (Platform.OS === "web") {
+        // Web platform: use fetch with blob
+        console.log("[ImageUpload] Web platform detected, processing blob...");
+        let blob: Blob;
+        
+        // Check if we have a File object directly (some web implementations provide this)
+        if (asset && 'file' in asset && asset.file instanceof File) {
+          console.log("[ImageUpload] Using File object directly");
+          blob = asset.file;
+        } else if (uri.startsWith('blob:')) {
+          // For blob URLs, fetch the blob
+          console.log("[ImageUpload] Fetching blob URL...");
+          const response = await fetch(uri);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch blob: ${response.status}`);
+          }
+          blob = await response.blob();
+          console.log("[ImageUpload] Blob fetched, size:", blob.size);
+        } else if (uri.startsWith('data:')) {
+          // For data URLs, convert to blob
+          console.log("[ImageUpload] Converting data URL to blob...");
+          const response = await fetch(uri);
+          blob = await response.blob();
+          console.log("[ImageUpload] Blob created, size:", blob.size);
+        } else {
+          // Try fetching as regular URL
+          console.log("[ImageUpload] Fetching as regular URL...");
+          const response = await fetch(uri);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch image: ${response.status}`);
+          }
+          blob = await response.blob();
+          console.log("[ImageUpload] Blob fetched, size:", blob.size);
+        }
+
+        console.log("[ImageUpload] Uploading blob to:", uploadUrl);
+        const uploadResponse = await fetch(uploadUrl, {
+          method: "POST",
+          body: blob,
+          headers: {
+            "Content-Type":
+              mime && mime.length > 0 ? mime : "application/octet-stream",
+          },
+        });
+
+        console.log("[ImageUpload] Upload response status:", uploadResponse.status);
+
+        if (!uploadResponse.ok) {
+          const errorText = await uploadResponse.text().catch(() => '');
+          console.error("[ImageUpload] Upload failed:", uploadResponse.status, errorText);
+          throw new Error(
+            `Upload failed with status ${uploadResponse.status}: ${errorText}`,
+          );
+        }
+
+        try {
+          const parsed = await uploadResponse.json();
+          console.log("[ImageUpload] Upload response:", parsed);
+          storageId = parsed?.storageId;
+        } catch (parseError) {
+          console.error("[ImageUpload] Failed to parse upload response", parseError);
+          const responseText = await uploadResponse.text().catch(() => '');
+          console.error("[ImageUpload] Response body:", responseText);
+          throw new Error("Unexpected response from upload service");
+        }
+      } else {
+        // Native platforms: use FileSystem
+        const uploadResult = await FileSystem.uploadAsync(uploadUrl, uri, {
+          httpMethod: "POST",
+          headers: {
+            "Content-Type":
+              mime && mime.length > 0 ? mime : "application/octet-stream",
+          },
+        });
+
+        if (uploadResult.status !== 200) {
+          throw new Error(`Upload failed with status ${uploadResult.status}`);
+        }
+
+        try {
+          const parsed = JSON.parse(uploadResult.body ?? "{}");
+          storageId = parsed?.storageId;
+        } catch (parseError) {
+          console.error("Failed to parse upload response", parseError);
+          throw new Error("Unexpected response from upload service");
+        }
+      }
+
+      if (!storageId) {
+        console.error("[ImageUpload] No storageId returned");
+        throw new Error("No storageId returned from upload");
+      }
+
+      console.log("[ImageUpload] Getting public URL for storageId:", storageId);
+      const publicUrl = await getCoverUrl({ storageId } as any);
+      console.log("[ImageUpload] Public URL:", publicUrl);
+      
+      updateFormData("coverPhotoUri", publicUrl);
+      updateFormData("coverPhotoStorageId", storageId);
+      console.log("[ImageUpload] Upload completed successfully!");
     } catch (e) {
-      console.error("Image picker error", e);
-      Alert.alert("Upload failed", "Something went wrong. Please try again.");
+      console.error("[ImageUpload] Error:", e);
+      const errorMessage = e instanceof Error ? e.message : "Unknown error";
+      console.error("[ImageUpload] Error message:", errorMessage);
+      Alert.alert("Upload failed", `Something went wrong: ${errorMessage}`);
+    }
+    finally {
+      setIsUploadingCover(false);
+      console.log("[ImageUpload] Upload process finished");
     }
   };
 
@@ -363,15 +522,16 @@ export default function CreateListStep2() {
   const onOccasionSelect = (occasionId: OccasionOption["id"]) =>
     updateFormData("occasion", occasionId);
 
-  const datePicker = (
-    <DateTimePickerModal
-      isVisible={isDatePickerVisible}
-      mode="date"
-      onConfirm={handleDateConfirm}
-      onCancel={hideDatePicker}
-      display={Platform.OS === "ios" ? "inline" : "default"}
-    />
-  );
+  const datePicker =
+    Platform.OS !== "web" ? (
+      <DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="date"
+        onConfirm={handleDateConfirm}
+        onCancel={hideDatePicker}
+        display={Platform.OS === "ios" ? "inline" : "default"}
+      />
+    ) : null;
 
   const layoutProps: SharedLayoutProps = {
     headerTitle,
@@ -384,6 +544,7 @@ export default function CreateListStep2() {
     showDatePicker,
     handlePickImage,
     isFormValid,
+    isUploadingCover,
     occasions: OCCASION_OPTIONS,
     onOccasionSelect,
   };
@@ -409,13 +570,17 @@ type SharedLayoutProps = {
   headerTitle: string;
   formData: FormData;
   characterCount: number;
-  updateFormData: (field: keyof FormData, value: string | Occasion) => void;
+  updateFormData: (
+    field: keyof FormData,
+    value: string | Occasion | null,
+  ) => void;
   handleNoteChange: (text: string) => void;
   handleBack: () => void;
   handleContinue: () => void;
   showDatePicker: () => void;
   handlePickImage: () => void;
   isFormValid: boolean;
+  isUploadingCover: boolean;
   occasions: OccasionOption[];
   onOccasionSelect: (occasionId: OccasionOption["id"]) => void;
 };
@@ -435,6 +600,7 @@ function DesktopLayout({
   showDatePicker,
   handlePickImage,
   isFormValid,
+  isUploadingCover,
   occasions,
   onOccasionSelect,
   steps,
@@ -515,13 +681,21 @@ function DesktopLayout({
                   styles.uploadArea,
                   styles.desktopUploadArea,
                   formData.coverPhotoUri && styles.uploadAreaPreview,
+                  isUploadingCover && styles.uploadAreaDisabled,
                 ]}
                 onPress={handlePickImage}
+                disabled={isUploadingCover}
               >
-                {formData.coverPhotoUri ? (
+                {isUploadingCover ? (
+                  <View style={styles.uploadingPlaceholder}>
+                    <ActivityIndicator color="#4B0082" />
+                    <Text style={styles.uploadingText}>Uploading...</Text>
+                  </View>
+                ) : formData.coverPhotoUri ? (
                   <Image
                     source={{ uri: formData.coverPhotoUri }}
                     style={styles.desktopCoverPhotoImage}
+                    resizeMode="cover"
                   />
                 ) : (
                   <View style={styles.desktopUploadContent}>
@@ -669,7 +843,7 @@ function DesktopOccasionCard({
     >
       <View style={styles.desktopOccasionHeader}>
         <View style={styles.desktopOccasionInfo}>
-          {option.icon("#330065", 28)}
+          {option.icon("#330065", 18)}
           <Text style={styles.desktopOccasionTitle}>{option.title}</Text>
         </View>
         <View
@@ -696,6 +870,7 @@ function MobileLayout({
   showDatePicker,
   handlePickImage,
   isFormValid,
+  isUploadingCover,
   occasions,
   onOccasionSelect,
 }: SharedLayoutProps) {
@@ -819,13 +994,21 @@ function MobileLayout({
                 style={[
                   styles.uploadArea,
                   formData.coverPhotoUri && styles.uploadAreaPreview,
+                  isUploadingCover && styles.uploadAreaDisabled,
                 ]}
                 onPress={handlePickImage}
+                disabled={isUploadingCover}
               >
-                {formData.coverPhotoUri ? (
+                {isUploadingCover ? (
+                  <View style={styles.uploadingPlaceholder}>
+                    <ActivityIndicator color="#4B0082" />
+                    <Text style={styles.uploadingText}>Uploading...</Text>
+                  </View>
+                ) : formData.coverPhotoUri ? (
                   <Image
                     source={{ uri: formData.coverPhotoUri }}
                     style={styles.coverPhotoImage}
+                    resizeMode="contain"
                   />
                 ) : (
                   <View style={styles.uploadContent}>
@@ -1096,7 +1279,15 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
     justifyContent: "flex-start",
   },
+  uploadAreaDisabled: {
+    opacity: 0.6,
+  },
   uploadContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  uploadingPlaceholder: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
@@ -1104,7 +1295,6 @@ const styles = StyleSheet.create({
   coverPhotoImage: {
     width: "100%",
     height: "100%",
-    resizeMode: "contain",
   },
   uploadText: {
     fontSize: 16,
@@ -1112,6 +1302,11 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito_700Bold",
     color: "#3B0076",
     lineHeight: 16,
+  },
+  uploadingText: {
+    fontSize: 14,
+    fontFamily: "Nunito_600SemiBold",
+    color: "#4B0082",
   },
   uploadInfo: {
     fontSize: 12,
@@ -1353,7 +1548,6 @@ const styles = StyleSheet.create({
   desktopCoverPhotoImage: {
     width: "100%",
     height: "100%",
-    resizeMode: "cover",
   },
   desktopFieldGrid: {
     flexDirection: "row",
@@ -1432,11 +1626,17 @@ const styles = StyleSheet.create({
   desktopOccasionCardSelected: {
     borderColor: "#4B0082",
     backgroundColor: "#F5EDFF",
-    shadowColor: "#4B0082",
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 4,
+    ...(Platform.OS === "web"
+      ? {
+          boxShadow: "0px 12px 16px 0px rgba(75, 0, 130, 0.12)",
+        }
+      : {
+          shadowColor: "#4B0082",
+          shadowOpacity: 0.12,
+          shadowRadius: 16,
+          shadowOffset: { width: 0, height: 12 },
+          elevation: 4,
+        }),
   },
   desktopOccasionHeader: {
     flexDirection: "row",
@@ -1444,13 +1644,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   desktopOccasionInfo: {
-    flexDirection: "row",
+    flexDirection: "column",
     alignItems: "center",
     gap: 12,
   },
   desktopOccasionTitle: {
-    fontSize: 20,
-    fontFamily: "Nunito_700Bold",
+    fontSize: 18,
+    fontFamily: "Nunito_600SemiBold",
     color: "#330065",
   },
   desktopOccasionRadio: {

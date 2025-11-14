@@ -25,13 +25,20 @@ export default function TabLayout() {
     ios: {
       position: "absolute",
       height: 100,
-      paddingTop: 30,
-      paddingBottom: 10,
+      paddingTop: 24,
+      paddingBottom: 20,
+      backgroundColor: "#FFFFFF",
+      borderTopWidth: 0,
+      elevation: 0,
+      shadowOpacity: 0,
     },
     default: {
       height: 100,
-      paddingTop: 30,
-      paddingBottom: 10,
+      paddingTop: 24,
+      paddingBottom: 20,
+      backgroundColor: "#FFFFFF",
+      borderTopWidth: 0,
+      elevation: 0,
     },
   });
   const search = new URLSearchParams();
@@ -53,9 +60,10 @@ export default function TabLayout() {
   }
 
   return (
-    <Tabs
+      <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: "#3B0076",
+        tabBarInactiveTintColor: "#B1A6C4",
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
@@ -98,7 +106,7 @@ export default function TabLayout() {
                 width: 72,
                 height: 72,
                 borderRadius: 36,
-                backgroundColor: focused ? "#4B0082" : "#6A0FBF",
+                backgroundColor: "#3B0076",
                 alignItems: "center",
                 justifyContent: "center",
                 shadowColor: "#000",
@@ -106,7 +114,7 @@ export default function TabLayout() {
                 shadowRadius: 8,
                 shadowOffset: { width: 0, height: 4 },
                 elevation: 6,
-                marginTop: -24,
+                marginTop: 0,
               }}
             >
               <Ionicons name="add" size={42} color="#FFFFFF" />

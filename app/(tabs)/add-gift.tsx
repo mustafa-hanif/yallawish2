@@ -5,6 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { desktopStyles, styles } from "@/styles/addGiftStyles";
 import { Ionicons } from "@expo/vector-icons";
 import { useAction, useMutation, useQuery } from "convex/react";
+import { LinearGradient } from "expo-linear-gradient";
 import * as Linking from 'expo-linking';
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -266,7 +267,15 @@ export default function AddGift() {
       setIsUrlValid(true);
       return;
     }
-    setIsUrlValid(validateUrl(link));
+    // Only validate if it looks like a URL (starts with http:// or https://)
+    // Keywords without http/https prefix are considered valid
+    const trimmedLink = link.trim();
+    if (trimmedLink.startsWith("http://") || trimmedLink.startsWith("https://")) {
+      setIsUrlValid(validateUrl(link));
+    } else {
+      // It's a keyword, not a URL, so it's valid
+      setIsUrlValid(true);
+    }
   }, [link]);
 
   const DESCRIPTION_LIMIT = 400;
@@ -308,14 +317,24 @@ export default function AddGift() {
   };
 
   const openSearchBrowser = () => {
-    if (!search.trim()) return;
-    const q = encodeURIComponent(search.trim());
+    // On web, use the link input value; on mobile, use the search field
+    const searchQuery = Platform.OS === "web" ? link.trim() : search.trim();
+    if (!searchQuery) return;
+    
+    const q = encodeURIComponent(searchQuery);
     const url = `https://www.google.com/search?q=${q}&tbm=shop`;
-    setBrowserUrl(url);
-    setCurrentBrowserUrl(url);
-    // Hide sheet while browsing
-    setShowSheet(false);
-    setShowBrowser(true);
+    
+    if (Platform.OS === "web" && typeof window !== "undefined") {
+      // On web, open in a new tab
+      window.open(url, "_blank");
+    } else {
+      // On mobile, use WebView modal
+      setBrowserUrl(url);
+      setCurrentBrowserUrl(url);
+      // Hide sheet while browsing
+      setShowSheet(false);
+      setShowBrowser(true);
+    }
   };
 
   const handleBrowserAdd = async () => {
@@ -442,84 +461,221 @@ export default function AddGift() {
   return (
     <View style={isDesktop ? desktopStyles.container : styles.container}>
       {layout}
-      {/** Bottom Sheet **/}
-      <Modal visible={showSheet} transparent animationType="none" onRequestClose={closeSheet}>
+      {/** Bottom Sheet / Modal **/}
+      <Modal visible={showSheet} transparent animationType={isDesktop ? "fade" : "none"} onRequestClose={closeSheet}>
         <Pressable style={styles.backdrop} onPress={closeSheet} />
-        <Animated.View style={[styles.sheetContainer, { transform: [{ translateY }] }]}>
-          <Pressable onPress={closeSheet}>
-            <View style={styles.sheetHandle} />
-          </Pressable>
-          <ScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
-            <Text style={styles.sheetTitle}>Add a gift item</Text>
-            <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>Add a web link</Text>
-              <View style={styles.inputRow}>
-                <TextInput value={link} onChangeText={setLink} style={styles.input} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="https://" />
-                {scraping ? <Text style={styles.scrapeStatus}>…</Text> : <Ionicons name="open-outline" size={20} color="#7A6F88" />}
+        {isDesktop ? (
+          <View style={desktopStyles.modalContainer}>
+            <View style={desktopStyles.modalContent}>
+              {/* Header */}
+              <View style={desktopStyles.modalHeader}>
+                <Text style={desktopStyles.modalTitle}>Add a Gift</Text>
+                <Pressable onPress={closeSheet} style={desktopStyles.modalCloseButton}>
+                  <Ionicons name="close" size={24} color="#8E8EA9" />
+                </Pressable>
               </View>
-              {!isUrlValid && link.trim().length > 0 && (<Text style={styles.errorText}>Invalid URL</Text>)}
 
-              {scrapeError && <Text style={styles.errorText}>{scrapeError}</Text>}
-            </View>
-            <View style={styles.orDivider}>
-              <View style={styles.orLine} />
-              <Text style={styles.orText}>OR</Text>
-              <View style={styles.orLine} />
-            </View>
-            <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>Search via Google</Text>
-              <View style={styles.inputRow}>
-                <TextInput value={search} onChangeText={setSearch} style={styles.input} autoCapitalize="none" autoCorrect={false} placeholder="Search products" returnKeyType="search" onSubmitEditing={openSearchBrowser} />
-                <Pressable onPress={openSearchBrowser}>
-                  <Ionicons name="search-outline" size={20} color="#1C0335" />
+              <ScrollView contentContainerStyle={desktopStyles.modalScrollContent} showsVerticalScrollIndicator={false}>
+                {/* Web Link Section */}
+                <View style={desktopStyles.modalFieldGroup}>
+                  <Text style={desktopStyles.modalFieldLabel}>Web Link</Text>
+                  <View style={desktopStyles.modalInputRow}>
+                    <TextInput
+                      value={link}
+                      onChangeText={setLink}
+                      style={desktopStyles.modalInput}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      keyboardType="url"
+                      placeholder="Type, paste or search"
+                      placeholderTextColor="#8E8EA9"
+                    />
+                    <Pressable onPress={openSearchBrowser} style={desktopStyles.modalSearchButton}>
+                      <Text style={desktopStyles.modalSearchButtonText}>Search via</Text>
+                      <View style={desktopStyles.googleLogo}>
+                        <Text style={desktopStyles.googleG}>G</Text>
+                      </View>
+                    </Pressable>
+                  </View>
+                  {!isUrlValid && link.trim().length > 0 && (
+                    <Text style={desktopStyles.modalErrorText}>Invalid URL</Text>
+                  )}
+                  {scrapeError && <Text style={desktopStyles.modalErrorText}>{scrapeError}</Text>}
+                  {scraping && <Text style={desktopStyles.modalScrapingText}>Loading...</Text>}
+                </View>
+
+                {/* Product Image and Details Row */}
+                <View style={desktopStyles.modalProductRow}>
+                  {/* Image Section */}
+                  <View style={desktopStyles.modalImageContainer}>
+                    {imageUrl ? (
+                      <View style={desktopStyles.modalImageWrapper}>
+                        <Image source={{ uri: imageUrl }} style={desktopStyles.modalProductImage} resizeMode="contain" />
+                        <Pressable style={desktopStyles.modalImageEditButton}>
+                          <Ionicons name="image-outline" size={20} color="#3B0076" />
+                        </Pressable>
+                      </View>
+                    ) : (
+                      <View style={desktopStyles.modalImagePlaceholder}>
+                        <Ionicons name="image-outline" size={48} color="#D1D1D6" />
+                      </View>
+                    )}
+                  </View>
+
+                  {/* Price and Quantity Section */}
+                  <View style={desktopStyles.modalPriceQtyColumn}>
+                    <View style={desktopStyles.modalFieldGroup}>
+                      <Text style={desktopStyles.modalFieldLabel}>Price of gift</Text>
+                      <TextInput
+                        value={price}
+                        onChangeText={setPrice}
+                        style={desktopStyles.modalPriceInput}
+                        keyboardType="decimal-pad"
+                        placeholder="AED 0.00"
+                        placeholderTextColor="#8E8EA9"
+                      />
+                    </View>
+                    <View style={desktopStyles.modalFieldGroup}>
+                      <Text style={desktopStyles.modalFieldLabel}>Quantity</Text>
+                      <View style={desktopStyles.modalQtyRow}>
+                        <Pressable onPress={decQty} style={desktopStyles.modalQtyButton}>
+                          <Text style={desktopStyles.modalQtyButtonText}>–</Text>
+                        </Pressable>
+                        <Text style={desktopStyles.modalQtyValue}>{String(quantity).padStart(2, '0')}</Text>
+                        <Pressable onPress={incQty} style={desktopStyles.modalQtyButton}>
+                          <Text style={desktopStyles.modalQtyButtonText}>+</Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Name of Gift */}
+                <View style={desktopStyles.modalFieldGroup}>
+                  <Text style={desktopStyles.modalFieldLabel}>Name of Gift</Text>
+                  <View style={desktopStyles.modalInputRow}>
+                    <TextInput
+                      value={name}
+                      onChangeText={setName}
+                      style={desktopStyles.modalInput}
+                      placeholder="Enter gift name"
+                      placeholderTextColor="#8E8EA9"
+                    />
+                    <Ionicons name="pencil-outline" size={20} color="#AEAEB2" />
+                  </View>
+                </View>
+
+                {/* Description */}
+                <View style={desktopStyles.modalFieldGroup}>
+                  <Text style={desktopStyles.modalFieldLabel}>Description</Text>
+                  <View style={desktopStyles.modalTextareaWrapper}>
+                    <TextInput
+                      placeholder="Prefer color white, size medium etc"
+                      value={description}
+                      onChangeText={t => t.length <= DESCRIPTION_LIMIT && setDescription(t)}
+                      style={desktopStyles.modalTextarea}
+                      multiline
+                      placeholderTextColor="#8E8EA9"
+                    />
+                    <Text style={desktopStyles.modalCharCount}>{description.length}/100</Text>
+                  </View>
+                </View>
+              </ScrollView>
+
+              {/* Footer Buttons */}
+              <View style={desktopStyles.modalFooter}>
+                <Pressable style={desktopStyles.modalCancelButton} onPress={handleCancel}>
+                  <Text style={desktopStyles.modalCancelButtonText}>Cancel</Text>
+                </Pressable>
+                <Pressable
+                  style={[desktopStyles.modalSaveButton, (!canSave) && desktopStyles.modalSaveButtonDisabled]}
+                  onPress={handleSave}
+                  disabled={!canSave}
+                >
+                  <Text style={[desktopStyles.modalSaveButtonText, (!canSave) && desktopStyles.modalSaveButtonTextDisabled]}>
+                    {saving ? 'Saving...' : 'Save'}
+                  </Text>
                 </Pressable>
               </View>
             </View>
-            <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>Desired quantity</Text>
-              <View style={styles.qtyRow}>
-                <Pressable onPress={decQty} style={styles.qtyBtn}><Text style={styles.qtyBtnText}>–</Text></Pressable>
-                <Text style={styles.qtyValue}>{String(quantity).padStart(2, '0')}</Text>
-                <Pressable onPress={incQty} style={styles.qtyBtn}><Text style={styles.qtyBtnText}>+</Text></Pressable>
-              </View>
-            </View>
-            <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>Price of gift</Text>
-              <View style={styles.inputRow}>
-                <TextInput value={price} onChangeText={setPrice} style={styles.input} keyboardType="decimal-pad" />
-              </View>
-            </View>
-            <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>Name of gift</Text>
-              <View style={styles.inputRow}>
-                <TextInput value={name} onChangeText={setName} style={styles.input} />
-                <Ionicons name="pencil-outline" size={20} color="#1C0335" />
-              </View>
-              {imageUrl && (
-                <Image source={{ uri: imageUrl }} style={styles.previewImage} />
-              )}
-            </View>
-            <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>Description (optional)</Text>
-              <View style={[styles.inputRow, styles.textareaWrapper]}>
-                <TextInput
-                  placeholder="Prefer white, size M."
-                  value={description}
-                  onChangeText={t => t.length <= DESCRIPTION_LIMIT && setDescription(t)}
-                  style={[styles.input, styles.textarea]}
-                  multiline
-                />
-                <Text style={styles.charCount}>{DESCRIPTION_LIMIT - description.length}</Text>
-              </View>
-            </View>
-            <Pressable style={[styles.saveBtn, (!canSave) && styles.saveBtnDisabled]} onPress={handleSave} disabled={!canSave}>
-              <Text style={[styles.saveBtnText, (!canSave) && styles.saveBtnTextDisabled]}>{saving ? 'Saving...' : 'Save'}</Text>
+          </View>
+        ) : (
+          <Animated.View style={[styles.sheetContainer, { transform: [{ translateY }] }]}>
+            <Pressable onPress={closeSheet}>
+              <View style={styles.sheetHandle} />
             </Pressable>
-            <Pressable style={styles.cancelBtn} onPress={handleCancel}>
-              <Text style={styles.cancelBtnText}>Cancel</Text>
-            </Pressable>
-          </ScrollView>
-        </Animated.View>
+            <ScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
+              <Text style={styles.sheetTitle}>Add a gift item</Text>
+              <View style={styles.fieldGroup}>
+                <Text style={styles.fieldLabel}>Add a web link</Text>
+                <View style={styles.inputRow}>
+                  <TextInput value={link} onChangeText={setLink} style={styles.input} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="https://" />
+                  {scraping ? <Text style={styles.scrapeStatus}>…</Text> : <Ionicons name="open-outline" size={20} color="#7A6F88" />}
+                </View>
+                {!isUrlValid && link.trim().length > 0 && (<Text style={styles.errorText}>Invalid URL</Text>)}
+
+                {scrapeError && <Text style={styles.errorText}>{scrapeError}</Text>}
+              </View>
+              <View style={styles.orDivider}>
+                <View style={styles.orLine} />
+                <Text style={styles.orText}>OR</Text>
+                <View style={styles.orLine} />
+              </View>
+              <View style={styles.fieldGroup}>
+                <Text style={styles.fieldLabel}>Search via Google</Text>
+                <View style={styles.inputRow}>
+                  <TextInput value={search} onChangeText={setSearch} style={styles.input} autoCapitalize="none" autoCorrect={false} placeholder="Search products" returnKeyType="search" onSubmitEditing={openSearchBrowser} />
+                  <Pressable onPress={openSearchBrowser}>
+                    <Ionicons name="search-outline" size={20} color="#1C0335" />
+                  </Pressable>
+                </View>
+              </View>
+              <View style={styles.fieldGroup}>
+                <Text style={styles.fieldLabel}>Desired quantity</Text>
+                <View style={styles.qtyRow}>
+                  <Pressable onPress={decQty} style={styles.qtyBtn}><Text style={styles.qtyBtnText}>–</Text></Pressable>
+                  <Text style={styles.qtyValue}>{String(quantity).padStart(2, '0')}</Text>
+                  <Pressable onPress={incQty} style={styles.qtyBtn}><Text style={styles.qtyBtnText}>+</Text></Pressable>
+                </View>
+              </View>
+              <View style={styles.fieldGroup}>
+                <Text style={styles.fieldLabel}>Price of gift</Text>
+                <View style={styles.inputRow}>
+                  <TextInput value={price} onChangeText={setPrice} style={styles.input} keyboardType="decimal-pad" />
+                </View>
+              </View>
+              <View style={styles.fieldGroup}>
+                <Text style={styles.fieldLabel}>Name of gift</Text>
+                <View style={styles.inputRow}>
+                  <TextInput value={name} onChangeText={setName} style={styles.input} />
+                  <Ionicons name="pencil-outline" size={20} color="#1C0335" />
+                </View>
+                {imageUrl && (
+                  <Image source={{ uri: imageUrl }} style={styles.previewImage} />
+                )}
+              </View>
+              <View style={styles.fieldGroup}>
+                <Text style={styles.fieldLabel}>Description (optional)</Text>
+                <View style={[styles.inputRow, styles.textareaWrapper]}>
+                  <TextInput
+                    placeholder="Prefer white, size M."
+                    value={description}
+                    onChangeText={t => t.length <= DESCRIPTION_LIMIT && setDescription(t)}
+                    style={[styles.input, styles.textarea]}
+                    multiline
+                  />
+                  <Text style={styles.charCount}>{DESCRIPTION_LIMIT - description.length}</Text>
+                </View>
+              </View>
+              <Pressable style={[styles.saveBtn, (!canSave) && styles.saveBtnDisabled]} onPress={handleSave} disabled={!canSave}>
+                <Text style={[styles.saveBtnText, (!canSave) && styles.saveBtnTextDisabled]}>{saving ? 'Saving...' : 'Save'}</Text>
+              </Pressable>
+              <Pressable style={styles.cancelBtn} onPress={handleCancel}>
+                <Text style={styles.cancelBtnText}>Cancel</Text>
+              </Pressable>
+            </ScrollView>
+          </Animated.View>
+        )}
       </Modal>
       {/* Product search browser modal */}
       <Modal visible={showBrowser} animationType="slide" presentationStyle="fullScreen" onRequestClose={() => setShowBrowser(false)}>
@@ -807,19 +963,61 @@ function DesktopLayout({
             </View>
           </View>
 
-          <View style={desktopStyles.heroCard}>
-            <Image source={coverUri ? { uri: coverUri } : FALLBACK_COVER} style={desktopStyles.heroImage} />
-            <View style={desktopStyles.heroOverlay}>
-              <Pressable style={desktopStyles.changeCoverButton} onPress={onManage}>
-                <Text style={desktopStyles.changeCoverText}>Change cover photo</Text>
-              </Pressable>
-              <View style={desktopStyles.ribbonContainer}>
-                <RibbonHeader
-                  title={title}
-                  subtitle={[ribbonSubtitle, daysToGo].filter(Boolean).join(" - ")}
-                />
+          <View style={desktopStyles.heroCardWrapper}>
+            <View style={desktopStyles.heroCard}>
+              <Image source={coverUri ? { uri: coverUri } : FALLBACK_COVER} style={desktopStyles.heroImage} />
+              <View style={desktopStyles.heroOverlay}>
+                <Pressable style={desktopStyles.changeCoverButton} onPress={onManage}>
+                  <Text style={desktopStyles.changeCoverText}>Change cover photo</Text>
+                </Pressable>
               </View>
             </View>
+            <View style={desktopStyles.ribbonContainer}>
+              <RibbonHeader
+                title={title}
+                subtitle={[ribbonSubtitle, daysToGo].filter(Boolean).join(" - ")}
+              />
+            </View>
+          </View>
+
+          {/* Gift Stats Cards */}
+          <View style={desktopStyles.statsRow}>
+            <LinearGradient
+              colors={["#3B0076", "#5A00B8"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={desktopStyles.statCard}
+            >
+              <Text style={desktopStyles.statCardLabel}>Total Items</Text>
+              <Text style={desktopStyles.statCardValue}>{totalItemsCount}</Text>
+            </LinearGradient>
+            <LinearGradient
+              colors={["#1F6F4A", "#2A8F5F"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={desktopStyles.statCard}
+            >
+              <Text style={desktopStyles.statCardLabel}>All Claimed</Text>
+              <Text style={desktopStyles.statCardValue}>{totals.fullyClaimed}</Text>
+            </LinearGradient>
+            <LinearGradient
+              colors={["#F2994A", "#FFB366"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={desktopStyles.statCard}
+            >
+              <Text style={desktopStyles.statCardLabel}>Items Claimed</Text>
+              <Text style={desktopStyles.statCardValue}>{totals.claimedCount}</Text>
+            </LinearGradient>
+            <LinearGradient
+              colors={["#4D4D4D", "#666666"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={desktopStyles.statCard}
+            >
+              <Text style={desktopStyles.statCardLabel}>Items Unclaimed</Text>
+              <Text style={desktopStyles.statCardValue}>{totals.unclaimedCount}</Text>
+            </LinearGradient>
           </View>
 
           <View style={desktopStyles.controlsRow}>

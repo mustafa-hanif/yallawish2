@@ -200,6 +200,7 @@ export default function GiftDetail() {
   const [showLeaving, setShowLeaving] = useState(false);
   const [countdown, setCountdown] = useState(5);
   const [submitting, setSubmitting] = useState(false);
+  const [showBuyNowForm, setShowBuyNowForm] = useState(false);
 
   useEffect(() => {
     if (action === "want" && isSignedIn) {
@@ -246,8 +247,13 @@ export default function GiftDetail() {
       goToSignIn();
       return;
     }
-    setShowLeaving(true);
-  }, [buyUrl, isSignedIn, goToSignIn]);
+    if (isDesktop) {
+      setShowBuyNowForm(true);
+      setMarked(true);
+    } else {
+      setShowLeaving(true);
+    }
+  }, [buyUrl, isSignedIn, goToSignIn, isDesktop]);
 
   const onIWantThisToo = useCallback(() => {
     if (!isSignedIn) {
@@ -297,6 +303,9 @@ export default function GiftDetail() {
         buyer_name: user?.fullName ?? user?.firstName ?? null,
         buyer_email: user?.primaryEmailAddress?.emailAddress ?? null,
       } as any);
+      if (isDesktop) {
+        setShowBuyNowForm(false);
+      }
       router.replace({
         pathname: "/purchase-success",
         params: listId ? { listId: String(listId) } : undefined,
@@ -323,6 +332,8 @@ export default function GiftDetail() {
     orderNumber,
     userId,
     user,
+    router,
+    isDesktop,
   ]);
 
   const currentItemId = item ? String((item as any)._id) : itemId ? String(itemId) : "";
@@ -431,6 +442,8 @@ export default function GiftDetail() {
       onSeeAll={onSeeAll}
       available={available}
       submitting={submitting}
+      showBuyNowForm={showBuyNowForm}
+      onCloseBuyNowForm={() => setShowBuyNowForm(false)}
     />
   ) : (
     <MobileLayout
@@ -933,6 +946,8 @@ type DesktopLayoutProps = {
   onSeeAll: () => void;
   available: number;
   submitting: boolean;
+  showBuyNowForm: boolean;
+  onCloseBuyNowForm: () => void;
 };
 
 const DesktopLayout: React.FC<DesktopLayoutProps> = ({
@@ -969,8 +984,228 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
   onSeeAll,
   available,
   submitting,
+  showBuyNowForm,
+  onCloseBuyNowForm,
 }) => {
   const remainingChars = Math.max(0, NOTE_LIMIT - note.length);
+
+  if (showBuyNowForm) {
+    return (
+      <SafeAreaView style={desktopStyles.safeArea} edges={Platform.OS === "web" ? [] : ["top"]}>
+        <ScrollView contentContainerStyle={desktopStyles.scrollContent}>
+          <View style={desktopStyles.maxWidth}>
+            <View style={desktopStyles.breadcrumbRow}>
+              <Pressable style={desktopStyles.backPill} onPress={onCloseBuyNowForm}>
+                <Ionicons name="chevron-back" size={18} color={COLORS.purple} />
+                <Text style={desktopStyles.backPillText}>Back</Text>
+              </Pressable>
+              <Text style={desktopStyles.breadcrumbText}>
+                Home / {listTitle} / Buy Now
+              </Text>
+            </View>
+
+            <View style={desktopStyles.buyNowColumns}>
+              <View style={desktopStyles.productSectionColumn}>
+                <View style={desktopStyles.productImageContainer}>
+                  <Image
+                    source={item.image_url ? { uri: item.image_url } : FALLBACK_IMAGE}
+                    style={desktopStyles.productImage}
+                    contentFit="contain"
+                  />
+                </View>
+                <View style={desktopStyles.productBody}>
+                  <View style={desktopStyles.productInfo}>
+                    <Text style={desktopStyles.productTitle}>{item.name}</Text>
+                    {price && <Text style={desktopStyles.productPrice}>{price}</Text>}
+                    <Text style={desktopStyles.productMeta}>
+                      Quantity: {String(item.quantity ?? 1).padStart(2, "0")}
+                    </Text>
+                    {item.description && (
+                      <Text style={desktopStyles.productDescription}>{item.description}</Text>
+                    )}
+                  </View>
+                </View>
+              </View>
+
+              <View style={desktopStyles.purchaseFormCard}>
+                <Text style={desktopStyles.formTitle}>Please fill-up the details below</Text>
+
+                <View style={desktopStyles.fieldBlock}>
+                  <Text style={desktopStyles.fieldLabel}>I bought</Text>
+                  <View style={desktopStyles.stepper}>
+                    <Pressable
+                      onPress={dec}
+                      disabled={qty <= 1}
+                      style={[
+                        desktopStyles.stepperButton,
+                        qty <= 1 && desktopStyles.stepperButtonDisabled,
+                      ]}
+                    >
+                      <Text style={desktopStyles.stepperButtonText}>−</Text>
+                    </Pressable>
+                    <Text style={desktopStyles.stepperValue}>
+                      {String(qty).padStart(2, "0")}
+                    </Text>
+                    <Pressable
+                      onPress={inc}
+                      disabled={qty >= maxQuantity}
+                      style={[
+                        desktopStyles.stepperButton,
+                        qty >= maxQuantity && desktopStyles.stepperButtonDisabled,
+                      ]}
+                    >
+                      <Text style={desktopStyles.stepperButtonText}>+</Text>
+                    </Pressable>
+                  </View>
+                </View>
+
+                <View style={desktopStyles.fieldBlock}>
+                  <Text style={desktopStyles.fieldLabel}>Delivered to</Text>
+                  <View style={desktopStyles.radioGroup}>
+                    <Pressable
+                      onPress={() => setDeliveredTo("recipient")}
+                      style={desktopStyles.radioOption}
+                    >
+                      <View
+                        style={[
+                          desktopStyles.radioOuter,
+                          deliveredTo === "recipient" && desktopStyles.radioOuterActive,
+                        ]}
+                      >
+                        {deliveredTo === "recipient" && <View style={desktopStyles.radioInner} />}
+                      </View>
+                      <Text style={desktopStyles.radioLabel}>{ownerName}</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => setDeliveredTo("me")}
+                      style={desktopStyles.radioOption}
+                    >
+                      <View
+                        style={[
+                          desktopStyles.radioOuter,
+                          deliveredTo === "me" && desktopStyles.radioOuterActive,
+                        ]}
+                      >
+                        {deliveredTo === "me" && <View style={desktopStyles.radioInner} />}
+                      </View>
+                      <Text style={desktopStyles.radioLabel}>My home</Text>
+                    </Pressable>
+                  </View>
+                </View>
+
+                <View style={desktopStyles.fieldBlock}>
+                  <Text style={desktopStyles.fieldLabel}>Add a note</Text>
+                  <View style={desktopStyles.noteField}>
+                    <TextInput
+                      value={note}
+                      onChangeText={setNote}
+                      placeholder="Here's a little gift to make your day better! 🎉"
+                      placeholderTextColor="#B1A6C4"
+                      multiline
+                      style={desktopStyles.noteInput}
+                    />
+                    <Text style={desktopStyles.charCounter}>
+                      {remainingChars}/{NOTE_LIMIT}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={desktopStyles.fieldBlock}>
+                  <Text style={desktopStyles.fieldLabel}>Where did you buy this?</Text>
+                  <View style={desktopStyles.storeRow}>
+                    <Pressable
+                      onPress={() => setStoreOption("suggested")}
+                      disabled={!buyUrl}
+                      style={[
+                        desktopStyles.storeOption,
+                        storeOption === "suggested" && desktopStyles.storeOptionActive,
+                        !buyUrl && desktopStyles.storeOptionDisabled,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          desktopStyles.storeOptionText,
+                          storeOption === "suggested" && desktopStyles.storeOptionTextActive,
+                        ]}
+                      >
+                        {storeDisplayName.toUpperCase()}
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => {
+                        setStoreOption("custom");
+                        if (!storeName || storeName === storeDisplayName) {
+                          setStoreName("");
+                        }
+                      }}
+                      style={[
+                        desktopStyles.storeOption,
+                        storeOption === "custom" && desktopStyles.storeOptionActive,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          desktopStyles.storeOptionText,
+                          storeOption === "custom" && desktopStyles.storeOptionTextActive,
+                        ]}
+                      >
+                        Another store
+                      </Text>
+                    </Pressable>
+                  </View>
+                  {storeOption === "custom" && (
+                    <View style={desktopStyles.inputField}>
+                      <Text style={desktopStyles.inputLabel}>Store name</Text>
+                      <View style={desktopStyles.inputWrapper}>
+                        <TextInput
+                          value={storeName}
+                          onChangeText={setStoreName}
+                          placeholder="Macy's"
+                          placeholderTextColor="#B1A6C4"
+                          style={desktopStyles.textInput}
+                        />
+                      </View>
+                    </View>
+                  )}
+                </View>
+
+                <View style={desktopStyles.fieldBlock}>
+                  <Text style={desktopStyles.inputLabel}>Order number (if known)</Text>
+                  <View style={desktopStyles.inputWrapper}>
+                    <TextInput
+                      value={orderNumber}
+                      onChangeText={setOrderNumber}
+                      placeholder="#123456789"
+                      placeholderTextColor="#B1A6C4"
+                      style={desktopStyles.textInput}
+                    />
+                  </View>
+                </View>
+
+                <View style={desktopStyles.formActions}>
+                  <Pressable style={desktopStyles.backButton} onPress={onCloseBuyNowForm}>
+                    <Text style={desktopStyles.backButtonText}>Back</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={onSubmit}
+                    disabled={!canSubmit}
+                    style={[
+                      desktopStyles.submitButton,
+                      (!canSubmit || submitting) && desktopStyles.submitButtonDisabled,
+                    ]}
+                  >
+                    <Text style={desktopStyles.submitButtonText}>
+                      {submitting ? "Submitting…" : "Submit"}
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={desktopStyles.safeArea} edges={Platform.OS === "web" ? [] : ["top"]}>
@@ -987,21 +1222,25 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
           </View>
 
           <View style={desktopStyles.columns}>
-            <View style={desktopStyles.productCard}>
-              <Image
-                source={item.image_url ? { uri: item.image_url } : FALLBACK_IMAGE}
-                style={desktopStyles.productImage}
-                contentFit="cover"
-              />
+            <View style={desktopStyles.productSection}>
+              <View style={desktopStyles.productImageContainer}>
+                <Image
+                  source={item.image_url ? { uri: item.image_url } : FALLBACK_IMAGE}
+                  style={desktopStyles.productImage}
+                  contentFit="contain"
+                />
+              </View>
               <View style={desktopStyles.productBody}>
-                <Text style={desktopStyles.productTitle}>{item.name}</Text>
-                {price && <Text style={desktopStyles.productPrice}>{price}</Text>}
-                <Text style={desktopStyles.productMeta}>
-                  Quantity: {String(item.quantity ?? 1).padStart(2, "0")}
-                </Text>
-                {item.description && (
-                  <Text style={desktopStyles.productDescription}>{item.description}</Text>
-                )}
+                <View style={desktopStyles.productInfo}>
+                  <Text style={desktopStyles.productTitle}>{item.name}</Text>
+                  {price && <Text style={desktopStyles.productPrice}>{price}</Text>}
+                  <Text style={desktopStyles.productMeta}>
+                    Quantity: {String(item.quantity ?? 1).padStart(2, "0")}
+                  </Text>
+                  {item.description && (
+                    <Text style={desktopStyles.productDescription}>{item.description}</Text>
+                  )}
+                </View>
                 <View style={desktopStyles.productActions}>
                   <Pressable
                     onPress={onBuyNow}
@@ -1023,221 +1262,6 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
                   </Text>
                 )}
               </View>
-            </View>
-
-            <View style={desktopStyles.detailCard}>
-              <Text style={desktopStyles.detailTitle}>Purchase details</Text>
-              <Text style={desktopStyles.detailSubtitle}>
-                Share a few details to coordinate with other gifters.
-              </Text>
-
-              <View style={desktopStyles.toggleRow}>
-                <Pressable
-                  onPress={() => onToggleMarked(false)}
-                  style={[
-                    desktopStyles.toggleButton,
-                    !marked && desktopStyles.toggleButtonActive,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      desktopStyles.toggleButtonText,
-                      !marked && desktopStyles.toggleButtonTextActive,
-                    ]}
-                  >
-                    Not yet
-                  </Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => onToggleMarked(true)}
-                  style={[
-                    desktopStyles.toggleButton,
-                    marked && desktopStyles.toggleButtonActive,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      desktopStyles.toggleButtonText,
-                      marked && desktopStyles.toggleButtonTextActive,
-                    ]}
-                  >
-                    Yes, I did
-                  </Text>
-                </Pressable>
-              </View>
-
-              {marked ? (
-                <>
-                  <View style={desktopStyles.fieldBlock}>
-                    <Text style={desktopStyles.fieldLabel}>I bought</Text>
-                    <View style={desktopStyles.stepper}>
-                      <Pressable
-                        onPress={dec}
-                        disabled={qty <= 1}
-                        style={[
-                          desktopStyles.stepperButton,
-                          qty <= 1 && desktopStyles.stepperButtonDisabled,
-                        ]}
-                      >
-                        <Text style={desktopStyles.stepperButtonText}>−</Text>
-                      </Pressable>
-                      <Text style={desktopStyles.stepperValue}>
-                        {String(qty).padStart(2, "0")}
-                      </Text>
-                      <Pressable
-                        onPress={inc}
-                        disabled={qty >= maxQuantity}
-                        style={[
-                          desktopStyles.stepperButton,
-                          qty >= maxQuantity && desktopStyles.stepperButtonDisabled,
-                        ]}
-                      >
-                        <Text style={desktopStyles.stepperButtonText}>+</Text>
-                      </Pressable>
-                    </View>
-                  </View>
-
-                  <View style={desktopStyles.fieldBlock}>
-                    <Text style={desktopStyles.fieldLabel}>Delivered to</Text>
-                    <View style={desktopStyles.radioGroup}>
-                      <Pressable
-                        onPress={() => setDeliveredTo("recipient")}
-                        style={desktopStyles.radioOption}
-                      >
-                        <View
-                          style={[
-                            desktopStyles.radioOuter,
-                            deliveredTo === "recipient" && desktopStyles.radioOuterActive,
-                          ]}
-                        >
-                          {deliveredTo === "recipient" && <View style={desktopStyles.radioInner} />}
-                        </View>
-                        <Text style={desktopStyles.radioLabel}>{ownerName}</Text>
-                      </Pressable>
-                      <Pressable
-                        onPress={() => setDeliveredTo("me")}
-                        style={desktopStyles.radioOption}
-                      >
-                        <View
-                          style={[
-                            desktopStyles.radioOuter,
-                            deliveredTo === "me" && desktopStyles.radioOuterActive,
-                          ]}
-                        >
-                          {deliveredTo === "me" && <View style={desktopStyles.radioInner} />}
-                        </View>
-                        <Text style={desktopStyles.radioLabel}>My home</Text>
-                      </Pressable>
-                    </View>
-                  </View>
-
-                  <View style={desktopStyles.fieldBlock}>
-                    <Text style={desktopStyles.fieldLabel}>Add a note</Text>
-                    <View style={desktopStyles.noteField}>
-                      <TextInput
-                        value={note}
-                        onChangeText={setNote}
-                        placeholder="Here’s a little gift to make your day better! 🎉"
-                        placeholderTextColor="#B1A6C4"
-                        multiline
-                        style={desktopStyles.noteInput}
-                      />
-                      <Text style={desktopStyles.charCounter}>
-                        {remainingChars}/{NOTE_LIMIT}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={desktopStyles.fieldBlock}>
-                    <Text style={desktopStyles.fieldLabel}>Where did you buy this?</Text>
-                    <View style={desktopStyles.storeRow}>
-                      <Pressable
-                        onPress={() => setStoreOption("suggested")}
-                        disabled={!buyUrl}
-                        style={[
-                          desktopStyles.storeOption,
-                          storeOption === "suggested" && desktopStyles.storeOptionActive,
-                          !buyUrl && desktopStyles.storeOptionDisabled,
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            desktopStyles.storeOptionText,
-                            storeOption === "suggested" && desktopStyles.storeOptionTextActive,
-                          ]}
-                        >
-                          {storeDisplayName.toUpperCase()}
-                        </Text>
-                      </Pressable>
-                      <Pressable
-                        onPress={() => {
-                          setStoreOption("custom");
-                          if (!storeName || storeName === storeDisplayName) {
-                            setStoreName("");
-                          }
-                        }}
-                        style={[
-                          desktopStyles.storeOption,
-                          storeOption === "custom" && desktopStyles.storeOptionActive,
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            desktopStyles.storeOptionText,
-                            storeOption === "custom" && desktopStyles.storeOptionTextActive,
-                          ]}
-                        >
-                          Another store
-                        </Text>
-                      </Pressable>
-                    </View>
-                    {storeOption === "custom" && (
-                      <View style={desktopStyles.inputField}>
-                        <Text style={desktopStyles.inputLabel}>Store name</Text>
-                        <View style={desktopStyles.inputWrapper}>
-                          <TextInput
-                            value={storeName}
-                            onChangeText={setStoreName}
-                            placeholder="Macy’s"
-                            placeholderTextColor="#B1A6C4"
-                            style={desktopStyles.textInput}
-                          />
-                        </View>
-                      </View>
-                    )}
-                  </View>
-
-                  <View style={desktopStyles.fieldBlock}>
-                    <Text style={desktopStyles.fieldLabel}>Order number (optional)</Text>
-                    <View style={desktopStyles.inputWrapper}>
-                      <TextInput
-                        value={orderNumber}
-                        onChangeText={setOrderNumber}
-                        placeholder="#123456789"
-                        placeholderTextColor="#B1A6C4"
-                        style={desktopStyles.textInput}
-                      />
-                    </View>
-                  </View>
-                </>
-              ) : (
-                <Text style={desktopStyles.notice}>
-                  Toggle “Yes, I did” after you complete the purchase.
-                </Text>
-              )}
-
-              <Pressable
-                onPress={onSubmit}
-                disabled={!canSubmit}
-                style={[
-                  desktopStyles.submitButton,
-                  (!canSubmit || submitting) && desktopStyles.submitButtonDisabled,
-                ]}
-              >
-                <Text style={desktopStyles.submitButtonText}>
-                  {submitting ? "Submitting…" : "Submit"}
-                </Text>
-              </Pressable>
             </View>
           </View>
 
@@ -1790,7 +1814,7 @@ const mobileStyles = StyleSheet.create({
 const desktopStyles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: "#F8F4FF",
+    backgroundColor: COLORS.background,
   },
   safeArea: {
     flex: 1,
@@ -1804,6 +1828,7 @@ const desktopStyles = StyleSheet.create({
     maxWidth: 1120,
     paddingHorizontal: 32,
     paddingTop: 32,
+    alignSelf: "center",
   },
   breadcrumbRow: {
     flexDirection: "row",
@@ -1832,61 +1857,132 @@ const desktopStyles = StyleSheet.create({
     fontFamily: "Nunito_500Medium",
   },
   columns: {
+    width: "100%",
+  },
+  buyNowColumns: {
     flexDirection: "row",
     gap: 32,
     alignItems: "flex-start",
+    width: "100%",
   },
-  productCard: {
+  purchaseFormCard: {
     flex: 1,
+    flexShrink: 0,
+    padding: 32,
+    minWidth: 400,
+  },
+  formTitle: {
+    color: COLORS.textPrimary,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 24,
+    marginBottom: 24,
+  },
+  formActions: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 32,
+    justifyContent: "space-between",
+  },
+  backButton: {
+    height: 48,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: COLORS.purple,
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: COLORS.background,
-    borderRadius: 24,
-    padding: 24,
-    shadowColor: "#200A40",
-    shadowOpacity: 0.06,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 12 },
+    paddingHorizontal: 24,
+    minWidth: 100,
+  },
+  backButtonText: {
+    color: COLORS.purple,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
+  },
+  productSection: {
+    flexDirection: "row",
+    gap: 32,
+    alignItems: "flex-start",
+    flex: 1,
+    minWidth: 0,
+  },
+  productSectionColumn: {
+    flexDirection: "column",
+    gap: 24,
+    alignItems: "flex-start",
+    flex: 1,
+    minWidth: 0,
+  },
+  productImageContainer: {
+    width: 400,
+    height: 400,
+    flexShrink: 1,
+    borderRadius: 20,
+    backgroundColor: COLORS.background,
+    overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 300,
+    maxWidth: 400,
+    alignSelf: "stretch",
   },
   productImage: {
     width: "100%",
-    height: 320,
-    borderRadius: 20,
-    backgroundColor: COLORS.surface,
+    height: "100%",
   },
   productBody: {
-    marginTop: 20,
-    gap: 10,
+    flex: 1,
+    gap: 24,
+    justifyContent: "flex-start",
+    minWidth: 200,
+    paddingLeft: 0,
+    flexShrink: 1,
+  },
+  productInfo: {
+    gap: 0,
+    flex: 1,
   },
   productTitle: {
     color: COLORS.textPrimary,
     fontFamily: "Nunito_700Bold",
     fontSize: 28,
+    lineHeight: 36,
+    marginTop: 82,
+    marginBottom: 4,
   },
   productPrice: {
-    color: COLORS.purple,
+    color: COLORS.accent,
     fontFamily: "Nunito_700Bold",
-    fontSize: 22,
+    fontSize: 24,
+    marginBottom: 8,
   },
   productMeta: {
     color: COLORS.textSecondary,
     fontFamily: "Nunito_600SemiBold",
+    fontSize: 16,
+    marginBottom: 12,
   },
   productDescription: {
     color: COLORS.textSecondary,
     lineHeight: 24,
     fontFamily: "Nunito_500Medium",
+    fontSize: 16,
+    marginBottom: 4,
   },
   productActions: {
     flexDirection: "row",
     gap: 12,
-    marginTop: 12,
+    marginTop: 24,
+    width: "100%",
   },
   primaryButton: {
-    flex: 1,
-    height: 56,
-    borderRadius: 16,
+    height: 48,
+    borderRadius: 12,
     backgroundColor: COLORS.purple,
     alignItems: "center",
     justifyContent: "center",
+    maxWidth: 214,
+    flex: 1,
   },
   primaryButtonDisabled: {
     opacity: 0.5,
@@ -1897,14 +1993,15 @@ const desktopStyles = StyleSheet.create({
     fontSize: 16,
   },
   secondaryButton: {
-    flex: 1,
-    height: 56,
-    borderRadius: 16,
+    height: 48,
+    borderRadius: 12,
     borderWidth: 2,
     borderColor: COLORS.purple,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: COLORS.background,
+    maxWidth: 214,
+    flex: 1,
   },
   secondaryButtonText: {
     color: COLORS.purple,
@@ -1912,7 +2009,8 @@ const desktopStyles = StyleSheet.create({
     fontSize: 16,
   },
   detailCard: {
-    flex: 1,
+    width: 400,
+    flexShrink: 0,
     backgroundColor: COLORS.background,
     borderRadius: 24,
     padding: 28,
@@ -2096,12 +2194,13 @@ const desktopStyles = StyleSheet.create({
     fontFamily: "Nunito_500Medium",
   },
   submitButton: {
-    marginTop: 28,
-    height: 58,
-    borderRadius: 16,
+    height: 48,
+    borderRadius: 12,
     backgroundColor: COLORS.purple,
     alignItems: "center",
     justifyContent: "center",
+    paddingHorizontal: 24,
+    minWidth: 100,
   },
   submitButtonDisabled: {
     opacity: 0.6,

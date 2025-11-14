@@ -141,6 +141,7 @@ export const createList = mutation({
     shippingAddress: v.optional(v.union(v.string(), v.null())),
     occasion: v.optional(v.union(v.string(), v.null())),
     coverPhotoUri: v.optional(v.union(v.string(), v.null())),
+    coverPhotoStorageId: v.optional(v.union(v.string(), v.null())),
     privacy: v.union(v.literal("private"), v.literal("shared")),
     requiresPassword: v.optional(v.boolean()),
     password: v.optional(v.union(v.string(), v.null())),
@@ -156,6 +157,7 @@ export const createList = mutation({
       shippingAddress: args.shippingAddress ?? null,
       occasion: args.occasion ?? null,
       coverPhotoUri: args.coverPhotoUri ?? null,
+      coverPhotoStorageId: args.coverPhotoStorageId ?? null,
       privacy: args.privacy,
       requiresPassword: args.requiresPassword ?? false,
       password: args.password ?? null,
@@ -175,6 +177,7 @@ export const updateListDetails = mutation({
     shippingAddress: v.optional(v.union(v.string(), v.null())),
     occasion: v.optional(v.union(v.string(), v.null())),
     coverPhotoUri: v.optional(v.union(v.string(), v.null())),
+    coverPhotoStorageId: v.optional(v.union(v.string(), v.null())),
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.listId, {
@@ -184,9 +187,28 @@ export const updateListDetails = mutation({
       shippingAddress: args.shippingAddress ?? null,
       occasion: args.occasion ?? null,
       coverPhotoUri: args.coverPhotoUri ?? null,
+      coverPhotoStorageId: args.coverPhotoStorageId ?? null,
       updated_at: new Date().toISOString(),
     });
     return true;
+  },
+});
+
+export const generateListCoverUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const getListCoverUrl = mutation({
+  args: { storageId: v.string() },
+  handler: async (ctx, args) => {
+    const url = await ctx.storage.getUrl(args.storageId as any);
+    if (!url) {
+      throw new Error("Failed to resolve cover photo URL");
+    }
+    return url;
   },
 });
 
@@ -211,7 +233,18 @@ export const updateListPrivacy = mutation({
 export const getListById = query({
   args: { listId: v.id("lists") },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.listId);
+    const list = await ctx.db.get(args.listId);
+    if (!list) {
+      return null;
+    }
+    let coverPhotoUri = list.coverPhotoUri ?? null;
+    if (list.coverPhotoStorageId) {
+      const refreshed = await ctx.storage.getUrl(list.coverPhotoStorageId as any);
+      if (refreshed) {
+        coverPhotoUri = refreshed;
+      }
+    }
+    return { ...list, coverPhotoUri };
   },
 });
 
@@ -220,10 +253,22 @@ export const getMyLists = query({
   handler: async (ctx, args) => {
     const userId = args.user_id ?? null;
     if (userId === null) return [];
-    return await ctx.db
+    const lists = await ctx.db
       .query("lists")
       .withIndex("by_user", (q) => q.eq("user_id", userId))
       .collect();
+    return await Promise.all(
+      lists.map(async (list) => {
+        let coverPhotoUri = list.coverPhotoUri ?? null;
+        if (list.coverPhotoStorageId) {
+          const refreshed = await ctx.storage.getUrl(list.coverPhotoStorageId as any);
+          if (refreshed) {
+            coverPhotoUri = refreshed;
+          }
+        }
+        return { ...list, coverPhotoUri };
+      })
+    );
   },
 });
 

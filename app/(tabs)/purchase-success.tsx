@@ -1,11 +1,31 @@
+import { useUser } from '@clerk/clerk-expo';
+import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useRef } from 'react';
-import { Image, Pressable, SafeAreaView, StatusBar, Text, View } from 'react-native';
+import { Platform, Pressable, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
+
+const DESKTOP_BREAKPOINT = 1024;
+
+const COLORS = {
+  background: "#FFFFFF",
+  surface: "#F7F3FB",
+  lightPurple: "#F8F4FF",
+  purple: "#3B0076",
+  deepPurple: "#2C0C54",
+  textPrimary: "#1C0335",
+  textSecondary: "#6B5E7E",
+};
 
 export default function PurchaseSuccess() {
   const { listId } = useLocalSearchParams<{ name?: string; listId?: string }>();
+  const { width } = useWindowDimensions();
+  const isDesktop = Platform.OS === "web" && width >= DESKTOP_BREAKPOINT;
+  const { user } = useUser();
   const confettiRef = useRef<any>(null);
+
+  const buyerName = user?.fullName || user?.firstName || "there";
 
   const onSendAnnouncement = () => {
     // TODO: integrate announcement flow
@@ -21,48 +41,333 @@ export default function PurchaseSuccess() {
     router.replace('/create-list-step1');
   };
 
+  if (isDesktop) {
+    return (
+      <View style={desktopStyles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+        <ConfettiCannon ref={confettiRef} count={120} origin={{ x: width / 2, y: -10 }} fadeOut autoStart fallSpeed={3000} explosionSpeed={450} />
+        <SafeAreaView style={desktopStyles.safeArea}>
+          <View style={desktopStyles.header}>
+            <Image source={require('@/assets/images/yallawish_logo.png')} style={desktopStyles.logo} />
+          </View>
+
+          <ScrollView contentContainerStyle={desktopStyles.scrollContent}>
+            <View style={desktopStyles.content}>
+              {/* Gift Illustration */}
+              <View style={desktopStyles.illustrationContainer}>
+                <Image 
+                  source={require('@/assets/images/thankyou.png')} 
+                  style={desktopStyles.illustration}
+                  contentFit="contain"
+                />
+              </View>
+
+              <Text style={desktopStyles.heading}>Thank You {buyerName}!</Text>
+              <Text style={desktopStyles.subtext}>
+                Your gift is on its way - and it's going to make someone's day!
+              </Text>
+
+              <View style={desktopStyles.buttonContainer}>
+                <Pressable onPress={onSendAnnouncement} style={desktopStyles.primaryButton}>
+                  <Ionicons name="megaphone" size={20} color="#FFFFFF" />
+                  <Text style={desktopStyles.primaryButtonText}>Send a gift announcement</Text>
+                </Pressable>
+                <Pressable onPress={onPurchaseAnother} style={desktopStyles.secondaryButton}>
+                  <Ionicons name="gift" size={20} color={COLORS.purple} />
+                  <Text style={desktopStyles.secondaryButtonText}>Purchase another gift</Text>
+                </Pressable>
+              </View>
+
+              <View style={desktopStyles.bottomSection}>
+                <View style={desktopStyles.bottomTextContainer}>
+                  <Text style={desktopStyles.bottomText}>Wasn't that easy?</Text>
+                  <Text style={desktopStyles.bottomTextBold}>Make Gifting Fun & Easy for Your Friends & Family</Text>
+                </View>
+                <Pressable onPress={onCreateList} style={desktopStyles.createButton}>
+                  <Text style={desktopStyles.createButtonText}>Create My List</Text>
+                </Pressable>
+              </View>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </View>
+    );
+  }
+
   return (
-    <View style={{ flex: 1, backgroundColor: '#2C0C54' }}>
+    <View style={mobileStyles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#2C0C54" />
-      {/* Confetti */}
       <ConfettiCannon ref={confettiRef} count={120} origin={{ x: 200, y: -10 }} fadeOut autoStart fallSpeed={3000} explosionSpeed={450} />
-      <SafeAreaView style={{ flex: 1 }}>
-        <View style={{ alignItems: 'center', paddingTop: 24 }}>
-          <Image source={require('@/assets/images/yallawish_logo.png')} style={{ width: 150, height: 30, resizeMode: 'contain' }} />
+      <SafeAreaView style={mobileStyles.safeArea}>
+        <View style={mobileStyles.header}>
+          <Image source={require('@/assets/images/yallawish_logo.png')} style={mobileStyles.logo} />
         </View>
 
-        <View style={{ flex: 1, alignItems: 'center', paddingHorizontal: 24 }}>
-          <Text style={{ color: '#FFFFFF', fontFamily: 'Nunito_700Bold', fontSize: 36, textAlign: 'center', marginTop: 36 }}>
-            Thank You!
-          </Text>
-          <Text style={{ color: 'rgba(255,255,255,0.9)', fontFamily: 'Nunito_600SemiBold', fontSize: 18, textAlign: 'center', marginTop: 12, lineHeight: 26 }}>
-            Your gift is on its way – and it’s going to make someones’s day!
+        <View style={mobileStyles.content}>
+          <Text style={mobileStyles.heading}>Thank You!</Text>
+          <Text style={mobileStyles.subtext}>
+            Your gift is on its way – and it's going to make someones's day!
           </Text>
 
-          {/* Big check icon substitute */}
-          <View style={{ width: 84, height: 84, borderRadius: 42, backgroundColor: '#39D98A', alignItems: 'center', justifyContent: 'center', marginTop: 28 }}>
-            <Text style={{ color: '#0A4D2E', fontSize: 44 }}>✓</Text>
+          <View style={mobileStyles.checkContainer}>
+            <Text style={mobileStyles.check}>✓</Text>
           </View>
 
-          <View style={{ width: '100%', marginTop: 28, gap: 16 }}>
-            <Pressable onPress={onSendAnnouncement} style={{ height: 56, borderRadius: 14, borderWidth: 2, borderColor: 'rgba(255,255,255,0.6)', alignItems: 'center', justifyContent: 'center' }}>
-              <Text style={{ color: '#FFFFFF', fontFamily: 'Nunito_700Bold', fontSize: 16 }}>Send a gift announcement</Text>
+          <View style={mobileStyles.buttonContainer}>
+            <Pressable onPress={onSendAnnouncement} style={mobileStyles.button}>
+              <Text style={mobileStyles.buttonText}>Send a gift announcement</Text>
             </Pressable>
-            <Pressable onPress={onPurchaseAnother} style={{ height: 56, borderRadius: 14, borderWidth: 2, borderColor: 'rgba(255,255,255,0.6)', alignItems: 'center', justifyContent: 'center' }}>
-              <Text style={{ color: '#FFFFFF', fontFamily: 'Nunito_700Bold', fontSize: 16 }}>Purchase another gift</Text>
+            <Pressable onPress={onPurchaseAnother} style={mobileStyles.button}>
+              <Text style={mobileStyles.buttonText}>Purchase another gift</Text>
             </Pressable>
           </View>
 
-          <Text style={{ color: 'rgba(255,255,255,0.9)', fontFamily: 'Nunito_700Bold', fontSize: 18, textAlign: 'center', marginTop: 32 }}>Wasn’t that easy?</Text>
-          <Text style={{ color: '#FFFFFF', fontFamily: 'Nunito_700Bold', fontSize: 26, textAlign: 'center', marginTop: 12 }}>
+          <Text style={mobileStyles.bottomHeading}>Wasn't that easy?</Text>
+          <Text style={mobileStyles.bottomText}>
             {`Make Gifting Fun\n& Easy for Your\nFriends & Family`}
           </Text>
 
-          <Pressable onPress={onCreateList} style={{ width: '100%', height: 56, borderRadius: 14, backgroundColor: '#FF3EB5', alignItems: 'center', justifyContent: 'center', marginTop: 24 }}>
-            <Text style={{ color: '#FFFFFF', fontFamily: 'Nunito_700Bold', fontSize: 18 }}>Create My List</Text>
+          <Pressable onPress={onCreateList} style={mobileStyles.createButton}>
+            <Text style={mobileStyles.createButtonText}>Create My List</Text>
           </Pressable>
         </View>
       </SafeAreaView>
     </View>
   );
 }
+
+const mobileStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#2C0C54',
+  },
+  safeArea: {
+    flex: 1,
+  },
+  header: {
+    alignItems: 'center',
+    paddingTop: 24,
+  },
+  logo: {
+    width: 150,
+    height: 30,
+    resizeMode: 'contain',
+  },
+  content: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  heading: {
+    color: '#FFFFFF',
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 36,
+    textAlign: 'center',
+    marginTop: 36,
+  },
+  subtext: {
+    color: 'rgba(255,255,255,0.9)',
+    fontFamily: 'Nunito_600SemiBold',
+    fontSize: 18,
+    textAlign: 'center',
+    marginTop: 12,
+    lineHeight: 26,
+  },
+  checkContainer: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: '#39D98A',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 28,
+  },
+  check: {
+    color: '#0A4D2E',
+    fontSize: 44,
+  },
+  buttonContainer: {
+    width: '100%',
+    marginTop: 28,
+    gap: 16,
+  },
+  button: {
+    height: 56,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.6)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 16,
+  },
+  bottomHeading: {
+    color: 'rgba(255,255,255,0.9)',
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 18,
+    textAlign: 'center',
+    marginTop: 32,
+  },
+  bottomText: {
+    color: '#FFFFFF',
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 26,
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  createButton: {
+    width: '100%',
+    height: 56,
+    borderRadius: 14,
+    backgroundColor: '#FF3EB5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 24,
+  },
+  createButtonText: {
+    color: '#FFFFFF',
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 18,
+  },
+});
+
+const desktopStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  safeArea: {
+    flex: 1,
+  },
+  header: {
+    paddingHorizontal: 48,
+    paddingTop: 24,
+    paddingBottom: 16,
+  },
+  logo: {
+    width: 150,
+    height: 30,
+    resizeMode: 'contain',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: 48,
+  },
+  content: {
+    alignItems: 'center',
+    maxWidth: 600,
+    width: '100%',
+    paddingHorizontal: 32,
+  },
+  illustrationContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 32,
+    position: 'relative',
+  },
+  illustration: {
+    width: 200,
+    height: 200,
+  },
+  heading: {
+    color: COLORS.textPrimary,
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 42,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  subtext: {
+    color: COLORS.textSecondary,
+    fontFamily: 'Nunito_600SemiBold',
+    fontSize: 18,
+    textAlign: 'center',
+    marginBottom: 40,
+    lineHeight: 26,
+  },
+  buttonContainer: {
+    width: '100%',
+    gap: 16,
+    marginBottom: 48,
+    alignItems: 'center',
+  },
+  primaryButton: {
+    height: 56,
+    borderRadius: 14,
+    backgroundColor: COLORS.purple,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 12,
+    maxWidth: 273,
+    width: '100%',
+  },
+  primaryButtonText: {
+    color: '#FFFFFF',
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 16,
+  },
+  secondaryButton: {
+    height: 56,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: COLORS.purple,
+    backgroundColor: COLORS.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 12,
+    maxWidth: 273,
+    width: '100%',
+  },
+  secondaryButtonText: {
+    color: COLORS.purple,
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 16,
+  },
+  bottomSection: {
+    width: 730,
+    backgroundColor: COLORS.lightPurple,
+    borderRadius: 20,
+    padding: 32,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 24,
+  },
+  bottomTextContainer: {
+    flex: 1,
+    flexDirection: 'column',
+    gap: 4,
+  },
+  bottomText: {
+    color: COLORS.textPrimary,
+    fontFamily: 'Nunito_500Medium',
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  bottomTextBold: {
+    color: COLORS.textPrimary,
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  createButton: {
+    height: 56,
+    borderRadius: 14,
+    backgroundColor: COLORS.purple,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+    minWidth: 200,
+  },
+  createButtonText: {
+    color: '#FFFFFF',
+    fontFamily: 'Nunito_700Bold',
+    fontSize: 18,
+  },
+});
