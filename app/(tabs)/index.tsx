@@ -447,33 +447,65 @@ export default function HomeScreen() {
 
   const initialCards = [
     {
-      id: "0",
+      id: "1",
       title: "Create List",
       subtitle: "Create a new wishlist for any occasion",
-      image: require("@/assets/images/createList.svg"),
+      image: require("@/assets/images/purple-0.png"),
       backgroundColor: "#F3ECFE",
       action: handleCreateWishlist,
     },
     {
-      id: "1",
+      id: "2",
       title: "Share List",
       subtitle: "Invite friends & family to view your list",
-      image: require("@/assets/images/shareList.svg"),
+      image: require("@/assets/images/purple-1.png"),
       backgroundColor: "#E9FFE2",
       action: () => Alert.alert("Share", "Sharing coming soon"),
     },
     {
-      id: "2",
+      id: "3",
       title: "Add Community",
       subtitle: "See popular public registries",
-      image: require("@/assets/images/addCommunity.svg"),
+      image: require("@/assets/images/purple-2.png"),
+      backgroundColor: "#C2D9FF",
+      action: () => Alert.alert("Community", "Community lists coming soon"),
+    },
+       {
+      id: "4",
+      title: "Create List",
+      subtitle: "Create a new wishlist for any occasion",
+      image: require("@/assets/images/purple-3.png"),
+      backgroundColor: "#F3ECFE",
+      action: handleCreateWishlist,
+    },
+    {
+      id: "5",
+      title: "Share List",
+      subtitle: "Invite friends & family to view your list",
+      image: require("@/assets/images/purple-4.png"),
+      backgroundColor: "#E9FFE2",
+      action: () => Alert.alert("Share", "Sharing coming soon"),
+    },
+    {
+      id: "6",
+      title: "Add Community",
+      subtitle: "See popular public registries",
+      image: require("@/assets/images/purple-5.png"),
+      backgroundColor: "#C2D9FF",
+      action: () => Alert.alert("Community", "Community lists coming soon"),
+    },
+     {
+      id: "7",
+      title: "Add Community",
+      subtitle: "See popular public registries",
+      image: require("@/assets/images/purple-2.png"),
       backgroundColor: "#C2D9FF",
       action: () => Alert.alert("Community", "Community lists coming soon"),
     },
   ];
   // Cards array static for infinite loop (no state mutation needed)
   const cards = initialCards;
-
+  
   const mergeStyles = (...styleInputs: any[]) => StyleSheet.flatten(styleInputs.filter(Boolean));
 
   const renderLifeMomentCard = (moment: LifeMomentCard, variant: "primary" | "secondary") => {
