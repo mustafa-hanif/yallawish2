@@ -735,7 +735,7 @@ export default function HomeScreen() {
               <ScrollView
                 ref={scrollRef}
                 horizontal
-                pagingEnabled
+                // pagingEnabled
                 showsHorizontalScrollIndicator={false}
                 scrollEventThrottle={16}
                 onScroll={(e) => {
