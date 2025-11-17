@@ -616,11 +616,18 @@ export const styles = StyleSheet.create({
     lineHeight: 22,
   },
   aiSection: {
-    backgroundColor: "#330065",
+    // backgroundColor: "#330065",
     paddingHorizontal: 24,
     paddingVertical: 36,
     borderRadius: 28,
     marginHorizontal: 20,
+    marginTop: 32,
+  },
+  aiSectionMobile: {
+    backgroundColor: "#330065",
+  },
+  gradientSectionMobile: {
+    paddingHorizontal: 24,
     marginTop: 32,
   },
   aiHeader: {
@@ -628,10 +635,10 @@ export const styles = StyleSheet.create({
     marginBottom: 12,
   },
   aiButton: {
-    backgroundColor: "#03FFEE",
-    color: "#330065",
+    fontFamily: "Nunito_400Regular",
+    backgroundColor: "#283884",
+    color: "#03FFEE",
     fontSize: 11,
-    fontFamily: "Nunito_700Bold",
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 16,
@@ -648,7 +655,7 @@ export const styles = StyleSheet.create({
     color: "#FFFFFF",
     lineHeight: 22,
     marginBottom: 24,
-    maxWidth: "80%",
+    // maxWidth: "80%",
   },
   aiChatButton: {
     width: 44,
@@ -656,7 +663,7 @@ export const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.18)",
+    // backgroundColor: "rgba(255, 255, 255, 0.18)",
   },
   robotImage: {
     width: 340,

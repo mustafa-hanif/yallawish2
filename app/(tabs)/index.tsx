@@ -8,6 +8,7 @@ import { styles } from "@/styles";
 import { SignedIn, SignedOut, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
+import { LinearGradient } from "expo-linear-gradient";
 import { Link, router } from "expo-router";
 import { Alert, Dimensions, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -164,17 +165,23 @@ const responsiveStyles = StyleSheet.create({
     marginHorizontal: 0,
     marginTop: 0,
   },
+  aiSectionOuterMobile: {
+    padding: 0,
+    backgroundColor: "transparent",
+    marginHorizontal: 0,
+    marginTop: 0,
+  },
   aiSectionDesktopWrapper: {
     width: "100%",
     maxWidth: 1180,
     alignSelf: "center",
-    paddingVertical: 40,
-    paddingHorizontal: 20,
+    // paddingVertical: 40,
+    // paddingHorizontal: 20,
   },
   aiSectionDesktop: {
     borderRadius: 32,
-    paddingHorizontal: 40,
-    paddingVertical: 40,
+    // paddingHorizontal: 40,
+    // paddingVertical: 40,
     flexDirection: "row",
     alignItems: "center",
     overflow: "hidden",
@@ -182,11 +189,13 @@ const responsiveStyles = StyleSheet.create({
   },
   aiContentDesktop: {
     flex: 1,
-    marginRight: 32,
+    padding: 40
   },
   aiRobotDesktop: {
     flex: 1,
     alignItems: "flex-end",
+    height: '100%',
+    justifyContent:'flex-end',
   },
   robotImageDesktop: {
     width: 340,
@@ -911,10 +920,16 @@ export default function HomeScreen() {
         </View>
 
         {/* AI Assistant */}
-        <View style={mergeStyles(styles.aiSection, isDesktop ? responsiveStyles.aiSectionOuter : null)}>
           {isDesktop ? (
-            <View style={responsiveStyles.aiSectionDesktopWrapper}>
-              <View style={responsiveStyles.aiSectionDesktop}>
+        <View style={mergeStyles(isDesktop ? styles.aiSection : styles.aiSectionMobile, isDesktop ? responsiveStyles.aiSectionOuter : null)}>
+            <View style={[responsiveStyles.aiSectionDesktopWrapper]}>
+              <LinearGradient 
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                colors={['#330065','#03ffee87']}
+                // locations={[0.65, 0.999]}
+                locations={[0.65, 0.999]}
+                style={[responsiveStyles.aiSectionDesktop]}>
                 <View style={responsiveStyles.aiContentDesktop}>
                   <View style={styles.aiHeader}>
                     <Text style={styles.aiButton}>AI-POWERED</Text>
@@ -928,24 +943,42 @@ export default function HomeScreen() {
                 <View style={responsiveStyles.aiRobotDesktop}>
                   <Image source={require("@/assets/images/robot.png")} style={mergeStyles(styles.robotImage, responsiveStyles.robotImageDesktop)} contentFit="contain" />
                 </View>
-              </View>
+              </LinearGradient>
+            </View>
             </View>
           ) : (
             <>
-              <View style={styles.aiHeader}>
-                <Text style={styles.aiButton}>AI-POWERED</Text>
-              </View>
-              <Text style={styles.aiTitle}>Meet Genie!</Text>
-              <Text style={styles.aiDescription}>Let our smart assistant suggest the perfect registry items based on your lifestyle, preferences, and needs — saving you time and guesswork!</Text>
-              <Pressable style={styles.aiChatButton}>
-                <Ionicons name="chevron-forward" size={32} color="#FFFFFF" />
-              </Pressable>
-              <View style={{ height: 280 }}>
-                <Image source={require("@/assets/images/robot.png")} style={styles.robotImage} contentFit="contain" />
+            <View style={mergeStyles(styles.aiSectionMobile)}>
+                <LinearGradient 
+                  // start={{ x: 0, y: 1 }}
+                  // end={{ x: 0, y: 1.5 }}
+                  colors={['#330065','#03ffee87']}
+                  // locations={[0.8, 0.999]}
+                  locations={[0.5, 0.9]}
+                  style={mergeStyles(styles.gradientSectionMobile)}
+                  >
+
+                  <View style={styles.aiHeader}>
+                    <Text style={styles.aiButton}>
+                      <Text style={{ fontFamily:'Nunito_700Bold', fontWeight:'bold', fontStyle:'italic'}}>AI</Text> POWERED</Text>
+                  </View>
+                  <View style={{flexDirection: 'row', justifyContent:'space-between', alignItems: 'center'}}>
+                    <Text style={styles.aiTitle}>Meet Genie!</Text>
+                    <Pressable style={styles.aiChatButton}>
+                    <Ionicons name="chevron-forward" size={32}  color="#FFFFFF" />
+                  </Pressable>
+                  </View>
+                  <Text style={styles.aiDescription}>Let our smart assistant suggest the perfect registry items based on your lifestyle, preferences, and needs — saving you time and guesswork!</Text>
+                  
+                  <View style={{ height: 280, justifyContent:'flex-end', alignItems:'center' }}>
+                    <Image source={require("@/assets/images/robot.png")} style={styles.robotImage} contentFit="contain" />
+                  </View>
+
+                </LinearGradient>
               </View>
             </>
           )}
-        </View>
+        {/* </View> */}
         <View style={isDesktop ? responsiveStyles.signOutWrapper : { paddingHorizontal: 20, marginTop: 24 }}>
           <SignOutButton />
         </View>
