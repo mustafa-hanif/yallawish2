@@ -523,6 +523,9 @@ export default function SelectProfileScreen() {
         isDesktop={isDesktop}
         onRequestClose={closeModal}
       >
+          <Pressable onPress={closeModal}>
+            <View style={styles.sheetHandle} />
+          </Pressable>
         <ProfileModalContent
           isDesktop={isDesktop}
           firstName={firstName}

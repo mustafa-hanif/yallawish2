@@ -686,6 +686,14 @@ const selectProfileStyles = StyleSheet.create({
   webSelectWrapperDesktop: {
     height: 54,
   },
+  sheetHandle: {
+    alignSelf: "center",
+    width: 48,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#DDD7E4",
+    marginBottom: 12,
+  },
 });
 
 export default selectProfileStyles;
