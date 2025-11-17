@@ -591,7 +591,9 @@ function MobileLayout({
       >
         <Pressable style={styles.sheetBackdrop} onPress={closeShareModal} />
         <View style={styles.sheet}>
-          <View style={styles.sheetHandle} />
+          <Pressable onPress={closeShareModal}>
+            <View style={styles.sheetHandle} />
+          </Pressable>
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 24 }}
