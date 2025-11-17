@@ -1,19 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useMemo } from "react";
 import {
-    ActivityIndicator,
-    Platform,
-    Pressable,
-    ScrollView,
-    Switch,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Dimensions,
+  Platform,
+  Pressable,
+  ScrollView,
+  Switch,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 
 import styles from "@/styles/selectProfileStyles";
 
 export type DropdownKey = "gender" | "relation";
+  const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 type ProfileModalContentProps = {
   isDesktop: boolean;
@@ -195,10 +197,13 @@ export function ProfileModalContent({
 
   return (
     <ScrollView
-      style={
-        isDesktop
-          ? styles.desktopModalScrollContainer
-          : styles.mobileModalScrollContainer
+      style={[
+        !isDesktop ? { height: SCREEN_HEIGHT * 0.7 } : {}, 
+      // isDesktop
+      //   ? styles.desktopModalScrollContainer
+      //   : styles.mobileModalScrollContainer
+    
+    ]
       }
       contentContainerStyle={
         isDesktop ? styles.desktopModalScroll : styles.mobileModalScroll
