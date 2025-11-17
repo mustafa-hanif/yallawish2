@@ -415,7 +415,7 @@ export default function HomeScreen() {
       color: "#FF9500"
      },
     { id: 8,
-      name: "Retirement",
+      name: "Other",
       icon: require("@/assets/images/other2.svg",),
       color: "#A2845E"
      },
