@@ -142,10 +142,11 @@ export function ResponsiveAuthLayout({
                 <Text
                   style={{
                     color: "#FFFFFF",
-                    fontSize: 32,
+                    fontSize: 40,
                     lineHeight: 38,
                     textAlign: "center",
                     fontFamily: "Nunito_700Bold",
+                    marginBottom: 24
                   }}
                 >
                   {heroTitle}
@@ -153,12 +154,11 @@ export function ResponsiveAuthLayout({
                 {heroSubtitle && (
                   <Text
                     style={{
-                      color: "rgba(255,255,255,0.85)",
-                      fontSize: 16,
+                      color: "#FFFFFF",
+                      fontSize: 20,
                       lineHeight: 24,
                       textAlign: "center",
-                      marginTop: 12,
-                      fontFamily: "Nunito_400Regular",
+                      fontFamily: "Nunito_300Light",
                     }}
                   >
                     {heroSubtitle}
