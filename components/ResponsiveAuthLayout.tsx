@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import {
-    Dimensions,
-    Image,
-    ImageBackground,
-    Platform,
-    Pressable,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  Dimensions,
+  Image,
+  ImageBackground,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 type ResponsiveAuthLayoutProps = {
@@ -17,6 +17,9 @@ type ResponsiveAuthLayoutProps = {
   heroTitle?: string;
   heroSubtitle?: string;
   showHero?: boolean;
+  mobileScrollViewStyle?: object
+  mobileLogoHeaderStyle? : object
+  tabs?: React.ReactNode;
 };
 
 // Background images for carousel (add more as needed)
@@ -32,6 +35,9 @@ export function ResponsiveAuthLayout({
   heroTitle,
   heroSubtitle,
   showHero = false,
+  mobileScrollViewStyle = {},
+  mobileLogoHeaderStyle = {},
+  tabs,
 }: ResponsiveAuthLayoutProps) {
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
   const isDesktop = Platform.OS === "web" && SCREEN_WIDTH >= 768;
@@ -101,32 +107,34 @@ export function ResponsiveAuthLayout({
   // Mobile layout (original)
   return (
     <ImageBackground
-      source={require("@/assets/images/onboard_image.jpg")}
-      style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, overflow: "hidden" }}
-      imageStyle={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
+      source={require("@/assets/images/onboard_image.png")}
+      style={{ width: SCREEN_WIDTH,  height: '100%', overflow: "hidden" }}
+      imageStyle={{ width: SCREEN_WIDTH, height:'100%' }}
       resizeMode="cover"
     >
-      <View style={{ position: "absolute", inset: 0, backgroundColor: "rgba(44, 12, 84, 0.85)" }} />
+      {/* <View style={{ position: "absolute", inset: 0, backgroundColor: "rgba(44, 12, 84, 0.0001)" }} /> */}
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
             minHeight: SCREEN_HEIGHT,
             paddingHorizontal: 20,
+            // flexDirection:''
             paddingTop: 24,
             paddingBottom: 24,
-            // flexDirection:''
-            justifyContent:'space-between'
+
+            justifyContent:'space-between',
+            ...mobileScrollViewStyle
           }}
         >
           {/* Logo */}
-          <View style={{ alignItems: "center", marginBottom: 16, }}>
+          <View style={{ alignItems: "center", marginTop: 16, ...mobileLogoHeaderStyle }}>
             <Image
               source={require("@/assets/images/yallawish_logo.png")}
-              style={{ width: 148, height: 28, resizeMode: "contain" }}
+              style={{ width: 158, height: 38, resizeMode: "contain" }}
             />
           </View>
-
+          {tabs ? tabs : null}
           <View>
             {/* Hero text (mobile) */}
             {showHero && heroTitle && (
@@ -134,10 +142,11 @@ export function ResponsiveAuthLayout({
                 <Text
                   style={{
                     color: "#FFFFFF",
-                    fontSize: 32,
+                    fontSize: 40,
                     lineHeight: 38,
                     textAlign: "center",
                     fontFamily: "Nunito_700Bold",
+                    marginBottom: 24
                   }}
                 >
                   {heroTitle}
@@ -145,12 +154,11 @@ export function ResponsiveAuthLayout({
                 {heroSubtitle && (
                   <Text
                     style={{
-                      color: "rgba(255,255,255,0.85)",
-                      fontSize: 16,
+                      color: "#FFFFFF",
+                      fontSize: 20,
                       lineHeight: 24,
                       textAlign: "center",
-                      marginTop: 12,
-                      fontFamily: "Nunito_400Regular",
+                      fontFamily: "Nunito_300Light",
                     }}
                   >
                     {heroSubtitle}

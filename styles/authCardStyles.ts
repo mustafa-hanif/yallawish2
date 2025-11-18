@@ -34,6 +34,9 @@ export const authCardStyles = StyleSheet.create({
     maxWidth: 440,
     width: "100%",
   },
+  segmentedControlMobile: {
+    marginBottom: 32
+  },
   segmentedOption: {
     flex: 1,
   },

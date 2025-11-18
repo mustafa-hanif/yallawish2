@@ -5,7 +5,7 @@ import { useOAuth } from "@clerk/clerk-expo";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
-import { Dimensions, Platform, Text, View } from "react-native";
+import { Dimensions, Image, Platform, Text, View } from "react-native";
 
 export default function Page() {
   const router = useRouter();
@@ -32,7 +32,7 @@ export default function Page() {
   const heroTitle = isBuy ? "Sign up to make this gift count" : "Gifting made \n personal.";
   const heroSubtitle = isBuy
     ? "Buy the perfect gift from this list or even create your own to share with friends and family."
-    : "Buy the perfect gift from this list or even create your own to share with friends and family.";
+    : "Build lists for yourself or someone you love and make every gift count.";
   const cardTitle = isBuy ? "Sign in to make this gift count" : "Welcome to YallaWish";
   const cardSubtitle = isBuy
     ? "Sign in to claim this gift and keep everyone in sync."
@@ -61,6 +61,8 @@ export default function Page() {
       showHero={!isDesktop}
       heroTitle={heroTitle}
       heroSubtitle={heroSubtitle}
+      mobileScrollViewStyle={{ paddingBottom: 0}}
+      mobileLogoHeaderStyle={{ marginTop: 40, marginBottom: 20 }}
     >
       <View
         style={[
@@ -114,18 +116,20 @@ export default function Page() {
           <View style={[styles.socialStack, { marginTop:50 }]}>
             <SocialButton
               onPress={onGoogle}
-              icon={<AntDesign name="google" size={20} color="#4285F4" />}
+              icon={<Image source={require('@/assets/images/googleIcon.png')} />}
               label="Continue with Google"
+  
             />
             <SocialButton
               onPress={onApple}
-              icon={<AntDesign name="apple" size={22} color="#000000" />}
+              icon={<Image source={require('@/assets/images/appleIcon.png')} />}
               label="Continue with Apple"
+  
             />
           </View>
         )}
 
-        <Divider text="Or continue with email" tone="card" />
+        <Divider text="OR" tone="card" />
 
         <SocialButton
           onPress={() =>
@@ -140,7 +144,7 @@ export default function Page() {
               },
             })
           }
-          icon={<Ionicons name="mail-outline" size={20} color="#1F1235" />}
+          icon={<Image source={require('@/assets/images/mail.png')} />}
           label="Continue with Email"
         />
       </View>

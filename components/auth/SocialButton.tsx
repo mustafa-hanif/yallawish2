@@ -1,12 +1,14 @@
 import React from "react";
 import {
-    Pressable,
-    StyleProp,
-    StyleSheet,
-    Text,
-    TextStyle,
-    View,
-    ViewStyle,
+  Dimensions,
+  Platform,
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextStyle,
+  View,
+  ViewStyle
 } from "react-native";
 
 type SocialButtonVariant = "default" | "primary" | "icon";
@@ -31,14 +33,16 @@ export function SocialButton({
   accessibilityLabel,
 }: SocialButtonProps) {
   const isIconOnly = variant === "icon";
-
+  
+  const { width: SCREEN_WIDTH } = Dimensions.get("window");
+  const isDesktop = Platform.OS === "web" && SCREEN_WIDTH >= 768;
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
       style={({ pressed }) => [
-        styles.base,
+        [styles.base, !isDesktop ? { borderRadius: 8 } : {}],
         styles[`button_${variant}`],
         pressed && styles.pressed,
         style,
