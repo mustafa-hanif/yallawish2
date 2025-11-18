@@ -28,20 +28,34 @@ export default function SignUpScreen() {
   const [lastName, setLastName] = React.useState("");
   const [marketing, setMarketing] = React.useState(false);
   const [error, setError] = React.useState<(string | null)[]>([]);
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const { width: SCREEN_WIDTH } = Dimensions.get("window");
   const isDesktop = Platform.OS === "web" && SCREEN_WIDTH >= 768;
 
   // Handle submission of sign-up form
   const onSignUpPress = async () => {
-    if (!isLoaded) return;
+    if (!isLoaded || isLoading) return;
+    
+    // Basic validation
+    if (!emailAddress.trim()) {
+      setError(["Please enter your email address."]);
+      return;
+    }
+    if (!password.trim()) {
+      setError(["Please enter a password."]);
+      return;
+    }
+    
+    setIsLoading(true);
     setError([]);
+    
     try {
       await signUp.create({
-        emailAddress,
+        emailAddress: emailAddress.trim(),
         password,
-        firstName,
-        lastName,
+        firstName: firstName.trim() || undefined,
+        lastName: lastName.trim() || undefined,
         unsafeMetadata: {
           marketing,
         },
@@ -52,7 +66,7 @@ export default function SignUpScreen() {
       router.push({
         pathname: "/verify-otp",
         params: {
-          email: emailAddress,
+          email: emailAddress.trim(),
           ...(showAddToList ? { addToList: String(addToList) || "1" } : {}),
           ...(decodedReturnTo
             ? { returnTo: encodeURIComponent(decodedReturnTo) }
@@ -66,6 +80,8 @@ export default function SignUpScreen() {
       } else {
         setError(["An unknown error occurred."]);
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -124,17 +140,20 @@ export default function SignUpScreen() {
 
         <View style={styles.fieldsStack}>
           <View style={[styles.nameRow, isDesktop && styles.nameRowDesktop]}>
-            <TextInput
-              style={[
-                styles.input,
-                styles.inputField,
-                isDesktop && styles.inputDesktop,
-              ]}
-              value={firstName}
-              placeholder="First name"
-              placeholderTextColor="rgba(255,255,255,0.65)"
-              onChangeText={setFirstName}
-            />
+          <TextInput
+            style={[
+              styles.input,
+              styles.inputField,
+              isDesktop && styles.inputDesktop,
+            ]}
+            value={firstName}
+            placeholder="First name"
+            placeholderTextColor="rgba(255,255,255,0.65)"
+            onChangeText={(text) => {
+              setFirstName(text);
+              if (error.length > 0) setError([]);
+            }}
+          />
             <TextInput
               style={[
                 styles.input,
@@ -144,7 +163,10 @@ export default function SignUpScreen() {
               value={lastName}
               placeholder="Last name"
               placeholderTextColor="rgba(255,255,255,0.65)"
-              onChangeText={setLastName}
+              onChangeText={(text) => {
+                setLastName(text);
+                if (error.length > 0) setError([]);
+              }}
             />
           </View>
 
@@ -155,7 +177,10 @@ export default function SignUpScreen() {
             placeholder="Email address"
             placeholderTextColor="rgba(255,255,255,0.65)"
             keyboardType="email-address"
-            onChangeText={setEmailAddress}
+            onChangeText={(text) => {
+              setEmailAddress(text);
+              if (error.length > 0) setError([]);
+            }}
           />
 
           <TextInput
@@ -164,7 +189,12 @@ export default function SignUpScreen() {
             placeholder="Password"
             placeholderTextColor="rgba(255,255,255,0.65)"
             secureTextEntry
-            onChangeText={setPassword}
+            onChangeText={(text) => {
+              setPassword(text);
+              if (error.length > 0) setError([]);
+            }}
+            onSubmitEditing={onSignUpPress}
+            returnKeyType="done"
           />
         </View>
 
@@ -190,7 +220,7 @@ export default function SignUpScreen() {
         <SocialButton
           onPress={onSignUpPress}
           icon={null}
-          label={ctaLabel}
+          label={isLoading ? "Signing up..." : ctaLabel}
           variant="primary"
         />
 

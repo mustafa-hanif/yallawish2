@@ -6,7 +6,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#F6F3FF",
   },
   headerWrapper: {
-    backgroundColor: "#2C0077",
+    backgroundColor: "#36006C",
   },
   navBar: {
     flexDirection: "row",
