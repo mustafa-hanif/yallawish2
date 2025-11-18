@@ -7,6 +7,7 @@ import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import * as React from "react";
 import {
   Dimensions,
+  Image,
   Platform,
   Pressable,
   Text,
@@ -71,50 +72,50 @@ export default function LoginScreen() {
       }
     }
   };
+
+    const TabUI = () => (
+    <View style={[styles.segmentedControl, isDesktop ? styles.segmentedControlDesktop: styles.segmentedControlMobile]}>
+      <View style={styles.segmentedOption}>
+        <Link
+          href={{
+            pathname: "/sign-up",
+            params: {
+              ...(showAddToList ? { addToList: String(addToList) || "1" } : {}),
+              ...(decodedReturnTo ? { returnTo: encodeURIComponent(decodedReturnTo) } : {}),
+            },
+          }}
+          asChild
+        >
+          <Pressable style={styles.segmentedInactive}>
+            <Text style={styles.segmentedInactiveText}>Signup</Text>
+          </Pressable>
+        </Link>
+      </View>
+      <View style={styles.segmentedOption}>
+        <View style={styles.segmentedActive}>
+          <Text style={styles.segmentedActiveText}>Login</Text>
+        </View>
+      </View>
+    </View>
+  );
+
+  
   return (
     <ResponsiveAuthLayout
       showHero={!isDesktop}
       heroTitle={heroTitle}
       heroSubtitle={heroSubtitle}
+      mobileLogoHeaderStyle={{ marginTop: 20, marginBottom: 20 }}
+      tabs={<TabUI />}
     >
       <View
         style={[
           styles.formContainer,
+          // isDesktop ? styles.formContainerDesktop : styles.formContainerMobile,
           isDesktop ? styles.formContainerDesktop : styles.formContainerMobile,
         ]}
       >
-        <View
-          style={[
-            styles.segmentedControl,
-            isDesktop && styles.segmentedControlDesktop,
-          ]}
-        >
-          <View style={styles.segmentedOption}>
-            <Link
-              href={{
-                pathname: "/sign-up",
-                params: {
-                  ...(showAddToList
-                    ? { addToList: String(addToList) || "1" }
-                    : {}),
-                  ...(decodedReturnTo
-                    ? { returnTo: encodeURIComponent(decodedReturnTo) }
-                    : {}),
-                },
-              }}
-              asChild
-            >
-              <Pressable style={styles.segmentedInactive}>
-                <Text style={styles.segmentedInactiveText}>Signup</Text>
-              </Pressable>
-            </Link>
-          </View>
-          <View style={styles.segmentedOption}>
-            <View style={styles.segmentedActive}>
-              <Text style={styles.segmentedActiveText}>Login</Text>
-            </View>
-          </View>
-        </View>
+        {isDesktop ? <TabUI /> : null}
 
         {isDesktop && (<Text
           style={[
@@ -224,12 +225,12 @@ export default function LoginScreen() {
           <View style={styles.socialStack}>
             <SocialButton
               onPress={onGoogle}
-              icon={<AntDesign name="google" size={20} color="#4285F4" />}
+               icon={<Image source={require('@/assets/images/googleIcon.png')} />}
               label="Continue with Google"
             />
             <SocialButton
               onPress={onApple}
-              icon={<AntDesign name="apple" size={22} color="#000000" />}
+              icon={<Image source={require('@/assets/images/appleIcon.png')} />}
               label="Continue with Apple"
             />
           </View>

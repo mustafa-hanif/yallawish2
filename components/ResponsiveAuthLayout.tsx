@@ -19,6 +19,7 @@ type ResponsiveAuthLayoutProps = {
   showHero?: boolean;
   mobileScrollViewStyle?: object
   mobileLogoHeaderStyle? : object
+  tabs?: React.ReactNode;
 };
 
 // Background images for carousel (add more as needed)
@@ -35,7 +36,8 @@ export function ResponsiveAuthLayout({
   heroSubtitle,
   showHero = false,
   mobileScrollViewStyle = {},
-  mobileLogoHeaderStyle = {}
+  mobileLogoHeaderStyle = {},
+  tabs,
 }: ResponsiveAuthLayoutProps) {
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
   const isDesktop = Platform.OS === "web" && SCREEN_WIDTH >= 768;
@@ -132,7 +134,7 @@ export function ResponsiveAuthLayout({
               style={{ width: 158, height: 38, resizeMode: "contain" }}
             />
           </View>
-
+          {tabs ? tabs : null}
           <View>
             {/* Hero text (mobile) */}
             {showHero && heroTitle && (

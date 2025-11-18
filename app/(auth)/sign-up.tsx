@@ -7,6 +7,7 @@ import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import * as React from "react";
 import {
   Dimensions,
+  Image,
   Platform,
   Pressable,
   Text,
@@ -69,48 +70,46 @@ export default function SignUpScreen() {
     }
   };
 
+ const TabUI = () => (
+  <View style={[styles.segmentedControl, isDesktop ? styles.segmentedControlDesktop: styles.segmentedControlMobile]}>
+    <View style={styles.segmentedOption}>
+      <View style={styles.segmentedActive}>
+        <Text style={styles.segmentedActiveText}>Signup</Text>
+      </View>
+    </View>
+    <View style={styles.segmentedOption}>
+      <Link
+        href={{
+          pathname: "/log-in",
+          params: {
+            ...(showAddToList ? { addToList: String(addToList) || "1" } : {}),
+            ...(decodedReturnTo ? { returnTo: encodeURIComponent(decodedReturnTo) } : {}),
+          },
+        }}
+        asChild
+      >
+        <Pressable style={styles.segmentedInactive}>
+          <Text style={styles.segmentedInactiveText}>Login</Text>
+        </Pressable>
+      </Link>
+    </View>
+  </View>
+);
+
   return (
     <ResponsiveAuthLayout
       showHero={!isDesktop}
       heroTitle={`Sign up to save \n this gift`}
       heroSubtitle="Add it to your list now and start creating your own to share with friends and family."
+      mobileLogoHeaderStyle={{ marginTop: 20, marginBottom: 30 }}
+      tabs={<TabUI />}
     >
       <View style={[
         styles.formContainer,
         isDesktop ? styles.formContainerDesktop : styles.formContainerMobile,
       ]}>
-        <View
-          style={[
-            styles.segmentedControl,
-            isDesktop && styles.segmentedControlDesktop,
-          ]}
-        >
-          <View style={styles.segmentedOption}>
-            <View style={styles.segmentedActive}>
-              <Text style={styles.segmentedActiveText}>Signup</Text>
-            </View>
-          </View>
-          <View style={styles.segmentedOption}>
-            <Link
-              href={{
-                pathname: "/log-in",
-                params: {
-                  ...(showAddToList
-                    ? { addToList: String(addToList) || "1" }
-                    : {}),
-                  ...(decodedReturnTo
-                    ? { returnTo: encodeURIComponent(decodedReturnTo) }
-                    : {}),
-                },
-              }}
-              asChild
-            >
-              <Pressable style={styles.segmentedInactive}>
-                <Text style={styles.segmentedInactiveText}>Login</Text>
-              </Pressable>
-            </Link>
-          </View>
-        </View>
+        {isDesktop ? <TabUI /> : null}
+     
         {isDesktop && (<>
           <Text
             style={[
@@ -237,12 +236,12 @@ export default function SignUpScreen() {
           <View style={styles.socialStack}>
             <SocialButton
               onPress={() => {}}
-              icon={<AntDesign name="google" size={20} color="#4285F4" />}
+              icon={<Image source={require('@/assets/images/googleIcon.png')} />}
               label="Continue with Google"
             />
             <SocialButton
               onPress={() => {}}
-              icon={<AntDesign name="apple" size={22} color="#000000" />}
+              icon={<Image source={require('@/assets/images/appleIcon.png')} />}
               label="Continue with Apple"
             />
           </View>

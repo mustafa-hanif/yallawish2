@@ -62,7 +62,7 @@ export default function Page() {
       heroTitle={heroTitle}
       heroSubtitle={heroSubtitle}
       mobileScrollViewStyle={{ paddingBottom: 0}}
-      mobileLogoHeaderStyle={{ marginTop: 80 }}
+      mobileLogoHeaderStyle={{ marginTop: 40, marginBottom: 20 }}
     >
       <View
         style={[
