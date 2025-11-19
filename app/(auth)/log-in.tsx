@@ -180,7 +180,7 @@ export default function LoginScreen() {
           onPress={onSignInPress}
           icon={null}
           label={ctaLabel}
-          variant="primary"
+          variant={isDesktop? "primary" : "default"}
         />
 
         {error.length > 0 && (

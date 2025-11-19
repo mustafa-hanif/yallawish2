@@ -117,7 +117,7 @@ export default function SignUpScreen() {
       showHero={!isDesktop}
       heroTitle={`Sign up to save \n this gift`}
       heroSubtitle="Add it to your list now and start creating your own to share with friends and family."
-      mobileLogoHeaderStyle={{ marginTop: 20, marginBottom: 30 }}
+      mobileLogoHeaderStyle={{ marginTop: 20, marginBottom: 20 }}
       tabs={<TabUI />}
     >
       <View style={[
@@ -222,7 +222,7 @@ export default function SignUpScreen() {
           onPress={onSignUpPress}
           icon={null}
           label={isLoading ? "Signing up..." : ctaLabel}
-          variant="primary"
+          variant={isDesktop? "primary" : "default"}
         />
 
         {error.length > 0 && (
