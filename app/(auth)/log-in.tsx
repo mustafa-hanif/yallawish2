@@ -192,7 +192,7 @@ export default function LoginScreen() {
           </View>
         )}
 
-        <Divider text="Or continue with" tone="card" />
+        <Divider text={isDesktop ? "Or continue with" : "OR" } tone="card" marginVertical={isDesktop ? 16 : 8} />
 
         {isDesktop ? (
           <View style={styles.socialRowDesktop}>

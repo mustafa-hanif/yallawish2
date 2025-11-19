@@ -1,11 +1,11 @@
 import React from "react";
 import {
-    StyleProp,
-    StyleSheet,
-    Text,
-    TextStyle,
-    View,
-    ViewStyle,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextStyle,
+  View,
+  ViewStyle,
 } from "react-native";
 
 type DividerTone = "light" | "card";
@@ -15,16 +15,18 @@ type DividerProps = {
   tone?: DividerTone;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
+  marginVertical?: number
 };
 
 export function Divider({
   text = "OR",
   tone = "light",
+  marginVertical = 16,
   style,
   textStyle,
 }: DividerProps) {
   return (
-    <View style={[styles.container, style]}>
+    <View style={[styles.container, { marginVertical } , style]}>
       <View style={[styles.line, tone === "card" && styles.lineCard]} />
       <Text style={[styles.text, tone === "card" && styles.textCard, textStyle]}>
         {text}
@@ -38,7 +40,6 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 16,
   },
   line: {
     flex: 1,
