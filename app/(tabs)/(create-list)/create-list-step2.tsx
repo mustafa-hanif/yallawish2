@@ -886,29 +886,19 @@ function MobileLayout({
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#330065" />
+      <StatusBar barStyle="light-content" backgroundColor="transparent" />
       <LinearGradient
-        colors={["#330065", "#6600CB"]}
+        colors={["#330065", "#45018ad7"]}
+        locations={[0, 0.7]}
         start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+        end={{ x: 0, y: 2 }}
         style={styles.header}
       >
         <SafeAreaView edges={["top"]}>
           <View style={styles.headerContent}>
-            <View style={styles.statusBar}>
-              <Text style={styles.timeText}>12:48</Text>
-              <View style={styles.statusIcons}>
-                <Ionicons name="cellular" size={16} color="#FFFFFF" />
-                <Ionicons name="wifi" size={16} color="#FFFFFF" />
-                <View style={styles.batteryIcon}>
-                  <View style={styles.batteryFill} />
-                </View>
-              </View>
-            </View>
-
             <View style={styles.navigation}>
               <Pressable onPress={handleBack} style={styles.backButton}>
-                <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+                <Image source={require("@/assets/images/backArrow.png")} />
               </Pressable>
               <Text style={styles.headerTitle}>{headerTitle}</Text>
             </View>
@@ -1046,9 +1036,6 @@ function MobileLayout({
       </ScrollView>
 
       <View style={styles.bottomButtons}>
-        <Pressable onPress={handleBack} style={styles.backButtonBottom}>
-          <Text style={styles.backButtonText}>Back</Text>
-        </Pressable>
         <Pressable
           style={[
             styles.continueButton,
@@ -1058,6 +1045,9 @@ function MobileLayout({
           disabled={!isFormValid}
         >
           <Text style={styles.continueButtonText}>Continue</Text>
+        </Pressable>
+        <Pressable onPress={handleBack} style={styles.backButtonBottom}>
+          <Text style={styles.backButtonText}>Back</Text>
         </Pressable>
       </View>
     </View>
@@ -1097,6 +1087,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   header: {
+    minHeight: 108,
     paddingBottom: 16,
   },
   headerContent: {
@@ -1180,7 +1171,6 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 24,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     color: "#1C0335",
     marginBottom: 24,
@@ -1379,7 +1369,6 @@ const styles = StyleSheet.create({
   continueButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     lineHeight: 16,
   },
@@ -1393,7 +1382,6 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: "#3B0076",
     fontSize: 16,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     lineHeight: 16,
   },
