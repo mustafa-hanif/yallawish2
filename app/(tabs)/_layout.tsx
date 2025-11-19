@@ -6,15 +6,16 @@ import { Platform, View, useWindowDimensions } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import TabBarBackground from "@/components/ui/TabBarBackground";
-import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useAuth } from "@clerk/clerk-expo";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const DESKTOP_BREAKPOINT = 1024;
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { bottom } = useSafeAreaInsets(); // Get the safe area bottom inset
   const { isSignedIn } = useAuth();
   const pathname = usePathname();
   const params = useGlobalSearchParams();
@@ -24,20 +25,22 @@ export default function TabLayout() {
   const baseTabBarStyle = Platform.select({
     ios: {
       position: "absolute",
-      height: 100,
+      height: 97,
       paddingTop: 24,
-      paddingBottom: 20,
+      paddingBottom:  38 + bottom,
       backgroundColor: "#FFFFFF",
-      borderTopWidth: 0,
+      borderTopWidth: 1,
+      borderColor:"#D1D1D6",
       elevation: 0,
       shadowOpacity: 0,
     },
     default: {
-      height: 100,
+      height: 97,
       paddingTop: 24,
-      paddingBottom: 20,
+      paddingBottom:  38 + bottom,
       backgroundColor: "#FFFFFF",
-      borderTopWidth: 0,
+      borderTopWidth: 1,
+      borderColor:"#D1D1D6",
       elevation: 0,
     },
   });
@@ -53,47 +56,36 @@ export default function TabLayout() {
   const returnTo = `${pathname}${qs}`;
   // Register for push notifications and save token when signed in
   usePushNotifications();
-  const allowAnonymous = ['/view-list', '/gift-detail', '/purchase-success', '/profile-setup'].some((p) => pathname?.includes(p));
+  const allowAnonymous = ["/view-list", "/gift-detail", "/purchase-success", "/profile-setup"].some((p) => pathname?.includes(p));
   if (!isSignedIn && !allowAnonymous) {
     const encoded = encodeURIComponent(returnTo);
     return <Redirect href={{ pathname: "/sign-in", params: { returnTo: encoded } }} />;
   }
 
   return (
-      <Tabs
+    <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#3B0076",
-        tabBarInactiveTintColor: "#B1A6C4",
+        tabBarActiveTintColor: "#330065",
+        tabBarInactiveTintColor: "#9BADB4",
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
-        tabBarStyle: isDesktopWeb ? { display: "none" } : baseTabBarStyle,
+        tabBarStyle: isDesktopWeb ? { display: "none" } : baseTabBarStyle, // Apply dynamic bottom padding here
+
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: "",
-          tabBarIcon: ({ color }) => (
-            <Image
-              source={require("@/assets/images/home.svg")}
-              style={{ width: 28, height: 28, tintColor: color }}
-              contentFit="contain"
-            />
-          ),
+          tabBarIcon: ({ color }) => <Image source={require("@/assets/images/home.svg")} style={{ width: 24, height: 24, tintColor: color }} contentFit="contain" />,
         }}
       />
       <Tabs.Screen
         name="favorites"
         options={{
           title: "",
-          tabBarIcon: ({ color }) => (
-            <Image
-              source={require("@/assets/images/favourite.svg")}
-              style={{ width: 28, height: 28, tintColor: color }}
-              contentFit="contain"
-            />
-          ),
+          tabBarIcon: ({ color }) => <Image source={require("@/assets/images/favourite.svg")} style={{ width: 24, height: 24, tintColor: color }} contentFit="contain" />,
         }}
       />
       <Tabs.Screen
@@ -103,21 +95,16 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }) => (
             <View
               style={{
-                width: 72,
-                height: 72,
+                width: 60,
+                height: 60,
                 borderRadius: 36,
-                backgroundColor: "#3B0076",
+                backgroundColor: "#330065",
                 alignItems: "center",
                 justifyContent: "center",
-                shadowColor: "#000",
-                shadowOpacity: 0.15,
                 shadowRadius: 8,
-                shadowOffset: { width: 0, height: 4 },
-                elevation: 6,
-                marginTop: 0,
               }}
             >
-              <Ionicons name="add" size={42} color="#FFFFFF" />
+              <Ionicons name="add" size={20} color="#FFFFFF" />
             </View>
           ),
         }}
@@ -126,26 +113,14 @@ export default function TabLayout() {
         name="global"
         options={{
           title: "",
-          tabBarIcon: ({ color }) => (
-            <Image
-              source={require("@/assets/images/global.svg")}
-              style={{ width: 28, height: 28, tintColor: color }}
-              contentFit="contain"
-            />
-          ),
+          tabBarIcon: ({ color }) => <Image source={require("@/assets/images/global.svg")} style={{ width: 24, height: 24, tintColor: color }} contentFit="contain" />,
         }}
       />
       <Tabs.Screen
         name="messages"
         options={{
           title: "",
-          tabBarIcon: ({ color }) => (
-            <Image
-              source={require("@/assets/images/filter-mail-circle.svg")}
-              style={{ width: 28, height: 28, tintColor: color }}
-              contentFit="contain"
-            />
-          ),
+          tabBarIcon: ({ color }) => <Image source={require("@/assets/images/filter-mail-circle.svg")} style={{ width: 24, height: 24, tintColor: color }} contentFit="contain" />,
         }}
       />
       <Tabs.Screen name="(create-list)" options={{ href: null }} />
@@ -169,7 +144,6 @@ export default function TabLayout() {
           tabBarStyle: { display: 'none' },
         }}
       /> */}
-      
       {/* <Tabs.Screen
         name="profile-setup"
         options={{
