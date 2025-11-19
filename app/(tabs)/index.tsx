@@ -845,7 +845,8 @@ export default function HomeScreen() {
                   <View style={{
                     alignItems: 'center',
                     justifyContent: 'center',
-                    paddingBottom: isDesktop ? 20 : 16,
+                    paddingBottom: isDesktop ? 0 : 16,
+                    marginTop: isDesktop ? 10 : 0,
                   }}>
                     <Image 
                       source={require("@/assets/images/homepage/explore_button.png")} 
@@ -864,28 +865,345 @@ export default function HomeScreen() {
         {/* {!isDesktop ? renderActionCards() : null} */}
 
         {/* Life moments */}
-        <View style={mergeStyles(styles.lifeMomentsSection, isDesktop ? responsiveStyles.section : null)}>
-          <View style={isDesktop ? responsiveStyles.sectionInner : undefined}>
-            <View style={[styles.lifeMomentsHeader]}>
-              <View style={{width:'100%'}}>
-                <Text style={[styles.lifeMomentsTitle, !isDesktop ? styles.lifeMomentsTitleMobile : {} ]}>Browse by life moments</Text>
+        <View style={{
+          backgroundColor: '#000000',
+          paddingVertical: isDesktop ? 80 : 40,
+          paddingHorizontal: isDesktop ? 0 : 20,
+        }}>
+          {isDesktop ? (
+            <View style={{
+              width: '100%',
+              maxWidth: 1800,
+              alignSelf: 'center',
+              paddingHorizontal: 150,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 60,
+            }}>
+              {/* Left Side - Text and Button */}
+              <View style={{ flex: 1 }}>
+                <Text style={{
+                  fontFamily: 'Nunito_700Bold',
+                  fontSize: 48,
+                  color: '#D8B3FE',
+                  marginBottom: 8,
+                }}>
+                  Browse By Specials
+                </Text>
+                <Text style={{
+                  fontFamily: 'Nunito_700Bold',
+                  fontSize: 48,
+                  color: '#330065',
+                  marginBottom: 32,
+                }}>
+                  Life Moments
+                </Text>
+                <Pressable style={{
+                  borderWidth: 1,
+                  borderColor: '#D8B3FE',
+                  borderRadius: 999,
+                  paddingHorizontal: 32,
+                  paddingVertical: 14,
+                  backgroundColor: '#000000',
+                  alignSelf: 'flex-start',
+                }}>
+                  <Text style={{
+                    fontFamily: 'Nunito_600SemiBold',
+                    fontSize: 16,
+                    color: '#FFFFFF',
+                  }}>
+                    Discover Gifts
+                  </Text>
+                </Pressable>
+              </View>
+
+              {/* Right Side - Cards */}
+              <View style={{ flex: 1.5, flexDirection: 'row', gap: 24 }}>
+                {/* Birthday Card */}
+                <Pressable style={{
+                  flex: 1,
+                  borderRadius: 16,
+                  overflow: 'hidden',
+                  position: 'relative',
+                }}>
+                  <Image 
+                    source={require("@/assets/images/homepage/homepage_image_1.png")} 
+                    style={{ width: '100%', height: 400 }}
+                    contentFit="cover"
+                  />
+                  <View style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(51, 0, 101, 0.4)',
+                  }} />
+                  <View style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    padding: 20,
+                  }}>
+                    <Text style={{
+                      fontFamily: 'Nunito_700Bold',
+                      fontSize: 24,
+                      color: '#FFFFFF',
+                      marginBottom: 4,
+                    }}>
+                      Birthday
+                    </Text>
+                    <Text style={{
+                      fontFamily: 'Nunito_400Regular',
+                      fontSize: 14,
+                      color: '#FFFFFF',
+                      opacity: 0.9,
+                    }}>
+                      55 Products
+                    </Text>
+                  </View>
+                  <View style={{
+                    position: 'absolute',
+                    top: 16,
+                    right: 16,
+                    width: 32,
+                    height: 32,
+                    borderRadius: 16,
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <LucideIcons.ArrowUpRight size={20} color="#FFFFFF" />
+                  </View>
+                </Pressable>
+
+                {/* Wedding Card */}
+                <Pressable style={{
+                  flex: 1,
+                  borderRadius: 16,
+                  overflow: 'hidden',
+                  position: 'relative',
+                }}>
+                  <Image 
+                    source={require("@/assets/images/homepage/homepage_image_2.png")} 
+                    style={{ width: '100%', height: 400 }}
+                    contentFit="cover"
+                  />
+                  <View style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(51, 0, 101, 0.4)',
+                  }} />
+                  <View style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    padding: 20,
+                  }}>
+                    <Text style={{
+                      fontFamily: 'Nunito_700Bold',
+                      fontSize: 24,
+                      color: '#FFFFFF',
+                      marginBottom: 4,
+                    }}>
+                      Wedding
+                    </Text>
+                    <Text style={{
+                      fontFamily: 'Nunito_400Regular',
+                      fontSize: 14,
+                      color: '#FFFFFF',
+                      opacity: 0.9,
+                    }}>
+                      30 Products
+                    </Text>
+                  </View>
+                  <View style={{
+                    position: 'absolute',
+                    top: 16,
+                    right: 16,
+                    width: 32,
+                    height: 32,
+                    borderRadius: 16,
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <LucideIcons.ArrowUpRight size={20} color="#FFFFFF" />
+                  </View>
+                </Pressable>
+
+                {/* Graduation Card */}
+                <Pressable style={{
+                  flex: 1,
+                  borderRadius: 16,
+                  overflow: 'hidden',
+                  position: 'relative',
+                }}>
+                  <Image 
+                    source={require("@/assets/images/homepage/homepage_image3.png")} 
+                    style={{ width: '100%', height: 400 }}
+                    contentFit="cover"
+                  />
+                  <View style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(51, 0, 101, 0.4)',
+                  }} />
+                  <View style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    padding: 20,
+                  }}>
+                    <Text style={{
+                      fontFamily: 'Nunito_700Bold',
+                      fontSize: 24,
+                      color: '#FFFFFF',
+                      marginBottom: 4,
+                    }}>
+                      Graduation
+                    </Text>
+                    <Text style={{
+                      fontFamily: 'Nunito_400Regular',
+                      fontSize: 14,
+                      color: '#FFFFFF',
+                      opacity: 0.9,
+                    }}>
+                      20 Products
+                    </Text>
+                  </View>
+                  <View style={{
+                    position: 'absolute',
+                    top: 16,
+                    right: 16,
+                    width: 32,
+                    height: 32,
+                    borderRadius: 16,
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <LucideIcons.ArrowUpRight size={20} color="#FFFFFF" />
+                  </View>
+                </Pressable>
               </View>
             </View>
-            {isDesktop ? (
-              <View style={mergeStyles(styles.lifeMomentsGrid, responsiveStyles.lifeMomentGridDesktop)}>
-                {lifeMomentsPrimary.map((moment) => renderLifeMomentCard(moment, "primary"))}
-              </View>
-            ) : (
+          ) : (
+            <View>
+              <Text style={{
+                fontFamily: 'Nunito_700Bold',
+                fontSize: 32,
+                color: '#D8B3FE',
+                marginBottom: 8,
+              }}>
+                Browse By Specials
+              </Text>
+              <Text style={{
+                fontFamily: 'Nunito_700Bold',
+                fontSize: 32,
+                color: '#330065',
+                marginBottom: 24,
+              }}>
+                Life Moments
+              </Text>
+              <Pressable style={{
+                borderWidth: 1,
+                borderColor: '#D8B3FE',
+                borderRadius: 999,
+                paddingHorizontal: 24,
+                paddingVertical: 12,
+                backgroundColor: '#000000',
+                alignSelf: 'flex-start',
+                marginBottom: 24,
+              }}>
+                <Text style={{
+                  fontFamily: 'Nunito_600SemiBold',
+                  fontSize: 14,
+                  color: '#FFFFFF',
+                }}>
+                  Discover Gifts
+                </Text>
+              </Pressable>
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={responsiveStyles.lifeMomentScrollContent}
-                style={styles.lifeMomentsScroll}
+                contentContainerStyle={{ gap: 16, paddingRight: 20 }}
               >
-                {lifeMomentsPrimary.map((moment) => renderLifeMomentCard(moment, "primary"))}
+                {[
+                  { title: 'Birthday', products: '55 Products', image: require("@/assets/images/homepage/homepage_image_1.png") },
+                  { title: 'Wedding', products: '30 Products', image: require("@/assets/images/homepage/homepage_image_2.png") },
+                  { title: 'Graduation', products: '20 Products', image: require("@/assets/images/homepage/homepage_image3.png") },
+                ].map((card, index) => (
+                  <Pressable key={index} style={{
+                    width: 280,
+                    borderRadius: 16,
+                    overflow: 'hidden',
+                    position: 'relative',
+                  }}>
+                    <Image 
+                      source={card.image} 
+                      style={{ width: '100%', height: 350 }}
+                      contentFit="cover"
+                    />
+                    <View style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      backgroundColor: 'rgba(51, 0, 101, 0.4)',
+                    }} />
+                    <View style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      padding: 16,
+                    }}>
+                      <Text style={{
+                        fontFamily: 'Nunito_700Bold',
+                        fontSize: 20,
+                        color: '#FFFFFF',
+                        marginBottom: 4,
+                      }}>
+                        {card.title}
+                      </Text>
+                      <Text style={{
+                        fontFamily: 'Nunito_400Regular',
+                        fontSize: 12,
+                        color: '#FFFFFF',
+                        opacity: 0.9,
+                      }}>
+                        {card.products}
+                      </Text>
+                    </View>
+                    <View style={{
+                      position: 'absolute',
+                      top: 12,
+                      right: 12,
+                      width: 28,
+                      height: 28,
+                      borderRadius: 14,
+                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <LucideIcons.ArrowUpRight size={18} color="#FFFFFF" />
+                    </View>
+                  </Pressable>
+                ))}
               </ScrollView>
-            )}
-          </View>
+            </View>
+          )}
         </View>
 
         {/* Categories */}
