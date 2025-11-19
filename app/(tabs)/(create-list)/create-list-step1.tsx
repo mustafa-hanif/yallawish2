@@ -321,7 +321,6 @@ const styles = StyleSheet.create({
   },
   header: {
     minHeight: 108,
-    paddingBottom: 16,
   },
   headerContent: {
     paddingHorizontal: 16,
@@ -402,7 +401,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: "Nunito_700Bold",
     color: "#1C0335",
-    marginBottom: 24,
+    marginBottom: 16,
     lineHeight: 28,
   },
   optionsContainer: {
