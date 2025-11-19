@@ -185,6 +185,14 @@ export const authCardStyles = StyleSheet.create({
   inputDesktop: {
     backgroundColor: "rgba(255,255,255,0.08)",
   },
+  inputMobile: {
+    backgroundColor: "transparent",
+    borderColor: '#FFFFFF',
+    borderWidth: 1,
+    paddingVertical: 16,
+    borderRadius: 8,
+    fontSize: 14,
+  },
   checkboxRow: {
     flexDirection: "row",
     alignItems: "center",

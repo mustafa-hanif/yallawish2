@@ -144,10 +144,11 @@ export default function SignUpScreen() {
               styles.input,
               styles.inputField,
               isDesktop && styles.inputDesktop,
+              !isDesktop ? styles.inputMobile : {}
             ]}
             value={firstName}
-            placeholder="First name"
-            placeholderTextColor="rgba(255,255,255,0.65)"
+            placeholder={isDesktop ? "First name" : "First Name"}
+            placeholderTextColor="#FFFFFF66"
             onChangeText={(text) => {
               setFirstName(text);
               if (error.length > 0) setError([]);
@@ -158,10 +159,11 @@ export default function SignUpScreen() {
                 styles.input,
                 styles.inputField,
                 isDesktop && styles.inputDesktop,
+                !isDesktop ? styles.inputMobile : {}
               ]}
               value={lastName}
-              placeholder="Last name"
-              placeholderTextColor="rgba(255,255,255,0.65)"
+              placeholder={isDesktop ? "Last name" : "Last Name"}
+              placeholderTextColor="#FFFFFF66"
               onChangeText={(text) => {
                 setLastName(text);
                 if (error.length > 0) setError([]);
@@ -170,11 +172,11 @@ export default function SignUpScreen() {
           </View>
 
           <TextInput
-            style={[styles.input, isDesktop && styles.inputDesktop]}
+            style={[styles.input, isDesktop && styles.inputDesktop, !isDesktop ? styles.inputMobile : {}]}
             autoCapitalize="none"
             value={emailAddress}
-            placeholder="Email address"
-            placeholderTextColor="rgba(255,255,255,0.65)"
+            placeholder={isDesktop ? "Email address" : "Email"}
+            placeholderTextColor="#FFFFFF66"
             keyboardType="email-address"
             onChangeText={(text) => {
               setEmailAddress(text);
@@ -183,10 +185,10 @@ export default function SignUpScreen() {
           />
 
           <TextInput
-            style={[styles.input, isDesktop && styles.inputDesktop]}
+            style={[styles.input, isDesktop && styles.inputDesktop, !isDesktop ? styles.inputMobile : {}]}
             value={password}
             placeholder="Password"
-            placeholderTextColor="rgba(255,255,255,0.65)"
+            placeholderTextColor="#FFFFFF66"
             secureTextEntry
             onChangeText={(text) => {
               setPassword(text);

@@ -129,11 +129,11 @@ export default function LoginScreen() {
 
         <View style={styles.fieldsStack}>
           <TextInput
-            style={[styles.input, isDesktop && styles.inputDesktop]}
+            style={[styles.input, isDesktop && styles.inputDesktop , !isDesktop ? styles.inputMobile : {}]}
             autoCapitalize="none"
             value={emailAddress}
-            placeholder="Email address"
-            placeholderTextColor="rgba(255,255,255,0.65)"
+            placeholder={isDesktop ? "Email address" : "Email"}
+             placeholderTextColor="#FFFFFF66"
             keyboardType="email-address"
             onChangeText={setEmailAddress}
           />
@@ -144,10 +144,11 @@ export default function LoginScreen() {
                 styles.input,
                 styles.passwordInput,
                 isDesktop && styles.inputDesktop,
+                !isDesktop ? styles.inputMobile : {}
               ]}
               value={password}
               placeholder="Password"
-              placeholderTextColor="rgba(255,255,255,0.65)"
+              placeholderTextColor="#FFFFFF66"
               secureTextEntry={!showPassword}
               onChangeText={setPassword}
             />
