@@ -3,17 +3,18 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
-  Dimensions,
-  Platform,
+  Dimensions, Image, ImageSourcePropType, Platform,
   Pressable,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
   View,
-  useWindowDimensions,
+  useWindowDimensions
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+
 
 const { width: screenWidth } = Dimensions.get("window");
 const DESKTOP_BREAKPOINT = 1024;
@@ -24,7 +25,9 @@ type OptionConfig = {
   id: Exclude<ListOption, null>;
   title: string;
   description: string;
+  mobileDescription: string;
   icon: (color: string, size: number) => React.ReactNode;
+  mobileIcon: ImageSourcePropType
 };
 
 const STEP_ITEMS = ["Who is this list for?", "Giftlist Details", "Who can see this list?"];
@@ -34,13 +37,18 @@ const OPTION_CONFIG: OptionConfig[] = [
     id: "myself",
     title: "Myself",
     description: "Build a wish list for your own celebrations, milestones, or just a treat for yourself!",
+    mobileDescription: "Build a wish list for your celebrations, big or small — or just because you deserve it.",
     icon: (color, size) => <Ionicons name="person-outline" size={size} color={color} />,
+    mobileIcon: require("@/assets/images/myself.png")
   },
   {
     id: "someone-else",
     title: "Someone else",
     description: "Make a list on behalf of your kids, pets, spouse, parents, or anyone special.",
+    mobileDescription: "Make a list on behalf of your kids, pets, spouse, parents, or anyone special.",
+
     icon: (color, size) => <Ionicons name="people-outline" size={size} color={color} />,
+    mobileIcon: require("@/assets/images/someoneElse.png")
   },
 ];
 
@@ -258,10 +266,10 @@ function MobileLayout({ selectedOption, onSelect, onBack, onContinue }: LayoutPr
             </View>
           </View>
           <View style={styles.optionHeader}>
-            {config.icon("#1C0335", 40)}
+            <Image source={config.mobileIcon} style={styles.mobileIcon} />
             <Text style={styles.optionTitle}>{config.title}</Text>
           </View>
-          <Text style={styles.optionDescription}>{config.description}</Text>
+          <Text style={styles.optionDescription}>{config.mobileDescription}</Text>
         </View>
       </Pressable>
     );
@@ -269,28 +277,19 @@ function MobileLayout({ selectedOption, onSelect, onBack, onContinue }: LayoutPr
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#330065" />
+      <StatusBar barStyle="light-content" backgroundColor="transparent" />
       <LinearGradient
-        colors={["#330065", "#6600CB"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+        colors={["#330065", "#45018ad7"]}
         style={styles.header}
+        locations={[0, 0.7]}  
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 2 }}
       >
         <SafeAreaView edges={["top"]}>
           <View style={styles.headerContent}>
-            <View style={styles.statusBar}>
-              <Text style={styles.timeText}>12:48</Text>
-              <View style={styles.statusIcons}>
-                <Ionicons name="cellular" size={16} color="#FFFFFF" />
-                <Ionicons name="wifi" size={16} color="#FFFFFF" />
-                <View style={styles.batteryIcon}>
-                  <View style={styles.batteryFill} />
-                </View>
-              </View>
-            </View>
             <View style={styles.navigation}>
               <Pressable onPress={onBack} style={styles.backButton}>
-                <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+                <Image source={require("@/assets/images/backArrow.png")} />
               </Pressable>
               <Text style={styles.headerTitle}>Create List</Text>
             </View>
@@ -299,8 +298,7 @@ function MobileLayout({ selectedOption, onSelect, onBack, onContinue }: LayoutPr
       </LinearGradient>
       <ProgressIndicator />
       <View style={styles.content}>
-        <Text style={styles.sectionTitle}>Make a list for</Text>
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <Text style={styles.sectionTitle}>Who is this list for?</Text>
           <View style={styles.optionsContainer}>{OPTION_CONFIG.map(renderOptionCard)}</View>
           <View style={styles.continueContainer}>
             <Pressable
@@ -311,7 +309,6 @@ function MobileLayout({ selectedOption, onSelect, onBack, onContinue }: LayoutPr
               <Text style={styles.continueButtonText}>Continue</Text>
             </Pressable>
           </View>
-        </ScrollView>
       </View>
     </View>
   );
@@ -323,6 +320,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   header: {
+    minHeight: 108,
     paddingBottom: 16,
   },
   headerContent: {
@@ -371,7 +369,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: "#FFFFFF",
     fontSize: 24,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     lineHeight: 28,
     letterSpacing: -1,
@@ -403,7 +400,6 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 24,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     color: "#1C0335",
     marginBottom: 24,
@@ -411,12 +407,12 @@ const styles = StyleSheet.create({
   },
   optionsContainer: {
     gap: 16,
-    marginBottom: 40,
+    marginBottom: 29,
   },
   optionCard: {
     borderRadius: 8,
     borderWidth: 1,
-    padding: 16,
+    padding: 15,
     paddingBottom: 24,
   },
   optionCardSelected: {
@@ -457,15 +453,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     marginTop: 24,
   },
+  mobileIcon:{
+     width: 33, height: 33, objectFit:'contain' 
+  },
   optionTitle: {
     fontSize: 24,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     color: "#1C0335",
     lineHeight: 24,
   },
   optionDescription: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "400",
     fontFamily: "Nunito_400Regular",
     color: "#1C0335",
@@ -488,7 +486,6 @@ const styles = StyleSheet.create({
   continueButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     lineHeight: 16,
   },
