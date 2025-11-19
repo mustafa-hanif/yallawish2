@@ -261,4 +261,9 @@ export const authCardStyles = StyleSheet.create({
     fontSize: 14,
     textDecorationLine: "underline",
   },
+   forgotLinkMobile: {
+    color: "#FFFFFF",
+    fontFamily: "Nunito_400Regular",
+    fontSize: 12,
+  },
 });

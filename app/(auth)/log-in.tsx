@@ -165,16 +165,32 @@ export default function LoginScreen() {
               />
             </Pressable>
           </View>
+          {
+          !isDesktop ?
+            <Pressable
+              onPress={() => {}}
+              accessibilityRole="button"
+              accessibilityLabel="Forgot password"
+            >
+              <Text style={styles.forgotLinkMobile}>Forgot password?</Text>
+            </Pressable>
+          : null
+          }
         </View>
+        {
+        isDesktop ?
+          <Pressable
+            onPress={() => {}}
+            style={styles.forgotLinkWrapper}
+            accessibilityRole="button"
+            accessibilityLabel="Forgot password"
+          >
+            <Text style={styles.forgotLink}>Forgot password?</Text>
+          </Pressable>
+        : null
+         }
+        
 
-        <Pressable
-          onPress={() => {}}
-          style={styles.forgotLinkWrapper}
-          accessibilityRole="button"
-          accessibilityLabel="Forgot password"
-        >
-          <Text style={styles.forgotLink}>Forgot password?</Text>
-        </Pressable>
 
         <SocialButton
           onPress={onSignInPress}
