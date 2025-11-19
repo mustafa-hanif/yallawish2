@@ -25,8 +25,8 @@ export const authCardStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderRadius: 999,
-    padding: 6,
-    backgroundColor: "rgba(255,255,255,0.16)",
+    padding: 5,
+    backgroundColor: "#EEEEEE",
     alignSelf: "stretch",
   },
   segmentedControlDesktop: {
@@ -50,20 +50,39 @@ export const authCardStyles = StyleSheet.create({
     shadowRadius: 28,
     shadowOffset: { width: 0, height: 14 },
   },
+  segmentedActiveMobile: {
+    paddingVertical: 14,
+  },
+
+  
   segmentedActiveText: {
     fontFamily: "Nunito_700Bold",
     fontSize: 18,
     color: "#330065",
+  },
+   segmentedActiveTextMobile: {
+    fontSize: 13.44,
   },
   segmentedInactive: {
     borderRadius: 999,
     alignItems: "center",
     paddingVertical: 16,
   },
+  segmentedInactiveMobile: {
+   
+    paddingVertical: 14,
+  },
+  
+ 
   segmentedInactiveText: {
-    fontFamily: "Nunito_700Bold",
+    fontFamily: "Nunito_600SemiBold",
     fontSize: 18,
-    color: "rgba(255,255,255,0.78)",
+    color: "#330065",
+  },
+  segmentedInactiveTextMobile: {
+    fontFamily: "Nunito_600SemiBold",
+    fontSize: 13.44,
+    color:'#330065'
   },
   welcomeTitle: {
     textAlign: "center",
@@ -166,6 +185,14 @@ export const authCardStyles = StyleSheet.create({
   inputDesktop: {
     backgroundColor: "rgba(255,255,255,0.08)",
   },
+  inputMobile: {
+    backgroundColor: "transparent",
+    borderColor: '#FFFFFF',
+    borderWidth: 1,
+    paddingVertical: 16,
+    borderRadius: 8,
+    fontSize: 14,
+  },
   checkboxRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -233,5 +260,10 @@ export const authCardStyles = StyleSheet.create({
     fontFamily: "Nunito_600SemiBold",
     fontSize: 14,
     textDecorationLine: "underline",
+  },
+   forgotLinkMobile: {
+    color: "#FFFFFF",
+    fontFamily: "Nunito_400Regular",
+    fontSize: 12,
   },
 });

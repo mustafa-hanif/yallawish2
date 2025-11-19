@@ -129,7 +129,7 @@ export default function Page() {
           </View>
         )}
 
-        <Divider text="OR" tone="card" />
+        <Divider text={isDesktop ? "Or continue with" : "OR"} tone="card" />
 
         <SocialButton
           onPress={() =>

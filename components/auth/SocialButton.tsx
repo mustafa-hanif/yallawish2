@@ -42,7 +42,7 @@ export function SocialButton({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
       style={({ pressed }) => [
-        [styles.base, !isDesktop ? { borderRadius: 8 } : {}],
+        [styles.base, !isDesktop ? styles.baseMobile : {}],
         styles[`button_${variant}`],
         pressed && styles.pressed,
         style,
@@ -69,12 +69,13 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
   },
+  baseMobile: { borderRadius: 8 },
   pressed: {
     opacity: 0.85,
   },
   button_default: {
     backgroundColor: "#FFFFFF",
-    paddingVertical: 14,
+    paddingVertical: 16,
     paddingHorizontal: 18,
   },
   button_primary: {
@@ -113,7 +114,7 @@ const styles = StyleSheet.create({
   },
   label_default: {
     fontSize: 16,
-    color: "#1F1235",
+    color: "#3B0076",
     textAlign: "center",
     fontFamily: "Nunito_700Bold",
   },

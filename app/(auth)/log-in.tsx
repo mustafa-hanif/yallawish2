@@ -86,14 +86,14 @@ export default function LoginScreen() {
           }}
           asChild
         >
-          <Pressable style={styles.segmentedInactive}>
-            <Text style={styles.segmentedInactiveText}>Signup</Text>
+          <Pressable style={{...styles.segmentedInactive, ...(!isDesktop ? styles.segmentedInactiveMobile : {})}}>
+            <Text style={[styles.segmentedInactiveText, !isDesktop ? styles.segmentedInactiveTextMobile : {}]}>Signup</Text>
           </Pressable>
         </Link>
       </View>
       <View style={styles.segmentedOption}>
-        <View style={styles.segmentedActive}>
-          <Text style={styles.segmentedActiveText}>Login</Text>
+        <View style={{...styles.segmentedActive, ...(!isDesktop ? styles.segmentedActiveMobile : {})}}>
+          <Text style={[styles.segmentedActiveText, !isDesktop ? styles.segmentedActiveTextMobile : {}]}>Login</Text>
         </View>
       </View>
     </View>
@@ -129,11 +129,11 @@ export default function LoginScreen() {
 
         <View style={styles.fieldsStack}>
           <TextInput
-            style={[styles.input, isDesktop && styles.inputDesktop]}
+            style={[styles.input, isDesktop && styles.inputDesktop , !isDesktop ? styles.inputMobile : {}]}
             autoCapitalize="none"
             value={emailAddress}
-            placeholder="Email address"
-            placeholderTextColor="rgba(255,255,255,0.65)"
+            placeholder={isDesktop ? "Email address" : "Email"}
+             placeholderTextColor="#FFFFFF66"
             keyboardType="email-address"
             onChangeText={setEmailAddress}
           />
@@ -144,10 +144,11 @@ export default function LoginScreen() {
                 styles.input,
                 styles.passwordInput,
                 isDesktop && styles.inputDesktop,
+                !isDesktop ? styles.inputMobile : {}
               ]}
               value={password}
               placeholder="Password"
-              placeholderTextColor="rgba(255,255,255,0.65)"
+              placeholderTextColor="#FFFFFF66"
               secureTextEntry={!showPassword}
               onChangeText={setPassword}
             />
@@ -164,22 +165,38 @@ export default function LoginScreen() {
               />
             </Pressable>
           </View>
+          {
+          !isDesktop ?
+            <Pressable
+              onPress={() => {}}
+              accessibilityRole="button"
+              accessibilityLabel="Forgot password"
+            >
+              <Text style={styles.forgotLinkMobile}>Forgot password?</Text>
+            </Pressable>
+          : null
+          }
         </View>
+        {
+        isDesktop ?
+          <Pressable
+            onPress={() => {}}
+            style={styles.forgotLinkWrapper}
+            accessibilityRole="button"
+            accessibilityLabel="Forgot password"
+          >
+            <Text style={styles.forgotLink}>Forgot password?</Text>
+          </Pressable>
+        : null
+         }
+        
 
-        <Pressable
-          onPress={() => {}}
-          style={styles.forgotLinkWrapper}
-          accessibilityRole="button"
-          accessibilityLabel="Forgot password"
-        >
-          <Text style={styles.forgotLink}>Forgot password?</Text>
-        </Pressable>
 
         <SocialButton
           onPress={onSignInPress}
           icon={null}
           label={ctaLabel}
-          variant="primary"
+          variant={isDesktop? "primary" : "default"}
         />
 
         {error.length > 0 && (
@@ -192,7 +209,7 @@ export default function LoginScreen() {
           </View>
         )}
 
-        <Divider text="Or continue with" tone="card" />
+        <Divider text={isDesktop ? "Or continue with" : "OR" } tone="card" marginVertical={isDesktop ? 16 : 8} />
 
         {isDesktop ? (
           <View style={styles.socialRowDesktop}>

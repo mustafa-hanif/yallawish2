@@ -89,8 +89,8 @@ export default function SignUpScreen() {
  const TabUI = () => (
   <View style={[styles.segmentedControl, isDesktop ? styles.segmentedControlDesktop: styles.segmentedControlMobile]}>
     <View style={styles.segmentedOption}>
-      <View style={styles.segmentedActive}>
-        <Text style={styles.segmentedActiveText}>Signup</Text>
+      <View style={{...styles.segmentedActive, ...(!isDesktop ? styles.segmentedActiveMobile : {})}}>
+        <Text style={[styles.segmentedActiveText, !isDesktop ? styles.segmentedActiveTextMobile : {}]}>Signup</Text>
       </View>
     </View>
     <View style={styles.segmentedOption}>
@@ -104,8 +104,8 @@ export default function SignUpScreen() {
         }}
         asChild
       >
-        <Pressable style={styles.segmentedInactive}>
-          <Text style={styles.segmentedInactiveText}>Login</Text>
+        <Pressable style={{...styles.segmentedInactive, ...(!isDesktop ? styles.segmentedInactiveMobile : {})}}>
+          <Text style={[styles.segmentedInactiveText, !isDesktop ? styles.segmentedInactiveTextMobile : {}]}>Login</Text>
         </Pressable>
       </Link>
     </View>
@@ -117,7 +117,7 @@ export default function SignUpScreen() {
       showHero={!isDesktop}
       heroTitle={`Sign up to save \n this gift`}
       heroSubtitle="Add it to your list now and start creating your own to share with friends and family."
-      mobileLogoHeaderStyle={{ marginTop: 20, marginBottom: 30 }}
+      mobileLogoHeaderStyle={{ marginTop: 20, marginBottom: 20 }}
       tabs={<TabUI />}
     >
       <View style={[
@@ -144,10 +144,11 @@ export default function SignUpScreen() {
               styles.input,
               styles.inputField,
               isDesktop && styles.inputDesktop,
+              !isDesktop ? styles.inputMobile : {}
             ]}
             value={firstName}
-            placeholder="First name"
-            placeholderTextColor="rgba(255,255,255,0.65)"
+            placeholder={isDesktop ? "First name" : "First Name"}
+            placeholderTextColor="#FFFFFF66"
             onChangeText={(text) => {
               setFirstName(text);
               if (error.length > 0) setError([]);
@@ -158,10 +159,11 @@ export default function SignUpScreen() {
                 styles.input,
                 styles.inputField,
                 isDesktop && styles.inputDesktop,
+                !isDesktop ? styles.inputMobile : {}
               ]}
               value={lastName}
-              placeholder="Last name"
-              placeholderTextColor="rgba(255,255,255,0.65)"
+              placeholder={isDesktop ? "Last name" : "Last Name"}
+              placeholderTextColor="#FFFFFF66"
               onChangeText={(text) => {
                 setLastName(text);
                 if (error.length > 0) setError([]);
@@ -170,11 +172,11 @@ export default function SignUpScreen() {
           </View>
 
           <TextInput
-            style={[styles.input, isDesktop && styles.inputDesktop]}
+            style={[styles.input, isDesktop && styles.inputDesktop, !isDesktop ? styles.inputMobile : {}]}
             autoCapitalize="none"
             value={emailAddress}
-            placeholder="Email address"
-            placeholderTextColor="rgba(255,255,255,0.65)"
+            placeholder={isDesktop ? "Email address" : "Email"}
+            placeholderTextColor="#FFFFFF66"
             keyboardType="email-address"
             onChangeText={(text) => {
               setEmailAddress(text);
@@ -183,10 +185,10 @@ export default function SignUpScreen() {
           />
 
           <TextInput
-            style={[styles.input, isDesktop && styles.inputDesktop]}
+            style={[styles.input, isDesktop && styles.inputDesktop, !isDesktop ? styles.inputMobile : {}]}
             value={password}
             placeholder="Password"
-            placeholderTextColor="rgba(255,255,255,0.65)"
+            placeholderTextColor="#FFFFFF66"
             secureTextEntry
             onChangeText={(text) => {
               setPassword(text);
@@ -220,7 +222,7 @@ export default function SignUpScreen() {
           onPress={onSignUpPress}
           icon={null}
           label={isLoading ? "Signing up..." : ctaLabel}
-          variant="primary"
+          variant={isDesktop? "primary" : "default"}
         />
 
         {error.length > 0 && (
@@ -233,7 +235,7 @@ export default function SignUpScreen() {
           </View>
         )}
 
-        <Divider text="Or continue with" tone="card" />
+        <Divider text={isDesktop ? "Or continue with" : "OR" } tone="card" marginVertical={isDesktop ? 16 : 8} />
 
         {isDesktop ? (
           <View style={styles.socialRowDesktop}>
