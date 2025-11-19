@@ -89,8 +89,8 @@ export default function SignUpScreen() {
  const TabUI = () => (
   <View style={[styles.segmentedControl, isDesktop ? styles.segmentedControlDesktop: styles.segmentedControlMobile]}>
     <View style={styles.segmentedOption}>
-      <View style={styles.segmentedActive}>
-        <Text style={styles.segmentedActiveText}>Signup</Text>
+      <View style={{...styles.segmentedActive, ...(!isDesktop ? styles.segmentedActiveMobile : {})}}>
+        <Text style={[styles.segmentedActiveText, !isDesktop ? styles.segmentedActiveTextMobile : {}]}>Signup</Text>
       </View>
     </View>
     <View style={styles.segmentedOption}>
@@ -104,8 +104,8 @@ export default function SignUpScreen() {
         }}
         asChild
       >
-        <Pressable style={styles.segmentedInactive}>
-          <Text style={styles.segmentedInactiveText}>Login</Text>
+        <Pressable style={{...styles.segmentedInactive, ...(!isDesktop ? styles.segmentedInactiveMobile : {})}}>
+          <Text style={[styles.segmentedInactiveText, !isDesktop ? styles.segmentedInactiveTextMobile : {}]}>Login</Text>
         </Pressable>
       </Link>
     </View>

@@ -86,14 +86,14 @@ export default function LoginScreen() {
           }}
           asChild
         >
-          <Pressable style={styles.segmentedInactive}>
-            <Text style={styles.segmentedInactiveText}>Signup</Text>
+          <Pressable style={{...styles.segmentedInactive, ...(!isDesktop ? styles.segmentedInactiveMobile : {})}}>
+            <Text style={[styles.segmentedInactiveText, !isDesktop ? styles.segmentedInactiveTextMobile : {}]}>Signup</Text>
           </Pressable>
         </Link>
       </View>
       <View style={styles.segmentedOption}>
-        <View style={styles.segmentedActive}>
-          <Text style={styles.segmentedActiveText}>Login</Text>
+        <View style={{...styles.segmentedActive, ...(!isDesktop ? styles.segmentedActiveMobile : {})}}>
+          <Text style={[styles.segmentedActiveText, !isDesktop ? styles.segmentedActiveTextMobile : {}]}>Login</Text>
         </View>
       </View>
     </View>
