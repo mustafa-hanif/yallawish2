@@ -338,15 +338,15 @@ export const styles = StyleSheet.create({
     borderBottomColor: "#E5E5EA",
   },
   avatarCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 48,
+    height: 48,
+    borderRadius: 8,
     backgroundColor: "#E4E4FF",
     alignItems: "center",
     justifyContent: "center",
   },
   avatarInitials: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: "Nunito_700Bold",
     color: "#3B0076",
   },
@@ -358,7 +358,7 @@ export const styles = StyleSheet.create({
   friendEmail: {
     fontSize: 12,
     fontFamily: "Nunito_300Light",
-    color: "#8E8E93",
+    color: "#1C0335",
   },
   friendCheckbox: {
     width: 24,
