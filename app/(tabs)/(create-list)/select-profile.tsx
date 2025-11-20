@@ -4,9 +4,7 @@ import { Doc } from "@/convex/_generated/dataModel";
 import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
-import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import React, { Fragment, ReactNode, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -23,6 +21,8 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import styles from "@/styles/selectProfileStyles";
+import { LinearGradient } from "expo-linear-gradient";
+import { Image, StatusBar } from "react-native";
 const DESKTOP_BREAKPOINT = 1024;
 const DEFAULT_COUNTRY_CODE = "+971";
 const GENDER_OPTIONS = [
@@ -420,27 +420,31 @@ export default function SelectProfileScreen() {
 
   const renderProfilesMobile = () => (
     <View style={styles.mobileContainer}>
-      <StatusBar style="light" />
+      <StatusBar barStyle="light-content" backgroundColor="transparent" />
+      
       <LinearGradient
         colors={["#330065", "#6600CB"]}
+        locations={[0, 0.7]}  
         start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+        end={{ x: 0, y: 2 }}
         style={styles.mobileHeaderGradient}
       >
-        <SafeAreaView edges={['top']}>
+        <SafeAreaView edges={["top"]}>
           <View style={styles.mobileHeaderContent}>
-            <Pressable onPress={() => router.back()} style={styles.mobileBackButton}>
-              <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
-            </Pressable>
-            <Text style={styles.mobileHeaderTitle}>Select Profile</Text>
+            <View style={styles.navigation}>
+              <Pressable onPress={() => router.back()} style={styles.mobileBackButton}>
+                <Image source={require("@/assets/images/backArrow.png")} />
+              </Pressable>
+              <Text style={styles.mobileHeaderTitle}>Select Profile</Text>
+            </View>
           </View>
         </SafeAreaView>
       </LinearGradient>
 
       <View style={styles.mobileBody}>
-        <Text style={styles.mobileHeading}>Select or add profile</Text>
+        <Text style={styles.mobileHeading}>Select or Add Profile</Text>
         <Text style={styles.mobileSubheading}>
-          Choose a giftee to manage their wishlist or create someone new.
+          Choose or add a new profile to create a{"\n"}wishlist for
         </Text>
 
         {isLoadingProfiles ? (
@@ -488,9 +492,9 @@ export default function SelectProfileScreen() {
 
             <Pressable style={styles.mobileAddCard} onPress={openModal}>
               <View style={styles.mobileAddIconWrap}>
-                <Ionicons name="add" size={28} color="#4B0082" />
+                <Ionicons name="add" size={20} color="#ffff" />
               </View>
-              <Text style={styles.mobileAddText}>New Profile</Text>
+              <Text style={styles.mobileAddText}>Add New</Text>
             </Pressable>
 
             <View style={styles.mobileBottomSpacer} />
