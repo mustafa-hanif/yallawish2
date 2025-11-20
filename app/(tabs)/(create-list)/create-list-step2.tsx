@@ -1020,11 +1020,7 @@ function MobileLayout({
                   />
                 ) : (
                   <View style={styles.uploadContent}>
-                    <Ionicons
-                      name="cloud-upload-outline"
-                      size={24}
-                      color="#3B0076"
-                    />
+                    <Image source={require("@/assets/images/uploadIcon.png")} />
                     <Text style={styles.uploadText}>Upload</Text>
                   </View>
                 )}
@@ -1306,7 +1302,7 @@ const styles = StyleSheet.create({
   },
   uploadText: {
     fontSize: 16,
-    fontWeight: "700",
+    // fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     color: "#3B0076",
     lineHeight: 16,
@@ -1322,7 +1318,6 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito_300Light",
     color: "#8E8E93",
     lineHeight: 24,
-    textAlign: "center",
   },
   occasionsContainer: {
     backgroundColor: "#FFFFFF",
