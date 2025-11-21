@@ -1,18 +1,17 @@
 import { Image } from "expo-image";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-import { SignOutButton } from "@/components";
 import { ContactUs } from "@/components/homepage/ContactUs";
 import { DownloadCTA } from "@/components/homepage/DownloadCTA";
 import { FAQSection } from "@/components/homepage/FAQSection";
 import { Footer } from "@/components/homepage/Footer";
 import { api } from "@/convex/_generated/api";
 import { styles } from "@/styles";
+import { responsiveStylesHome } from "@/styles/homePageResponsiveStyles";
 import { SignedIn, SignedOut, useUser } from "@clerk/clerk-expo";
-import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import * as LucideIcons from "lucide-react-native";
 import { Alert, Dimensions, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -32,181 +31,7 @@ const OCCASION_COLOR: Record<string, string> = {
   "no-occasion": "#4D4D4D",
 };
 
-const responsiveStyles = StyleSheet.create({
-  pageContainer: {
-    paddingBottom: 48,
-  },
-  headerWrapper: {
-    width: "100%",
-  },
-  navBarDesktop: {
-    width: "100%",
-    maxWidth: 1180,
-    alignSelf: "center",
-    paddingHorizontal: 20,
-  },
-  header: {
-    paddingHorizontal: 0,
-    justifyContent: "center",
-  },
-  headerInner: {
-    width: "100%",
-    maxWidth: 1180,
-    alignSelf: "center",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-  },
-  headerInnerDesktop: {
-    paddingVertical: 6,
-  },
-  headerSearch: {
-    maxWidth: 520,
-  },
-  profileButtonDesktop: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginLeft: 20,
-  },
-  heroSectionDesktop: {
-    width: "100%",
-    paddingHorizontal: 0,
-    paddingTop: 0,
-    paddingBottom: 0,
-  },
-  heroContentDesktop: {
-    flex: 1,
-    paddingRight: 48,
-  },
-  heroVisualDesktop: {
-    flex: 1.1,
-    paddingLeft: 32,
-    justifyContent: "center",
-  },
-  heroSwiperDesktop: {
-    justifyContent: "center",
-    width: "100%",
-  },
-  section: {
-    paddingHorizontal: 0,
-  },
-  sectionInner: {
-    width: "100%",
-    maxWidth: 1800,
-    alignSelf: "center",
-    paddingHorizontal: 150,
-  },
-  lifeMomentGridDesktop: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    alignItems: 'center',
-    rowGap: 54.5
-  },
-  lifeMomentGridMobile: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "flex-start",
-    rowGap: 20
-  },
-  lifeMomentCardDesktop: {
-    width: '23%',
-    height: 246,
-    minWidth: 260,
-    justifyContent: 'center'
-  },
-  lifeMomentCardMobile: {
-    width: 300,
-    // marginRight: 16,
-  },
-  lifeMomentScrollContent: {
-    paddingHorizontal: 20,
-    gap: 20
-  },
-  eventsDesktopList: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "flex-start",
-  },
-  eventCardDesktop: {
-    width: "31%",
-    minWidth: 250,
-    marginBottom: 24,
-    marginRight: 24,
-  },
-  picksDesktopList: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "flex-start",
-  },
-  pickCardDesktop: {
-    width: "31%",
-    minWidth: 240,
-    marginBottom: 24,
-    marginRight: 24,
-  },
-  inspirationDesktopList: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "flex-start",
-  },
-  inspirationCardDesktop: {
-    width: "48%",
-    minWidth: 340,
-    marginBottom: 24,
-    marginRight: 24,
-  },
-  aiSectionOuter: {
-    padding: 0,
-    backgroundColor: "transparent",
-    marginHorizontal: 0,
-    marginTop: 0,
-  },
-  aiSectionOuterMobile: {
-    padding: 0,
-    backgroundColor: "transparent",
-    marginHorizontal: 0,
-    marginTop: 0,
-  },
-  aiSectionDesktopWrapper: {
-    width: "100%",
-    maxWidth: 1180,
-    alignSelf: "center",
-    // paddingVertical: 40,
-    // paddingHorizontal: 20,
-  },
-  aiSectionDesktop: {
-    borderRadius: 32,
-    // paddingHorizontal: 40,
-    // paddingVertical: 40,
-    flexDirection: "row",
-    alignItems: "center",
-    overflow: "hidden",
-    backgroundColor: "#330065",
-  },
-  aiContentDesktop: {
-    flex: 1,
-    padding: 40
-  },
-  aiRobotDesktop: {
-    flex: 1,
-    alignItems: "flex-end",
-    height: '100%',
-    justifyContent: 'flex-end',
-  },
-  robotImageDesktop: {
-    width: 340,
-    height: 260,
-  },
-  signOutWrapper: {
-    width: "100%",
-    maxWidth: 1180,
-    alignSelf: "center",
-    paddingHorizontal: 20,
-    marginTop: 24,
-  },
-});
+const responsiveStyles = responsiveStylesHome;
 export default function HomeScreen() {
 
   const { user } = useUser();
@@ -579,105 +404,67 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={{ width: "100%" }}>
           {/* Top Promotional Banner */}
-          {isDesktop && (
-            <View style={{
-              backgroundColor: "#F8A8D4",
-              paddingVertical: 8,
-              paddingHorizontal: 20,
-              alignItems: "center",
-              justifyContent: "center",
-            }}>
-              <Text style={{
-                fontFamily: "Nunito_600SemiBold",
-                fontSize: 14,
-                color: "#330065",
-              }}>FREE SHIPPING FOR ALL ORDERS OF AED150</Text>
-            </View>
-          )}
+          <View style={{
+            backgroundColor: "#F8A8D4",
+            paddingVertical: 8,
+            paddingHorizontal: 20,
+            alignItems: "center",
+            justifyContent: "center",
+          }}>
+            <Text style={{
+              fontFamily: "Nunito_600SemiBold",
+              fontSize: 14,
+              color: "#330065",
+            }}>FREE SHIPPING FOR ALL ORDERS OF AED150</Text>
+          </View>
+
 
           {/* Main Navigation Bar */}
           <View style={mergeStyles(styles.headerWrapper, isDesktop ? responsiveStyles.headerWrapper : null)}>
-            {isDesktop ? (
-              <View style={mergeStyles(styles.navBar, isDesktop ? responsiveStyles.navBarDesktop : null)}>
-                <Pressable onPress={() => router.replace("/")} style={styles.navBrandRow}>
-                  <Image source={require("@/assets/images/yallawish_logo.png")} style={styles.navBrandLogo} contentFit="contain" />
-                </Pressable>
 
-                <View
-                  style={mergeStyles(
-                    styles.searchContainer,
-                    responsiveStyles.headerSearch,
-                  )}
-                >
-                  <LucideIcons.Search size={20} color="#FFFFFF" />
-                  <TextInput
-                    placeholder="Search for gifts, lists or inspirations..."
-                    style={styles.searchInput}
-                    placeholderTextColor="#D9CCFF"
-                  />
-                </View>
+            <View style={mergeStyles(styles.navBar, isDesktop ? responsiveStyles.navBarDesktop : null)}>
+              <Pressable onPress={() => router.replace("/")} style={styles.navBrandRow}>
+                <Image source={require("@/assets/images/yallawish_logo.png")} style={styles.navBrandLogo} contentFit="contain" />
+              </Pressable>
 
-                <View style={[styles.navActions, { gap: 20 }]}>
-                  <SignedOut>
-                    <Pressable onPress={() => router.push("/sign-up")}>
-                      <Text style={styles.navAuthLink}>Sign up</Text>
-                    </Pressable>
-                    <Pressable onPress={() => router.push("/log-in")}>
-                      <Text style={styles.navAuthLink}>Login</Text>
-                    </Pressable>
-                  </SignedOut>
-                  <SignedIn>
-                    <Pressable style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                      <Text style={[styles.navAuthLink, { marginRight: 0 }]}>Account</Text>
-                      <LucideIcons.User size={20} color="#FFFFFF" />
-                    </Pressable>
-                    <Pressable>
-                      <LucideIcons.Heart size={24} color="#FFFFFF" strokeWidth={2} />
-                    </Pressable>
-                    <Pressable>
-                      <LucideIcons.ShoppingBag size={24} color="#FFFFFF" strokeWidth={2} />
-                    </Pressable>
-                  </SignedIn>
-                </View>
+              <View
+                style={mergeStyles(
+                  styles.searchContainer,
+                  responsiveStyles.headerSearch,
+                )}
+              >
+                <LucideIcons.Search size={20} color="#FFFFFF" />
+                <TextInput
+                  placeholder="Search for gifts, lists or inspirations..."
+                  style={styles.searchInput}
+                  placeholderTextColor="#D9CCFF"
+                />
               </View>
-            ) : (
-              <View style={[styles.header, { paddingHorizontal: 0, paddingVertical: 20 }]}>
-                <View style={mergeStyles(responsiveStyles.headerInner, { gap: 30 })}>
-                  <View style={[styles.mobileSearchContainer, { height: 40 }]}>
-                    <LucideIcons.Search size={20} color="#FFFFFF" />
-                    <TextInput
-                      placeholder="Type your search here..."
-                      style={styles.searchInput}
-                      placeholderTextColor="#EFECF266"
-                    />
-                  </View>
-                  <Pressable
-                    style={mergeStyles(styles.profileButton, isDesktop ? responsiveStyles.profileButtonDesktop : null)}
-                    onPress={handlePressProfile}
-                  >
-                    {profilePhoto ? (
-                      <Image
-                        source={{ uri: profilePhoto }}
-                        style={mergeStyles(
-                          styles.profileAvatarImage,
-                          isDesktop ? { width: 48, height: 48, borderRadius: 24 } : null,
-                        )}
-                        contentFit="cover"
-                      />
-                    ) : (
-                      <View
-                        style={mergeStyles(
-                          styles.profileImage,
-                          isDesktop ? { width: 48, height: 48, borderRadius: 24 } : null,
-                        )}
-                      >
-                        <Text style={styles.profileText}>{profileInitials}</Text>
-                      </View>
-                    )}
+
+              <View style={[styles.navActions, { gap: 20 }]}>
+                <SignedOut>
+                  <Pressable onPress={() => router.push("/sign-up")}>
+                    <Text style={styles.navAuthLink}>Sign up</Text>
                   </Pressable>
-                </View>
+                  <Pressable onPress={() => router.push("/log-in")}>
+                    <Text style={styles.navAuthLink}>Login</Text>
+                  </Pressable>
+                </SignedOut>
+                <SignedIn>
+                  <Pressable style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <Text style={[styles.navAuthLink, { marginRight: 0 }]}>Account</Text>
+                    <LucideIcons.User size={20} color="#FFFFFF" />
+                  </Pressable>
+                  <Pressable>
+                    <LucideIcons.Heart size={24} color="#FFFFFF" strokeWidth={2} />
+                  </Pressable>
+                  <Pressable>
+                    <LucideIcons.ShoppingBag size={24} color="#FFFFFF" strokeWidth={2} />
+                  </Pressable>
+                </SignedIn>
               </View>
-            )}
+            </View>
+
           </View>
 
           {/* Secondary Navigation Bar - Categories */}
@@ -1688,894 +1475,499 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {isDesktop && (
-          <View style={{
-            backgroundColor: '#FFFFFF',
-            paddingVertical: 80,
-            paddingHorizontal: 0,
-          }}>
-            <View style={responsiveStyles.sectionInner}>
-              <View style={{ flexDirection: 'row', gap: 24, justifyContent: 'space-between' }}>
-                {[
-                  {
-                    id: 1,
-                    title: "Riiffs La Femme Bloom For Women Perfume 100ml",
-                    price: "AED399.99",
-                    image: require("@/assets/images/homepage/promotions/promotion1.png"),
-                    bgColor: "#F59E7E", // Peach/Orange
-                  },
-                  {
-                    id: 2,
-                    title: "Sunset Breeze Women's Sandals",
-                    price: "AED109.99",
-                    image: require("@/assets/images/homepage/promotions/promotion2.png"),
-                    bgColor: "#6B7FD7", // Blue/Purple
-                  },
-                  {
-                    id: 3,
-                    title: "Beautiful elegance and luxury fashion green handbag",
-                    price: "AED299.99",
-                    image: require("@/assets/images/homepage/promotions/promotion3.png"),
-                    bgColor: "#10B981", // Teal/Green
-                  },
-                ].map((item) => (
-                  <View key={item.id} style={{
-                    flex: 1,
-                    backgroundColor: item.bgColor,
-                    borderRadius: 24,
-                    padding: 32,
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    minHeight: 500,
-                  }}>
-                    <View style={{
-                      width: '100%',
-                      height: 250,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      marginBottom: 24,
-                    }}>
-                      <View style={{
-                        position: 'absolute',
-                        width: 200,
-                        height: 200,
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                        borderRadius: 100,
-                        transform: [{ scaleX: 1.2 }],
-                      }} />
-                      <Image
-                        source={item.image}
-                        style={{ width: 220, height: 220 }}
-                        contentFit="contain"
-                      />
-                    </View>
-
-                    <View style={{ alignItems: 'center', gap: 24 }}>
-                      <Text style={{
-                        fontFamily: 'Nunito_700Bold',
-                        fontSize: 20,
-                        color: '#FFFFFF',
-                        textAlign: 'center',
-                        lineHeight: 28,
-                      }}>
-                        {item.title}
-                      </Text>
-
-                      <Pressable style={{
-                        backgroundColor: '#FFFFFF',
-                        borderRadius: 999,
-                        paddingHorizontal: 32,
-                        paddingVertical: 12,
-                      }}>
-                        <Text style={{
-                          fontFamily: 'Nunito_600SemiBold',
-                          fontSize: 14,
-                          color: '#1F2937',
-                        }}>
-                          Add to List
-                        </Text>
-                      </Pressable>
-
-                      <Text style={{
-                        fontFamily: 'Nunito_700Bold',
-                        fontSize: 18,
-                        color: '#FFFFFF',
-                      }}>
-                        {item.price}
-                      </Text>
-                    </View>
-                  </View>
-                ))}
-              </View>
-            </View>
-          </View>
-        )}
-
-        {isDesktop && (
-          <View style={{
-            backgroundColor: '#FFFFFF',
-            paddingVertical: 80,
-            paddingHorizontal: 0,
-          }}>
-            <View style={responsiveStyles.sectionInner}>
-              <View style={{ alignItems: 'center', marginBottom: 48 }}>
-                <View style={{
-                  backgroundColor: '#F8A8D4',
-                  paddingHorizontal: 16,
-                  paddingVertical: 6,
-                  borderRadius: 20,
-                  marginBottom: 16,
-                  transform: [{ rotate: '-3deg' }],
-                }}>
-                  <Text style={{
-                    fontFamily: 'Nunito_700Bold',
-                    fontSize: 12,
-                    color: '#FFFFFF',
-                    textTransform: 'uppercase',
-                  }}>
-                    Best of the Week
-                  </Text>
-                </View>
-                <Text style={{
-                  fontFamily: 'Nunito_700Bold',
-                  fontSize: 42,
-                  color: '#1A0034',
-                  textAlign: 'center',
-                }}>
-                  Recommended Bestsellers
-                </Text>
-              </View>
-
-              <View style={{ flexDirection: 'row', gap: 24, justifyContent: 'space-between' }}>
-                {[
-                  {
-                    id: 1,
-                    title: "Classic PX Smart Watch",
-                    category: "Accessories, Watches",
-                    price: "AED249.00 - AED399.00",
-                    image: require("@/assets/images/homepage/arrivals/arrival1.png"),
-                    bgColor: "#E6F4FE", // Light Blue
-                  },
-                  {
-                    id: 2,
-                    title: "Baby Girl Warm Shirt",
-                    category: "Clothes, Baby",
-                    price: "AED99.00 - AED199.00",
-                    image: require("@/assets/images/homepage/arrivals/arrival5.png"),
-                    bgColor: "#F3E8FF", // Light Purple
-                  },
-                  {
-                    id: 3,
-                    title: "Frames Upholstered Chair",
-                    category: "Furniture, Chairs",
-                    price: "AED549.00",
-                    image: require("@/assets/images/homepage/arrivals/arrival3.png"),
-                    bgColor: "#FEFBEB", // Light Yellow
-                  },
-                ].map((item) => (
-                  <View key={item.id} style={{
-                    flex: 1,
-                    maxWidth: 400,
-                  }}>
-                    <View style={{
-                      backgroundColor: item.bgColor,
-                      borderRadius: 16,
-                      aspectRatio: 1.2,
-                      marginBottom: 24,
-                      position: 'relative',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      padding: 20,
-                    }}>
-                      <Image
-                        source={item.image}
-                        style={{ width: '80%', height: '80%' }}
-                        contentFit="contain"
-                      />
-                      <Pressable style={{
-                        position: 'absolute',
-                        top: 16,
-                        right: 16,
-                        width: 36,
-                        height: 36,
-                        borderRadius: 18,
-                        backgroundColor: '#330065',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}>
-                        <LucideIcons.Heart size={18} color="#FFFFFF" />
-                      </Pressable>
-                    </View>
-
-                    <View style={{ alignItems: 'center' }}>
-                      <Text style={{
-                        fontFamily: 'Nunito_700Bold',
-                        fontSize: 20,
-                        color: '#1A0034',
-                        textAlign: 'center',
-                        marginBottom: 8,
-                      }}>
-                        {item.title}
-                      </Text>
-                      <Text style={{
-                        fontFamily: 'Nunito_400Regular',
-                        fontSize: 14,
-                        color: '#6F5F8F',
-                        textAlign: 'center',
-                        marginBottom: 8,
-                      }}>
-                        {item.category}
-                      </Text>
-                      <Text style={{
-                        fontFamily: 'Nunito_700Bold',
-                        fontSize: 18,
-                        color: '#DC2626',
-                        textAlign: 'center',
-                      }}>
-                        {item.price}
-                      </Text>
-                    </View>
-                  </View>
-                ))}
-              </View>
-            </View>
-          </View>
-        )}
-
-        {isDesktop && (
-          <View style={{
-            width: '100%',
-            paddingVertical: 80,
-            paddingHorizontal: 80,
-            backgroundColor: '#FFFFFF',
-          }}>
-            <View style={responsiveStyles.sectionInner}>
-              <LinearGradient
-                colors={['#F472B6', '#F9A8D4', '#FBCFE8']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{
-                  borderRadius: 32,
-                  paddingVertical: 80,
-                  paddingHorizontal: 60,
+        
+        <View style={{
+          backgroundColor: '#FFFFFF',
+          paddingVertical: 80,
+          paddingHorizontal: 0,
+        }}>
+          <View style={responsiveStyles.sectionInner}>
+            <View style={{ flexDirection: 'row', gap: 24, justifyContent: 'space-between' }}>
+              {[
+                {
+                  id: 1,
+                  title: "Riiffs La Femme Bloom For Women Perfume 100ml",
+                  price: "AED399.99",
+                  image: require("@/assets/images/homepage/promotions/promotion1.png"),
+                  bgColor: "#F59E7E", // Peach/Orange
+                },
+                {
+                  id: 2,
+                  title: "Sunset Breeze Women's Sandals",
+                  price: "AED109.99",
+                  image: require("@/assets/images/homepage/promotions/promotion2.png"),
+                  bgColor: "#6B7FD7", // Blue/Purple
+                },
+                {
+                  id: 3,
+                  title: "Beautiful elegance and luxury fashion green handbag",
+                  price: "AED299.99",
+                  image: require("@/assets/images/homepage/promotions/promotion3.png"),
+                  bgColor: "#10B981", // Teal/Green
+                },
+              ].map((item) => (
+                <View key={item.id} style={{
+                  flex: 1,
+                  backgroundColor: item.bgColor,
+                  borderRadius: 24,
+                  padding: 32,
                   alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <View style={{
-                  backgroundColor: '#FFFFFF',
-                  paddingHorizontal: 24,
-                  paddingVertical: 10,
-                  borderRadius: 999,
-                  marginBottom: 32,
-                  transform: [{ rotate: '-2deg' }],
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 4,
-                  elevation: 3,
+                  justifyContent: 'space-between',
+                  minHeight: 500,
                 }}>
-                  <Text style={{
-                    fontFamily: 'Nunito_700Bold',
-                    fontSize: 16,
-                    color: '#1A0034',
+                  <View style={{
+                    width: '100%',
+                    height: 250,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginBottom: 24,
                   }}>
-                    Ready to Start Your Gifting Journey?
-                  </Text>
-                </View>
+                    <View style={{
+                      position: 'absolute',
+                      width: 200,
+                      height: 200,
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      borderRadius: 100,
+                      transform: [{ scaleX: 1.2 }],
+                    }} />
+                    <Image
+                      source={item.image}
+                      style={{ width: 220, height: 220 }}
+                      contentFit="contain"
+                    />
+                  </View>
 
-                <Text style={{
-                  fontFamily: 'Nunito_700Bold',
-                  fontSize: 36,
-                  color: '#1A0034',
-                  textAlign: 'center',
-                  marginBottom: 48,
-                  lineHeight: 54,
-                  maxWidth: 900,
-                }}>
-                  Create Your Own Gift List In Minutes, Share It With Friends & Family, And Make Every Celebration Memorable.
-                </Text>
-
-                <View style={{ flexDirection: 'row', gap: 24 }}>
-                  <Pressable
-                    onPress={handleCreateWishlist}
-                    style={{
-                      backgroundColor: '#330065',
-                      borderRadius: 999,
-                      paddingHorizontal: 48,
-                      paddingVertical: 16,
-                      minWidth: 200,
-                      alignItems: 'center',
-                    }}
-                  >
+                  <View style={{ alignItems: 'center', gap: 24 }}>
                     <Text style={{
-                      fontFamily: 'Nunito_600SemiBold',
+                      fontFamily: 'Nunito_700Bold',
+                      fontSize: 20,
+                      color: '#FFFFFF',
+                      textAlign: 'center',
+                      lineHeight: 28,
+                    }}>
+                      {item.title}
+                    </Text>
+
+                    <Pressable style={{
+                      backgroundColor: '#FFFFFF',
+                      borderRadius: 999,
+                      paddingHorizontal: 32,
+                      paddingVertical: 12,
+                    }}>
+                      <Text style={{
+                        fontFamily: 'Nunito_600SemiBold',
+                        fontSize: 14,
+                        color: '#1F2937',
+                      }}>
+                        Add to List
+                      </Text>
+                    </Pressable>
+
+                    <Text style={{
+                      fontFamily: 'Nunito_700Bold',
                       fontSize: 18,
                       color: '#FFFFFF',
                     }}>
-                      Create List
+                      {item.price}
                     </Text>
-                  </Pressable>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
+        
 
-                  <Pressable style={{
-                    borderWidth: 2,
-                    borderColor: '#330065',
+        
+        <View style={{
+          backgroundColor: '#FFFFFF',
+          paddingVertical: 80,
+          paddingHorizontal: 0,
+        }}>
+          <View style={responsiveStyles.sectionInner}>
+            <View style={{ alignItems: 'center', marginBottom: 48 }}>
+              <View style={{
+                backgroundColor: '#F8A8D4',
+                paddingHorizontal: 16,
+                paddingVertical: 6,
+                borderRadius: 20,
+                marginBottom: 16,
+                transform: [{ rotate: '-3deg' }],
+              }}>
+                <Text style={{
+                  fontFamily: 'Nunito_700Bold',
+                  fontSize: 12,
+                  color: '#FFFFFF',
+                  textTransform: 'uppercase',
+                }}>
+                  Best of the Week
+                </Text>
+              </View>
+              <Text style={{
+                fontFamily: 'Nunito_700Bold',
+                fontSize: 42,
+                color: '#1A0034',
+                textAlign: 'center',
+              }}>
+                Recommended Bestsellers
+              </Text>
+            </View>
+
+            <View style={{ flexDirection: 'row', gap: 24, justifyContent: 'space-between' }}>
+              {[
+                {
+                  id: 1,
+                  title: "Classic PX Smart Watch",
+                  category: "Accessories, Watches",
+                  price: "AED249.00 - AED399.00",
+                  image: require("@/assets/images/homepage/arrivals/arrival1.png"),
+                  bgColor: "#E6F4FE", // Light Blue
+                },
+                {
+                  id: 2,
+                  title: "Baby Girl Warm Shirt",
+                  category: "Clothes, Baby",
+                  price: "AED99.00 - AED199.00",
+                  image: require("@/assets/images/homepage/arrivals/arrival5.png"),
+                  bgColor: "#F3E8FF", // Light Purple
+                },
+                {
+                  id: 3,
+                  title: "Frames Upholstered Chair",
+                  category: "Furniture, Chairs",
+                  price: "AED549.00",
+                  image: require("@/assets/images/homepage/arrivals/arrival3.png"),
+                  bgColor: "#FEFBEB", // Light Yellow
+                },
+              ].map((item) => (
+                <View key={item.id} style={{
+                  flex: 1,
+                  maxWidth: 400,
+                }}>
+                  <View style={{
+                    backgroundColor: item.bgColor,
+                    borderRadius: 16,
+                    aspectRatio: 1.2,
+                    marginBottom: 24,
+                    position: 'relative',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    padding: 20,
+                  }}>
+                    <Image
+                      source={item.image}
+                      style={{ width: '80%', height: '80%' }}
+                      contentFit="contain"
+                    />
+                    <Pressable style={{
+                      position: 'absolute',
+                      top: 16,
+                      right: 16,
+                      width: 36,
+                      height: 36,
+                      borderRadius: 18,
+                      backgroundColor: '#330065',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <LucideIcons.Heart size={18} color="#FFFFFF" />
+                    </Pressable>
+                  </View>
+
+                  <View style={{ alignItems: 'center' }}>
+                    <Text style={{
+                      fontFamily: 'Nunito_700Bold',
+                      fontSize: 20,
+                      color: '#1A0034',
+                      textAlign: 'center',
+                      marginBottom: 8,
+                    }}>
+                      {item.title}
+                    </Text>
+                    <Text style={{
+                      fontFamily: 'Nunito_400Regular',
+                      fontSize: 14,
+                      color: '#6F5F8F',
+                      textAlign: 'center',
+                      marginBottom: 8,
+                    }}>
+                      {item.category}
+                    </Text>
+                    <Text style={{
+                      fontFamily: 'Nunito_700Bold',
+                      fontSize: 18,
+                      color: '#DC2626',
+                      textAlign: 'center',
+                    }}>
+                      {item.price}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
+        
+
+
+        <View style={{
+          width: '100%',
+          paddingVertical: 80,
+          paddingHorizontal: 80,
+          backgroundColor: '#FFFFFF',
+        }}>
+          <View style={responsiveStyles.sectionInner}>
+            <LinearGradient
+              colors={['#F472B6', '#F9A8D4', '#FBCFE8']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{
+                borderRadius: 32,
+                paddingVertical: 80,
+                paddingHorizontal: 60,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <View style={{
+                backgroundColor: '#FFFFFF',
+                paddingHorizontal: 24,
+                paddingVertical: 10,
+                borderRadius: 999,
+                marginBottom: 32,
+                transform: [{ rotate: '-2deg' }],
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 3,
+              }}>
+                <Text style={{
+                  fontFamily: 'Nunito_700Bold',
+                  fontSize: 16,
+                  color: '#1A0034',
+                }}>
+                  Ready to Start Your Gifting Journey?
+                </Text>
+              </View>
+
+              <Text style={{
+                fontFamily: 'Nunito_700Bold',
+                fontSize: 36,
+                color: '#1A0034',
+                textAlign: 'center',
+                marginBottom: 48,
+                lineHeight: 54,
+                maxWidth: 900,
+              }}>
+                Create Your Own Gift List In Minutes, Share It With Friends & Family, And Make Every Celebration Memorable.
+              </Text>
+
+              <View style={{ flexDirection: 'row', gap: 24 }}>
+                <Pressable
+                  onPress={handleCreateWishlist}
+                  style={{
+                    backgroundColor: '#330065',
                     borderRadius: 999,
                     paddingHorizontal: 48,
                     paddingVertical: 16,
                     minWidth: 200,
                     alignItems: 'center',
                   }}
-                  >
-                    <Text style={{
-                      fontFamily: 'Nunito_600SemiBold',
-                      fontSize: 18,
-                      color: '#330065',
-                    }}>
-                      Browse Gifts
-                    </Text>
-                  </Pressable>
-                </View>
-              </LinearGradient>
-            </View>
-          </View>
-        )}
-
-        {isDesktop && (
-          <View style={{
-            backgroundColor: '#FFFFFF',
-            paddingVertical: 80,
-            paddingHorizontal: 0,
-          }}>
-            <View style={responsiveStyles.sectionInner}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 80 }}>
-                {/* Left Column */}
-                <View style={{ flex: 1 }}>
-                  <View style={{
-                    backgroundColor: '#5C9DFF',
-                    paddingHorizontal: 16,
-                    paddingVertical: 6,
-                    borderRadius: 20,
-                    alignSelf: 'flex-start',
-                    marginBottom: 24,
-                    transform: [{ rotate: '-3deg' }],
-                  }}>
-                    <Text style={{
-                      fontFamily: 'Nunito_700Bold',
-                      fontSize: 12,
-                      color: '#FFFFFF',
-                    }}>
-                      Testimonial
-                    </Text>
-                  </View>
-
+                >
                   <Text style={{
-                    fontFamily: 'Nunito_700Bold',
-                    fontSize: 42,
-                    color: '#1A0034',
-                    marginBottom: 32,
-                  }}>
-                    Real Feedback, Real Satisfaction
-                  </Text>
-
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 32 }}>
-                    <View style={{ flexDirection: 'row' }}>
-                      {[1, 2, 3].map((i) => (
-                        <View key={i} style={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: 20,
-                          borderWidth: 2,
-                          borderColor: '#FFFFFF',
-                          marginLeft: i > 1 ? -12 : 0,
-                          backgroundColor: '#E5E7EB',
-                          overflow: 'hidden',
-                        }}>
-                          <Image
-                            source={require("@/assets/images/girlUser.png")}
-                            style={{ width: '100%', height: '100%' }}
-                            contentFit="cover"
-                          />
-                        </View>
-                      ))}
-                    </View>
-                    <View>
-                      <View style={{ flexDirection: 'row', gap: 4, marginBottom: 4 }}>
-                        {[...Array(5)].map((_, i) => (
-                          <LucideIcons.Star key={i} size={16} color="#FBBF24" fill="#FBBF24" />
-                        ))}
-                      </View>
-                      <Text style={{
-                        fontFamily: 'Nunito_600SemiBold',
-                        fontSize: 14,
-                        color: '#1A0034',
-                      }}>
-                        5.9K Clients Reviews
-                      </Text>
-                    </View>
-                  </View>
-
-                  <Text style={{
-                    fontFamily: 'Nunito_400Regular',
+                    fontFamily: 'Nunito_600SemiBold',
                     fontSize: 18,
-                    color: '#4B5563',
-                    marginBottom: 32,
-                    lineHeight: 28,
+                    color: '#FFFFFF',
                   }}>
-                    "YallaWish made my wedding planning so much easier! I created my gift list in minutes and shared it with all my guests. Everyone loved how simple it was, and I got exactly the gifts I needed. Truly a stress-free experience!"
+                    Create List
                   </Text>
+                </Pressable>
 
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-                    <View style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: 24,
-                      overflow: 'hidden',
-                    }}>
-                      <Image
-                        source={require("@/assets/images/girlUser.png")}
-                        style={{ width: '100%', height: '100%' }}
-                        contentFit="cover"
-                      />
-                    </View>
-                    <View>
-                      <Text style={{
-                        fontFamily: 'Nunito_700Bold',
-                        fontSize: 16,
-                        color: '#1A0034',
-                      }}>
-                        Sarah Ahmed
-                      </Text>
-                      <Text style={{
-                        fontFamily: 'Nunito_400Regular',
-                        fontSize: 14,
-                        color: '#6B7280',
-                      }}>
-                        Wedding Gift
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-
-                {/* Right Column - Heart Graphic */}
-                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                  <View style={{
-                    opacity: 0.1,
-                    transform: [{ scale: 1.5 }]
+                <Pressable style={{
+                  borderWidth: 2,
+                  borderColor: '#330065',
+                  borderRadius: 999,
+                  paddingHorizontal: 48,
+                  paddingVertical: 16,
+                  minWidth: 200,
+                  alignItems: 'center',
+                }}
+                >
+                  <Text style={{
+                    fontFamily: 'Nunito_600SemiBold',
+                    fontSize: 18,
+                    color: '#330065',
                   }}>
-                    <LucideIcons.Heart size={400} color="#F472B6" fill="#FCE7F3" />
-                  </View>
-                  <View style={{
-                    position: 'absolute',
-                    top: '50%',
-                    right: 0,
-                    transform: [{ translateY: -50 }],
-                  }}>
-                    <View style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 20,
-                      borderWidth: 1,
-                      borderColor: '#E5E7EB',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: '#FFFFFF',
-                    }}>
-                      <LucideIcons.ChevronRight size={24} color="#1A0034" />
-                    </View>
-                  </View>
-                </View>
-              </View>
-            </View>
-          </View>
-        )}
-
-
-        {!isDesktop && (
-          <>
-            {/* Upcoming Events */}
-            <View style={mergeStyles(styles.eventSection, isDesktop ? responsiveStyles.section : null)}>
-              <View style={isDesktop ? responsiveStyles.sectionInner : undefined}>
-                <View style={styles.sectionHeader}>
-                  <Text style={styles.eventSectionTitle}>Upcoming events</Text>
-                  <Ionicons name="chevron-forward" size={28} color="black" />
-                </View>
-                {isDesktop ? (
-                  <View style={responsiveStyles.eventsDesktopList}>
-                    {upcomingEvents.map((event) => (
-                      <Link key={event.id} href={{ pathname: "/add-gift", params: { listId: String(event.id) } }} asChild>
-                        <Pressable style={mergeStyles(styles.eventCard, responsiveStyles.eventCardDesktop)} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
-                          <View style={[styles.eventLeftBorder, { backgroundColor: event.color }]} />
-                          <View style={styles.eventContent}>
-                            <View style={styles.eventDateContainer}>
-                              <Text style={styles.eventDateNumber}>{event.date}</Text>
-                              <Text style={styles.eventDateMonth}>{event.month}</Text>
-                            </View>
-                            <View style={styles.eventInfo}>
-                              <Text style={styles.eventTitle}>{event.title}</Text>
-                              <Text style={styles.eventSubtitle}>{event.subtitle}</Text>
-                            </View>
-                          </View>
-                        </Pressable>
-                      </Link>
-                    ))}
-                  </View>
-                ) : (
-                  <ScrollView horizontal style={styles.eventsScroll} directionalLockEnabled decelerationRate="fast" showsHorizontalScrollIndicator={false}>
-                    {upcomingEvents.map((event) => (
-                      <Link key={event.id} href={{ pathname: "/add-gift", params: { listId: String(event.id) } }} asChild>
-                        <Pressable style={styles.eventCard} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
-                          <View style={[styles.eventLeftBorder, { backgroundColor: event.color }]} />
-                          <View style={styles.eventContent}>
-                            <View style={styles.eventDateContainer}>
-                              <Text style={styles.eventDateNumber}>{event.date}</Text>
-                              <Text style={styles.eventDateMonth}>{event.month}</Text>
-                            </View>
-                            <View style={styles.eventInfo}>
-                              <Text style={styles.eventTitle}>{event.title}</Text>
-                              <Text style={styles.eventSubtitle}>{event.subtitle}</Text>
-                            </View>
-                          </View>
-                        </Pressable>
-                      </Link>
-                    ))}
-                  </ScrollView>
-                )}
-              </View>
-            </View>
-
-            {/* Top Picks */}
-            <View style={mergeStyles(styles.topSection, isDesktop ? responsiveStyles.section : null)}>
-              <View style={isDesktop ? responsiveStyles.sectionInner : undefined}>
-                <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>Top picks for you...</Text>
-                  <Pressable>
-                    <Ionicons name="chevron-forward" size={24} color="black" />
-                  </Pressable>
-                </View>
-                {isDesktop ? (
-                  <View style={responsiveStyles.picksDesktopList}>
-                    {topPicks.map((item) => (
-                      <View key={item.id} style={mergeStyles(styles.pickCard, responsiveStyles.pickCardDesktop)}>
-                        <View style={styles.pickImageContainer}>
-                          <Image style={{ height: 147, width: 180, borderRadius: 8 }} contentFit="contain" source={item.image} />
-                        </View>
-                        <Text style={styles.pickName}>{item.name}</Text>
-                        <Text style={styles.pickSubtitle}>{item.subtitle}</Text>
-                        <View style={styles.pickPriceRow}>
-                          <Image source={require("@/assets/images/dirham.png")} style={{ width: 14, height: 12, marginRight: 6 }} />
-                          <Text style={styles.pickPrice}>{item.price}</Text>
-                        </View>
-                      </View>
-                    ))}
-                  </View>
-                ) : (
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.picksScroll}>
-                    {topPicks.map((item) => (
-                      <View key={item.id} style={styles.pickCard}>
-                        <View style={styles.pickImageContainer}>
-                          <Image style={{ height: 147, width: 180, borderRadius: 8 }} contentFit="contain" source={item.image} />
-                        </View>
-                        <Text style={styles.pickName}>{item.name}</Text>
-                        <Text style={styles.pickSubtitle}>{item.subtitle}</Text>
-                        <View style={styles.pickPriceRow}>
-                          <Image source={require("@/assets/images/dirham.png")} style={{ width: 14, height: 12, marginRight: 6 }} />
-                          <Text style={styles.pickPrice}>{item.price}</Text>
-                        </View>
-                      </View>
-                    ))}
-                  </ScrollView>
-                )}
-              </View>
-            </View>
-
-            {/* Inspiration Boards */}
-            <View style={mergeStyles(styles.isection, isDesktop ? responsiveStyles.section : null)}>
-              <View style={isDesktop ? responsiveStyles.sectionInner : undefined}>
-                <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>Inspiration boards</Text>
-                  <Pressable>
-                    <Ionicons name="chevron-forward" size={24} color="black" />
-                  </Pressable>
-                </View>
-                {isDesktop ? (
-                  <View style={responsiveStyles.inspirationDesktopList}>
-                    {inspirationBoards.map((board) => (
-                      <Pressable key={board.id} style={mergeStyles(styles.inspirationCard, responsiveStyles.inspirationCardDesktop)}>
-                        <View style={styles.inspirationContent}>
-                          <Text style={styles.inspirationTitle}>{board.title}</Text>
-                          <Text style={styles.inspirationSubtitle}>{board.subtitle}</Text>
-                        </View>
-                        <View style={styles.inspirationImageContainer}>
-                          <Image style={{ width: 148, height: 148 }} contentFit="cover" source={board.image} />
-                        </View>
-                      </Pressable>
-                    ))}
-                  </View>
-                ) : (
-                  inspirationBoards.map((board) => (
-                    <Pressable key={board.id} style={styles.inspirationCard}>
-                      <View style={styles.inspirationContent}>
-                        <Text style={styles.inspirationTitle}>{board.title}</Text>
-                        <Text style={styles.inspirationSubtitle}>{board.subtitle}</Text>
-                      </View>
-                      <View style={styles.inspirationImageContainer}>
-                        <Image style={{ width: 148, height: 148 }} contentFit="cover" source={board.image} />
-                      </View>
-                    </Pressable>
-                  ))
-                )}
-              </View>
-            </View>
-
-            {/* AI Assistant */}
-            {isDesktop ? (
-              <View style={mergeStyles(isDesktop ? styles.aiSection : styles.aiSectionMobile, isDesktop ? responsiveStyles.aiSectionOuter : null)}>
-                <View style={[responsiveStyles.aiSectionDesktopWrapper]}>
-                  <LinearGradient
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    colors={['#330065', '#03ffee87']}
-                    // locations={[0.65, 0.999]}
-                    locations={[0.65, 0.999]}
-                    style={[responsiveStyles.aiSectionDesktop]}>
-                    <View style={responsiveStyles.aiContentDesktop}>
-                      <View style={styles.aiHeader}>
-                        <Text style={styles.aiButton}>AI-POWERED</Text>
-                      </View>
-                      <Text style={styles.aiTitle}>Meet Genie!</Text>
-                      <Text style={styles.aiDescription}>Let our smart assistant suggest the perfect registry items based on your lifestyle, preferences, and needs — saving you time and guesswork!</Text>
-                      <Pressable style={styles.aiChatButton}>
-                        <Ionicons name="chevron-forward" size={32} color="#FFFFFF" />
-                      </Pressable>
-                    </View>
-                    <View style={responsiveStyles.aiRobotDesktop}>
-                      <Image source={require("@/assets/images/robot.png")} style={mergeStyles(styles.robotImage, responsiveStyles.robotImageDesktop)} contentFit="contain" />
-                    </View>
-                  </LinearGradient>
-                </View>
-              </View>
-            ) : (
-              <>
-                <View style={mergeStyles(styles.aiSectionMobile)}>
-                  <LinearGradient
-                    // start={{ x: 0, y: 1 }}
-                    // end={{ x: 0, y: 1.5 }}
-                    colors={['#330065', '#03ffee87']}
-                    // locations={[0.8, 0.999]}
-                    locations={[0.5, 0.9]}
-                    style={mergeStyles(styles.gradientSectionMobile)}
-                  >
-
-                    <View style={styles.aiHeader}>
-                      <Text style={styles.aiButton}>
-                        <Text style={{ fontFamily: 'Nunito_700Bold', fontWeight: 'bold', fontStyle: 'italic' }}>AI</Text> POWERED</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Text style={styles.aiTitle}>Meet Genie!</Text>
-                      <Pressable style={styles.aiChatButton}>
-                        <Ionicons name="chevron-forward" size={32} color="#FFFFFF" />
-                      </Pressable>
-                    </View>
-                    <Text style={styles.aiDescription}>Let our smart assistant suggest the perfect registry items based on your lifestyle, preferences, and needs — saving you time and guesswork!</Text>
-
-                    <View style={{ height: 280, justifyContent: 'flex-end', alignItems: 'center' }}>
-                      <Image source={require("@/assets/images/robot.png")} style={styles.robotImage} contentFit="contain" />
-                    </View>
-
-                  </LinearGradient>
-                </View>
-              </>
-            )}
-            {/* </View> */}
-
-            {/* New Arrivals */}
-            <View style={mergeStyles(styles.topSection, isDesktop ? responsiveStyles.section : null)}>
-              <View style={isDesktop ? responsiveStyles.sectionInner : undefined}>
-                <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>New Arrivals</Text>
-                  <Pressable>
-                    <Ionicons name="chevron-forward" size={24} color="black" />
-                  </Pressable>
-                </View>
-                {isDesktop ? (
-                  <View style={[responsiveStyles.picksDesktopList, { gap: 24 }]}>
-                    {[
-                      { id: 1, name: "Smartwatch", subtitle: "Dark Green", price: "299.99", image: require("@/assets/images/nikeShoes.png") },
-                      { id: 2, name: "Diamond Ring", subtitle: "Platinum", price: "1,299.99", image: require("@/assets/images/oculus.png") },
-                      { id: 3, name: "Wicker Chair", subtitle: "Natural", price: "199.99", image: require("@/assets/images/nikeShoes.png") },
-                      { id: 4, name: "Essential Oil", subtitle: "Lavender", price: "29.99", image: require("@/assets/images/oculus.png") },
-                      { id: 5, name: "Baby Sweater", subtitle: "Light Blue", price: "49.99", image: require("@/assets/images/nikeShoes.png") },
-                      { id: 6, name: "Headphones", subtitle: "Black", price: "149.99", image: require("@/assets/images/oculus.png") },
-                    ].map((item) => (
-                      <View key={item.id} style={[mergeStyles(styles.pickCard, responsiveStyles.pickCardDesktop), { width: "31%" }]}>
-                        <View style={styles.pickImageContainer}>
-                          <Image style={{ height: 200, width: "100%", borderRadius: 8 }} contentFit="cover" source={item.image} />
-                        </View>
-                        <Text style={styles.pickName}>{item.name}</Text>
-                        <Text style={styles.pickSubtitle}>{item.subtitle}</Text>
-                        <View style={styles.pickPriceRow}>
-                          <Image source={require("@/assets/images/dirham.png")} style={{ width: 14, height: 12, marginRight: 6 }} />
-                          <Text style={styles.pickPrice}>{item.price}</Text>
-                        </View>
-                        <Pressable style={{ marginTop: 12, backgroundColor: "#330065", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 }}>
-                          <Text style={{ color: "#FFFFFF", fontFamily: "Nunito_600SemiBold", fontSize: 14, textAlign: "center" }}>Add to Cart</Text>
-                        </Pressable>
-                      </View>
-                    ))}
-                  </View>
-                ) : (
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.picksScroll}>
-                    {[
-                      { id: 1, name: "Smartwatch", subtitle: "Dark Green", price: "299.99", image: require("@/assets/images/nikeShoes.png") },
-                      { id: 2, name: "Diamond Ring", subtitle: "Platinum", price: "1,299.99", image: require("@/assets/images/oculus.png") },
-                      { id: 3, name: "Wicker Chair", subtitle: "Natural", price: "199.99", image: require("@/assets/images/nikeShoes.png") },
-                    ].map((item) => (
-                      <View key={item.id} style={styles.pickCard}>
-                        <View style={styles.pickImageContainer}>
-                          <Image style={{ height: 200, width: 180, borderRadius: 8 }} contentFit="cover" source={item.image} />
-                        </View>
-                        <Text style={styles.pickName}>{item.name}</Text>
-                        <Text style={styles.pickSubtitle}>{item.subtitle}</Text>
-                        <View style={styles.pickPriceRow}>
-                          <Image source={require("@/assets/images/dirham.png")} style={{ width: 14, height: 12, marginRight: 6 }} />
-                          <Text style={styles.pickPrice}>{item.price}</Text>
-                        </View>
-                        <Pressable style={{ marginTop: 12, backgroundColor: "#330065", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 }}>
-                          <Text style={{ color: "#FFFFFF", fontFamily: "Nunito_600SemiBold", fontSize: 14, textAlign: "center" }}>Add to Cart</Text>
-                        </Pressable>
-                      </View>
-                    ))}
-                  </ScrollView>
-                )}
-              </View>
-            </View>
-
-            {/* Profile Setup Form - Find the Perfect Gift in 3 Simple Steps */}
-            {isDesktop && (
-              <View style={mergeStyles(styles.topSection, responsiveStyles.section)}>
-                <View style={responsiveStyles.sectionInner}>
-                  <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Find the Perfect Gift in 3 Simple Steps</Text>
-                  </View>
-                  <Pressable onPress={() => router.push("/profile-setup")} style={{
-                    backgroundColor: "#FFFFFF",
-                    borderRadius: 16,
-                    padding: 24,
-                    borderWidth: 1,
-                    borderColor: "#E4DBF6",
-                    marginTop: 24,
-                  }}>
-                    <Text style={{ fontFamily: "Nunito_600SemiBold", fontSize: 18, color: "#1C0335", marginBottom: 16 }}>Step 1: Profile Details</Text>
-                    <Text style={{ fontFamily: "Nunito_400Regular", fontSize: 14, color: "#6F5F8F", marginBottom: 20 }}>
-                      Complete your profile to get personalized gift recommendations
-                    </Text>
-                    <Pressable style={{ alignSelf: "flex-start", backgroundColor: "#330065", paddingVertical: 12, paddingHorizontal: 24, borderRadius: 8 }}>
-                      <Text style={{ color: "#FFFFFF", fontFamily: "Nunito_600SemiBold", fontSize: 14 }}>Get Started</Text>
-                    </Pressable>
-                  </Pressable>
-                </View>
-              </View>
-            )}
-
-            {/* Recommended Bestsellers */}
-            <View style={mergeStyles(styles.topSection, isDesktop ? responsiveStyles.section : null)}>
-              <View style={isDesktop ? responsiveStyles.sectionInner : undefined}>
-                <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>Recommended Bestsellers</Text>
-                  <Pressable>
-                    <Ionicons name="chevron-forward" size={24} color="black" />
-                  </Pressable>
-                </View>
-                {isDesktop ? (
-                  <View style={[responsiveStyles.picksDesktopList, { gap: 24 }]}>
-                    {topPicks.map((item) => (
-                      <View key={item.id} style={[mergeStyles(styles.pickCard, responsiveStyles.pickCardDesktop), { width: "31%" }]}>
-                        <View style={styles.pickImageContainer}>
-                          <Image style={{ height: 200, width: "100%", borderRadius: 8 }} contentFit="cover" source={item.image} />
-                        </View>
-                        <Text style={styles.pickName}>{item.name}</Text>
-                        <Text style={styles.pickSubtitle}>{item.subtitle}</Text>
-                        <View style={styles.pickPriceRow}>
-                          <Image source={require("@/assets/images/dirham.png")} style={{ width: 14, height: 12, marginRight: 6 }} />
-                          <Text style={styles.pickPrice}>{item.price}</Text>
-                        </View>
-                        <Pressable style={{ marginTop: 12, backgroundColor: "#330065", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 }}>
-                          <Text style={{ color: "#FFFFFF", fontFamily: "Nunito_600SemiBold", fontSize: 14, textAlign: "center" }}>Add to Cart</Text>
-                        </Pressable>
-                      </View>
-                    ))}
-                  </View>
-                ) : (
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.picksScroll}>
-                    {topPicks.map((item) => (
-                      <View key={item.id} style={styles.pickCard}>
-                        <View style={styles.pickImageContainer}>
-                          <Image style={{ height: 200, width: 180, borderRadius: 8 }} contentFit="cover" source={item.image} />
-                        </View>
-                        <Text style={styles.pickName}>{item.name}</Text>
-                        <Text style={styles.pickSubtitle}>{item.subtitle}</Text>
-                        <View style={styles.pickPriceRow}>
-                          <Image source={require("@/assets/images/dirham.png")} style={{ width: 14, height: 12, marginRight: 6 }} />
-                          <Text style={styles.pickPrice}>{item.price}</Text>
-                        </View>
-                        <Pressable style={{ marginTop: 12, backgroundColor: "#330065", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 }}>
-                          <Text style={{ color: "#FFFFFF", fontFamily: "Nunito_600SemiBold", fontSize: 14, textAlign: "center" }}>Add to Cart</Text>
-                        </Pressable>
-                      </View>
-                    ))}
-                  </ScrollView>
-                )}
-              </View>
-            </View>
-
-            {/* Create Your Own Gift List Banner */}
-            <View style={mergeStyles(styles.topSection, isDesktop ? responsiveStyles.section : null)}>
-              <View style={isDesktop ? responsiveStyles.sectionInner : undefined}>
-                <Pressable onPress={handleCreateWishlist} style={{
-                  backgroundColor: "#FDF1F8",
-                  borderRadius: 16,
-                  padding: isDesktop ? 48 : 32,
-                  alignItems: "center",
-                  borderWidth: 1,
-                  borderColor: "#F8A8D4",
-                }}>
-                  <Text style={{ fontFamily: "Nunito_700Bold", fontSize: isDesktop ? 32 : 24, color: "#1C0335", marginBottom: 12, textAlign: "center" }}>
-                    Create Your Own Gift List
+                    Browse Gifts
                   </Text>
-                  <Text style={{ fontFamily: "Nunito_400Regular", fontSize: 16, color: "#6F5F8F", textAlign: "center", marginBottom: 24 }}>
-                    Share your wishlist with friends and family
-                  </Text>
-                  <Pressable style={{ backgroundColor: "#330065", paddingVertical: 14, paddingHorizontal: 32, borderRadius: 8 }}>
-                    <Text style={{ color: "#FFFFFF", fontFamily: "Nunito_600SemiBold", fontSize: 16 }}>Create List</Text>
-                  </Pressable>
                 </Pressable>
               </View>
-            </View>
+            </LinearGradient>
+          </View>
+        </View>
 
-            {/* Real Feedback Testimonial */}
-            <View style={mergeStyles(styles.topSection, isDesktop ? responsiveStyles.section : null)}>
-              <View style={isDesktop ? responsiveStyles.sectionInner : undefined}>
-                <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>Real Feedback. Real Satisfaction</Text>
-                </View>
+
+
+        <View style={{
+          backgroundColor: '#FFFFFF',
+          paddingVertical: 80,
+          paddingHorizontal: 0,
+        }}>
+          <View style={responsiveStyles.sectionInner}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 80 }}>
+              {/* Left Column */}
+              <View style={{ flex: 1 }}>
                 <View style={{
-                  backgroundColor: "#FFFFFF",
-                  borderRadius: 16,
-                  padding: 32,
-                  borderWidth: 1,
-                  borderColor: "#E4DBF6",
-                  marginTop: 24,
+                  backgroundColor: '#5C9DFF',
+                  paddingHorizontal: 16,
+                  paddingVertical: 6,
+                  borderRadius: 20,
+                  alignSelf: 'flex-start',
+                  marginBottom: 24,
+                  transform: [{ rotate: '-3deg' }],
                 }}>
-                  <View style={{ flexDirection: "row", marginBottom: 16 }}>
-                    {[...Array(5)].map((_, i) => (
-                      <Ionicons key={i} name="star" size={24} color="#FFD700" />
+                  <Text style={{
+                    fontFamily: 'Nunito_700Bold',
+                    fontSize: 12,
+                    color: '#FFFFFF',
+                  }}>
+                    Testimonial
+                  </Text>
+                </View>
+
+                <Text style={{
+                  fontFamily: 'Nunito_700Bold',
+                  fontSize: 42,
+                  color: '#1A0034',
+                  marginBottom: 32,
+                }}>
+                  Real Feedback, Real Satisfaction
+                </Text>
+
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 32 }}>
+                  <View style={{ flexDirection: 'row' }}>
+                    {[1, 2, 3].map((i) => (
+                      <View key={i} style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 20,
+                        borderWidth: 2,
+                        borderColor: '#FFFFFF',
+                        marginLeft: i > 1 ? -12 : 0,
+                        backgroundColor: '#E5E7EB',
+                        overflow: 'hidden',
+                      }}>
+                        <Image
+                          source={require("@/assets/images/girlUser.png")}
+                          style={{ width: '100%', height: '100%' }}
+                          contentFit="cover"
+                        />
+                      </View>
                     ))}
                   </View>
-                  <Text style={{ fontFamily: "Nunito_400Regular", fontSize: 16, color: "#1C0335", marginBottom: 16, lineHeight: 24 }}>
-                    "YallaWish made it so easy to create and share my wedding registry. My guests loved being able to see exactly what I wanted!"
-                  </Text>
-                  <Text style={{ fontFamily: "Nunito_600SemiBold", fontSize: 14, color: "#6F5F8F" }}>— Sarah M.</Text>
+                  <View>
+                    <View style={{ flexDirection: 'row', gap: 4, marginBottom: 4 }}>
+                      {[...Array(5)].map((_, i) => (
+                        <LucideIcons.Star key={i} size={16} color="#FBBF24" fill="#FBBF24" />
+                      ))}
+                    </View>
+                    <Text style={{
+                      fontFamily: 'Nunito_600SemiBold',
+                      fontSize: 14,
+                      color: '#1A0034',
+                    }}>
+                      5.9K Clients Reviews
+                    </Text>
+                  </View>
+                </View>
+
+                <Text style={{
+                  fontFamily: 'Nunito_400Regular',
+                  fontSize: 18,
+                  color: '#4B5563',
+                  marginBottom: 32,
+                  lineHeight: 28,
+                }}>
+                  "YallaWish made my wedding planning so much easier! I created my gift list in minutes and shared it with all my guests. Everyone loved how simple it was, and I got exactly the gifts I needed. Truly a stress-free experience!"
+                </Text>
+
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                  <View style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 24,
+                    overflow: 'hidden',
+                  }}>
+                    <Image
+                      source={require("@/assets/images/girlUser.png")}
+                      style={{ width: '100%', height: '100%' }}
+                      contentFit="cover"
+                    />
+                  </View>
+                  <View>
+                    <Text style={{
+                      fontFamily: 'Nunito_700Bold',
+                      fontSize: 16,
+                      color: '#1A0034',
+                    }}>
+                      Sarah Ahmed
+                    </Text>
+                    <Text style={{
+                      fontFamily: 'Nunito_400Regular',
+                      fontSize: 14,
+                      color: '#6B7280',
+                    }}>
+                      Wedding Gift
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Right Column - Heart Graphic */}
+              <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                <View style={{
+                  opacity: 0.1,
+                  transform: [{ scale: 1.5 }]
+                }}>
+                  <LucideIcons.Heart size={400} color="#F472B6" fill="#FCE7F3" />
+                </View>
+                <View style={{
+                  position: 'absolute',
+                  top: '50%',
+                  right: 0,
+                  transform: [{ translateY: -50 }],
+                }}>
+                  <View style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    borderWidth: 1,
+                    borderColor: '#E5E7EB',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#FFFFFF',
+                  }}>
+                    <LucideIcons.ChevronRight size={24} color="#1A0034" />
+                  </View>
                 </View>
               </View>
             </View>
+          </View>
+        </View>
 
-            {/* FAQ Section */}
-            <FAQSection isDesktop={isDesktop} responsiveStyles={responsiveStyles} mergeStyles={mergeStyles} />
+        <FAQSection isDesktop={isDesktop} responsiveStyles={responsiveStyles} mergeStyles={mergeStyles} />
 
-            {/* Download App Banner */}
-            <DownloadCTA isDesktop={isDesktop} />
+         {/* Download App Banner */}
+         <DownloadCTA isDesktop={isDesktop} />
 
-            {/* Contact Form */}
-            <ContactUs isDesktop={isDesktop} responsiveStyles={responsiveStyles} mergeStyles={mergeStyles} />
 
-            <Footer isDesktop={isDesktop} />
+        {/* Contact Form */}
+        <ContactUs isDesktop={isDesktop} responsiveStyles={responsiveStyles} mergeStyles={mergeStyles} />
 
-            <View style={isDesktop ? responsiveStyles.signOutWrapper : { paddingHorizontal: 20, marginTop: 24 }}>
-              <SignOutButton />
-            </View>
-          </>
-        )}
+        <Footer isDesktop={isDesktop} />
+
+
       </ScrollView>
     </SafeAreaView>
   );
