@@ -822,7 +822,6 @@ function MobileLayout({
 }: MobileLayoutProps) {
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor="#330065" />
       <HeaderBar title={title} onBack={handleBack} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <ListCover imageUri={coverUri} overlayText={overlayText} />
