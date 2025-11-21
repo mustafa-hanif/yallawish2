@@ -19,6 +19,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { Image } from "react-native";
 import { desktopStyles, styles } from "./step3styles";
 
 type PrivacyOption = "private" | "my-people" | "public" | null;
@@ -125,12 +126,7 @@ const OptionCard = React.memo(function OptionCardBase({
         <View style={optionStyles.optionHeader}>
           {icon}
           <Text style={optionStyles.optionTitle}>{title}</Text>
-          <Ionicons
-            name="information-circle-outline"
-            size={16}
-            color="#1C0335"
-            style={{ marginLeft: 6 }}
-          />
+          <Image source={require("@/assets/images/infoIcon.png")}/>
         </View>
 
         <Text style={optionStyles.optionDescription}>{description}</Text>
@@ -494,19 +490,19 @@ function MobileLayout({
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#330065" />
-
+      <StatusBar barStyle="light-content" backgroundColor="transparent" />
       <LinearGradient
-        colors={["#330065", "#6600CB"]}
+        colors={["#330065", "#45018ad7"]}
+        locations={[0, 0.7]}
         start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+        end={{ x: 0, y: 2 }}
         style={styles.header}
       >
         <SafeAreaView edges={["top"]}>
           <View style={styles.headerContent}>
             <View style={styles.navigation}>
               <Pressable onPress={handleBack} style={styles.backButton}>
-                <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+                <Image source={require("@/assets/images/backArrow.png")} />
               </Pressable>
               <Text style={styles.headerTitle}>Create List</Text>
             </View>
@@ -524,7 +520,7 @@ function MobileLayout({
           <View style={styles.optionsContainer}>
             <OptionCard
               option="private"
-              icon={<Ionicons name="lock-closed-outline" size={40} color="#1C0335" />}
+              icon={<Image source={require("@/assets/images/privateIcon.png")}/>}
               title="Private"
               description="Only visible to you"
               isSelected={selectedOption === "private"}
@@ -534,7 +530,7 @@ function MobileLayout({
 
             <OptionCard
               option="my-people"
-              icon={<Ionicons name="people-outline" size={40} color="#1C0335" />}
+              icon={<Image source={require("@/assets/images/myPeopleIcon.png")}/>}
               title="My People"
               description="Visible only to selected groups or individuals in your YallaWish Circle."
               isSelected={selectedOption === "my-people"}
@@ -548,7 +544,7 @@ function MobileLayout({
 
             <OptionCard
               option="public"
-              icon={<Ionicons name="globe-outline" size={40} color="#1C0335" />}
+              icon={<Image source={require("@/assets/images/publicIcon.png")}/>}
               title="Public"
               description="Visible to anyone with the link, on Google, or on YallaWish"
               isSelected={selectedOption === "public"}
@@ -699,7 +695,7 @@ function MobileLayout({
               <Text style={styles.buttonPrimaryText}>Yalla! Let’s add gifts</Text>
             </Pressable>
             <Pressable
-              style={[styles.button, styles.buttonSecondary, { marginBottom: 20 }]}
+              style={[styles.button, styles.buttonSecondary, { marginBottom: 20, marginTop: 20 }]}
               onPress={closeShareModal}
             >
               <Text style={styles.buttonSecondaryText}>Back</Text>

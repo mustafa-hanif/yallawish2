@@ -110,6 +110,8 @@ type OccasionOption = {
   title: string;
   borderColor: string;
   icon: (color: string, size: number) => React.ReactNode;
+  mobileIcon?: React.ReactNode;
+  backgroundColor?: string
 };
 
 const OCCASION_OPTIONS: OccasionOption[] = [
@@ -118,36 +120,48 @@ const OCCASION_OPTIONS: OccasionOption[] = [
     title: "Birthday",
     borderColor: "#FC0",
     icon: (color, size) => <Ionicons name="gift" size={size} color={color} />,
+    mobileIcon: <Image source={require("@/assets/images/birthdayIcon.png")}/>,
+    backgroundColor: "#FFF6D2"
   },
   {
     id: "wedding",
     title: "Wedding",
     borderColor: "#FF3B30",
     icon: (color, size) => <Ionicons name="heart" size={size} color={color} />,
+    mobileIcon: <Image source={require("@/assets/images/weddingIcon.png")}/>,
+    backgroundColor: "#FFE0E0"
   },
   {
     id: "baby-shower",
     title: "Baby Shower",
     borderColor: "#91DA93",
     icon: (color, size) => <Ionicons name="person" size={size} color={color} />,
+    mobileIcon: <Image source={require("@/assets/images/babyShowerIcon.png")}/>,
+    backgroundColor: "#F0F9F0"
   },
   {
     id: "graduation",
     title: "Graduation",
     borderColor: "#32ADE6",
     icon: (color, size) => <Ionicons name="school" size={size} color={color} />,
+    mobileIcon: <Image source={require("@/assets/images/graduationIcon.png")}/>,
+    backgroundColor: "#D9F3FF"
   },
   {
     id: "new-home",
     title: "New Home",
     borderColor: "#A2845E",
     icon: (color, size) => <Ionicons name="home" size={size} color={color} />,
+    mobileIcon: <Image source={require("@/assets/images/newHomeIcon.png")}/>,
+    backgroundColor: "#F5E8D5"
   },
   {
     id: "retirement",
     title: "Retirement",
     borderColor: "#FF9500",
     icon: (color, size) => <Ionicons name="person" size={size} color={color} />,
+    mobileIcon: <Image source={require("@/assets/images/retirementIcon.png")}/>,
+    backgroundColor: "#FFEBCC"
   },
   {
     id: "no-occasion",
@@ -156,12 +170,16 @@ const OCCASION_OPTIONS: OccasionOption[] = [
     icon: (color, size) => (
       <Ionicons name="document-text" size={size} color={color} />
     ),
+    mobileIcon: <Image source={require("@/assets/images/noOccasionIcon.png")}/>,
+    backgroundColor: "#F4F4F4"
   },
   {
     id: "other",
     title: "Other",
     borderColor: "#D1D1D6",
     icon: (color, size) => <Ionicons name="gift" size={size} color={color} />,
+    mobileIcon: <Image source={require("@/assets/images/otherIcon.png")}/>,
+    backgroundColor: "#E9E9E9"
   },
 ];
 
@@ -1002,11 +1020,7 @@ function MobileLayout({
                   />
                 ) : (
                   <View style={styles.uploadContent}>
-                    <Ionicons
-                      name="cloud-upload-outline"
-                      size={24}
-                      color="#3B0076"
-                    />
+                    <Image source={require("@/assets/images/uploadIcon.png")} />
                     <Text style={styles.uploadText}>Upload</Text>
                   </View>
                 )}
@@ -1063,12 +1077,12 @@ type OccasionItemProps = {
 function OccasionItem({ option, isSelected, onSelect }: OccasionItemProps) {
   return (
     <Pressable
-      style={[styles.occasionItem, { borderLeftColor: option.borderColor }]}
+      style={[styles.occasionItem, { borderLeftColor: option.borderColor , ...(isSelected && {backgroundColor: option.backgroundColor, borderBottomRightRadius: 40, borderTopRightRadius: 40}) }]}
       onPress={() => onSelect(option.id)}
     >
       <View style={styles.occasionContent}>
         <View style={styles.occasionLeft}>
-          {option.icon("#1C0335", 24)}
+          {option.mobileIcon}
           <Text style={styles.occasionTitle}>{option.title}</Text>
         </View>
         <View
@@ -1288,7 +1302,7 @@ const styles = StyleSheet.create({
   },
   uploadText: {
     fontSize: 16,
-    fontWeight: "700",
+    // fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     color: "#3B0076",
     lineHeight: 16,
@@ -1304,7 +1318,6 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito_300Light",
     color: "#8E8E93",
     lineHeight: 24,
-    textAlign: "center",
   },
   occasionsContainer: {
     backgroundColor: "#FFFFFF",
@@ -1327,7 +1340,6 @@ const styles = StyleSheet.create({
   },
   occasionTitle: {
     fontSize: 16,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     color: "#1C0335",
     lineHeight: 24,

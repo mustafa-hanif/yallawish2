@@ -9,16 +9,17 @@ export const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   header: {
+     minHeight: 108,
     paddingBottom: 16,
   },
   headerContent: {
     paddingHorizontal: 16,
-    paddingTop: 50,
   },
   navigation: {
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
+    paddingTop: 16,
   },
   backButton: {
     padding: 4,
@@ -53,9 +54,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#DDD7E4",
   },
   contentScroll: {
-    // paddingHorizontal: 16,
-    // Leave room for the fixed footer so content isn't hidden
-    paddingBottom: 160,
+    paddingBottom: 200,
   },
   content: {
     flex: 1,
@@ -63,7 +62,6 @@ export const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 24,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     color: "#1C0335",
     marginBottom: 24,
@@ -114,12 +112,11 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginBottom: 16,
-    marginTop: 24,
+    marginVertical: 16,
+    // marginTop: 24,
   },
   optionTitle: {
     fontSize: 24,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     color: "#1C0335",
     lineHeight: 24,
@@ -196,13 +193,11 @@ export const styles = StyleSheet.create({
   buttonPrimaryText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
   },
   buttonSecondaryText: {
     color: "#3B0076",
     fontSize: 16,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
   },
   sheetBackdrop: {
@@ -231,7 +226,6 @@ export const styles = StyleSheet.create({
   },
   sheetTitle: {
     fontSize: 24,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     color: "#1C0335",
     marginBottom: 16,
@@ -327,7 +321,6 @@ export const styles = StyleSheet.create({
   },
   shareWithFriends: {
     fontSize: 24,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     color: "#1C0335",
     marginBottom: 8,
@@ -345,15 +338,15 @@ export const styles = StyleSheet.create({
     borderBottomColor: "#E5E5EA",
   },
   avatarCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 48,
+    height: 48,
+    borderRadius: 8,
     backgroundColor: "#E4E4FF",
     alignItems: "center",
     justifyContent: "center",
   },
   avatarInitials: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: "Nunito_700Bold",
     color: "#3B0076",
   },
@@ -365,7 +358,7 @@ export const styles = StyleSheet.create({
   friendEmail: {
     fontSize: 12,
     fontFamily: "Nunito_300Light",
-    color: "#8E8E93",
+    color: "#1C0335",
   },
   friendCheckbox: {
     width: 24,
