@@ -166,7 +166,7 @@ export const NewArrivals: React.FC<NewArrivalsProps> = ({ isDesktop, responsiveS
                 </Text>
                 <Pressable style={{
                   borderWidth: 1,
-                  borderColor: '#D8B3FE',
+                  borderColor: '#330065',
                   borderRadius: 999,
                   paddingHorizontal: 24,
                   paddingVertical: 10,
@@ -174,7 +174,7 @@ export const NewArrivals: React.FC<NewArrivalsProps> = ({ isDesktop, responsiveS
                   <Text style={{
                     fontFamily: 'Nunito_600SemiBold',
                     fontSize: 14,
-                    color: '#D8B3FE',
+                    color: '#330065',
                   }}>
                     Add to List
                   </Text>
