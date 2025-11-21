@@ -1,25 +1,15 @@
 import React, { useEffect, useState } from "react";
-import {
-  Dimensions,
-  Image,
-  ImageBackground,
-  Platform,
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Animated, Dimensions, Easing, Image, ImageBackground, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 
 type ResponsiveAuthLayoutProps = {
   children: React.ReactNode;
   heroTitle?: string;
   heroSubtitle?: string;
   showHero?: boolean;
-  mobileScrollViewStyle?: object
-  mobileLogoHeaderStyle? : object
+  mobileScrollViewStyle?: object;
+  mobileLogoHeaderStyle?: object;
   tabs?: React.ReactNode;
+  showAnimation?: boolean;
 };
 
 // Background images for carousel (add more as needed)
@@ -30,18 +20,15 @@ const BACKGROUND_IMAGES = [
   // Add more images here when provided
 ];
 
-export function ResponsiveAuthLayout({
-  children,
-  heroTitle,
-  heroSubtitle,
-  showHero = false,
-  mobileScrollViewStyle = {},
-  mobileLogoHeaderStyle = {},
-  tabs,
-}: ResponsiveAuthLayoutProps) {
+export function ResponsiveAuthLayout({ children, heroTitle, heroSubtitle, showHero = false, mobileScrollViewStyle = {}, mobileLogoHeaderStyle = {}, tabs, showAnimation = false }: ResponsiveAuthLayoutProps) {
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
   const isDesktop = Platform.OS === "web" && SCREEN_WIDTH >= 768;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isSplash, setIsSplash] = useState(showAnimation);
+
+  useEffect(() => {
+    setIsSplash(showAnimation);
+  }, [showAnimation]);
 
   // Carousel effect for desktop background
   useEffect(() => {
@@ -56,33 +43,19 @@ export function ResponsiveAuthLayout({
 
   if (isDesktop) {
     return (
-      <ImageBackground
-        source={BACKGROUND_IMAGES[currentImageIndex]}
-        style={styles.desktopFullBackground}
-        imageStyle={styles.desktopFullBackgroundImage}
-        resizeMode="cover"
-      >
+      <ImageBackground source={BACKGROUND_IMAGES[currentImageIndex]} style={styles.desktopFullBackground} imageStyle={styles.desktopFullBackgroundImage} resizeMode="cover">
         {/* <View style={styles.desktopOverlay} /> */}
-        
+
         {/* Logo and hero text - positioned on the left */}
         <View style={styles.desktopHeroContent}>
-          <Image
-            source={require("@/assets/images/yallawish_logo.png")}
-            style={styles.desktopLogo}
-          />
+          <Image source={require("@/assets/images/yallawish_logo.png")} style={styles.desktopLogo} />
           <View style={styles.desktopHeroText}>
             <Text style={styles.desktopHeroTitle}>GIFTING, MADE MEANINGFUL</Text>
             <Text style={styles.desktopHeroSubtitle}>CELEBRATE EVERYTHING</Text>
           </View>
           <View style={styles.sliderButtonContainer}>
             {Array.from({ length: BACKGROUND_IMAGES.length }).map((_, index) => (
-              <Pressable
-                key={`hero-carousel-dot-${index}`}
-                onPress={() => setCurrentImageIndex(index)}
-                style={[styles.sliderButton, currentImageIndex === index && styles.sliderButtonActive]}
-                accessibilityRole="button"
-                accessibilityLabel={`Show hero slide ${index + 1}`}
-              />
+              <Pressable key={`hero-carousel-dot-${index}`} onPress={() => setCurrentImageIndex(index)} style={[styles.sliderButton, currentImageIndex === index && styles.sliderButtonActive]} accessibilityRole="button" accessibilityLabel={`Show hero slide ${index + 1}`} />
             ))}
           </View>
           <Text style={styles.desktopCopyright}>© 2025 YallaWish. All rights reserved</Text>
@@ -90,14 +63,8 @@ export function ResponsiveAuthLayout({
 
         {/* Form container - centered/right positioned */}
         <View style={styles.desktopFormWrapper}>
-          <ScrollView
-            style={styles.desktopScrollView}
-            contentContainerStyle={styles.desktopScrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={styles.desktopFormContainer}>
-              {children}
-            </View>
+          <ScrollView style={styles.desktopScrollView} contentContainerStyle={styles.desktopScrollContent} showsVerticalScrollIndicator={false}>
+            <View style={styles.desktopFormContainer}>{children}</View>
           </ScrollView>
         </View>
       </ImageBackground>
@@ -105,72 +72,107 @@ export function ResponsiveAuthLayout({
   }
 
   // Mobile layout (original)
+  const translateY = useState(new Animated.Value(0))[0];
+  const fadeIn = useState(new Animated.Value(0))[0];
+
+  useEffect(() => {
+    if (isSplash) {
+      Animated.timing(translateY, {
+        toValue: -340, // logo moves up
+        duration: 2500,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+
+      setTimeout(() => {
+        setIsSplash(false);
+      }, 2800); // delay before showing full UI
+    }
+    if (!isSplash) {
+      Animated.timing(fadeIn, {
+        toValue: 1,
+        duration: 800,      // slightly longer fade
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [isSplash]);
+  
   return (
-    <ImageBackground
-      source={require("@/assets/images/onboard_image.png")}
-      style={{ width: SCREEN_WIDTH,  height: '100%', overflow: "hidden" }}
-      imageStyle={{ width: SCREEN_WIDTH, height:'100%' }}
-      resizeMode="cover"
-    >
-      {/* <View style={{ position: "absolute", inset: 0, backgroundColor: "rgba(44, 12, 84, 0.0001)" }} /> */}
-      <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{
-            minHeight: SCREEN_HEIGHT,
-            paddingHorizontal: 20,
-            // flexDirection:''
-            paddingTop: 24,
-            paddingBottom: 24,
+    <ImageBackground source={require("@/assets/images/onboard_image.png")} style={{ width: SCREEN_WIDTH, height: "100%", overflow: "hidden" }} imageStyle={{ width: SCREEN_WIDTH, height: "100%" }} resizeMode="cover">
+      {isSplash ? (
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <Animated.Image
+            source={require("@/assets/images/yallawish_logo.png")}
+            style={{
+              width: 158,
+              height: 38,
+              resizeMode: "contain",
+              transform: [{ translateY }],
+            }}
+          />
+        </View>
+      ) : (
+        <>
+          {/* <Animated.View style={{ flex: 1, opacity: fadeIn }}>
+            
+          </Animated.View> */}
+          <SafeAreaView style={{ flex: 1 }}>
+            <ScrollView
+              style={{ flex: 1 }}
+              contentContainerStyle={{
+                minHeight: SCREEN_HEIGHT,
+                paddingHorizontal: 20,
+                // flexDirection:''
+                paddingTop: 24,
+                paddingBottom: 24,
 
-            justifyContent:'space-between',
-            ...mobileScrollViewStyle
-          }}
-        >
-          {/* Logo */}
-          <View style={{ alignItems: "center", marginTop: 16, ...mobileLogoHeaderStyle }}>
-            <Image
-              source={require("@/assets/images/yallawish_logo.png")}
-              style={{ width: 158, height: 38, resizeMode: "contain" }}
-            />
-          </View>
-          {tabs ? tabs : null}
-          <View>
-            {/* Hero text (mobile) */}
-            {showHero && heroTitle && (
-              <View style={{ paddingHorizontal: 8, marginBottom: 20 }}>
-                <Text
-                  style={{
-                    color: "#FFFFFF",
-                    fontSize: 40,
-                    lineHeight: 38,
-                    textAlign: "center",
-                    fontFamily: "Nunito_700Bold",
-                    marginBottom: 24
-                  }}
-                >
-                  {heroTitle}
-                </Text>
-                {heroSubtitle && (
-                  <Text
-                    style={{
-                      color: "#FFFFFF",
-                      fontSize: 20,
-                      lineHeight: 24,
-                      textAlign: "center",
-                      fontFamily: "Nunito_300Light",
-                    }}
-                  >
-                    {heroSubtitle}
-                  </Text>
-                )}
+                justifyContent: "space-between",
+                ...mobileScrollViewStyle,
+              }}
+            >
+              {/* Logo */}
+              <View style={{ alignItems: "center", marginTop: 16, ...mobileLogoHeaderStyle }}>
+                <Image source={require("@/assets/images/yallawish_logo.png")} style={{ width: 158, height: 38, resizeMode: "contain" }} />
               </View>
-            )}
-          {children}
-          </View>
-
-        </ScrollView>
-      </SafeAreaView>
+              {tabs ? tabs : null}
+              <Animated.View  style={{ opacity: fadeIn }}>
+                {/* Hero text (mobile) */}
+                {showHero && heroTitle && (
+                  <View style={{ paddingHorizontal: 8, marginBottom: 20 }}>
+                    <Text
+                      style={{
+                        color: "#FFFFFF",
+                        fontSize: 40,
+                        lineHeight: 38,
+                        textAlign: "center",
+                        fontFamily: "Nunito_700Bold",
+                        marginBottom: 24,
+                      }}
+                    >
+                      {heroTitle}
+                    </Text>
+                    {heroSubtitle && (
+                      <Text
+                        style={{
+                          color: "#FFFFFF",
+                          fontSize: 20,
+                          lineHeight: 24,
+                          textAlign: "center",
+                          fontFamily: "Nunito_300Light",
+                        }}
+                      >
+                        {heroSubtitle}
+                      </Text>
+                    )}
+                  </View>
+                )}
+                {children}
+              </Animated.View>
+            </ScrollView>
+          </SafeAreaView>
+        </>
+      )}
+      {/* <View style={{ position: "absolute", inset: 0, backgroundColor: "rgba(44, 12, 84, 0.0001)" }} /> */}
     </ImageBackground>
   );
 }
@@ -181,7 +183,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     height: "100vh" as any,
-    backgroundColor:'#330065'
+    backgroundColor: "#330065",
   },
   desktopFullBackgroundImage: {
     width: "100%",
@@ -254,24 +256,24 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     paddingHorizontal: 56,
   },
-  sliderButtonContainer:{
-    width:79.69,
-    height:32,
-    backgroundColor:'#1C1C1C' ,
-    marginBottom:32,
-    borderRadius:26,
-    justifyContent:'center',
-    alignItems:'center',
-    flexDirection:'row',
-    gap:8
+  sliderButtonContainer: {
+    width: 79.69,
+    height: 32,
+    backgroundColor: "#1C1C1C",
+    marginBottom: 32,
+    borderRadius: 26,
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
   },
   sliderButton: {
     width: 7.9,
     height: 7.9,
-    backgroundColor:'#EEEEEE',
-    borderRadius: 50
+    backgroundColor: "#EEEEEE",
+    borderRadius: 50,
   },
   sliderButtonActive: {
     backgroundColor: "#03FFEE",
-  }
+  },
 });
