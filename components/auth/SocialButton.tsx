@@ -1,15 +1,7 @@
 import React from "react";
-import {
-  Dimensions,
-  Platform,
-  Pressable,
-  StyleProp,
-  StyleSheet,
-  Text,
-  TextStyle,
-  View,
-  ViewStyle
-} from "react-native";
+import { Dimensions, Platform, StyleProp, StyleSheet, Text, TextStyle, View, ViewStyle } from "react-native";
+
+import Ripple from "react-native-material-ripple";
 
 type SocialButtonVariant = "default" | "primary" | "icon";
 
@@ -23,44 +15,28 @@ type SocialButtonProps = {
   accessibilityLabel?: string;
 };
 
-export function SocialButton({
-  icon,
-  label,
-  onPress,
-  variant = "default",
-  style,
-  textStyle,
-  accessibilityLabel,
-}: SocialButtonProps) {
+const rippleRipple: Record<SocialButtonVariant, string> = {
+  default: "#3B0076",
+  primary: "#0000",
+  icon: "#3B0076",
+};
+
+export function SocialButton({ icon, label, onPress, variant = "default", style, textStyle, accessibilityLabel }: SocialButtonProps) {
   const isIconOnly = variant === "icon";
-  
+
   const { width: SCREEN_WIDTH } = Dimensions.get("window");
   const isDesktop = Platform.OS === "web" && SCREEN_WIDTH >= 768;
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel ?? label}
-      style={({ pressed }) => [
-        [styles.base, !isDesktop ? styles.baseMobile : {}],
-        styles[`button_${variant}`],
-        pressed && styles.pressed,
-        style,
-      ]}
-    >
+    <Ripple onPress={onPress}  rippleColor={rippleRipple[variant]} rippleDuration={900} accessibilityRole="button" accessibilityLabel={accessibilityLabel ?? label} style={[[styles.base, !isDesktop ? styles.baseMobile : {}], styles[`button_${variant}`], style]}>
       {isIconOnly ? (
         <View style={styles.iconOnly}>{icon}</View>
       ) : (
         <View style={styles.content}>
           {icon ? <View style={styles.iconContainer}>{icon}</View> : null}
-          {label ? (
-            <Text style={[styles.label, styles[`label_${variant}`], textStyle]}>
-              {label}
-            </Text>
-          ) : null}
+          {label ? <Text style={[styles.label, styles[`label_${variant}`], textStyle]}>{label}</Text> : null}
         </View>
       )}
-    </Pressable>
+    </Ripple>
   );
 }
 
