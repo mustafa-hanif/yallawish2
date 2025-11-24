@@ -845,8 +845,12 @@ function MobileLayout({
         <View style={styles.addGiftSection}>
           {displayedItems.length > 0 ? (
             <>
-              {displayedItems.map((item) => (
-                <GiftItemCard key={item._id} item={item} />
+              {displayedItems.map((item, index) => (
+                <>
+                  {index !== 0 ? <View style={styles.giftDivider} /> : null}
+                  <GiftItemCard key={item._id} item={item} />
+                  
+                </>
               ))}
               <Pressable style={styles.addMoreButton} onPress={onAddGift}>
                 <Ionicons name="add" size={20} color="#3B0076" />
