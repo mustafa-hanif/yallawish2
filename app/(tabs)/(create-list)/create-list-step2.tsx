@@ -23,7 +23,9 @@ import {
   useWindowDimensions
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from "react-native-safe-area-context";
+
 
 type FormFieldProps = {
   label: string;
@@ -1075,18 +1077,46 @@ type OccasionItemProps = {
 };
 
 function OccasionItem({ option, isSelected, onSelect }: OccasionItemProps) {
+      const scale = useSharedValue(0);
+
+      React.useEffect(() => {
+        scale.value = withTiming(isSelected ? 1 : 0, { duration:700 });
+      }, [isSelected]);
+
+      const bgStyle = useAnimatedStyle(() => ({transform: [{ scaleX: scale.value }],}));
+
+
   return (
-    <Pressable
-      style={[styles.occasionItem, { borderLeftColor: option.borderColor , ...(isSelected && {backgroundColor: option.backgroundColor, borderBottomRightRadius: 40, borderTopRightRadius: 40}) }]}
-      onPress={() => onSelect(option.id)}
-    >
+     <Pressable onPress={() => onSelect(option.id)} style={[styles.occasionItem, { borderLeftColor: option.borderColor }]}>
+      <Animated.View
+            style={[
+              {
+                position: "absolute",
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+                backgroundColor: option.backgroundColor,
+                borderTopRightRadius: 40,
+                borderBottomRightRadius: 40,
+                transformOrigin: "left",
+              },
+              bgStyle,
+            ]}
+          />
+
+      {/* Content on top */}
       <View style={styles.occasionContent}>
         <View style={styles.occasionLeft}>
           {option.mobileIcon}
           <Text style={styles.occasionTitle}>{option.title}</Text>
         </View>
+
         <View
-          style={[styles.radioButton, isSelected && styles.radioButtonSelected]}
+          style={[
+            styles.radioButton,
+            isSelected && styles.radioButtonSelected,
+          ]}
         >
           {isSelected && <View style={styles.radioButtonInner} />}
         </View>
