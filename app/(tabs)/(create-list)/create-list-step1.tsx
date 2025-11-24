@@ -12,6 +12,7 @@ import {
   View,
   useWindowDimensions
 } from "react-native";
+import Ripple from "react-native-material-ripple";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 
@@ -252,7 +253,10 @@ function MobileLayout({ selectedOption, onSelect, onBack, onContinue }: LayoutPr
   const renderOptionCard = (config: OptionConfig) => {
     const isSelected = selectedOption === config.id;
     return (
-      <Pressable
+      <Ripple
+        rippleOpacity={0.2}
+        rippleColor="#3B0076"
+        rippleDuration={900}
         key={config.id}
         style={[styles.optionCard, isSelected ? styles.optionCardSelected : styles.optionCardUnselected]}
         onPress={() => onSelect(config.id)}
@@ -271,7 +275,7 @@ function MobileLayout({ selectedOption, onSelect, onBack, onContinue }: LayoutPr
           </View>
           <Text style={styles.optionDescription}>{config.mobileDescription}</Text>
         </View>
-      </Pressable>
+      </Ripple>
     );
   };
 
