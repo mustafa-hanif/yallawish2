@@ -23,7 +23,6 @@ export const styles = StyleSheet.create({
   headerTitle: {
     color: "#FFFFFF",
     fontSize: 24,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     lineHeight: 28,
     letterSpacing: -1,
@@ -32,7 +31,7 @@ export const styles = StyleSheet.create({
     paddingBottom: 260, // Extra space for footer + bottom tab bar on iOS
   },
   coverContainer: {
-    height: 145,
+    height: 180,
     width: "100%",
   },
   coverImage: {
@@ -42,18 +41,14 @@ export const styles = StyleSheet.create({
   },
   coverOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(29, 23, 0, 0.32)",
+    backgroundColor: "#1D170052",
     justifyContent: "center",
     alignItems: "center",
   },
   daysToGo: {
     color: "#FFFFFF",
     fontSize: 40,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
-    textShadowColor: "rgba(0, 0, 0, 0.25)",
-    textShadowOffset: { width: 0, height: 4 },
-    textShadowRadius: 40,
   },
   listInfoContainer: {
     marginTop: -40,
