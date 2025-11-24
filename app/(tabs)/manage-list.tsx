@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   scrollContent: { paddingBottom: 40 },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 18 },
   rowLeft: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  rowLabel: { fontSize: 16, fontFamily: 'Nunito_700Bold', color: '#1C0335' },
+  rowLabel: { fontSize: 17.49, fontFamily: 'Nunito_700Bold', color: '#1C0335', letterSpacing:0 },
   rowRight: { },
   sectionSeparator: { height: 1, backgroundColor: '#E5E5EA' },
   archiveOptionsWrap: { paddingLeft: 60, gap: 12, paddingTop: 12, paddingBottom: 12 },
