@@ -19,19 +19,13 @@ export const FooterBar: React.FC<Props> = ({ lastUpdated, onShare, onManage, man
       {lastUpdated && <Text style={styles.lastUpdated}>{lastUpdated}</Text>}
       {!viewMode ? (
         <View>
-          <Pressable
-            style={[
-              styles.button,
-              styles.buttonSecondary,
-              { marginBottom: 15 },
-            ]}
-            onPress={onShare}
-          >
-            <Text style={styles.buttonSecondaryText}>Share</Text>
-            <Ionicons name="share-outline" size={20} color="#3B0076" />
+          <Pressable style={[styles.button, styles.buttonPrimary, { marginBottom: 15 }]} onPress={onShare}>
+            <Text style={styles.buttonPrimaryText}>Share</Text>
+            <Ionicons name="share-social-outline" size={20} color="#ffff" />
           </Pressable>
-          <Pressable style={[styles.button, styles.buttonPrimary]} onPress={onManage}>
-            <Text style={styles.buttonPrimaryText}>{manageLabel}</Text>
+
+          <Pressable style={[styles.button, styles.buttonSecondary]} onPress={onManage}>
+            <Text style={styles.buttonSecondaryText}>{manageLabel}</Text>
           </Pressable>
         </View>
       ) : null}
