@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: "Nunito_700Bold",
     fontSize: 20,
-    lineHeight: 16,
+    lineHeight: 20,
     width: "100%",
   },
   subtitle: {
