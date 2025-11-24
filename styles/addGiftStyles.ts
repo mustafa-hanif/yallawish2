@@ -71,7 +71,6 @@ export const styles = StyleSheet.create({
   },
   privacyStatus: {
     fontSize: 16,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     color: "#1C0335",
   },
@@ -87,8 +86,11 @@ export const styles = StyleSheet.create({
   iconButton: {
     borderWidth: 1,
     borderColor: "#1C0335",
-    borderRadius: 20,
-    padding: 8,
+    borderRadius: 80,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
   },
   addGiftSection: {
     paddingHorizontal: 16,

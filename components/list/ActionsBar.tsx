@@ -2,7 +2,7 @@ import { styles } from "@/styles/addGiftStyles";
 import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import React from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Image, Modal, Pressable, Text, View } from "react-native";
 
 type Props = {
   privacy: "shared" | "private" | string;
@@ -33,24 +33,24 @@ export const ActionsBar: React.FC<Props> = ({ privacy, loading, onFilterPress, a
     : isShared
       ? (isPublic ? "Anyone with the link" : "Only people you choose")
       : "Only you can see this";
-  const iconName = isShared ? (isPublic ? "globe-outline" : "people-outline") : "lock-closed-outline";
+  const iconName = isShared ? (isPublic ? require("@/assets/images/publicIcon.png") : require("@/assets/images/myPeopleIcon.png")) : require("@/assets/images/privateIcon.png");
 
   return (
     <View style={styles.actionsContainer}>
       <View style={styles.privacyContainer}>
-        <Ionicons name={iconName as any} size={24} color="#1C0335" />
+        <Image source={iconName} resizeMode="contain" style={{ width:24, height: 24 }}/>
         <View>
           <Text style={styles.privacyStatus}>{title}</Text>
           <Text style={styles.privacyDesc}>{desc}</Text>
         </View>
-        <Ionicons name="settings-outline" size={16} color="#1C0335" />
+        <Ionicons style={{alignSelf:'flex-end'}} name="settings-sharp" size={18} color="#007AFF" />
       </View>
       <View style={styles.actionButtons}>
         <Pressable style={styles.iconButton} onPress={() => setShowAddress(true)}>
-          <Ionicons name="location-outline" size={24} color="#1C0335" />
+          <Image source={require("@/assets/images/locationPin.png")} />
         </Pressable>
         <Pressable style={styles.iconButton} onPress={onFilterPress}>
-          <Ionicons name="filter-outline" size={24} color="#1C0335" />
+          <Image source={require("@/assets/images/filtersLines.png")} />
         </Pressable>
       </View>
 
