@@ -46,8 +46,8 @@ export const ActionsBar: React.FC<Props> = ({ privacy, loading, onFilterPress, a
         <Ionicons style={{alignSelf:'flex-end'}} name="settings-sharp" size={18} color="#007AFF" />
       </View>
       <View style={styles.actionButtons}>
-        <Pressable style={styles.iconButton} onPress={() => setShowAddress(true)}>
-          <Image source={require("@/assets/images/locationPin.png")} />
+        <Pressable style={{...styles.iconButton, ...(showAddress && {backgroundColor:'#3B0076'})}} onPress={() => setShowAddress(true)}>
+          <Image style={showAddress && { tintColor: 'white' }}  source={require("@/assets/images/locationPin.png")} />
         </Pressable>
         <Pressable style={styles.iconButton} onPress={onFilterPress}>
           <Image source={require("@/assets/images/filtersLines.png")} />
@@ -56,14 +56,14 @@ export const ActionsBar: React.FC<Props> = ({ privacy, loading, onFilterPress, a
 
       {/* Address Modal */}
       <Modal visible={showAddress} transparent animationType="fade" onRequestClose={() => setShowAddress(false)}>
-        <Pressable style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.35)", padding: 20, justifyContent: "center" }} onPress={() => setShowAddress(false)}>
-          <Pressable style={{ backgroundColor: "#FFFFFF", borderRadius: 16, padding: 16, gap: 16, shadowColor: "#000", shadowOpacity: 0.25, shadowRadius: 24, shadowOffset: { width: 0, height: 8 } }} onPress={(e) => e.stopPropagation()}>
-            <Text style={{ color: "#1C0335", fontSize: 18, lineHeight: 26, fontFamily: "Nunito_700Bold" }}>
+        <Pressable style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.35)", padding: 20, justifyContent: "center",  }} onPress={() => setShowAddress(false)}>
+          <Pressable style={{ borderWidth:1, borderColor:'#1C0335', backgroundColor: "#FFFFFF", borderRadius: 8, padding: 16, gap: 16, shadowColor: "#000", shadowOpacity: 0.25, shadowRadius: 24, shadowOffset: { width: 0, height: 8 } }} onPress={(e) => e.stopPropagation()}>
+            <Text style={{ color: "#1C0335", fontSize: 16, lineHeight: 26, fontFamily: "Nunito_700Bold" }}>
               {address || "No address provided"}
             </Text>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Pressable onPress={onCopy} disabled={!address} style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 12, paddingHorizontal: 16, borderRadius: 12, borderWidth: 1, borderColor: "#3B0076" }}>
-                <Text style={{ color: "#1C0335", fontFamily: "Nunito_700Bold", fontSize: 16 }}>{copied ? "Copied!" : "Copy address"}</Text>
+              <Pressable onPress={onCopy} disabled={!address} style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 9, paddingHorizontal: 15, borderRadius: 8, borderWidth: 1, borderColor: "#3B0076" }}>
+                <Text style={{ color: "#1C0335", fontFamily: "Nunito_700Bold", fontSize: 12 }}>{copied ? "Copied!" : "Copy address"}</Text>
                 <Ionicons name="copy-outline" size={20} color="#1C0335" />
               </Pressable>
             </View>
