@@ -410,7 +410,7 @@ export default function AddGift() {
   const shareCount = Array.isArray(shares) ? shares.length : undefined;
   const address = (list?.shippingAddress as string | undefined) ?? null;
   const ribbonSubtitle = subtitle || formattedEventDate || "";
-
+  const occasion = list?.occasion || ""
 
   const layout = isDesktop ? (
     <DesktopLayout
@@ -436,6 +436,7 @@ export default function AddGift() {
       loading={loading}
       address={address}
       lastUpdated={lastUpdatedLabel}
+      occasion={occasion}
     />
   ) : (
     <MobileLayout
@@ -455,6 +456,7 @@ export default function AddGift() {
       shareCount={shareCount}
       address={address}
       lastUpdated={lastUpdatedLabel}
+      occasion={occasion}
     />
   );
 
@@ -800,6 +802,7 @@ type MobileLayoutProps = {
   shareCount?: number;
   address?: string | null;
   lastUpdated: string;
+  occasion?: string
 };
 
 function MobileLayout({
@@ -819,6 +822,7 @@ function MobileLayout({
   shareCount,
   address,
   lastUpdated,
+  occasion
 }: MobileLayoutProps) {
   return (
     <>
@@ -827,7 +831,7 @@ function MobileLayout({
         <ListCover imageUri={coverUri} overlayText={overlayText} />
 
         <View style={styles.listInfoContainer}>
-          <RibbonHeader title={title} subtitle={subtitle} />
+          <RibbonHeader occasion={occasion} title={title} subtitle={subtitle} />
         </View>
 
         <ActionsBar
@@ -896,6 +900,7 @@ type DesktopLayoutProps = {
   loading: boolean;
   address?: string | null;
   lastUpdated: string;
+  occasion?: string
 };
 
 function DesktopLayout({
@@ -921,6 +926,7 @@ function DesktopLayout({
   loading,
   address,
   lastUpdated,
+  occasion
 }: DesktopLayoutProps) {
   const privacyDisplay = getPrivacyDisplay(privacy, loading, shareCount);
   const availabilityOptions: { value: "all" | "claimed" | "unclaimed"; label: string }[] = [
@@ -973,6 +979,7 @@ function DesktopLayout({
             </View>
             <View style={desktopStyles.ribbonContainer}>
               <RibbonHeader
+                occasion={occasion}
                 title={title}
                 subtitle={[ribbonSubtitle, daysToGo].filter(Boolean).join(" - ")}
               />
