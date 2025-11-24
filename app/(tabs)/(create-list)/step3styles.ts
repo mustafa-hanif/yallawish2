@@ -27,7 +27,6 @@ export const styles = StyleSheet.create({
   headerTitle: {
     color: "#FFFFFF",
     fontSize: 24,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     lineHeight: 28,
     letterSpacing: -1,
