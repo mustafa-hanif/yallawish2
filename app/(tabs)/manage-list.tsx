@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
+import { Alert, Image, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ManageList() {
@@ -53,15 +53,21 @@ export default function ManageList() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#330065" />
-      <LinearGradient colors={["#330065", "#6600CB"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" />
+      <LinearGradient 
+        colors={["#330065", "#45018ad7"]}
+        locations={[0, 0.7]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 2 }}
+        style={styles.header}
+      >
         <SafeAreaView edges={["top"]}>
           <View style={styles.headerContent}>
             <View style={styles.navigation}>
               <Pressable onPress={handleBack} style={styles.backButton}>
-                <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+                 <Image source={require("@/assets/images/backArrow.png")} />
               </Pressable>
-              <Text style={styles.headerTitle}>Manage List{list?.title ? `: ${list.title}` : ''}</Text>
+              <Text style={styles.headerTitle}>Manage List</Text>
             </View>
           </View>
         </SafeAreaView>
@@ -112,11 +118,16 @@ export default function ManageList() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
-  header: { paddingBottom: 16 },
-  headerContent: { paddingHorizontal: 16, paddingTop: 50 },
-  navigation: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  header: { minHeight: 108, paddingBottom: 16, },
+  headerContent: { paddingHorizontal: 16 },
+  navigation: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    paddingTop: 16,
+  },
   backButton: { padding: 4 },
-  headerTitle: { color: '#FFFFFF', fontSize: 24, fontWeight: '700', fontFamily: 'Nunito_700Bold', lineHeight: 28, letterSpacing: -1 },
+  headerTitle: { color: "#FFFFFF", fontSize: 24, fontFamily: "Nunito_700Bold", lineHeight: 28, letterSpacing: -1 },
   scrollContent: { paddingBottom: 40 },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 18 },
   rowLeft: { flexDirection: 'row', alignItems: 'center', gap: 16 },
