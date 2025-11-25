@@ -563,9 +563,25 @@ function MobileLayout({
             </OptionCard>
           </View>
         </ScrollView>
-      </View>
+        <View style={styles.footer}>
+         <Pressable
+          style={[
+            styles.button,
+            !selectedOption ? styles.buttonDisabled : styles.buttonPrimary,
+          ]}
+          onPress={handleContinue}
+          disabled={!selectedOption}
+        >
+          <Text style={styles.buttonPrimaryText}>Yalla! Let’s add gifts</Text>
+        </Pressable>
+        <Pressable style={[styles.button, styles.buttonSecondary]} onPress={handleBack}>
+          <Text style={styles.buttonSecondaryText}>Back</Text>
+        </Pressable>
 
-      <SafeAreaView edges={["bottom"]} style={styles.footer}>
+        </View>
+      </View>
+     
+      {/* <SafeAreaView edges={["bottom"]} style={styles.footer}>
         <Pressable
           style={[
             styles.button,
@@ -579,7 +595,7 @@ function MobileLayout({
         <Pressable style={[styles.button, styles.buttonSecondary]} onPress={handleBack}>
           <Text style={styles.buttonSecondaryText}>Back</Text>
         </Pressable>
-      </SafeAreaView>
+      </SafeAreaView> */}
 
       <Modal
         visible={shareVisible}

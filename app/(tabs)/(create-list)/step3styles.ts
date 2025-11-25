@@ -53,7 +53,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#DDD7E4",
   },
   contentScroll: {
-    paddingBottom: 200,
+    paddingBottom: 50,
   },
   content: {
     flex: 1,
@@ -161,18 +161,8 @@ export const styles = StyleSheet.create({
     marginTop: 4,
   },
   footer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 16,
+    paddingVertical: 16,
     gap: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#E5E5EA',
-    zIndex: 1000,
   },
   button: {
     borderRadius: 8,
