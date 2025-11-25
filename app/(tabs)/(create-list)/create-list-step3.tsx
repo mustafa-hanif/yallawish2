@@ -65,6 +65,7 @@ type SharedLayoutProps = {
   toggleGroup: (id: string) => void;
   toggleFriend: (id: string) => void;
   confirmShareAndClose: () => Promise<void>;
+  headerTitle?: string
 };
 
 type DesktopLayoutProps = SharedLayoutProps & {
@@ -455,6 +456,7 @@ function DesktopShareModal({
 }
 
 function MobileLayout({
+  headerTitle,
   selectedOption,
   setSelectedOption,
   requirePassword,
@@ -504,7 +506,7 @@ function MobileLayout({
               <Pressable onPress={handleBack} style={styles.backButton}>
                 <Image source={require("@/assets/images/backArrow.png")} />
               </Pressable>
-              <Text style={styles.headerTitle}>Create List</Text>
+              <Text style={styles.headerTitle}>{headerTitle}</Text>
             </View>
           </View>
         </SafeAreaView>
@@ -899,7 +901,7 @@ export default function CreateListStep3() {
   const { width } = useWindowDimensions();
   const isDesktop = Platform.OS === "web" && width >= DESKTOP_BREAKPOINT;
 
-  const { listId } = useLocalSearchParams<{ listId?: string }>();
+  const { listId, isEdit = '' } = useLocalSearchParams<{ listId?: string, isEdit?: string }>();
   const updatePrivacy = useMutation(api.products.updateListPrivacy);
 
   const existing = useQuery(
@@ -1035,6 +1037,7 @@ export default function CreateListStep3() {
       setShareVisible(false);
     }
   };
+  const headerTitle = (Boolean(isEdit)) ? "Edit Visibility" : "Create List";
 
   const filteredGroups = groups.filter((group) =>
     group.name.toLowerCase().includes(groupQuery.toLowerCase())
@@ -1057,6 +1060,7 @@ export default function CreateListStep3() {
   };
 
   const sharedProps: SharedLayoutProps = {
+    headerTitle,
     selectedOption,
     setSelectedOption,
     requirePassword,

@@ -78,7 +78,7 @@ export default function ManageList() {
         <Row icon={<Image source={require("@/assets/images/customize.png")} />} label="Customize" right={<Ionicons name="chevron-forward" size={20} color="#1C0335" />} onPress={() => listId && router.push({ pathname: '/create-list-step2', params: { listId: String(listId) } })} />
         <View style={styles.sectionSeparator} />
         <View style={styles.sectionSeparator} />
-        <Row icon={<Image source={require("@/assets/images/manageVisibility.png")} />} label="Manage Visibility" right={<Ionicons name="chevron-forward" size={20} color="#1C0335" />} onPress={() => listId && router.push({ pathname: '/create-list-step3', params: { listId: String(listId) } })} />
+        <Row icon={<Image source={require("@/assets/images/manageVisibility.png")} />} label="Manage Visibility" right={<Ionicons name="chevron-forward" size={20} color="#1C0335" />} onPress={() => listId && router.push({ pathname: '/create-list-step3', params: { listIdd: String(listId) , isEdit: String(true) } })} />
 
         <View style={styles.sectionSeparator} />
 
