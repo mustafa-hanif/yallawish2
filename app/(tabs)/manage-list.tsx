@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   radioInner: { width: 12, height: 12, borderRadius: 6, backgroundColor: '#3B0076' },
   deleteRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 18 },
   deleteLabel: { fontSize: 16, fontFamily: 'Nunito_700Bold', color: '#FF3B30' },
-  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#FFFFFF', padding: 16, borderTopWidth: 1, borderTopColor: '#D1D1D6' },
+  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#FFFFFF', padding: 16},
   footerButton: { borderRadius: 8, paddingVertical: 16, alignItems: 'center' },
   footerPrimary: { backgroundColor: '#28004E' },
   footerPrimaryText: { color: '#FFFFFF', fontSize: 16, fontFamily: 'Nunito_700Bold' }
