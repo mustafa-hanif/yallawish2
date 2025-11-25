@@ -93,8 +93,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   addGiftSection: {
-    // paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingBottom: 16,
     gap: 16,
   },
   addGiftTitle: { fontSize: 16, fontFamily: "Nunito_700Bold", color: "#1C0335" },
@@ -272,6 +271,15 @@ export const styles = StyleSheet.create({
   applyBtnText: { color: "#FFFFFF", fontSize: 16, fontFamily: "Nunito_700Bold" },
   // Spacer at bottom of scroll so content not hidden behind apply bar
   sortScrollSpacer: { height: 120 },
+  selectedFilterContainer:{
+     paddingVertical: 32,
+     paddingLeft: 16, 
+     flexDirection:'row',
+  },
+  filterItem: {  width: "50%" , flexDirection:'row', alignItems:'center' },
+  filterContent: { flexDirection:'row', alignItems:'center' , paddingHorizontal:8 },
+  filterTitle: { color:'#000000', fontFamily: "Nunito_700Bold",  fontSize: 14 },
+  filterValue: { textTransform:'capitalize', color:'#1C1C1CB2', fontFamily: "Nunito_700Bold",  fontSize: 14, marginLeft: 5  },
 });
 
 export const desktopStyles = StyleSheet.create({
@@ -1086,4 +1094,5 @@ export const desktopStyles = StyleSheet.create({
   modalSaveButtonTextDisabled: {
     color: "#8E8E93",
   },
+ 
 });

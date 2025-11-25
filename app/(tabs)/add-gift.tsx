@@ -457,6 +457,9 @@ export default function AddGift() {
       address={address}
       lastUpdated={lastUpdatedLabel}
       occasion={occasion}
+      tempSortBy={tempSortBy}
+      tempFilterClaimed={tempFilterClaimed}
+      tempFilterUnclaimed={tempFilterUnclaimed}
     />
   );
 
@@ -803,6 +806,9 @@ type MobileLayoutProps = {
   address?: string | null;
   lastUpdated: string;
   occasion?: string
+  tempSortBy?: string
+  tempFilterClaimed?: boolean
+  tempFilterUnclaimed?: boolean
 };
 
 function MobileLayout({
@@ -822,7 +828,10 @@ function MobileLayout({
   shareCount,
   address,
   lastUpdated,
-  occasion
+  occasion,
+  tempSortBy,
+  tempFilterClaimed,
+  tempFilterUnclaimed,
 }: MobileLayoutProps) {
   return (
     <>
@@ -842,6 +851,8 @@ function MobileLayout({
           shareCount={shareCount}
         />
 
+        <SelectedFilter tempSortBy={String(tempSortBy)} tempFilterClaimed={Boolean(tempFilterClaimed)} tempFilterUnclaimed={Boolean(tempFilterUnclaimed)}/>
+        
         <View style={styles.addGiftSection}>
           {displayedItems.length > 0 ? (
             <>
@@ -1288,6 +1299,46 @@ function DesktopGiftItemRow({ item, onPress, index }: DesktopGiftItemRowProps) {
 
         <View style={desktopStyles.progressTrack}>
           <View style={[desktopStyles.progressFill, { width: `${claimedPct}%` }]} />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+
+function SelectedFilter({ tempSortBy, tempFilterClaimed, tempFilterUnclaimed}:{
+  tempSortBy: string, tempFilterClaimed: boolean, tempFilterUnclaimed: boolean
+  }) {
+  let availabilityValue = 'All'
+  if(tempFilterClaimed === false && tempFilterUnclaimed === false){
+    availabilityValue = 'All'
+  }
+  else if(tempFilterClaimed === true && tempFilterUnclaimed === true){
+    availabilityValue = 'All'
+  }
+  else if(tempFilterClaimed === true && tempFilterUnclaimed === false){
+    availabilityValue = 'Claimed'
+  }
+
+  else if(tempFilterClaimed === false && tempFilterUnclaimed === true){
+    availabilityValue = 'UnClaimed'
+  }
+
+
+  return (
+    <View style={styles.selectedFilterContainer}>
+      <View style={styles.filterItem}>
+        <Image source={require("@/assets/images/sortIcon.png")}/>
+        <View style={styles.filterContent}>
+          <Text style={styles.filterTitle}>Sort:</Text>
+          <Text style={styles.filterValue}>{String(tempSortBy)}</Text>
+        </View>
+      </View>
+        <View style={styles.filterItem}>
+        <Image source={require("@/assets/images/availabilityIcon.png")}/>
+        <View style={styles.filterContent}>
+          <Text style={styles.filterTitle}>Availability:</Text>
+          <Text style={styles.filterValue}>{availabilityValue}</Text>
         </View>
       </View>
     </View>
