@@ -940,6 +940,8 @@ function MobileLayout({
               label="Event title *"
               value={formData.eventTitle}
               onChangeText={(text) => updateFormData("eventTitle", text)}
+              style={{ minHeight: 'auto' }}
+              
             />
 
             <View style={styles.fieldContainer}>
@@ -963,7 +965,7 @@ function MobileLayout({
               </View>
             </View>
 
-            <View style={styles.fieldContainer}>
+            <View style={{...styles.fieldContainer, ...{ minHeight: 'auto' }}}>
               <Pressable onPress={showDatePicker} style={styles.fieldWrapper}>
                 <Text
                   style={[
@@ -984,6 +986,7 @@ function MobileLayout({
             </View>
 
             <FormField
+              style={{ minHeight: 'auto' }}
               label="Shipping Address (optional)"
               value={formData.shippingAddress}
               onChangeText={(text) => updateFormData("shippingAddress", text)}
@@ -1396,7 +1399,7 @@ const styles = StyleSheet.create({
   bottomButtons: {
     paddingHorizontal: 16,
     gap: 16,
-    paddingBottom: 16,
+    paddingVertical: 16,
   },
   continueButton: {
     backgroundColor: "#3B0076",
