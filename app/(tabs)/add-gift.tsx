@@ -8,7 +8,7 @@ import { useAction, useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Linking from 'expo-linking';
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
   Easing,
@@ -846,11 +846,11 @@ function MobileLayout({
           {displayedItems.length > 0 ? (
             <>
               {displayedItems.map((item, index) => (
-                <>
+                <Fragment key={item._id}>
                   {index !== 0 ? <View style={styles.giftDivider} /> : null}
-                  <GiftItemCard key={item._id} item={item} />
+                  <GiftItemCard  item={item} />
                   
-                </>
+                </Fragment>
               ))}
               <Pressable style={styles.addMoreButton} onPress={onAddGift}>
                 <Ionicons name="add" size={20} color="#3B0076" />
