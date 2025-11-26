@@ -809,23 +809,30 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
               )
             }
           </View>
-
+          <View style={{height:4, backgroundColor:'#EFECF266'}} /> 
           {moreItems.length > 0 && (
-            <View style={mobileStyles.moreSection}>
-              <Text style={mobileStyles.moreTitle}>More items in this list</Text>
-              {moreItems.map((entry) => (
-                <Pressable key={String(entry._id)} onPress={() => onSelectItem(String(entry._id))} style={mobileStyles.moreCard}>
-                  <Image source={entry.image_url ? { uri: entry.image_url } : FALLBACK_IMAGE} style={mobileStyles.moreImage} resizeMode="cover" />
-                  <View style={mobileStyles.moreContent}>
-                    <Text style={mobileStyles.moreName}>{entry.name}</Text>
-                    {entry.price != null && <Text style={mobileStyles.morePrice}>{formatPrice(entry.price, "AED") ?? ""}</Text>}
-                    <Text style={mobileStyles.moreMeta}>
-                      {Number(entry.claimed ?? 0)} of {Number(entry.quantity ?? 1)} claimed
-                    </Text>
+            <View>
+              <View style={{paddingHorizontal:16, paddingVertical: 24}}>
+                <Text style={mobileStyles.moreTitle}>More items in this list</Text>
+              </View>
+              <ScrollView horizontal style={{paddingLeft:16, paddingVertical: 20}} contentContainerStyle={{gap:10}} >
+                {moreItems?.map((entry) => (
+                  <View key={String(entry._id)} style={mobileStyles.moreCard}>
+                    <Image source={entry.image_url ? { uri: entry.image_url } : FALLBACK_IMAGE} style={mobileStyles.moreImage} resizeMode="cover" />
+                    <View  style={mobileStyles.moreContent}>
+                      <Text numberOfLines={2} style={mobileStyles.moreName}>{entry.name}</Text>
+                      <View style={{flexDirection:'row' , justifyContent:'space-between'}}>
+                        {entry.price != null && <Text style={mobileStyles.morePrice}>{formatPrice(entry.price, "") ?? ""}</Text>}
+                        <Text style={mobileStyles.moreMeta}> {Number(entry.claimed ?? 0)} of {Number(entry.quantity ?? 1)} claimed </Text>
+                      </View>
+                    </View>
+                     <Pressable style={[mobileStyles.moreItemsCardBuyNowButton]} onPress={() => onSelectItem(String(entry._id))}>
+                      <Text style={mobileStyles.moreItemsCardBuyNowButtonText}>Buy Now</Text>
+                    </Pressable>
                   </View>
-                  <Ionicons name="chevron-forward" size={20} color={COLORS.purple} />
-                </Pressable>
-              ))}
+                ))}
+              </ScrollView>
+
               <Pressable style={mobileStyles.seeAll} onPress={onSeeAll}>
                 <Text style={mobileStyles.seeAllText}>See all</Text>
               </Pressable>
@@ -1710,52 +1717,66 @@ const mobileStyles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontFamily: "Nunito_500Medium",
   },
-  moreSection: {
-    marginHorizontal: 16,
-    marginTop: 28,
-    gap: 14,
-  },
+
   moreTitle: {
     color: COLORS.textPrimary,
     fontFamily: "Nunito_700Bold",
-    fontSize: 18,
+    fontSize: 17.49,
   },
   moreCard: {
-    flexDirection: "row",
-    backgroundColor: COLORS.background,
-    borderRadius: 16,
-    padding: 14,
-    alignItems: "center",
-    gap: 14,
-    shadowColor: "#15072C",
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 8 },
+
+     backgroundColor: "#ffffff",
+      borderRadius: 8.16,
+      padding: 8,
+      alignItems: "center",
+      gap: 14,
+      // iOS shadow
+      shadowColor: "#000000",
+      shadowOpacity: 0.1,  
+      shadowRadius: 19.73,
+      shadowOffset: { width: 0, height: 0 },
+
+      // Android shadow
+      elevation: 8,       
+      width: 175,
   },
   moreImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 14,
+    width: '100%',
+    height: 88.07,
+    borderRadius: 8.16,
     backgroundColor: COLORS.surface,
   },
   moreContent: {
     flex: 1,
-    gap: 4,
+    gap: 8.16,
   },
   moreName: {
     color: COLORS.textPrimary,
-    fontFamily: "Nunito_700Bold",
-    fontSize: 16,
+    fontFamily: "Nunito_400Regular",
+    fontSize: 14.08,
   },
   morePrice: {
-    color: COLORS.accent,
+    color: '#1C0335',
     fontFamily: "Nunito_700Bold",
-    fontSize: 15,
+    fontSize: 11.37,
+  },
+  moreItemsCardBuyNowButton: {
+    width:'100%',
+    backgroundColor:'#007AFF',
+    borderRadius: 5.1,
+    height: 43,
+    justifyContent:'center',
+    alignItems:'center'
+  },
+  moreItemsCardBuyNowButtonText:{
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16.32,
+    color:'#ffff'
   },
   moreMeta: {
     color: COLORS.textSecondary,
-    fontFamily: "Nunito_500Medium",
-    fontSize: 12,
+    fontFamily: "Nunito_400Regular",
+    fontSize: 10,
   },
   seeAll: {
     alignSelf: "center",
