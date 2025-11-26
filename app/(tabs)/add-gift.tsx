@@ -850,8 +850,9 @@ function MobileLayout({
           address={address}
           shareCount={shareCount}
         />
-
-        <SelectedFilter tempSortBy={String(tempSortBy)} tempFilterClaimed={Boolean(tempFilterClaimed)} tempFilterUnclaimed={Boolean(tempFilterUnclaimed)}/>
+        {displayedItems.length > 0 ? (
+          <SelectedFilter tempSortBy={String(tempSortBy)} tempFilterClaimed={Boolean(tempFilterClaimed)} tempFilterUnclaimed={Boolean(tempFilterUnclaimed)}/>
+        ) : null}
         
         <View style={styles.addGiftSection}>
           {displayedItems.length > 0 ? (
@@ -859,7 +860,7 @@ function MobileLayout({
               {displayedItems.map((item, index) => (
                 <Fragment key={item._id}>
                   {index !== 0 ? <View style={styles.giftDivider} /> : null}
-                  <GiftItemCard  item={item} />
+                  <GiftItemCard title={title} item={item} />
                   
                 </Fragment>
               ))}
@@ -869,16 +870,13 @@ function MobileLayout({
               </Pressable>
             </>
           ) : (
-            <>
-              <Text style={styles.addGiftTitle}>Add your first gift item</Text>
+            <View style={styles.addYourFirstGift}>
+              <Text style={styles.addGiftTitle}>  Add your first gift item</Text>
               <Pressable style={styles.addGiftButton} onPress={onAddGift}>
                 <Ionicons name="add" size={24} color="#3B0076" />
                 <Text style={styles.addGiftButtonText}>Add a gift</Text>
               </Pressable>
-              {listId && (
-                <Text style={{ textAlign: "center", color: "#8E8E93" }}>Working on list: {listId}</Text>
-              )}
-            </>
+            </View>
           )}
         </View>
 

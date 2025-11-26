@@ -12,6 +12,7 @@ export type GiftItem = {
   price?: string | number | null;
   buy_url?: string | null;
   description?: string | null;
+  title?: string | null
 };
 
 type Props = {
@@ -19,13 +20,13 @@ type Props = {
   onPress?: (item: GiftItem) => void;
 };
 
-export const GiftItemCard: React.FC<Props> = ({ item, onPress }) => {
+export const GiftItemCard: React.FC<Props> = ({ title, item, onPress }) => {
   const { listId } = useLocalSearchParams<{ listId?: string }>();
   const pct = Math.min(100, Math.max(0, (item.claimed / Math.max(1, item.quantity)) * 100));
   const truncate = (text: string, len: number) => (text.length > len ? text.slice(0, len - 1) + "…" : text);
   const goDetail = () => {
     if (onPress) return onPress(item);
-    router.push({ pathname: "/gift-detail", params: { itemId: String(item._id), ...(listId ? { listId: String(listId) } : {}) } });
+    router.push({ pathname: "/gift-detail", params: { itemId: String(item._id), ...(listId ? { listId: String(listId) } : {}), ...(title ? { eventTitle: String(title) } : {}) } });
   };
   const isSoldOut = Number(item.claimed ?? 0) >= Number(item.quantity ?? 1);
   return (
