@@ -61,8 +61,6 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#AEAEB2",
   },
   privacyContainer: {
     flexDirection: "row",
@@ -92,6 +90,7 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  sectionSeparator: { height: 0.5 , backgroundColor: '#AEAEB2', marginHorizontal: 16 },
   addGiftSection: {
     paddingBottom: 16,
     gap: 16,
@@ -238,6 +237,7 @@ export const styles = StyleSheet.create({
   previewImage: { width: 120, height: 120, borderRadius: 12, marginTop: 8, backgroundColor: "#E1DEE6" },
   addMoreButton: { marginTop: 8, alignSelf: "center", flexDirection: "row", gap: 6, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24, borderWidth: 1, borderColor: "#3B0076", backgroundColor: "#FFFFFF" },
   addMoreButtonText: { fontSize: 14, fontFamily: "Nunito_700Bold", color: "#3B0076" },
+  addYourFirstGift: { paddingTop:24, paddingHorizontal: 16, rowGap: 20 }, 
   // Legacy overlay (unused now) kept for reference
   browserOverlay: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "#FFFFFF", elevation: 20 },
   browserHeader: { height: 56, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", gap: 12, borderBottomWidth: 1, borderBottomColor: "#E5E5EA", backgroundColor: "#F8F8FA" },
@@ -272,8 +272,8 @@ export const styles = StyleSheet.create({
   // Spacer at bottom of scroll so content not hidden behind apply bar
   sortScrollSpacer: { height: 120 },
   selectedFilterContainer:{
-     paddingVertical: 32,
-     paddingLeft: 16, 
+     paddingVertical: 16,
+     paddingLeft: 15, 
      flexDirection:'row',
   },
   filterItem: {  width: "50%" , flexDirection:'row', alignItems:'center' },

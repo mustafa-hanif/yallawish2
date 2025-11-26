@@ -36,6 +36,7 @@ export const ActionsBar: React.FC<Props> = ({ privacy, loading, onFilterPress, a
   const iconName = isShared ? (isPublic ? require("@/assets/images/publicIcon.png") : require("@/assets/images/myPeopleIcon.png")) : require("@/assets/images/privateIcon.png");
 
   return (
+    <>
     <View style={styles.actionsContainer}>
       <View style={styles.privacyContainer}>
         <Image source={iconName} resizeMode="contain" style={{ width:24, height: 24 }}/>
@@ -53,7 +54,7 @@ export const ActionsBar: React.FC<Props> = ({ privacy, loading, onFilterPress, a
           <Image source={require("@/assets/images/filtersLines.png")} />
         </Pressable>
       </View>
-
+      
       {/* Address Modal */}
       <Modal visible={showAddress} transparent animationType="fade" onRequestClose={() => setShowAddress(false)}>
         <Pressable style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.35)", padding: 20, justifyContent: "center",  }} onPress={() => setShowAddress(false)}>
@@ -71,5 +72,7 @@ export const ActionsBar: React.FC<Props> = ({ privacy, loading, onFilterPress, a
         </Pressable>
       </Modal>
     </View>
+    <View style={styles.sectionSeparator} />
+    </>
   );
 };
