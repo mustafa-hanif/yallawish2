@@ -12,10 +12,11 @@ type Props = PropsWithChildren<{
   contentPadding?: number;
   gap?: number;
   headerHeight?: number;
-  contentContainerStyle?: StyleSheet;
+  contentStyle?: StyleSheet;
+  scrollContainerStyle?: StyleSheet;
 }>;
 
-export default function ParallaxScrollView({ children, headerImage, headerBackgroundColor, contentPadding = 32, gap = 16, headerHeight = 250, contentContainerStyle }: Props) {
+export default function ParallaxScrollView({ children, headerImage, headerBackgroundColor, contentPadding = 32, gap = 16, headerHeight = 250, scrollContainerStyle, contentStyle }: Props) {
   const HEADER_HEIGHT = headerHeight;
 
   const colorScheme = useColorScheme() ?? "light";
@@ -37,9 +38,9 @@ export default function ParallaxScrollView({ children, headerImage, headerBackgr
 
   return (
     <ThemedView style={styles.container}>
-      <Animated.ScrollView ref={scrollRef} scrollEventThrottle={16} scrollIndicatorInsets={{ bottom }} contentContainerStyle={{ paddingBottom: bottom, ...contentContainerStyle }}>
+      <Animated.ScrollView ref={scrollRef} scrollEventThrottle={16} scrollIndicatorInsets={{ bottom }} contentContainerStyle={{ paddingBottom: bottom, ...scrollContainerStyle }}>
         <Animated.View style={[styles.header, headerBackgroundColor ? { backgroundColor: headerBackgroundColor[colorScheme] } : {}, { height: HEADER_HEIGHT }, headerAnimatedStyle]}>{headerImage}</Animated.View>
-        <ThemedView style={{ ...styles.content, padding: contentPadding, gap }}>{children}</ThemedView>
+        <ThemedView style={{ ...styles.content, padding: contentPadding, gap, ...contentStyle }}>{children}</ThemedView>
       </Animated.ScrollView>
     </ThemedView>
   );
