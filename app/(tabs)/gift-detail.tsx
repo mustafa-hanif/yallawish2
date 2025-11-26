@@ -1,5 +1,6 @@
 import type { GiftItem as GiftItemType } from "@/components/list/GiftItemCard";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
+import { occasionObj } from "@/constants/occasion";
 import { api } from "@/convex/_generated/api";
 import { styles as listStyles } from "@/styles/addGiftStyles";
 import { useAuth, useUser } from "@clerk/clerk-expo";
@@ -1309,7 +1310,7 @@ const CopyToMyListSheet: React.FC<CopyToMyListSheetProps> = ({
             <View style={{ alignSelf: 'center', width: 44, height: 5, borderRadius: 3, backgroundColor: '#E2DAF0', marginBottom: 12 }} />
           </Pressable>
           <Text style={{ color: '#1C0335', fontSize: 24, fontFamily: 'Nunito_700Bold' }}>Copy Item to your list</Text>
-          <Text style={{ color: '#6B5E7E', marginTop: 6 }}>Choose a list to add this item to</Text>
+          <Text style={{ color: '#1C0335', marginTop: 6 , fontFamily: 'Nunito_400Regular'}}>Choose a list to add this item to</Text>
 
           <ScrollView style={sheetStyles.list} contentContainerStyle={{ paddingBottom: 16 }}>
             {loading ? (
@@ -1322,16 +1323,19 @@ const CopyToMyListSheet: React.FC<CopyToMyListSheetProps> = ({
               </View>
             ) : (
               lists.map((entry) => {
+                const occasion =  entry?.occasion ? occasionObj[String(entry?.occasion)] : occasionObj["birthday"]
                 const id = String(entry._id);
                 const checked = selected.includes(id);
                 return (
                   <Pressable
                     key={id}
                     onPress={() => toggle(id)}
-                    style={sheetStyles.listItem}
+                    style={{...sheetStyles.listItem, borderLeftWidth:4, borderColor: occasion?.borderColor}}
                   >
                     <View style={sheetStyles.listLeft}>
-                      <View style={sheetStyles.listAccent} />
+                      <View style={sharedStyles.occasionIconContainer}>
+                        <Image source={occasion.mobileIcon}/>
+                      </View>
                       <Text style={sheetStyles.listTitle}>{entry.title || "Untitled list"}</Text>
                     </View>
                     <View
@@ -1396,6 +1400,9 @@ const sharedStyles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.textSecondary,
     textAlign: "center",
+  },
+  occasionIconContainer: {
+    paddingHorizontal: 16,
   },
 }) as Record<string, any>;
 
@@ -2376,15 +2383,14 @@ const sheetStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: "#EEE7FF",
+    height: 56
   },
   listLeft: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
   },
+
   listAccent: {
     width: 6,
     height: 32,
@@ -2399,9 +2405,9 @@ const sheetStyles = StyleSheet.create({
   checkbox: {
     width: 24,
     height: 24,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: "#CFC7DD",
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: "#AEAEB2",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -2418,10 +2424,11 @@ const sheetStyles = StyleSheet.create({
   },
   actions: {
     gap: 12,
+    paddingTop: 16
   },
   primary: {
     height: 56,
-    borderRadius: 14,
+    borderRadius: 8,
     backgroundColor: COLORS.purple,
     alignItems: "center",
     justifyContent: "center",
@@ -2436,7 +2443,7 @@ const sheetStyles = StyleSheet.create({
   },
   secondary: {
     height: 56,
-    borderRadius: 14,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: COLORS.purple,
     alignItems: "center",
