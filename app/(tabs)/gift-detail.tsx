@@ -1,25 +1,25 @@
 import type { GiftItem as GiftItemType } from "@/components/list/GiftItemCard";
+import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { api } from "@/convex/_generated/api";
 import { styles as listStyles } from "@/styles/addGiftStyles";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
-import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { Redirect, router, useLocalSearchParams, usePathname } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Linking,
+  Image, Linking,
   Modal,
   Platform,
   Pressable,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Switch,
   Text,
   TextInput,
   View,
-  useWindowDimensions,
+  useWindowDimensions
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -37,7 +37,7 @@ const COLORS = {
   accent: "#F2994A",
   textPrimary: "#1C0335",
   textSecondary: "#6B5E7E",
-  border: "#E5E0EC",
+  border: "#AEAEB2",
 };
 
 function formatPrice(price: unknown, currency?: string): string | null {
@@ -89,10 +89,11 @@ function buildReturnTo(pathname: string, params: Record<string, string | undefin
 }
 
 export default function GiftDetail() {
-  const { itemId, listId, action } = useLocalSearchParams<{
+  const { itemId, listId, action, eventTitle } = useLocalSearchParams<{
     itemId?: string;
     listId?: string;
     action?: string;
+    eventTitle?: string
   }>();
   const { width } = useWindowDimensions();
   const isDesktop = Platform.OS === "web" && width >= DESKTOP_BREAKPOINT;
@@ -478,6 +479,7 @@ export default function GiftDetail() {
       onSeeAll={onSeeAll}
       available={available}
       submitting={submitting}
+      eventTitle={eventTitle}
     />
   );
 
@@ -606,6 +608,7 @@ type MobileLayoutProps = {
   onSeeAll: () => void;
   available: number;
   submitting: boolean;
+  eventTitle?: string
 };
 
 const MobileLayout: React.FC<MobileLayoutProps> = ({
@@ -640,259 +643,194 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
   onSeeAll,
   available,
   submitting,
+  eventTitle
 }) => {
   const remainingChars = Math.max(0, NOTE_LIMIT - note.length);
 
   return (
     <View style={mobileStyles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.deepPurple} />
-      <View style={mobileStyles.header}>
-        <Pressable onPress={onBack} style={mobileStyles.backButton}>
-          <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
-        </Pressable>
-        <Text numberOfLines={1} style={mobileStyles.headerTitle}>
-          {item.name}
-        </Text>
-      </View>
+        <LinearGradient
+          colors={["#330065", "#45018ad7"]}
+          locations={[0, 0.7]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 2 }}
+          style={mobileStyles.header}
+        >
+          <SafeAreaView edges={["top"]}>
+            <View style={mobileStyles.headerContent}>
+              <View style={mobileStyles.navigation}>
+                <Pressable onPress={onBack} style={mobileStyles.backButton}>
+                  <Image source={require("@/assets/images/backArrow.png")} />
+                </Pressable>
+                <Text style={mobileStyles.headerTitle} numberOfLines={1}>{eventTitle || item.name}</Text>
+              </View>
+            </View>
+          </SafeAreaView>
+        </LinearGradient>
 
-      <ScrollView contentContainerStyle={mobileStyles.scrollContent}>
-        <View style={mobileStyles.productCard}>
-          <Image
-            source={item.image_url ? { uri: item.image_url } : FALLBACK_IMAGE}
-            style={mobileStyles.productImage}
-            contentFit="cover"
-          />
-          <Text style={mobileStyles.productTitle}>{item.name}</Text>
-          {price && <Text style={mobileStyles.productPrice}>{price}</Text>}
-          <Text style={mobileStyles.productMeta}>
-            Quantity: {" "}
-            <Text style={mobileStyles.productMetaStrong}>
-              {String(item.quantity ?? 1).padStart(2, "0")}
+        <ParallaxScrollView 
+          headerHeight={211}
+          contentPadding={0}
+          gap={0}
+          scrollContainerStyle={mobileStyles.scrollContent}
+          contentStyle={mobileStyles.scrollBackgroundColor}
+          headerImage={<Image source={item.image_url ? { uri: item.image_url } : FALLBACK_IMAGE} style={mobileStyles.productImage} resizeMode="cover" />
+          
+        }>
+          <View style={mobileStyles.productCard}>
+            <Text style={mobileStyles.productTitle}>{item.name}</Text>
+            {price && <Text style={mobileStyles.productPrice}>{price}</Text>}
+
+            <Text style={mobileStyles.productMeta}>
+              Quantity: <Text>{String(item.quantity ?? 1).padStart(2, "0")}</Text>
             </Text>
-          </Text>
-          {item.description && (
-            <Text style={mobileStyles.productDescription}>{item.description}</Text>
-          )}
+            {item.description && (
+              <Text numberOfLines={2} style={mobileStyles.productDescription}>
+                Description: {item.description}
+              </Text>
+            )}
 
-          <View style={mobileStyles.actionRow}>
-            <Pressable style={mobileStyles.secondaryButton} onPress={onIWantThisToo}>
-              <Text style={mobileStyles.secondaryButtonText}>I want this too</Text>
-            </Pressable>
-            <Pressable
-              style={[
-                mobileStyles.primaryButton,
-                !buyUrl && mobileStyles.primaryButtonDisabled,
-              ]}
-              onPress={onBuyNow}
-              disabled={!buyUrl}
-            >
-              <Text style={mobileStyles.primaryButtonText}>Buy now</Text>
-            </Pressable>
+            <View style={mobileStyles.actionRow}>
+              <Pressable style={mobileStyles.secondaryButton} onPress={onIWantThisToo}>
+                <Text style={mobileStyles.secondaryButtonText}>I want this too</Text>
+              </Pressable>
+              <Pressable style={[mobileStyles.primaryButton, !buyUrl && mobileStyles.primaryButtonDisabled]} onPress={onBuyNow} disabled={!buyUrl}>
+                <Text style={mobileStyles.primaryButtonText}>Buy now</Text>
+              </Pressable>
+            </View>
+            {available <= 0 && <Text style={mobileStyles.notice}>This gift has already been fully claimed.</Text>}
           </View>
-          {available <= 0 && (
-            <Text style={mobileStyles.notice}>
-              This gift has already been fully claimed.
-            </Text>
-          )}
-        </View>
-
-        <View style={mobileStyles.sectionCard}>
-          <View style={mobileStyles.switchRow}>
-            <Text style={mobileStyles.sectionTitle}>Mark as purchased</Text>
-            <Switch
-              value={marked}
-              onValueChange={onToggleMarked}
-              trackColor={{ false: "#D7CEE9", true: "#7C3AED" }}
-              thumbColor="#FFFFFF"
-            />
-          </View>
-
-          {marked && (
-            <>
-              <Text style={mobileStyles.sectionLabel}>I bought</Text>
-              <View style={mobileStyles.stepper}>
-                <Pressable
-                  onPress={dec}
-                  disabled={qty <= 1}
-                  style={[
-                    mobileStyles.stepperButton,
-                    qty <= 1 && mobileStyles.stepperButtonDisabled,
-                  ]}
-                >
-                  <Text style={mobileStyles.stepperButtonText}>−</Text>
-                </Pressable>
-                <Text style={mobileStyles.stepperValue}>
-                  {String(qty).padStart(2, "0")}
-                </Text>
-                <Pressable
-                  onPress={inc}
-                  disabled={qty >= maxQuantity}
-                  style={[
-                    mobileStyles.stepperButton,
-                    qty >= maxQuantity && mobileStyles.stepperButtonDisabled,
-                  ]}
-                >
-                  <Text style={mobileStyles.stepperButtonText}>+</Text>
-                </Pressable>
+          <View style={mobileStyles.section}>
+            <View style={{...mobileStyles.sectionCard, ...(!marked && { paddingBottom : 0 })}}>
+              <View style={mobileStyles.didYouBuyThisGiftContainer}>
+                <Text style={mobileStyles.didYouBuyThisGiftText}>Did you buy this gift?</Text>
               </View>
-
-              <Text style={mobileStyles.sectionLabel}>Delivered to</Text>
-              <View style={mobileStyles.radioGroup}>
-                <Pressable
-                  onPress={() => setDeliveredTo("recipient")}
-                  style={mobileStyles.radioRow}
-                >
-                  <View
-                    style={[
-                      mobileStyles.radioOuter,
-                      deliveredTo === "recipient" && mobileStyles.radioOuterActive,
-                    ]}
-                  >
-                    {deliveredTo === "recipient" && <View style={mobileStyles.radioInner} />}
+              {!marked && <View style={mobileStyles.didYouBuyThisGiftSeparator} />}
+              
+              <View style={mobileStyles.switchRow}>
+                <Text style={mobileStyles.sectionTitle}>Mark as purchased</Text>
+                <Switch value={marked} onValueChange={onToggleMarked} trackColor={{ false: "#D7CEE9", true: "#7C3AED" }} thumbColor="#FFFFFF" />
+              </View>
+              {marked && <View style={mobileStyles.didYouBuyThisGiftSeparator} />}
+              {marked && (
+                <View style={mobileStyles.markAsPurchasedSection}>
+                  <Text style={mobileStyles.sectionLabel}>I bought</Text>
+                  <View style={mobileStyles.stepper}>
+                    <Pressable onPress={dec} disabled={qty <= 1} style={[mobileStyles.stepperButton, qty <= 1 && mobileStyles.stepperButtonDisabled]}>
+                      <Text style={mobileStyles.stepperButtonText}>−</Text>
+                    </Pressable>
+                    <Text style={mobileStyles.stepperValue}>{String(qty).padStart(2, "0")}</Text>
+                    <Pressable onPress={inc} disabled={qty >= maxQuantity} style={[mobileStyles.stepperButton, qty >= maxQuantity && mobileStyles.stepperButtonDisabled]}>
+                      <Text style={mobileStyles.stepperButtonText}>+</Text>
+                    </Pressable>
                   </View>
-                  <Text style={mobileStyles.radioLabel}>{ownerName}</Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => setDeliveredTo("me")}
-                  style={mobileStyles.radioRow}
-                >
-                  <View
-                    style={[
-                      mobileStyles.radioOuter,
-                      deliveredTo === "me" && mobileStyles.radioOuterActive,
-                    ]}
-                  >
-                    {deliveredTo === "me" && <View style={mobileStyles.radioInner} />}
+
+                  <Text style={mobileStyles.sectionLabel}>Delivered to</Text>
+                  <View style={mobileStyles.radioGroup}>
+                    <Pressable onPress={() => setDeliveredTo("recipient")} style={mobileStyles.radioRow}>
+                      <Text style={mobileStyles.radioLabel}>{ownerName}</Text>
+                      <View style={[mobileStyles.radioOuter, deliveredTo === "recipient" && mobileStyles.radioOuterActive]}>
+                        {deliveredTo === "recipient" && <View style={mobileStyles.radioInnerActive} />}
+                        </View>
+                    </Pressable>
+                    <Pressable onPress={() => setDeliveredTo("me")} style={mobileStyles.radioRow}>
+                      <Text style={mobileStyles.radioLabel}>My home</Text>
+                      <View style={[mobileStyles.radioOuter, deliveredTo === "me" && mobileStyles.radioOuterActive]}>{deliveredTo === "me" && <View style={mobileStyles.radioInnerActive} />}</View>
+                    </Pressable>
                   </View>
-                  <Text style={mobileStyles.radioLabel}>My home</Text>
-                </Pressable>
-              </View>
 
-              <Text style={mobileStyles.sectionLabel}>Add a note</Text>
-              <View style={mobileStyles.noteField}>
-                <TextInput
-                  value={note}
-                  onChangeText={setNote}
-                  placeholder="Here’s a little gift to make your day better! 🎉"
-                  placeholderTextColor="#B1A6C4"
-                  multiline
-                  style={mobileStyles.noteInput}
-                />
-                <Text style={mobileStyles.charCounter}>
-                  {remainingChars}/{NOTE_LIMIT}
-                </Text>
-              </View>
-
-              <Text style={mobileStyles.sectionLabel}>Where did you buy this?</Text>
-              <View style={mobileStyles.storeRow}>
-                <Pressable
-                  onPress={() => setStoreOption("suggested")}
-                  disabled={!buyUrl}
-                  style={[
-                    mobileStyles.storeOption,
-                    storeOption === "suggested" && mobileStyles.storeOptionActive,
-                    !buyUrl && mobileStyles.storeOptionDisabled,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      mobileStyles.storeOptionText,
-                      storeOption === "suggested" && mobileStyles.storeOptionTextActive,
-                    ]}
-                  >
-                    {storeDisplayName.toUpperCase()}
-                  </Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => {
-                    setStoreOption("custom");
-                    if (!storeName || storeName === storeDisplayName) {
-                      setStoreName("");
-                    }
-                  }}
-                  style={[
-                    mobileStyles.storeOption,
-                    storeOption === "custom" && mobileStyles.storeOptionActive,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      mobileStyles.storeOptionText,
-                      storeOption === "custom" && mobileStyles.storeOptionTextActive,
-                    ]}
-                  >
-                    Another store
-                  </Text>
-                </Pressable>
-              </View>
-
-              {storeOption === "custom" && (
-                <View style={mobileStyles.inputField}>
-                  <Text style={mobileStyles.inputLabel}>Store name</Text>
-                  <View style={mobileStyles.inputWrapper}>
-                    <TextInput
-                      value={storeName}
-                      onChangeText={setStoreName}
-                      placeholder="Macy’s"
-                      placeholderTextColor="#B1A6C4"
-                      style={mobileStyles.textInput}
-                    />
+                  <Text style={mobileStyles.sectionLabel}>Add a note</Text>
+                  <View style={mobileStyles.noteField}>
+                    <TextInput value={note} onChangeText={setNote} placeholder="Here’s a little gift to make your day better! 🎉" placeholderTextColor="#B1A6C4" multiline style={mobileStyles.noteInput} />
+                    <Text style={mobileStyles.charCounter}>
+                      {remainingChars}/{NOTE_LIMIT}
+                    </Text>
                   </View>
+
+                  <Text style={{...mobileStyles.sectionLabel, ...mobileStyles.didYouBuyThisGiftText}}>Where did you buy this?</Text>
+                  <View style={mobileStyles.storeRow}>
+                    <Pressable onPress={() => setStoreOption("suggested")} disabled={!buyUrl} style={[mobileStyles.storeOption, !buyUrl && mobileStyles.storeOptionDisabled]}>
+                      <View style={[mobileStyles.radioOuter,storeOption === "suggested" && mobileStyles.radioOuterActive]}>{storeOption === "suggested" && <View style={mobileStyles.radioInnerActive} />}</View>
+                      <Text style={[mobileStyles.storeOptionText, storeOption === "suggested" && mobileStyles.storeOptionTextActive]}>{storeDisplayName.toUpperCase()}</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => {
+                        setStoreOption("custom");
+                        if (!storeName || storeName === storeDisplayName) {
+                          setStoreName("");
+                        }
+                      }}
+                      style={[mobileStyles.storeOption, storeOption === "custom"]}
+                    >
+                      <View style={[mobileStyles.radioOuter, storeOption === "custom" && mobileStyles.radioOuterActive]}>{storeOption === "custom" && <View style={mobileStyles.radioInnerActive} />}</View>
+                      <Text style={[mobileStyles.storeOptionText, storeOption === "custom" && mobileStyles.storeOptionTextActive]}>Another store</Text>
+                    </Pressable>
+                  </View>
+
+
                 </View>
               )}
-
-              <View style={mobileStyles.inputField}>
-                <Text style={mobileStyles.inputLabel}>Order number (optional)</Text>
-                <View style={mobileStyles.inputWrapper}>
-                  <TextInput
-                    value={orderNumber}
-                    onChangeText={setOrderNumber}
-                    placeholder="#123456789"
-                    placeholderTextColor="#B1A6C4"
-                    style={mobileStyles.textInput}
-                  />
-                </View>
-              </View>
-            </>
-          )}
-        </View>
-
-        {moreItems.length > 0 && (
-          <View style={mobileStyles.moreSection}>
-            <Text style={mobileStyles.moreTitle}>More items in this list</Text>
-            {moreItems.map((entry) => (
-              <Pressable
-                key={String(entry._id)}
-                onPress={() => onSelectItem(String(entry._id))}
-                style={mobileStyles.moreCard}
-              >
-                <Image
-                  source={entry.image_url ? { uri: entry.image_url } : FALLBACK_IMAGE}
-                  style={mobileStyles.moreImage}
-                  contentFit="cover"
-                />
-                <View style={mobileStyles.moreContent}>
-                  <Text style={mobileStyles.moreName}>{entry.name}</Text>
-                  {entry.price != null && (
-                    <Text style={mobileStyles.morePrice}>
-                      {formatPrice(entry.price, "AED") ?? ""}
-                    </Text>
+            </View>
+            {
+              marked && (
+                <>
+                  {storeOption === "custom" && (
+                    <View style={mobileStyles.inputField}>
+                      <Text style={mobileStyles.inputLabel}>Store Name</Text>
+                      <View style={mobileStyles.inputWrapper}>
+                        <TextInput
+                          value={storeName}
+                          onChangeText={setStoreName}
+                          placeholder="Macy’s"
+                          placeholderTextColor="#1C03351A"
+                          style={mobileStyles.textInput}
+                        />
+                      </View>
+                    </View>
                   )}
-                  <Text style={mobileStyles.moreMeta}>
-                    {Number(entry.claimed ?? 0)} of {Number(entry.quantity ?? 1)} claimed
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color={COLORS.purple} />
-              </Pressable>
-            ))}
-            <Pressable style={mobileStyles.seeAll} onPress={onSeeAll}>
-              <Text style={mobileStyles.seeAllText}>See all</Text>
-            </Pressable>
-          </View>
-        )}
 
-        <View style={{ height: 16 }} />
-      </ScrollView>
+                  <View style={mobileStyles.inputField}>
+                    <Text style={mobileStyles.inputLabel}>Order Number (if known)</Text>
+                    <View style={mobileStyles.inputWrapper}>
+                      <TextInput
+                        value={orderNumber}
+                        onChangeText={setOrderNumber}
+                        placeholder="#123456789"
+                        placeholderTextColor="#1C03351A"
+                        style={mobileStyles.textInput}
+                      />
+                    </View>
+                  </View>
+                </>
+              )
+            }
+          </View>
+
+          {moreItems.length > 0 && (
+            <View style={mobileStyles.moreSection}>
+              <Text style={mobileStyles.moreTitle}>More items in this list</Text>
+              {moreItems.map((entry) => (
+                <Pressable key={String(entry._id)} onPress={() => onSelectItem(String(entry._id))} style={mobileStyles.moreCard}>
+                  <Image source={entry.image_url ? { uri: entry.image_url } : FALLBACK_IMAGE} style={mobileStyles.moreImage} resizeMode="cover" />
+                  <View style={mobileStyles.moreContent}>
+                    <Text style={mobileStyles.moreName}>{entry.name}</Text>
+                    {entry.price != null && <Text style={mobileStyles.morePrice}>{formatPrice(entry.price, "AED") ?? ""}</Text>}
+                    <Text style={mobileStyles.moreMeta}>
+                      {Number(entry.claimed ?? 0)} of {Number(entry.quantity ?? 1)} claimed
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color={COLORS.purple} />
+                </Pressable>
+              ))}
+              <Pressable style={mobileStyles.seeAll} onPress={onSeeAll}>
+                <Text style={mobileStyles.seeAllText}>See all</Text>
+              </Pressable>
+            </View>
+          )}
+
+          <View style={{ height: 16 }} />
+        </ParallaxScrollView>
+
 
       <View style={mobileStyles.submitBar}>
         <Pressable
@@ -1010,7 +948,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
                   <Image
                     source={item.image_url ? { uri: item.image_url } : FALLBACK_IMAGE}
                     style={desktopStyles.productImage}
-                    contentFit="contain"
+                    resizeMode="contain"
                   />
                 </View>
                 <View style={desktopStyles.productBody}>
@@ -1227,7 +1165,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
                 <Image
                   source={item.image_url ? { uri: item.image_url } : FALLBACK_IMAGE}
                   style={desktopStyles.productImage}
-                  contentFit="contain"
+                  resizeMode="contain"
                 />
               </View>
               <View style={desktopStyles.productBody}>
@@ -1283,7 +1221,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
                     <Image
                       source={entry.image_url ? { uri: entry.image_url } : FALLBACK_IMAGE}
                       style={desktopStyles.moreImage}
-                      contentFit="cover"
+                      resizeMode="cover"
                     />
                     <View style={desktopStyles.moreBody}>
                       <Text style={desktopStyles.moreName}>{entry.name}</Text>
@@ -1470,14 +1408,19 @@ const mobileStyles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    backgroundColor: COLORS.deepPurple,
-    paddingTop: 18,
-    paddingBottom: 20,
+    minHeight: 108,
+    paddingBottom: 16,
+  },
+   headerContent: {
     paddingHorizontal: 16,
+  },
+  navigation: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 16,
+    paddingTop: 16,
   },
+  
   backButton: {
     padding: 4,
   },
@@ -1489,60 +1432,56 @@ const mobileStyles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 32,
+    backgroundColor: "#FFFFFF",
+  },
+  scrollBackgroundColor : {
+    backgroundColor: "#FFFFFF",
   },
   productCard: {
-    margin: 16,
     backgroundColor: COLORS.background,
-    borderRadius: 16,
     padding: 16,
-    shadowColor: "#15072C",
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 2,
   },
   productImage: {
     width: "100%",
-    height: 220,
-    borderRadius: 16,
+    height: 211,
     backgroundColor: COLORS.surface,
   },
   productTitle: {
     color: COLORS.textPrimary,
     fontFamily: "Nunito_700Bold",
-    fontSize: 24,
-    marginTop: 16,
+    fontSize: 23,
+    letterSpacing: 0
   },
   productPrice: {
-    color: COLORS.purple,
-    fontFamily: "Nunito_700Bold",
-    fontSize: 18,
-    marginTop: 8,
+    color: '#1C0335',
+    fontFamily: "Nunito_900Black",
+    fontSize: 16,
+    marginTop: 23,
   },
   productMeta: {
-    color: COLORS.textSecondary,
-    fontFamily: "Nunito_500Medium",
-    marginTop: 4,
-  },
-  productMetaStrong: {
-    color: COLORS.textPrimary,
+    color: '#007AFF',
     fontFamily: "Nunito_700Bold",
+    marginTop: 16,
+    fontSize: 14
   },
+
   productDescription: {
-    color: COLORS.textSecondary,
-    marginTop: 10,
+    color: '#8E8E93',
+    marginTop: 16,
     lineHeight: 22,
     fontFamily: "Nunito_500Medium",
+    letterSpacing: -0.1,
+    fontSize: 13
   },
   actionRow: {
     flexDirection: "row",
-    gap: 12,
-    marginTop: 18,
+    gap: 7.52,
+    marginTop: 32,
   },
   primaryButton: {
     flex: 1,
-    height: 56,
-    borderRadius: 14,
+    height: 60,
+    borderRadius: 7.52,
     backgroundColor: COLORS.purple,
     alignItems: "center",
     justifyContent: "center",
@@ -1557,8 +1496,8 @@ const mobileStyles = StyleSheet.create({
   },
   secondaryButton: {
     flex: 1,
-    height: 56,
-    borderRadius: 14,
+    height: 60,
+    borderRadius: 7.5,
     borderWidth: 2,
     borderColor: COLORS.purple,
     alignItems: "center",
@@ -1568,29 +1507,48 @@ const mobileStyles = StyleSheet.create({
   secondaryButtonText: {
     color: COLORS.purple,
     fontFamily: "Nunito_700Bold",
-    fontSize: 16,
+    fontSize: 15.04,
   },
   notice: {
     marginTop: 14,
     color: COLORS.accent,
     fontFamily: "Nunito_600SemiBold",
   },
-  sectionCard: {
-    marginHorizontal: 16,
-    marginTop: 12,
-    backgroundColor: COLORS.surface,
-    borderRadius: 18,
-    padding: 20,
+  section: {
+    padding: 16,
+    backgroundColor: "#FFFFFF",
   },
+  sectionCard: {
+    backgroundColor: "#F8F7FA",
+    borderRadius: 8,
+    paddingBottom: 20,
+  },
+  didYouBuyThisGiftContainer: {
+    // backgroundColor:'red'
+    paddingVertical: 16
+  },
+  didYouBuyThisGiftText: {
+    textAlign:'center',
+    color: '#1C1C1C',
+    fontFamily: "Nunito_700Bold",
+    fontSize: 20,
+  },
+  didYouBuyThisGiftSeparator: {backgroundColor:'#FFFFFF' , height:3 },
+
   switchRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    padding: 12
   },
   sectionTitle: {
     color: COLORS.textPrimary,
-    fontFamily: "Nunito_700Bold",
-    fontSize: 18,
+    fontFamily: "Nunito_600SemiBold",
+    fontSize: 16,
+  },
+  markAsPurchasedSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   sectionLabel: {
     color: COLORS.textPrimary,
@@ -1599,20 +1557,21 @@ const mobileStyles = StyleSheet.create({
     marginBottom: 8,
   },
   stepper: {
+    backgroundColor:'#F2F2F7',
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    height: 58,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    height: 56,
   },
   stepperButton: {
-    width: 44,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "#EFE7FF",
+    width: 40,
+    height: 40,
+    borderRadius: 4,
+    backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1635,37 +1594,47 @@ const mobileStyles = StyleSheet.create({
   radioRow: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent:'space-between',
     gap: 12,
   },
   radioOuter: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    borderWidth: 2,
-    borderColor: COLORS.border,
+    borderWidth: 1,
+    borderColor: '#D1D1D6',
+    backgroundColor:"#ffff",
     alignItems: "center",
     justifyContent: "center",
   },
   radioOuterActive: {
     borderColor: COLORS.purple,
+    backgroundColor: COLORS.purple,
   },
   radioInner: {
-    width: 12,
-    height: 12,
+    width: 10,
+    height: 10,
     borderRadius: 6,
     backgroundColor: COLORS.purple,
   },
+  radioInnerActive: {
+    width: 10,
+    height: 10,
+    borderRadius: 6,
+    backgroundColor: '#ffff',
+  },
   radioLabel: {
     color: COLORS.textPrimary,
-    fontFamily: "Nunito_600SemiBold",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16
   },
   noteField: {
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 14,
+    borderRadius: 8,
     padding: 14,
     minHeight: 110,
-    backgroundColor: COLORS.background,
+    
   },
   noteInput: {
     color: COLORS.textPrimary,
@@ -1679,19 +1648,19 @@ const mobileStyles = StyleSheet.create({
   },
   storeRow: {
     flexDirection: "row",
-    gap: 12,
+    gap: 16,
     marginTop: 12,
   },
   storeOption: {
     flex: 1,
-    height: 60,
-    borderRadius: 14,
+    height: 90.9,
+    borderRadius: 8.08,
     borderWidth: 1,
     borderColor: COLORS.border,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: COLORS.background,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
+    rowGap: 10
   },
   storeOptionActive: {
     borderColor: COLORS.purple,
@@ -1701,7 +1670,8 @@ const mobileStyles = StyleSheet.create({
     opacity: 0.4,
   },
   storeOptionText: {
-    color: COLORS.textPrimary,
+    fontSize: 16,
+    color: '#1C1C1C',
     fontFamily: "Nunito_700Bold",
     textAlign: "center",
   },
@@ -1712,18 +1682,19 @@ const mobileStyles = StyleSheet.create({
     marginTop: 16,
   },
   inputLabel: {
-    color: COLORS.textSecondary,
+    color:  '#AEAEB2',
     fontFamily: "Nunito_500Medium",
     marginBottom: 6,
+    fontSize: 16
   },
   inputWrapper: {
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 12,
+    borderRadius: 8,
     paddingHorizontal: 12,
-    height: 52,
+    height: 56,
     justifyContent: "center",
-    backgroundColor: COLORS.background,
+    // backgroundColor: COLORS.background,
   },
   textInput: {
     color: COLORS.textPrimary,
@@ -1790,13 +1761,14 @@ const mobileStyles = StyleSheet.create({
   },
   submitBar: {
     padding: 16,
+    paddingBottom: 35,
     borderTopWidth: 1,
     borderTopColor: "#EDE4FF",
     backgroundColor: COLORS.background,
   },
   submitButton: {
     height: 56,
-    borderRadius: 14,
+    borderRadius: 8,
     backgroundColor: COLORS.purple,
     alignItems: "center",
     justifyContent: "center",
@@ -2346,7 +2318,7 @@ const modalStyles = StyleSheet.create({
   primaryButtonText: {
     color: "#FFFFFF",
     fontFamily: "Nunito_700Bold",
-    fontSize: 16,
+    fontSize: 15.04,
   },
   secondaryButton: {
     height: 56,
