@@ -1,10 +1,10 @@
-import { useUser } from '@clerk/clerk-expo';
-import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
-import { router, useLocalSearchParams } from 'expo-router';
-import React, { useRef } from 'react';
-import { Platform, Pressable, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import ConfettiCannon from 'react-native-confetti-cannon';
+import { useUser } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
+
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useRef } from "react";
+import { Image, Platform, Pressable, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import ConfettiCannon from "react-native-confetti-cannon";
 
 const DESKTOP_BREAKPOINT = 1024;
 
@@ -30,15 +30,15 @@ export default function PurchaseSuccess() {
   const onSendAnnouncement = () => {
     // TODO: integrate announcement flow
     // For now, return to list if available
-    if (listId) router.replace({ pathname: '/view-list', params: { listId: String(listId) } });
-    else router.replace('/');
+    if (listId) router.replace({ pathname: "/view-list", params: { listId: String(listId) } });
+    else router.replace("/");
   };
   const onPurchaseAnother = () => {
-    if (listId) router.replace({ pathname: '/view-list', params: { listId: String(listId) } });
-    else router.replace('/');
+    if (listId) router.replace({ pathname: "/view-list", params: { listId: String(listId) } });
+    else router.replace("/");
   };
   const onCreateList = () => {
-    router.replace('/create-list-step1');
+    router.replace("/create-list-step1");
   };
 
   if (isDesktop) {
@@ -48,24 +48,18 @@ export default function PurchaseSuccess() {
         <ConfettiCannon ref={confettiRef} count={120} origin={{ x: width / 2, y: -10 }} fadeOut autoStart fallSpeed={3000} explosionSpeed={450} />
         <SafeAreaView style={desktopStyles.safeArea}>
           <View style={desktopStyles.header}>
-            <Image source={require('@/assets/images/yallawish_logo.png')} style={desktopStyles.logo} />
+            <Image source={require("@/assets/images/yallawish_logo.png")} style={desktopStyles.logo} />
           </View>
 
           <ScrollView contentContainerStyle={desktopStyles.scrollContent}>
             <View style={desktopStyles.content}>
               {/* Gift Illustration */}
               <View style={desktopStyles.illustrationContainer}>
-                <Image 
-                  source={require('@/assets/images/thankyou.png')} 
-                  style={desktopStyles.illustration}
-                  contentFit="contain"
-                />
+                <Image source={require("@/assets/images/thankyou.png")} style={desktopStyles.illustration} resizeMode="contain" />
               </View>
 
               <Text style={desktopStyles.heading}>Thank You {buyerName}!</Text>
-              <Text style={desktopStyles.subtext}>
-                Your gift is on its way - and it's going to make someone's day!
-              </Text>
+              <Text style={desktopStyles.subtext}>Your gift is on its way - and it's going to make someone's day!</Text>
 
               <View style={desktopStyles.buttonContainer}>
                 <Pressable onPress={onSendAnnouncement} style={desktopStyles.primaryButton}>
@@ -96,37 +90,32 @@ export default function PurchaseSuccess() {
 
   return (
     <View style={mobileStyles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#2C0C54" />
+      <StatusBar barStyle="light-content" backgroundColor="transparent" />
       <ConfettiCannon ref={confettiRef} count={120} origin={{ x: 200, y: -10 }} fadeOut autoStart fallSpeed={3000} explosionSpeed={450} />
       <SafeAreaView style={mobileStyles.safeArea}>
-        <View style={mobileStyles.header}>
-          <Image source={require('@/assets/images/yallawish_logo.png')} style={mobileStyles.logo} />
+        <View>
+          <Image source={require("@/assets/images/giftBox.png")} resizeMode="contain" />
         </View>
-
-        <View style={mobileStyles.content}>
-          <Text style={mobileStyles.heading}>Thank You!</Text>
-          <Text style={mobileStyles.subtext}>
-            Your gift is on its way – and it's going to make someones's day!
-          </Text>
-
-          <View style={mobileStyles.checkContainer}>
-            <Text style={mobileStyles.check}>✓</Text>
-          </View>
-
-          <View style={mobileStyles.buttonContainer}>
-            <Pressable onPress={onSendAnnouncement} style={mobileStyles.button}>
-              <Text style={mobileStyles.buttonText}>Send a gift announcement</Text>
-            </Pressable>
-            <Pressable onPress={onPurchaseAnother} style={mobileStyles.button}>
-              <Text style={mobileStyles.buttonText}>Purchase another gift</Text>
-            </Pressable>
-          </View>
-
+        <View>
+          <Text style={mobileStyles.heading}>THANK YOU {"\n"} {(String(buyerName)?.split(" ")?.[0].toUpperCase())}</Text>
+          <Text style={mobileStyles.subtext}>{"Your gift is on its way – and it's going\nto make someones's day!"}</Text>
+        </View>
+        <View style={{ marginVertical: 15 }}>
+          <Image resizeMode="contain" source={require("@/assets/images/successIcon.png")} />
+        </View>
+        <View style={mobileStyles.buttonContainer}>
+          <Pressable onPress={onSendAnnouncement} style={mobileStyles.button}>
+            <Text style={mobileStyles.buttonText}>Send a gift announcement</Text>
+          </Pressable>
+          <Pressable onPress={onPurchaseAnother} style={mobileStyles.button}>
+            <Text style={mobileStyles.buttonText}>Purchase another gift</Text>
+          </Pressable>
+        </View>
+        <View>
           <Text style={mobileStyles.bottomHeading}>Wasn't that easy?</Text>
-          <Text style={mobileStyles.bottomText}>
-            {`Make Gifting Fun\n& Easy for Your\nFriends & Family`}
-          </Text>
-
+          <Text style={mobileStyles.bottomText}>{`Make Gifting Fun\n& Easy for Your\nFriends & Family`}</Text>
+        </View>
+        <View style={{ width: "100%", marginTop: 10 }}>
           <Pressable onPress={onCreateList} style={mobileStyles.createButton}>
             <Text style={mobileStyles.createButtonText}>Create My List</Text>
           </Pressable>
@@ -139,98 +128,73 @@ export default function PurchaseSuccess() {
 const mobileStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2C0C54',
+    backgroundColor: "#47075C",
   },
   safeArea: {
     flex: 1,
+    gap: 14,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 50,
   },
-  header: {
-    alignItems: 'center',
-    paddingTop: 24,
-  },
-  logo: {
-    width: 150,
-    height: 30,
-    resizeMode: 'contain',
-  },
-  content: {
-    flex: 1,
-    alignItems: 'center',
-    paddingHorizontal: 24,
-  },
+
   heading: {
-    color: '#FFFFFF',
-    fontFamily: 'Nunito_700Bold',
-    fontSize: 36,
-    textAlign: 'center',
-    marginTop: 36,
+    color: "#FFFFFF",
+    fontFamily: "Nunito_900Black",
+    fontSize: 30,
+    textAlign: "center",
   },
   subtext: {
-    color: 'rgba(255,255,255,0.9)',
-    fontFamily: 'Nunito_600SemiBold',
-    fontSize: 18,
-    textAlign: 'center',
-    marginTop: 12,
-    lineHeight: 26,
+    color: "rgba(255,255,255,0.9)",
+    fontFamily: "Nunito_400Regular",
+    fontSize: 14,
+    textAlign: "center",
+    marginTop: 14,
   },
-  checkContainer: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
-    backgroundColor: '#39D98A',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 28,
-  },
-  check: {
-    color: '#0A4D2E',
-    fontSize: 44,
-  },
+
   buttonContainer: {
-    width: '100%',
-    marginTop: 28,
+    width: "100%",
     gap: 16,
   },
   button: {
     height: 56,
-    borderRadius: 14,
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.6)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#BA52FF",
+    alignItems: "center",
+    justifyContent: "center",
   },
   buttonText: {
-    color: '#FFFFFF',
-    fontFamily: 'Nunito_700Bold',
+    color: "#FFFFFF",
+    fontFamily: "Nunito_700Bold",
     fontSize: 16,
   },
   bottomHeading: {
-    color: 'rgba(255,255,255,0.9)',
-    fontFamily: 'Nunito_700Bold',
-    fontSize: 18,
-    textAlign: 'center',
-    marginTop: 32,
+    color: "rgba(255,255,255,0.9)",
+    fontFamily: "Nunito_600SemiBold",
+    fontSize: 24,
+    textAlign: "center",
   },
   bottomText: {
-    color: '#FFFFFF',
-    fontFamily: 'Nunito_700Bold',
-    fontSize: 26,
-    textAlign: 'center',
-    marginTop: 12,
+    color: "#FFFFFF",
+    fontFamily: "Nunito_900Black",
+    fontSize: 25,
+    textAlign: "center",
+    marginTop: 20,
   },
   createButton: {
-    width: '100%',
+    width: "100%",
     height: 56,
-    borderRadius: 14,
-    backgroundColor: '#FF3EB5',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 8,
+    backgroundColor: "#FF00C8",
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 24,
   },
   createButtonText: {
-    color: '#FFFFFF',
-    fontFamily: 'Nunito_700Bold',
-    fontSize: 18,
+    color: "#FFFFFF",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
   },
 });
 
@@ -250,25 +214,25 @@ const desktopStyles = StyleSheet.create({
   logo: {
     width: 150,
     height: 30,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   scrollContent: {
     flexGrow: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingBottom: 48,
   },
   content: {
-    alignItems: 'center',
+    alignItems: "center",
     maxWidth: 600,
-    width: '100%',
+    width: "100%",
     paddingHorizontal: 32,
   },
   illustrationContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 32,
-    position: 'relative',
+    position: "relative",
   },
   illustration: {
     width: 200,
@@ -276,39 +240,39 @@ const desktopStyles = StyleSheet.create({
   },
   heading: {
     color: COLORS.textPrimary,
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: "Nunito_700Bold",
     fontSize: 42,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 16,
   },
   subtext: {
     color: COLORS.textSecondary,
-    fontFamily: 'Nunito_600SemiBold',
+    fontFamily: "Nunito_600SemiBold",
     fontSize: 18,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 40,
     lineHeight: 26,
   },
   buttonContainer: {
-    width: '100%',
+    width: "100%",
     gap: 16,
     marginBottom: 48,
-    alignItems: 'center',
+    alignItems: "center",
   },
   primaryButton: {
     height: 56,
     borderRadius: 14,
     backgroundColor: COLORS.purple,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
     gap: 12,
     maxWidth: 273,
-    width: '100%',
+    width: "100%",
   },
   primaryButtonText: {
-    color: '#FFFFFF',
-    fontFamily: 'Nunito_700Bold',
+    color: "#FFFFFF",
+    fontFamily: "Nunito_700Bold",
     fontSize: 16,
   },
   secondaryButton: {
@@ -317,16 +281,16 @@ const desktopStyles = StyleSheet.create({
     borderWidth: 2,
     borderColor: COLORS.purple,
     backgroundColor: COLORS.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
     gap: 12,
     maxWidth: 273,
-    width: '100%',
+    width: "100%",
   },
   secondaryButtonText: {
     color: COLORS.purple,
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: "Nunito_700Bold",
     fontSize: 16,
   },
   bottomSection: {
@@ -334,25 +298,25 @@ const desktopStyles = StyleSheet.create({
     backgroundColor: COLORS.lightPurple,
     borderRadius: 20,
     padding: 32,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     gap: 24,
   },
   bottomTextContainer: {
     flex: 1,
-    flexDirection: 'column',
+    flexDirection: "column",
     gap: 4,
   },
   bottomText: {
     color: COLORS.textPrimary,
-    fontFamily: 'Nunito_500Medium',
+    fontFamily: "Nunito_500Medium",
     fontSize: 16,
     lineHeight: 24,
   },
   bottomTextBold: {
     color: COLORS.textPrimary,
-    fontFamily: 'Nunito_700Bold',
+    fontFamily: "Nunito_700Bold",
     fontSize: 16,
     lineHeight: 24,
   },
@@ -360,14 +324,14 @@ const desktopStyles = StyleSheet.create({
     height: 56,
     borderRadius: 14,
     backgroundColor: COLORS.purple,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 32,
     minWidth: 200,
   },
   createButtonText: {
-    color: '#FFFFFF',
-    fontFamily: 'Nunito_700Bold',
+    color: "#FFFFFF",
+    fontFamily: "Nunito_700Bold",
     fontSize: 18,
   },
 });
