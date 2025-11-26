@@ -528,14 +528,17 @@ export default function GiftDetail() {
             <Pressable onPress={() => setShowLeaving(false)}>
               <View style={{ alignSelf: 'center', width: 44, height: 5, borderRadius: 3, backgroundColor: '#E2DAF0', marginBottom: 12 }} />
             </Pressable>
-            <Text style={{ color: '#1C0335', fontSize: 28, fontFamily: 'Nunito_700Bold', textAlign: 'center' }}>Leaving Yallawish</Text>
-            <Text style={{ color: '#6B5E7E', textAlign: 'center', marginTop: 8 }}>
-              You’re about to visit the seller’s site. After buying, come back and mark this gift as purchased.
+            <Text style={{ color: '#1C0335', fontSize: 38, fontFamily: 'Nunito_900Black', textAlign: 'center' }}>Leaving Yallawish</Text>
+            <Text style={{ color: '#1C0335', textAlign: 'center', marginTop: 8 , fontFamily:'Nunito_700Bold'}}>
+              You’re about to visit the seller’s site. After buying, come back and <Text style={{textDecorationLine:'underline'}}>mark this gift as purchased.</Text>
             </Text>
             <View style={modalStyles.redirectContainer}>
               <Text style={modalStyles.redirectLabel}>Redirecting to</Text>
               <Text style={modalStyles.redirectHost}>{host ?? "the seller"}</Text>
-              <Text style={modalStyles.redirectLabel}>Continuing in</Text>
+              <View style={{flexDirection:'row' , alignItems:'center', justifyContent:'center', gap:8}}>
+                <Text style={modalStyles.redirectLabel}>You’ll be redirected in </Text>
+                <Image source={require("@/assets/images/redirected.png")}/>
+              </View>
               <Text style={modalStyles.countdown}>{countdown}s</Text>
             </View>
             <View style={modalStyles.buttonStack}>
@@ -547,13 +550,13 @@ export default function GiftDetail() {
                 style={[modalStyles.primaryButton, !buyUrl && modalStyles.disabledButton]}
                 disabled={!buyUrl}
               >
-                <Text style={modalStyles.primaryButtonText}>Proceed now</Text>
+                <Text style={modalStyles.primaryButtonText}>Proceed Now</Text>
               </Pressable>
               <Pressable
                 onPress={() => setShowLeaving(false)}
                 style={modalStyles.secondaryButton}
               >
-                <Text style={modalStyles.secondaryButtonText}>Stay here</Text>
+                <Text style={modalStyles.secondaryButtonText}>Stay Here</Text>
               </Pressable>
             </View>
           </Pressable>
@@ -2295,8 +2298,9 @@ const modalStyles = StyleSheet.create({
     gap: 6,
   },
   redirectLabel: {
-    color: COLORS.textSecondary,
-    fontFamily: "Nunito_500Medium",
+    color: '#1C0335',
+    fontFamily: "Nunito_700Bold",
+    fontSize: 19.6
   },
   redirectHost: {
     color: COLORS.textPrimary,
@@ -2304,17 +2308,17 @@ const modalStyles = StyleSheet.create({
     fontSize: 24,
   },
   countdown: {
-    color: COLORS.purple,
+    color: '#1C0335',
     fontFamily: "Nunito_700Bold",
-    fontSize: 36,
+    fontSize: 39.2,
   },
   buttonStack: {
     marginTop: 22,
-    gap: 14,
+    gap: 16,
   },
   primaryButton: {
     height: 56,
-    borderRadius: 14,
+    borderRadius: 7.29,
     backgroundColor: COLORS.purple,
     alignItems: "center",
     justifyContent: "center",
@@ -2325,11 +2329,11 @@ const modalStyles = StyleSheet.create({
   primaryButtonText: {
     color: "#FFFFFF",
     fontFamily: "Nunito_700Bold",
-    fontSize: 15.04,
+    fontSize: 14.5,
   },
   secondaryButton: {
     height: 56,
-    borderRadius: 14,
+    borderRadius: 7.29,
     borderWidth: 1,
     borderColor: COLORS.purple,
     alignItems: "center",
@@ -2339,7 +2343,7 @@ const modalStyles = StyleSheet.create({
   secondaryButtonText: {
     color: COLORS.purple,
     fontFamily: "Nunito_700Bold",
-    fontSize: 16,
+    fontSize: 14.5,
   },
 }) as Record<string, any>;
 
