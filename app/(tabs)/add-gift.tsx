@@ -1,4 +1,6 @@
 import { RibbonHeader } from "@/components/RibbonHeader";
+import { TextInputAreaField } from "@/components/TextInputAreaField";
+import { TextInputField } from "@/components/TextInputField";
 import { ActionsBar, FooterBar, GiftItemCard, HeaderBar, InfoBox, ListCover } from "@/components/list";
 import type { GiftItem as GiftItemType } from "@/components/list/GiftItemCard";
 import { api } from "@/convex/_generated/api";
@@ -611,31 +613,33 @@ export default function AddGift() {
             </Pressable>
             <ScrollView contentContainerStyle={{...styles.sheetContent, paddingHorizontal:0, gap:0}} showsVerticalScrollIndicator={false}>
               <View style={{ padding:16, gap: 20, backgroundColor:'#ffff'}}>
-                <Text style={styles.sheetTitle}>Add a gift item</Text>
-                <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>Add a web link</Text>
-                  <View style={styles.inputRow}>
-                    <TextInput value={link} onChangeText={setLink} style={styles.input} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="https://" />
-                    {scraping ? <Text style={styles.scrapeStatus}>…</Text> : <Ionicons name="open-outline" size={20} color="#7A6F88" />}
-                  </View>
-                  {!isUrlValid && link.trim().length > 0 && (<Text style={styles.errorText}>Invalid URL</Text>)}
+                <Text style={styles.sheetTitle}> Add a gift item</Text>
 
-                  {scrapeError && <Text style={styles.errorText}>{scrapeError}</Text>}
-                </View>
+                <TextInputField
+                  label="Add a web link"
+                  value={link}
+                  onChangeText={setLink} 
+                  icon={<Image source={require("@/assets/images/externalLink.png")} />}
+                  keyboardType="url"
+                  placeholder="https://"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  error={[ ...(!isUrlValid && link.trim().length > 0 ? ["Invalid URL"]: []), ...(scrapeError ? [String(scrapeError)]: []) ]}
+
+                />
                 <View style={styles.orDivider}>
                   <View style={styles.orLine} />
                   <Text style={styles.orText}>OR</Text>
                   <View style={styles.orLine} />
                 </View>
-                <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>Search via Google</Text>
-                  <View style={styles.inputRow}>
-                    <TextInput value={search} onChangeText={setSearch} style={styles.input} autoCapitalize="none" autoCorrect={false} placeholder="Search products" returnKeyType="search" onSubmitEditing={openSearchBrowser} />
-                    <Pressable onPress={openSearchBrowser}>
-                      <Ionicons name="search-outline" size={20} color="#1C0335" />
-                    </Pressable>
-                  </View>
-                </View>
+
+                 <TextInputField
+                  label="Search via Google"
+                  value={search}
+                  onChangeText={setSearch} 
+                  placeholder="Search products"
+                  icon={<Pressable onPress={openSearchBrowser}><Image source={require("@/assets/images/search.png")} /></Pressable>}
+                />
 
               </View>
               <View style={{ padding:16, paddingTop:24,  gap: 20}}>
@@ -647,35 +651,31 @@ export default function AddGift() {
                     <Pressable onPress={incQty} style={styles.qtyBtn}><Text style={styles.qtyBtnText}>+</Text></Pressable>
                   </View>
                 </View>
-                <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>Price of gift</Text>
-                  <View style={styles.inputRow}>
-                    <TextInput value={price} onChangeText={setPrice} style={styles.input} keyboardType="decimal-pad" />
-                  </View>
-                </View>
-                <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>Name of gift</Text>
-                  <View style={styles.inputRow}>
-                    <TextInput value={name} onChangeText={setName} style={styles.input} />
-                    <Ionicons name="pencil-outline" size={20} color="#1C0335" />
-                  </View>
-                  {imageUrl && (
-                    <Image source={{ uri: imageUrl }} style={styles.previewImage} />
-                  )}
-                </View>
-                <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>Description (optional)</Text>
-                  <View style={[styles.inputRow, styles.textareaWrapper]}>
-                    <TextInput
-                      placeholder="Prefer white, size M."
-                      value={description}
-                      onChangeText={t => t.length <= DESCRIPTION_LIMIT && setDescription(t)}
-                      style={[styles.input, styles.textarea]}
-                      multiline
-                    />
-                    <Text style={styles.charCount}>{DESCRIPTION_LIMIT - description.length}</Text>
-                  </View>
-                </View>
+                <TextInputField
+                  label="Price of gift"
+                  value={price}
+                  onChangeText={setPrice} 
+                  keyboardType="decimal-pad" 
+                  inputLabelContainerStyle={{backgroundColor:'#F2F2F7'}}
+                />
+
+                <TextInputField
+                  label="Name of gift"
+                  value={name}
+                  onChangeText={setName}
+                  inputLabelContainerStyle={{backgroundColor:'#F2F2F7'}}
+                  icon={<Image source={require("@/assets/images/Edit.png")} />}
+                />
+               
+                <TextInputAreaField 
+                  label="Description (optional)"
+                  placeholder="Prefer white, size M."
+                  value={description}
+                  onChangeText={t => t.length <= DESCRIPTION_LIMIT && setDescription(t)}
+                  inputLabelContainerStyle={{backgroundColor:'#F2F2F7'}}
+                  descriptionLimit={DESCRIPTION_LIMIT}
+                  
+                />
                 <Pressable style={[styles.saveBtn, (!canSave) && styles.saveBtnDisabled]} onPress={handleSave} disabled={!canSave}>
                   <Text style={[styles.saveBtnText, (!canSave) && styles.saveBtnTextDisabled]}>{saving ? 'Saving...' : 'Save'}</Text>
                 </Pressable>
