@@ -217,7 +217,7 @@ export const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: "Nunito_700Bold",
     color: "#1C0335",
-    marginBottom: 16,
+    marginBottom: 32,
   },
   searchBox: {
     flexDirection: "row",
@@ -296,7 +296,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginVertical: 12,
+    marginVertical: 20,
   },
   orLine: {
     flex: 1,
@@ -312,7 +312,7 @@ export const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: "Nunito_700Bold",
     color: "#1C0335",
-    marginBottom: 8,
+    marginVertical: 16,
   },
   friendList: {
     borderTopWidth: 1,

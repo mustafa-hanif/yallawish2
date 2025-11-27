@@ -19,6 +19,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { TextInputField } from "@/components/TextInputField";
 import { Image } from "react-native";
 import { desktopStyles, styles } from "./step3styles";
 
@@ -614,16 +615,14 @@ function MobileLayout({
           >
             <Text style={styles.sheetTitle}>Share with groups</Text>
 
-            <View style={styles.searchBox}>
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search groups"
-                placeholderTextColor="#8E8E93"
+
+              <TextInputField 
+                label="Search groups"
                 value={groupQuery}
                 onChangeText={setGroupQuery}
+                icon={<Image source={require("@/assets/images/search.png")}/>}
               />
-              <Ionicons name="search-outline" size={22} color="#1C0335" />
-            </View>
+  
 
             <View style={styles.groupGrid}>
               {filteredGroups.map((group) => {
@@ -661,18 +660,13 @@ function MobileLayout({
               <Text style={styles.orText}>OR</Text>
               <View style={styles.orLine} />
             </View>
-
-            <View style={styles.searchBox}>
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search by name or email"
-                placeholderTextColor="#8E8E93"
+              <TextInputField 
+                label="Search by name or email"
                 value={friendQuery}
                 onChangeText={setFriendQuery}
+                icon={<Image source={require("@/assets/images/search.png")}/>}
               />
-              <Ionicons name="search-outline" size={22} color="#1C0335" />
-            </View>
-
+            
             <Text style={styles.shareWithFriends}>Share with friends</Text>
 
             <View style={styles.friendList}>
