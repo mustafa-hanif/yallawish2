@@ -5,9 +5,11 @@ import { Image, Text, View } from "react-native";
 type Props = {
   imageUri?: string | null;
   overlayText?: string;
+  occasion?: string
 };
 
-export const ListCover: React.FC<Props> = ({ imageUri, overlayText }) => {
+export const ListCover: React.FC<Props> = ({ imageUri, overlayText, occasion }) => {
+
   return (
     <View style={styles.coverContainer}>
       {imageUri ? (
@@ -19,3 +21,14 @@ export const ListCover: React.FC<Props> = ({ imageUri, overlayText }) => {
     </View>
   );
 };
+
+// const occasionColor: Record<string, string> = {
+//     birthday: '#FFF6D2',
+//     wedding: "#FFE0E0",
+//     'baby-shower': '#F0F9F0',
+//     graduation: '#D9F3FF',
+//     'new-home' : '#F5E8D5',
+//     'retirement': '#FFEBCC',
+//     'no-occasion' : '#F4F4F4',
+//     'other' : '#E9E9E9'
+//   }
