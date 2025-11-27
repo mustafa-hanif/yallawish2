@@ -38,4 +38,5 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     height: "100%",
   },
+  errorText: { fontSize: 12, color: "#B00020", fontFamily: "Nunito_700Bold" },
 });
