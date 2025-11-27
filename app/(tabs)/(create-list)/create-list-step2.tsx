@@ -1,3 +1,5 @@
+import { TextInputAreaField } from "@/components/TextInputAreaField";
+import { TextInputField } from "@/components/TextInputField";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
@@ -936,34 +938,15 @@ function MobileLayout({
           <Text style={styles.sectionTitle}>Giftlist details</Text>
 
           <View style={styles.formContainer}>
-            <FormField
-              label="Event title *"
-              value={formData.eventTitle}
-              onChangeText={(text) => updateFormData("eventTitle", text)}
-              style={{ minHeight: 'auto' }}
-              
+            <TextInputField label="Event title *" value={formData.eventTitle} onChangeText={(text) => updateFormData("eventTitle", text)}/>
+            <TextInputAreaField 
+              label="Add note (optional)"
+              placeholderTextColor="#D1D1D6"
+              placeholder="Share a sweet message, special instructions, or anything you'd like your guests to know"
+              value={formData.eventNote}
+              onChangeText={handleNoteChange}
             />
 
-            <View style={styles.fieldContainer}>
-              <View style={[styles.fieldWrapper, styles.noteFieldWrapper]}>
-                <TextInput
-                  style={[styles.textInput, styles.noteInput]}
-                  value={formData.eventNote}
-                  onChangeText={handleNoteChange}
-                  multiline
-                  placeholder="Share a sweet message, special instructions, or anything you'd like your guests to know"
-                  placeholderTextColor="#D1D1D6"
-                />
-                <View style={styles.floatingLabel}>
-                  <Text style={styles.floatingLabelText}>
-                    Add note (optional)
-                  </Text>
-                </View>
-                <View style={styles.characterCount}>
-                  <Text style={styles.characterCountText}>{characterCount}</Text>
-                </View>
-              </View>
-            </View>
 
             <View style={{...styles.fieldContainer, ...{ minHeight: 'auto' }}}>
               <Pressable onPress={showDatePicker} style={styles.fieldWrapper}>
@@ -984,21 +967,15 @@ function MobileLayout({
                 </View>
               </Pressable>
             </View>
-
-            <FormField
-              style={{ minHeight: 'auto' }}
-              label="Shipping Address (optional)"
-              value={formData.shippingAddress}
-              onChangeText={(text) => updateFormData("shippingAddress", text)}
-              placeholder="Apt/house #, building/community area, city..."
-              rightIcon={
-                <Ionicons
-                  name="information-circle-outline"
-                  size={16}
-                  color="#AEAEB2"
-                />
-              }
-            />
+              <TextInputAreaField  
+                height={92}
+                label="Shipping Address (optional)"
+                value={formData.shippingAddress}
+                onChangeText={(text) => updateFormData("shippingAddress", text)} 
+                placeholder="Apt/house #, building/community area, city..."
+                // icon={<Ionicons name="information-circle-outline" size={16} color="#AEAEB2" />}
+                showCounter={false}
+              />
 
             <View style={styles.coverPhotoSection}>
               <Text style={styles.coverPhotoLabel}>Cover photo (optional)</Text>
@@ -1223,7 +1200,7 @@ const styles = StyleSheet.create({
     lineHeight: 28,
   },
   formContainer: {
-    gap: 24,
+    gap: 40,
   },
   fieldContainer: {
     minHeight: 135,
@@ -1232,7 +1209,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#AEAEB2",
     borderRadius: 8,
-    overflow: "hidden",
     position: "relative",
     backgroundColor: "#FFFFFF",
   },
