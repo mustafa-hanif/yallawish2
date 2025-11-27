@@ -249,7 +249,7 @@ export const styles = StyleSheet.create({
   browserAddBtnText: { color: "#FFFFFF", fontSize: 16, fontFamily: "Nunito_700Bold" },
   browserModalContainer: { flex: 1, backgroundColor: "#FFFFFF" },
   browserActionBarWrapper: { paddingHorizontal: 16, paddingBottom: 16, backgroundColor: "rgba(255,255,255,0.9)" },
-  browserActionBar: { backgroundColor: "#3B0076", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 16, borderRadius: 12 },
+  browserActionBar: { backgroundColor: "#3B0076", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 16, borderRadius: 8 },
   browserActionBarText: { color: "#FFFFFF", fontSize: 16, fontFamily: "Nunito_700Bold" },
   // Sort & Filter sheet
   sortSheetContainer: { position: "absolute", left: 0, right: 0, bottom: 0, backgroundColor: "#FFFFFF", borderTopLeftRadius: 32, borderTopRightRadius: 32, maxHeight: "80%" },

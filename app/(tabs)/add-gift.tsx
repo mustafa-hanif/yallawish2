@@ -690,16 +690,24 @@ export default function AddGift() {
       </Modal>
       {/* Product search browser modal */}
       <Modal visible={showBrowser} animationType="slide" presentationStyle="fullScreen" onRequestClose={() => setShowBrowser(false)}>
-        <View style={styles.browserModalContainer}>
-          <View style={styles.browserHeader}>
-            <Pressable style={styles.browserHeaderBtn} onPress={() => { setShowBrowser(false); setTimeout(() => setShowSheet(true), 60); }}>
-              <Ionicons name="chevron-back" size={24} color="#1C0335" />
-            </Pressable>
-            <Text style={styles.browserTitle} numberOfLines={1}>{currentBrowserUrl?.replace(/^https?:\/\//, '')}</Text>
-            <Pressable style={styles.browserHeaderBtn} onPress={() => setShowBrowser(false)}>
-              <Ionicons name="close" size={24} color="#1C0335" />
-            </Pressable>
+        
+        <LinearGradient 
+          colors={["#330065", "#45018ad7"]}
+          locations={[0, 0.7]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 2 }}
+          
+        >
+          <View style={[styles.browserHeader, {backgroundColor:'transparent', height: 80}]}>
+              <View style={[styles.navigation, { paddingBottom: 16}]}>
+                <Pressable onPress={() => { setShowBrowser(false); setTimeout(() => setShowSheet(true), 60); }} style={styles.backButton}>
+                    <Image source={require("@/assets/images/backArrow.png")} />
+                </Pressable>
+                <Text style={styles.headerTitle}>Search via Google</Text>
+              </View>
           </View>
+        </LinearGradient>
+        <View style={styles.browserModalContainer}>
           {browserUrl && (
             <WebView
               source={{ uri: browserUrl }}
