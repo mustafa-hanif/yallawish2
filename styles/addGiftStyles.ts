@@ -214,7 +214,7 @@ export const styles = StyleSheet.create({
   sheetContent: { paddingHorizontal: 16, paddingBottom: 60, gap: 20 },
   sheetTitle: { fontSize: 24, fontFamily: "Nunito_700Bold", color: "#1C0335", marginTop: 8 },
   fieldGroup: { gap: 8 },
-  fieldLabel: { fontSize: 14, fontFamily: "Nunito_700Bold", color: "#1C0335" },
+  fieldLabel: { fontSize: 16, fontFamily: "Nunito_700Bold", color: "#1C0335" },
   inputRow: { flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: "#AEAEB2", backgroundColor: "transparent", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, gap: 8 },
   input: { flex: 1, fontSize: 16, fontFamily: "Nunito_700Bold", color: "#1C0335", padding: 0 },
   orDivider: { flexDirection: "row", alignItems: "center", gap: 12 },

@@ -28,7 +28,6 @@ export const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     color: "#1C0335",
   },
