@@ -33,9 +33,11 @@ export const styles = StyleSheet.create({
   },
   rightIconContainer: {
     position: "absolute",
-    right: 16,
+    right: 0,
     justifyContent: "center",
+    alignItems: "center",
     height: "100%",
+    minWidth: 50,
   },
   errorText: { fontSize: 12, color: "#B00020", fontFamily: "Nunito_700Bold" },
 });

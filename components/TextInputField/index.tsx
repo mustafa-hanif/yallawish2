@@ -31,9 +31,9 @@ export function TextInputField({ icon, label, autoCorrect, autoCapitalize, varia
         <View style={{...styles.labelContainer, ...inputLabelContainerStyle}}>
           <Text style={styles.label}>{label}</Text>
         </View>
+        <TextInput autoCorrect={autoCorrect} keyboardType={keyboardType} autoCapitalize={autoCapitalize} style={styles.input} value={value} onChangeText={onChangeText} placeholder={placeholder} placeholderTextColor={placeholderTextColor} />
         {icon && <View style={styles.rightIconContainer}>{icon}</View>}
 
-        <TextInput autoCorrect={autoCorrect} keyboardType={keyboardType} autoCapitalize={autoCapitalize} style={styles.input} value={value} onChangeText={onChangeText} placeholder={placeholder} placeholderTextColor={placeholderTextColor} />
       </View>
       {Array.isArray(error) ? <>{error?.map((errorItem) => <Text style={styles.errorText}>{errorItem || ""}</Text>)}</> : <Text style={styles.errorText}>{error || ""}</Text>}
     </View>
