@@ -446,6 +446,7 @@ export default function AddGift() {
       subtitle={ribbonSubtitle}
       coverUri={coverUri}
       overlayText={formattedEventDate}
+      daysToGo={daysToGoText}
       displayedItems={displayedItems}
       onAddGift={handleAddGift}
       onOpenSortSheet={openSortSheet}
@@ -814,6 +815,8 @@ type MobileLayoutProps = {
   tempSortBy?: string
   tempFilterClaimed?: boolean
   tempFilterUnclaimed?: boolean
+  daysToGo: string | null;
+
 };
 
 function MobileLayout({
@@ -837,12 +840,13 @@ function MobileLayout({
   tempSortBy,
   tempFilterClaimed,
   tempFilterUnclaimed,
+  daysToGo
 }: MobileLayoutProps) {
   return (
     <>
       <HeaderBar title={title} onBack={handleBack} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <ListCover imageUri={coverUri} overlayText={overlayText} occasion={occasion}/>
+        <ListCover imageUri={coverUri} overlayText={String(daysToGo || "")} occasion={occasion}/>
 
         <View style={styles.listInfoContainer}>
           <RibbonHeader occasion={occasion} title={title} subtitle={subtitle} />
