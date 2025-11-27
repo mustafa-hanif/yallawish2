@@ -24,8 +24,9 @@ export default function ViewList() {
   const coverUri = list?.coverPhotoUri as string | undefined;
   const privacy = list?.privacy ?? "private";
   const shareCount = Array.isArray(shares) ? shares.length : undefined;
-
-  // Password gate
+  const occasion = list?.occasion || ""
+  
+// Password gate
   const requiresPassword: boolean = Boolean((list as any)?.requiresPassword);
   const [unlocked, setUnlocked] = useState(false);
 
@@ -115,9 +116,9 @@ export default function ViewList() {
     <View style={styles.container}>
       <HeaderBar title={title} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <ListCover imageUri={coverUri} overlayText={formatEventDate((list?.eventDate ?? undefined) as string | undefined)} />
+        <ListCover  occasion={occasion} imageUri={coverUri} overlayText={formatEventDate((list?.eventDate ?? undefined) as string | undefined)} />
         <View style={styles.listInfoContainer}>
-          <RibbonHeader title={title} subtitle={subtitle ?? ""} />
+          <RibbonHeader title={title} subtitle={subtitle ?? ""} occasion={occasion}/>
         </View>
         <ActionsBar privacy={privacy} loading={loading} address={(list?.shippingAddress as string | undefined) ?? null} shareCount={shareCount} />
 
