@@ -875,7 +875,8 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
               )
             }
           </View>
-          <View style={{height:4, backgroundColor:'#EFECF266'}} /> 
+          {moreItems.length > 0 ? <View style={{height:4, backgroundColor:'#EFECF266'}} />  : null}
+          
           {moreItems.length > 0 && (
             <View>
               <View style={{paddingHorizontal:16, paddingVertical: 24}}>
