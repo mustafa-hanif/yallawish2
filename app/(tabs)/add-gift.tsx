@@ -837,7 +837,7 @@ function MobileLayout({
     <>
       <HeaderBar title={title} onBack={handleBack} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <ListCover imageUri={coverUri} overlayText={overlayText} />
+        <ListCover imageUri={coverUri} overlayText={overlayText} occasion={occasion}/>
 
         <View style={styles.listInfoContainer}>
           <RibbonHeader occasion={occasion} title={title} subtitle={subtitle} />
