@@ -606,78 +606,83 @@ export default function AddGift() {
           </View>
         ) : (
           <Animated.View style={[styles.sheetContainer, { transform: [{ translateY }] }]}>
-            <Pressable onPress={closeSheet}>
+            <Pressable style={{backgroundColor:'#FFFF', borderWidth:0}} onPress={closeSheet}>
               <View style={styles.sheetHandle} />
             </Pressable>
-            <ScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
-              <Text style={styles.sheetTitle}>Add a gift item</Text>
-              <View style={styles.fieldGroup}>
-                <Text style={styles.fieldLabel}>Add a web link</Text>
-                <View style={styles.inputRow}>
-                  <TextInput value={link} onChangeText={setLink} style={styles.input} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="https://" />
-                  {scraping ? <Text style={styles.scrapeStatus}>…</Text> : <Ionicons name="open-outline" size={20} color="#7A6F88" />}
-                </View>
-                {!isUrlValid && link.trim().length > 0 && (<Text style={styles.errorText}>Invalid URL</Text>)}
+            <ScrollView contentContainerStyle={{...styles.sheetContent, paddingHorizontal:0, gap:0}} showsVerticalScrollIndicator={false}>
+              <View style={{ padding:16, gap: 20, backgroundColor:'#ffff'}}>
+                <Text style={styles.sheetTitle}>Add a gift item</Text>
+                <View style={styles.fieldGroup}>
+                  <Text style={styles.fieldLabel}>Add a web link</Text>
+                  <View style={styles.inputRow}>
+                    <TextInput value={link} onChangeText={setLink} style={styles.input} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="https://" />
+                    {scraping ? <Text style={styles.scrapeStatus}>…</Text> : <Ionicons name="open-outline" size={20} color="#7A6F88" />}
+                  </View>
+                  {!isUrlValid && link.trim().length > 0 && (<Text style={styles.errorText}>Invalid URL</Text>)}
 
-                {scrapeError && <Text style={styles.errorText}>{scrapeError}</Text>}
-              </View>
-              <View style={styles.orDivider}>
-                <View style={styles.orLine} />
-                <Text style={styles.orText}>OR</Text>
-                <View style={styles.orLine} />
-              </View>
-              <View style={styles.fieldGroup}>
-                <Text style={styles.fieldLabel}>Search via Google</Text>
-                <View style={styles.inputRow}>
-                  <TextInput value={search} onChangeText={setSearch} style={styles.input} autoCapitalize="none" autoCorrect={false} placeholder="Search products" returnKeyType="search" onSubmitEditing={openSearchBrowser} />
-                  <Pressable onPress={openSearchBrowser}>
-                    <Ionicons name="search-outline" size={20} color="#1C0335" />
-                  </Pressable>
+                  {scrapeError && <Text style={styles.errorText}>{scrapeError}</Text>}
                 </View>
-              </View>
-              <View style={styles.fieldGroup}>
-                <Text style={styles.fieldLabel}>Desired quantity</Text>
-                <View style={styles.qtyRow}>
-                  <Pressable onPress={decQty} style={styles.qtyBtn}><Text style={styles.qtyBtnText}>–</Text></Pressable>
-                  <Text style={styles.qtyValue}>{String(quantity).padStart(2, '0')}</Text>
-                  <Pressable onPress={incQty} style={styles.qtyBtn}><Text style={styles.qtyBtnText}>+</Text></Pressable>
+                <View style={styles.orDivider}>
+                  <View style={styles.orLine} />
+                  <Text style={styles.orText}>OR</Text>
+                  <View style={styles.orLine} />
                 </View>
-              </View>
-              <View style={styles.fieldGroup}>
-                <Text style={styles.fieldLabel}>Price of gift</Text>
-                <View style={styles.inputRow}>
-                  <TextInput value={price} onChangeText={setPrice} style={styles.input} keyboardType="decimal-pad" />
+                <View style={styles.fieldGroup}>
+                  <Text style={styles.fieldLabel}>Search via Google</Text>
+                  <View style={styles.inputRow}>
+                    <TextInput value={search} onChangeText={setSearch} style={styles.input} autoCapitalize="none" autoCorrect={false} placeholder="Search products" returnKeyType="search" onSubmitEditing={openSearchBrowser} />
+                    <Pressable onPress={openSearchBrowser}>
+                      <Ionicons name="search-outline" size={20} color="#1C0335" />
+                    </Pressable>
+                  </View>
                 </View>
+
               </View>
-              <View style={styles.fieldGroup}>
-                <Text style={styles.fieldLabel}>Name of gift</Text>
-                <View style={styles.inputRow}>
-                  <TextInput value={name} onChangeText={setName} style={styles.input} />
-                  <Ionicons name="pencil-outline" size={20} color="#1C0335" />
+              <View style={{ padding:16, paddingTop:24,  gap: 20}}>
+                <View style={styles.fieldGroup}>
+                  <Text style={styles.fieldLabel}>Desired quantity</Text>
+                  <View style={styles.qtyRow}>
+                    <Pressable onPress={decQty} style={styles.qtyBtn}><Text style={styles.qtyBtnText}>–</Text></Pressable>
+                    <Text style={styles.qtyValue}>{String(quantity).padStart(2, '0')}</Text>
+                    <Pressable onPress={incQty} style={styles.qtyBtn}><Text style={styles.qtyBtnText}>+</Text></Pressable>
+                  </View>
                 </View>
-                {imageUrl && (
-                  <Image source={{ uri: imageUrl }} style={styles.previewImage} />
-                )}
-              </View>
-              <View style={styles.fieldGroup}>
-                <Text style={styles.fieldLabel}>Description (optional)</Text>
-                <View style={[styles.inputRow, styles.textareaWrapper]}>
-                  <TextInput
-                    placeholder="Prefer white, size M."
-                    value={description}
-                    onChangeText={t => t.length <= DESCRIPTION_LIMIT && setDescription(t)}
-                    style={[styles.input, styles.textarea]}
-                    multiline
-                  />
-                  <Text style={styles.charCount}>{DESCRIPTION_LIMIT - description.length}</Text>
+                <View style={styles.fieldGroup}>
+                  <Text style={styles.fieldLabel}>Price of gift</Text>
+                  <View style={styles.inputRow}>
+                    <TextInput value={price} onChangeText={setPrice} style={styles.input} keyboardType="decimal-pad" />
+                  </View>
                 </View>
+                <View style={styles.fieldGroup}>
+                  <Text style={styles.fieldLabel}>Name of gift</Text>
+                  <View style={styles.inputRow}>
+                    <TextInput value={name} onChangeText={setName} style={styles.input} />
+                    <Ionicons name="pencil-outline" size={20} color="#1C0335" />
+                  </View>
+                  {imageUrl && (
+                    <Image source={{ uri: imageUrl }} style={styles.previewImage} />
+                  )}
+                </View>
+                <View style={styles.fieldGroup}>
+                  <Text style={styles.fieldLabel}>Description (optional)</Text>
+                  <View style={[styles.inputRow, styles.textareaWrapper]}>
+                    <TextInput
+                      placeholder="Prefer white, size M."
+                      value={description}
+                      onChangeText={t => t.length <= DESCRIPTION_LIMIT && setDescription(t)}
+                      style={[styles.input, styles.textarea]}
+                      multiline
+                    />
+                    <Text style={styles.charCount}>{DESCRIPTION_LIMIT - description.length}</Text>
+                  </View>
+                </View>
+                <Pressable style={[styles.saveBtn, (!canSave) && styles.saveBtnDisabled]} onPress={handleSave} disabled={!canSave}>
+                  <Text style={[styles.saveBtnText, (!canSave) && styles.saveBtnTextDisabled]}>{saving ? 'Saving...' : 'Save'}</Text>
+                </Pressable>
+                <Pressable style={styles.cancelBtn} onPress={handleCancel}>
+                  <Text style={styles.cancelBtnText}>Cancel</Text>
+                </Pressable>
               </View>
-              <Pressable style={[styles.saveBtn, (!canSave) && styles.saveBtnDisabled]} onPress={handleSave} disabled={!canSave}>
-                <Text style={[styles.saveBtnText, (!canSave) && styles.saveBtnTextDisabled]}>{saving ? 'Saving...' : 'Save'}</Text>
-              </Pressable>
-              <Pressable style={styles.cancelBtn} onPress={handleCancel}>
-                <Text style={styles.cancelBtnText}>Cancel</Text>
-              </Pressable>
             </ScrollView>
           </Animated.View>
         )}
