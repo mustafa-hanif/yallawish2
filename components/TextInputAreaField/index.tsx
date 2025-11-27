@@ -14,29 +14,35 @@ type TTextInputAreaFieldProps = {
   onChangeText?: (text: string) => void;
   icon?: React.ReactNode;
   placeholderTextColor?: string;
+  showCounter?: boolean;
+  height?: number
 };
 
-export function TextInputAreaField({ icon, label, variant = "default", placeholder, value, onChangeText, placeholderTextColor }: TTextInputAreaFieldProps) {
+export function TextInputAreaField({ icon, height = 160, label, variant = "default", placeholder, value, onChangeText, placeholderTextColor, showCounter = true }: TTextInputAreaFieldProps) {
   const [characterCount, setCharacterCount] = useState(0);
 
   useEffect(() => {
     setCharacterCount((value ?? "").length);
   }, [value]);
-  
+
   const { width: SCREEN_WIDTH } = Dimensions.get("window");
   const isDesktop = Platform.OS === "web" && SCREEN_WIDTH >= 768;
   return (
     <View style={styles.container}>
-      <View style={styles.inputWrapper}>
+      <View style={{...styles.inputWrapper, height}}>
         <View style={styles.labelContainer}>
           <Text style={styles.label}>{label}</Text>
         </View>
         {icon && <View style={styles.rightIconContainer}>{icon}</View>}
 
         <TextInput multiline placeholderTextColor={placeholderTextColor} placeholder={placeholder} style={styles.input} value={value} onChangeText={onChangeText} />
-        <View style={styles.characterCount}>
-          <Text style={styles.characterCountText}>{characterCount}</Text>
-        </View>
+        {showCounter ? (
+          <>
+            <View style={styles.characterCount}>
+              <Text style={styles.characterCountText}>{characterCount}</Text>
+            </View>
+          </>
+        ) : null}
       </View>
     </View>
   );
