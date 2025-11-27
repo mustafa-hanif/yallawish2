@@ -1,6 +1,5 @@
 import type { GiftItem as GiftItemType } from "@/components/list/GiftItemCard";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { occasionObj } from "@/constants/occasion";
 import { api } from "@/convex/_generated/api";
 import { styles as listStyles } from "@/styles/addGiftStyles";
 import { useAuth, useUser } from "@clerk/clerk-expo";
@@ -23,6 +22,73 @@ import {
   useWindowDimensions
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const occasionObj = {
+  birthday: {
+    id: "birthday",
+    title: "Birthday",
+    borderColor: "#FC0",
+    icon: "gift",
+    mobileIcon: require("@/assets/images/birthdayIcon.png"),
+    backgroundColor: "#FFF6D2",
+  },
+  wedding: {
+    id: "wedding",
+    title: "Wedding",
+    borderColor: "#FF3B30",
+    icon: "heart",
+    mobileIcon: require("@/assets/images/weddingIcon.png"),
+    backgroundColor: "#FFE0E0",
+  },
+  "baby-shower": {
+    id: "baby-shower",
+    title: "Baby Shower",
+    borderColor: "#91DA93",
+    icon: "person",
+    mobileIcon: require("@/assets/images/babyShowerIcon.png"),
+    backgroundColor: "#F0F9F0",
+  },
+  graduation: {
+    id: "graduation",
+    title: "Graduation",
+    borderColor: "#32ADE6",
+    icon: "school",
+    mobileIcon: require("@/assets/images/graduationIcon.png"),
+    backgroundColor: "#D9F3FF",
+  },
+  "new-home": {
+    id: "new-home",
+    title: "New Home",
+    borderColor: "#A2845E",
+    icon: "home",
+    mobileIcon: require("@/assets/images/newHomeIcon.png"),
+    backgroundColor: "#F5E8D5",
+  },
+  retirement: {
+    id: "retirement",
+    title: "Retirement",
+    borderColor: "#FF9500",
+    icon: "person",
+    mobileIcon: require("@/assets/images/retirementIcon.png"),
+    backgroundColor: "#FFEBCC",
+  },
+  "no-occasion": {
+    id: "no-occasion",
+    title: "No Occasion",
+    borderColor: "#4D4D4D",
+    icon: "document-text",
+    mobileIcon: require("@/assets/images/noOccasionIcon.png"),
+    backgroundColor: "#F4F4F4",
+  },
+  other: {
+    id: "other",
+    title: "Other",
+    borderColor: "#D1D1D6",
+    icon: "gift",
+    mobileIcon: require("@/assets/images/otherIcon.png"),
+    backgroundColor: "#E9E9E9",
+  },
+};
 
 type StoreOption = "suggested" | "custom";
 
