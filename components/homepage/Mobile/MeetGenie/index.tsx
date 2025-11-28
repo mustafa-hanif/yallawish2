@@ -1,4 +1,3 @@
-import { mergeStyles } from "@/utils";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { Image, Text, View } from "react-native";
@@ -6,8 +5,8 @@ import { styles } from "./style";
 
 export function MeetGenie() {
   return (
-    <View style={mergeStyles(styles.section)}>
-      <LinearGradient colors={["#330065", "#2C277A", "#03ffee3a"]} locations={[0.4, 0.8, 1]} style={mergeStyles(styles.gradientSectionMobile)}>
+    <View style={styles.section}>
+      <LinearGradient colors={["#330065", "#2C277A", "#03ffee3a"]} locations={[0.4, 0.8, 1]} style={styles.gradientSectionMobile}>
         <View style={styles.pillContainer}>
           <Text style={styles.pillText}>
             <Text style={styles.pillItalicText}>AI</Text> POWERED
