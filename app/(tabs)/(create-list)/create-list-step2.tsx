@@ -1,3 +1,4 @@
+import { DateInputField } from "@/components/DateInputField";
 import { TextInputAreaField } from "@/components/TextInputAreaField";
 import { TextInputField } from "@/components/TextInputField";
 import { api } from "@/convex/_generated/api";
@@ -947,26 +948,14 @@ function MobileLayout({
               onChangeText={handleNoteChange}
             />
 
+              <DateInputField 
+                label="Event date (optional)"
+                value={formData.eventDate}
+                onChange={(date) => updateFormData("eventDate", date)}
+                placeholder="Select a date"
 
-            <View style={{...styles.fieldContainer, ...{ minHeight: 'auto' }}}>
-              <Pressable onPress={showDatePicker} style={styles.fieldWrapper}>
-                <Text
-                  style={[
-                    styles.textInput,
-                    !formData.eventDate && styles.textInputEmpty,
-                    { color: formData.eventDate ? "#1C0335" : "#D1D1D6" },
-                  ]}
-                >
-                  {formData.eventDate || "Select a date"}
-                </Text>
-                <View style={styles.floatingLabel}>
-                  <Text style={styles.floatingLabelText}>Event date</Text>
-                </View>
-                <View style={styles.rightIconContainer}>
-                  <Ionicons name="calendar-outline" size={24} color="#AEAEB2" />
-                </View>
-              </Pressable>
-            </View>
+              />
+
               <TextInputAreaField  
                 height={92}
                 label="Shipping Address (optional)"
