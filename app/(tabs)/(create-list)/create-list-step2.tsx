@@ -1244,7 +1244,6 @@ const styles = StyleSheet.create({
   },
   floatingLabelText: {
     fontSize: 16,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     color: "#1C0335",
     lineHeight: 24,
@@ -1271,7 +1270,6 @@ const styles = StyleSheet.create({
   },
   coverPhotoLabel: {
     fontSize: 16,
-    fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     color: "#1C0335",
     lineHeight: 24,
@@ -1310,7 +1308,6 @@ const styles = StyleSheet.create({
   },
   uploadText: {
     fontSize: 16,
-    // fontWeight: "700",
     fontFamily: "Nunito_700Bold",
     color: "#3B0076",
     lineHeight: 16,
