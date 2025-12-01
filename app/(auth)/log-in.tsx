@@ -39,7 +39,7 @@ export default function LoginScreen() {
     const { createdSessionId, setActive: setActiveOAuth } = await startGoogle();
     if (createdSessionId) {
       await setActiveOAuth?.({ session: createdSessionId });
-      const target = decodedReturnTo ? (decodedReturnTo as any) : "/profile-setup";
+      const target = decodedReturnTo ? (decodedReturnTo as any) : "/(tabs)";
       router.replace(target);
     }
   };
@@ -48,7 +48,7 @@ export default function LoginScreen() {
     const { createdSessionId, setActive: setActiveOAuth } = await startApple();
     if (createdSessionId) {
       await setActiveOAuth?.({ session: createdSessionId });
-      const target = decodedReturnTo ? (decodedReturnTo as any) : "/profile-setup";
+      const target = decodedReturnTo ? (decodedReturnTo as any) : "/(tabs)";
       router.replace(target);
     }
   };
@@ -60,7 +60,7 @@ export default function LoginScreen() {
       const result = await signIn.create({ identifier: emailAddress, password });
       if (result.status === "complete") {
         await setActive?.({ session: result.createdSessionId });
-        const target = decodedReturnTo ? (decodedReturnTo as any) : "/profile-setup";
+        const target = decodedReturnTo ? (decodedReturnTo as any) : "/(tabs)";
         router.replace(target);
       }
     } catch (err) {
