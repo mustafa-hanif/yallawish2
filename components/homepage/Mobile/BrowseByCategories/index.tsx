@@ -17,7 +17,7 @@ const categories = [
   ],
 
   [
-    { id: 6, name: "House Warming", icon: require("@/assets/images/newHomeIcon.png"), color: "#5856D6" },
+    { id: 6, name: "New Home", icon: require("@/assets/images/newHomeIcon.png"), color: "#5856D6" },
     { id: 7, name: "Retirement", icon: require("@/assets/images/retirementIcon.png"), color: "#FF9500" },
   ],
   [
