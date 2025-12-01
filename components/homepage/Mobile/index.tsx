@@ -6,6 +6,7 @@ import { useQuery } from "convex/react";
 import { ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BrowseByCategories } from "./BrowseByCategories";
+import { Hero } from "./Hero";
 import { InspirationBoards } from "./InspirationBoards";
 import { MeetGenie } from "./MeetGenie";
 import { TopPicksForYou } from "./TopPicksForYou";
@@ -62,6 +63,7 @@ export function Mobile() {
   return (
     <SafeAreaView>
       <ScrollView showsVerticalScrollIndicator={false}>
+        <Hero />
         <BrowseByCategories />
         <UpcomingEvents upcomingEvents={upcomingEvents} />
         <TopPicksForYou />
