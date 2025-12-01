@@ -5,7 +5,6 @@ import { Alert, Dimensions, Pressable, Text, View } from "react-native";
 import Animated, { useSharedValue } from "react-native-reanimated";
 import Carousel from "react-native-reanimated-carousel";
 import { styles } from "./style";
-
 interface HeroProp {}
 const window: ScaledSize = Dimensions.get("screen");
 
@@ -52,35 +51,59 @@ export function Hero({}: HeroProp) {
       </View>
       <View>
         <Carousel
-          containerStyle={styles.carouselContainer}
-          autoPlayInterval={2000}
-          data={initialCards}
-          height={373}
-          loop={true}
-          pagingEnabled={true}
-          snapEnabled={true}
           width={window.width}
-          style={styles.carouselStyle}
+          height={373}
+          data={initialCards}
+          pagingEnabled
+          snapEnabled
+          loop
           mode="parallax"
-          modeConfig={{
-            parallaxScrollingScale: 0.75,
-            parallaxScrollingOffset: 250,
+          modeConfig={{ parallaxScrollingOffset: 240 }}
+          onProgressChange={(_, absProgress) => {
+            progress.value = absProgress ?? 0;
           }}
-          onProgressChange={progress}
-          renderItem={({ item }) => <SlideItem data={item} />}
+          autoPlay
+          autoPlayInterval={2000}
+          scrollAnimationDuration={1000}
+          renderItem={({ item, index }) => <SlideItem data={item} index={index} progress={progress} />}
         />
       </View>
     </View>
   );
 }
 
-const SlideItem: React.FC<Props> = (props) => {
-  const { data, length = 0, ...animatedViewProps } = props;
+const SlideItem = ({ data, index, progress }) => {
+//   const progressValue = useDerivedValue(() => {
+//     const v = progress.value;
+
+//     if (typeof v !== "number" || isNaN(v)) return 0;
+
+//     // Calculate the difference from the center index
+//     const diff = v - index;
+
+//     // Clamp to -1, 0, 1 for left, center, right only
+//     if (diff < -0.5) return -1;   // left
+//     if (diff > 0.5) return 1;     // right
+//     return 0;                     // center
+//   });
+
+//   const animatedStyle = useAnimatedStyle(() => {
+//     const rotation = interpolate(progressValue.value, [-1, 0, 1], [-24, 0, 24]);
+//     return {
+//       transform: [{ rotate: `${rotation}deg` }],
+//     };
+//   });
 
   return (
-    <Animated.View style={styles.carouselAnimatedView} {...animatedViewProps}>
-      <Pressable style={styles.carouselPressable} onPress={data?.action}>
-        <Animated.Image style={styles.carouselSlideItemContainer} source={data?.image} resizeMode="contain" />
+    <Animated.View style={[styles.carouselAnimatedView, 
+    // animatedStyle
+    ]}>
+      <Pressable style={styles.carouselPressable} onPress={data.action}>
+        <Animated.Image
+          style={styles.carouselSlideItemContainer}
+          source={data?.image}
+          resizeMode="contain"
+        />
       </Pressable>
     </Animated.View>
   );
