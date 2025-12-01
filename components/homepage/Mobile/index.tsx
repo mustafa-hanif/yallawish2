@@ -4,13 +4,13 @@ import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-expo";
 import { useQuery } from "convex/react";
 import { ScrollView } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { BrowseByCategories } from "./BrowseByCategories";
 import { Hero } from "./Hero";
 import { InspirationBoards } from "./InspirationBoards";
 import { MeetGenie } from "./MeetGenie";
 import { TopPicksForYou } from "./TopPicksForYou";
 import { UpcomingEvents } from "./UpcomingEvents";
+import { Header } from "./header";
 
 const OCCASION_COLOR: Record<string, string> = {
   birthday: "#00C4F0",
@@ -61,7 +61,8 @@ export function Mobile() {
   }, [myLists]);
 
   return (
-    <SafeAreaView>
+    <>
+      <Header />
       <ScrollView showsVerticalScrollIndicator={false}>
         <Hero />
         <BrowseByCategories />
@@ -70,6 +71,6 @@ export function Mobile() {
         <InspirationBoards />
         <MeetGenie />
       </ScrollView>
-    </SafeAreaView>
+    </>
   );
 }
