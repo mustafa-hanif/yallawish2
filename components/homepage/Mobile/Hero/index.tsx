@@ -1,3 +1,4 @@
+import { useUser } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import React from "react";
 import type { ScaledSize } from "react-native";
@@ -5,12 +6,14 @@ import { Alert, Dimensions, Pressable, Text, View } from "react-native";
 import Animated, { useSharedValue } from "react-native-reanimated";
 import Carousel from "react-native-reanimated-carousel";
 import { styles } from "./style";
+
 interface HeroProp {}
 const window: ScaledSize = Dimensions.get("screen");
 
 export function Hero({}: HeroProp) {
   const handleCreateWishlist = () => router.push("/create-list-step1");
   const progress = useSharedValue<number>(0);
+  const { user } = useUser();
 
   const initialCards = [
     {
@@ -43,7 +46,7 @@ export function Hero({}: HeroProp) {
     <View style={styles.section}>
       <View style={styles.contentContainer}>
         <View>
-          <Text style={styles.title}>{"Hi There!"}</Text>
+          <Text style={styles.title}>{`Hi ${user?.firstName || "There"}!`}</Text>
         </View>
         <View>
           <Text style={styles.subTitle}>Ready to make someone smile?</Text>
@@ -73,37 +76,36 @@ export function Hero({}: HeroProp) {
 }
 
 const SlideItem = ({ data, index, progress }) => {
-//   const progressValue = useDerivedValue(() => {
-//     const v = progress.value;
+  //   const progressValue = useDerivedValue(() => {
+  //     const v = progress.value;
 
-//     if (typeof v !== "number" || isNaN(v)) return 0;
+  //     if (typeof v !== "number" || isNaN(v)) return 0;
 
-//     // Calculate the difference from the center index
-//     const diff = v - index;
+  //     // Calculate the difference from the center index
+  //     const diff = v - index;
 
-//     // Clamp to -1, 0, 1 for left, center, right only
-//     if (diff < -0.5) return -1;   // left
-//     if (diff > 0.5) return 1;     // right
-//     return 0;                     // center
-//   });
+  //     // Clamp to -1, 0, 1 for left, center, right only
+  //     if (diff < -0.5) return -1;   // left
+  //     if (diff > 0.5) return 1;     // right
+  //     return 0;                     // center
+  //   });
 
-//   const animatedStyle = useAnimatedStyle(() => {
-//     const rotation = interpolate(progressValue.value, [-1, 0, 1], [-24, 0, 24]);
-//     return {
-//       transform: [{ rotate: `${rotation}deg` }],
-//     };
-//   });
+  //   const animatedStyle = useAnimatedStyle(() => {
+  //     const rotation = interpolate(progressValue.value, [-1, 0, 1], [-24, 0, 24]);
+  //     return {
+  //       transform: [{ rotate: `${rotation}deg` }],
+  //     };
+  //   });
 
   return (
-    <Animated.View style={[styles.carouselAnimatedView, 
-    // animatedStyle
-    ]}>
+    <Animated.View
+      style={[
+        styles.carouselAnimatedView,
+        // animatedStyle
+      ]}
+    >
       <Pressable style={styles.carouselPressable} onPress={data.action}>
-        <Animated.Image
-          style={styles.carouselSlideItemContainer}
-          source={data?.image}
-          resizeMode="contain"
-        />
+        <Animated.Image style={styles.carouselSlideItemContainer} source={data?.image} resizeMode="contain" />
       </Pressable>
     </Animated.View>
   );
