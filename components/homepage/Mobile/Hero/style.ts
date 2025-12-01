@@ -19,7 +19,7 @@ export const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: "Nunito_500Medium",
     color: "#1C1C1CB2",
-    letterSpacing: -2,
+    letterSpacing: -1,
     lineHeight: 28,
   },
   carouselContainer: {
