@@ -14,5 +14,5 @@ export const styles = StyleSheet.create({
     letterSpacing: -1,
     lineHeight: 28,
   },
-  flatList: { gap: 16 },
+  flatList: { gap: 8 },
 });
