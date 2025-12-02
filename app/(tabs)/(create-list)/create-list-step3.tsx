@@ -484,8 +484,8 @@ function MobileLayout({
   const ProgressIndicator = () => (
     <View style={styles.progressContainer}>
       <View style={styles.progressBarContainer}>
-        <View style={[styles.progressSegment, styles.progressInactive]} />
-        <View style={[styles.progressSegment, styles.progressInactive]} />
+        <View style={[styles.progressSegment, styles.progressActive]} />
+        <View style={[styles.progressSegment, styles.progressActive]} />
         <View style={[styles.progressSegment, styles.progressActive]} />
       </View>
     </View>
