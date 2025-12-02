@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Dimensions, Image, Platform, Pressable, Text, View, ViewStyle } from "react-native";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { Dimensions, Image, Modal, Platform, Pressable, Text, View, ViewStyle } from "react-native";
+
+import DatePicker from "@amjed-bouhouch/react-native-ui-datepicker";
+
 import { styles } from "./style";
 
 type DateInputFieldVariant = "default" | "primary";
@@ -23,8 +25,7 @@ export function DateInputField({ label, value, onChange, variant = "default", pl
 
   const handleDateConfirm = (date: Date) => {
     const formattedDate = date.toISOString().split("T")[0]; // Format the date as YYYY-MM-DD
-    if (onChange) onChange(formattedDate); // Notify parent about the change
-    setDatePickerVisible(false);
+    if (onChange) onChange(formattedDate); // Notify parent about the change  
   };
 
   const handleDatePickerVisibility = () => {
@@ -63,11 +64,16 @@ export function DateInputField({ label, value, onChange, variant = "default", pl
       setDatePickerVisible(true); // For mobile devices, show the modal picker
     }
   };
-
+  
+  const handleCloseModal = () => {
+     setDatePickerVisible(false);
+  }
   useEffect(() => {
     // Reset the date picker visibility when the component is unmounted
-    return () => setDatePickerVisible(false);
+    return () => handleCloseModal()
   }, []);
+
+
 
   return (
     <Pressable style={styles.container} onPress={handleDatePickerVisibility}>
@@ -82,8 +88,40 @@ export function DateInputField({ label, value, onChange, variant = "default", pl
       </View>
 
       {error ? <>{Array.isArray(error) ? <>{error?.map((errorItem) => <Text style={styles.errorText}>{errorItem || ""}</Text>)}</> : <Text style={styles.errorText}>{error || ""}</Text>}</> : <></>}
+      {isDatePickerVisible && (
+        <Modal transparent animationType="fade">
+          <Pressable onPress={handleCloseModal} style={styles.modalBackdrop} >
+            <View style={{ backgroundColor: "#fff", padding: 20, borderRadius: 16 }}>
+              <DatePicker
+                mode="single"
+                date={value ? new Date(value) : new Date()}
+                onChange={(params: any) => {
+                  const d = params.date;
+                  if (d) {
+                    const dateObj = new Date(d); // Ensure it's a Date object
+                    const year = dateObj.getFullYear();
+                    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+                    const day = String(dateObj.getDate()).padStart(2, "0");
+                    const formatted = `${year}-${month}-${day}`;
+                    onChange?.(formatted);
+                  }
+                  setDatePickerVisible(false);
+                }}
+                headerContainerStyle={styles.calendarHeader}
+                headerTextStyle={styles.calendarHeaderTextStyle}
+                headerButtonColor="#1C0335"
+                headerButtonSize={20}
+                weekDaysTextStyle={styles.weekDaysTextStyle}
+                dayContainerStyle={styles.calendarDayContainerStyle}
+                calendarTextStyle={styles.calendarTextStyle}
+                selectedItemColor="#330065"
+              />
+            </View>
+          </Pressable>
+        </Modal>
+      )}
 
-      {Platform.OS !== "web" && <DateTimePickerModal isVisible={isDatePickerVisible} mode="date" onConfirm={handleDateConfirm} onCancel={() => setDatePickerVisible(false)} display={Platform.OS === "ios" ? "inline" : "default"} />}
+      {/* {Platform.OS !== "web" && <DateTimePickerModal isVisible={isDatePickerVisible} mode="date" onConfirm={handleDateConfirm} onCancel={() => setDatePickerVisible(false)} display={Platform.OS === "ios" ? "inline" : "default"} />} */}
     </Pressable>
   );
 }

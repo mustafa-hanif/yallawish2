@@ -40,4 +40,33 @@ export const styles = StyleSheet.create({
     minWidth: 50,
   },
   errorText: { fontSize: 12, color: "#B00020", fontFamily: "Nunito_700Bold" },
+  modalBackdrop: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.3)",
+    paddingHorizontal: 20,
+  },
+  calendarHeader: {
+    backgroundColor: "#3b007647",
+    borderRadius: 50,
+  },
+  calendarHeaderTextStyle: {
+    fontSize: 20,
+    fontFamily: "Nunito_900Black",
+    color: "#1C0335",
+  },
+  weekDaysTextStyle: {
+    fontSize: 14,
+    fontFamily: "Nunito_700Bold",
+  },
+  calendarDayContainerStyle: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  calendarTextStyle: {
+    fontFamily: "Nunito_300Light",
+  },
 });
