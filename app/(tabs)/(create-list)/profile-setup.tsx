@@ -882,7 +882,7 @@ export default function ProfileSetupScreen() {
     <SafeAreaView
       style={[
         styles.safeArea,
-        { backgroundColor: isDesktop ? "#F6F2FF" : palette.background },
+        { backgroundColor: isDesktop ? "#F6F2FF" : '#ffff' },
       ]}
     >
       <StatusBar barStyle={colorScheme === "dark" ? "light-content" : "dark-content"} />
