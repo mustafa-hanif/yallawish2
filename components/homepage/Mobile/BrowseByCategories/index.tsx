@@ -12,11 +12,11 @@ const categories = [
   ],
   [
     { id: 3, name: "Birthday", icon: require("@/assets/images/cake.png"), color: "#FFCC00" },
-    { id: 2, name: "Baby Shower", icon: require("@/assets/images/babyShowerIcon.png"), color: "#00C7BE" },
+    { id: 2, name: "Baby Shower", icon: require("@/assets/images/babyShowerIcon1.png"), color: "#00C7BE" },
   ],
   [
     { id: 6, name: "New Home", icon: require("@/assets/images/newHomeIcon.png"), color: "#5856D6" },
-    { id: 7, name: "Retirement", icon: require("@/assets/images/retirementIcon.png"), color: "#FF9500" },
+    { id: 7, name: "Retirement", icon: require("@/assets/images/retirementIcon1.png"), color: "#FF9500" },
   ],
   [
     { id: 5, name: "Bridal Shower", icon: require("@/assets/images/bridalShower2.png"), color: "#AF52DE" },
