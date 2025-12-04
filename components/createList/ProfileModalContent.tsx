@@ -16,6 +16,7 @@ import styles from "@/styles/selectProfileStyles";
 import { Image } from "react-native";
 import { DateInputField } from "../DateInputField";
 import { DropDownField } from "../DropDown";
+import { PhoneInputField } from "../PhoneInputField";
 import { TextInputField } from "../TextInputField";
 
 export type DropdownKey = "gender" | "relation";
@@ -427,15 +428,23 @@ export function ProfileModalContent({
         </View>
       
         </> : 
-        <View style={{rowGap:30, marginTop: 25}}>
+        <View style={{rowGap:40, marginTop: 25}}>
          <TextInputField 
             keyboardType="email-address"
             label="Email address"
             value={email}
             onChangeText={onChangeEmail}
           />
-
-          <View style={[styles.field, isDesktop && styles.fieldHalf]}>
+          <PhoneInputField 
+            countryCodeValue={countryCode} 
+            onChangeCountryCode={onChangeCountryCode}
+            countryCodePlaceholder={"+971"}
+            phoneNumberValue={phoneNumber}
+            onChangePhoneNumber={onChangePhoneNumber}
+            phoneNumberPlaceholder="521 123 456"
+            label="Mobile number (optional)" 
+          />
+          {/* <View style={[styles.field, isDesktop && styles.fieldHalf]}>
           <Text style={styles.fieldLabel}>Mobile number (optional)</Text>
           <View style={styles.phoneRow}>
             <TextInput
@@ -454,8 +463,9 @@ export function ProfileModalContent({
               style={[styles.input, styles.phoneInput, isDesktop && styles.inputDesktop]}
             />
           </View>
-        </View>
-        </View>}
+        </View> */}
+      </View>
+      }
       </View>
 
       {isWeb ? (
