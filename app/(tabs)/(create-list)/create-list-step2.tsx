@@ -1365,10 +1365,12 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   continueButton: {
+    height: 56,
     backgroundColor: "#3B0076",
     borderRadius: 8,
     paddingVertical: 16,
     alignItems: "center",
+    justifyContent:'center'
   },
   continueButtonDisabled: {
     backgroundColor: "#D1D1D6",
@@ -1380,11 +1382,13 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   backButtonBottom: {
+    height: 56,
     borderWidth: 1,
     borderColor: "#3B0076",
     borderRadius: 8,
     paddingVertical: 16,
     alignItems: "center",
+    justifyContent:'center'
   },
   backButtonText: {
     color: "#3B0076",
