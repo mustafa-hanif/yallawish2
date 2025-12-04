@@ -270,7 +270,7 @@ function MobileLayout({ selectedOption, onSelect, onBack, onContinue }: LayoutPr
             </View>
           </View>
           <View style={styles.optionHeader}>
-            <Image source={config.mobileIcon} style={styles.mobileIcon} />
+            <Image source={config.mobileIcon} style={styles.mobileIcon} resizeMode="contain"/>
             <Text style={styles.optionTitle}>{config.title}</Text>
           </View>
           <Text style={styles.optionDescription}>{config.mobileDescription}</Text>
@@ -325,6 +325,7 @@ const styles = StyleSheet.create({
   },
   header: {
     minHeight: 108,
+    justifyContent:'flex-end'
   },
   headerContent: {
     paddingHorizontal: 16,
@@ -364,10 +365,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
-    paddingTop: 16,
+    paddingVertical: 16,
   },
   backButton: {
-    padding: 4,
   },
   headerTitle: {
     color: "#FFFFFF",
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: "Nunito_700Bold",
     color: "#1C0335",
-    marginBottom: 16,
+    paddingVertical: 16,
     lineHeight: 28,
   },
   optionsContainer: {
@@ -415,8 +415,9 @@ const styles = StyleSheet.create({
   optionCard: {
     borderRadius: 8,
     borderWidth: 1,
-    padding: 15,
+    padding: 16,
     paddingBottom: 24,
+    height:171
   },
   optionCardSelected: {
     backgroundColor: "#F5EDFE",
@@ -457,7 +458,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   mobileIcon:{
-     width: 33, height: 33, objectFit:'contain' 
+     width: 40, height: 40, objectFit:'contain' 
   },
   optionTitle: {
     fontSize: 24,
@@ -478,6 +479,8 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   continueButton: {
+    height:56,
+    justifyContent:'center',
     backgroundColor: "#3B0076",
     borderRadius: 8,
     paddingVertical: 16,
