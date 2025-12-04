@@ -50,6 +50,7 @@ export default function RootLayout() {
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen name="desktopHomepage" options={{ headerShown: false }} />
                 <Stack.Screen name="(auth)" options={{ headerShown: false, title: "" }} />
+                <Stack.Screen name="(admin)/admin" options={{ headerShown: false ,  title: ""}} />
                 <Stack.Screen name="+not-found" />
               </Stack>
               <StatusBar style="auto" />
