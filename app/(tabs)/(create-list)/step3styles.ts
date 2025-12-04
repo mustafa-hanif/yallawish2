@@ -165,6 +165,8 @@ export const styles = StyleSheet.create({
     gap: 16,
   },
   button: {
+    height: 56,
+    justifyContent:'center',
     borderRadius: 8,
     paddingVertical: 16,
     alignItems: "center",
