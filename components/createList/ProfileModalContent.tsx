@@ -13,6 +13,10 @@ import {
 } from "react-native";
 
 import styles from "@/styles/selectProfileStyles";
+import { Image } from "react-native";
+import { DateInputField } from "../DateInputField";
+import { DropDownField } from "../DropDown";
+import { TextInputField } from "../TextInputField";
 
 export type DropdownKey = "gender" | "relation";
   const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -51,6 +55,7 @@ type ProfileModalContentProps = {
   onSelectDate: (value: Date | null) => void;
   onCloseWebDatePicker: () => void;
   onClearDate: () => void;
+  setBirthDate?: () => void;
 };
 
 type WebDateChangeEvent = {
@@ -115,6 +120,7 @@ export function ProfileModalContent({
   onSelectDate,
   onCloseWebDatePicker,
   onClearDate,
+  setBirthDate
 }: ProfileModalContentProps) {
   const isWeb = Platform.OS === "web";
   const webTodayIso = useMemo(
@@ -178,6 +184,9 @@ export function ProfileModalContent({
     onSelectRelation(event.target?.value ?? "");
   };
 
+  const updateFormDate = () => {
+    
+  }
   const renderDropdown = (
     options: string[],
     onSelect: (value: string) => void,
@@ -212,14 +221,16 @@ export function ProfileModalContent({
       showsVerticalScrollIndicator={false}
     >
       <Text style={isDesktop ? styles.modalTitleDesktop : styles.modalTitle}>
-        Create a profile for someone else
+        {isDesktop ? "Create a profile for someone else" : `Create a profile for\nsomeone else`}
+        
       </Text>
       <Text
         style={
           isDesktop ? styles.modalSubtitleDesktop : styles.modalSubtitle
         }
       >
-        Add a child, partner, parent, or friend and build their wishlist on their behalf.
+        {isDesktop ? "Add a child, parent, partner, or even a pet — and build their gift list on their behalf." : `Add a child, parent, partner, or even a pet —\nand build their gift list on their behalf.`}
+        
       </Text>
 
       <View
@@ -229,6 +240,8 @@ export function ProfileModalContent({
           !isWeb && activeDropdown === "gender" && styles.dropdownRowRaised,
         ]}
       >
+        {isDesktop ? 
+        <>
         <View style={[styles.field, isDesktop && styles.fieldHalf]}>
           <Text style={styles.fieldLabel}>First name</Text>
           <TextInput
@@ -249,10 +262,24 @@ export function ProfileModalContent({
             style={[styles.input, isDesktop && styles.inputDesktop]}
           />
         </View>
+        </> : 
+        <View style={{ rowGap: 40 }}>
+          <TextInputField 
+            label="First name"
+            value={firstName}
+            onChangeText={onChangeFirstName}
+          />
+           <TextInputField 
+            label="Last name"
+            value={lastName}
+            onChangeText={onChangeLastName}
+          />
+        </View>}
       </View>
 
       <View style={[styles.fieldRow, isDesktop && styles.fieldRowDesktop]}>
-        <View
+        {isDesktop ? <>
+          <View
           style={[
             styles.field,
             isDesktop && styles.fieldHalf,
@@ -290,6 +317,22 @@ export function ProfileModalContent({
             </View>
           ) : null}
         </View>
+        </> : 
+        <>
+        <View style={{marginTop: 25 }}>
+          <DateInputField 
+            value={birthDate ? birthDate.toISOString().split("T")[0] : ""}
+            onChange={(dateString) => {
+              setBirthDate(dateString ? new Date(dateString) : null);
+            }} 
+            label="Date of birth" 
+            placeholder=""
+          
+          />
+        </View>
+        
+        </>}
+        
         {isWeb ? (
           <View style={[styles.field, isDesktop && styles.fieldHalf]}>
             <Text style={styles.fieldLabel}>Gender</Text>
@@ -314,31 +357,42 @@ export function ProfileModalContent({
             </View>
           </View>
         ) : (
-          <View
-            style={[
-              styles.field,
-              isDesktop && styles.fieldHalf,
-              activeDropdown === "gender" && styles.fieldDropdownActive,
-            ]}
-          >
-            <Text style={styles.fieldLabel}>Gender</Text>
-            <Pressable
-              onPress={() => onToggleDropdown("gender")}
-              style={[styles.input, styles.inputPressable, isDesktop && styles.inputDesktop]}
-            >
-              <Text style={gender ? styles.inputValue : styles.inputPlaceholder}>
-                {gender || "Select"}
-              </Text>
-              <Ionicons name="chevron-down" size={18} color="#6F5F8F" />
-            </Pressable>
-            {activeDropdown === "gender"
-              ? renderDropdown(genderOptions, onSelectGender)
-              : null}
+          <View style={{ marginTop:25 }}>
+            <DropDownField 
+              value={gender} 
+              label="Gender" 
+              options={genderOptions} 
+              onSelectOption={onSelectGender}
+              icon={<Image source={require("@/assets/images/chevrondown.png")}/>}
+            />
           </View>
+          // <View
+          //   style={[
+          //     styles.field,
+          //     isDesktop && styles.fieldHalf,
+          //     activeDropdown === "gender" && styles.fieldDropdownActive,
+          //   ]}
+          // >
+          //   <Text style={styles.fieldLabel}>Gender</Text>
+          //   <Pressable
+          //     onPress={() => onToggleDropdown("gender")}
+          //     style={[styles.input, styles.inputPressable, isDesktop && styles.inputDesktop]}
+          //   >
+          //     <Text style={gender ? styles.inputValue : styles.inputPlaceholder}>
+          //       {gender || "Select"}
+          //     </Text>
+          //     <Ionicons name="chevron-down" size={18} color="#6F5F8F" />
+          //   </Pressable>
+          //   {activeDropdown === "gender"
+          //     ? renderDropdown(genderOptions, onSelectGender)
+          //     : null}
+          // </View>
         )}
       </View>
 
       <View style={[styles.fieldRow, isDesktop && styles.fieldRowDesktop]}>
+        {isDesktop ? 
+        <>
         <View style={[styles.field, isDesktop && styles.fieldHalf]}>
           <Text style={styles.fieldLabel}>Email address</Text>
           <TextInput
@@ -371,6 +425,37 @@ export function ProfileModalContent({
             />
           </View>
         </View>
+      
+        </> : 
+        <View style={{rowGap:30, marginTop: 25}}>
+         <TextInputField 
+            keyboardType="email-address"
+            label="Email address"
+            value={email}
+            onChangeText={onChangeEmail}
+          />
+
+          <View style={[styles.field, isDesktop && styles.fieldHalf]}>
+          <Text style={styles.fieldLabel}>Mobile number (optional)</Text>
+          <View style={styles.phoneRow}>
+            <TextInput
+              value={countryCode}
+              onChangeText={onChangeCountryCode}
+              placeholder="+971"
+              placeholderTextColor="#B1A6C4"
+              style={[styles.input, styles.countryInput, isDesktop && styles.inputDesktop]}
+            />
+            <TextInput
+              value={phoneNumber}
+              onChangeText={onChangePhoneNumber}
+              placeholder="521 123 456"
+              placeholderTextColor="#B1A6C4"
+              keyboardType="phone-pad"
+              style={[styles.input, styles.phoneInput, isDesktop && styles.inputDesktop]}
+            />
+          </View>
+        </View>
+        </View>}
       </View>
 
       {isWeb ? (
@@ -397,35 +482,20 @@ export function ProfileModalContent({
           </View>
         </View>
       ) : (
-        <View
-          style={[
-            styles.field,
-            activeDropdown === "relation" && styles.fieldDropdownActive,
-            activeDropdown === "relation" && styles.dropdownRowRaised,
-          ]}
-        >
-          <Text style={styles.fieldLabel}>Relation with this person (optional)</Text>
-          <Pressable
-            onPress={() => onToggleDropdown("relation")}
-            style={[styles.input, styles.inputPressable, isDesktop && styles.inputDesktop]}
-          >
-            <Text style={relation ? styles.inputValue : styles.inputPlaceholder}>
-              {relation || "Select"}
-            </Text>
-            <Ionicons name="chevron-down" size={18} color="#6F5F8F" />
-          </Pressable>
-          {activeDropdown === "relation"
-            ? renderDropdown(relationOptions, onSelectRelation)
-            : null}
+        <View style={{ marginTop: 25 }}>
+          <DropDownField  icon={<Image source={require("@/assets/images/chevrondown.png")}/>} value={relation} label="Relation with this person (optional)" options={relationOptions} onSelectOption={onSelectRelation}/>
         </View>
+   
       )}
 
       <View style={styles.toggleRow}>
         <View style={styles.toggleTexts}>
-          <Text style={styles.toggleTitle}>Allow them to edit</Text>
+          <Text style={isDesktop ? styles.toggleTitle : styles.toggleTitleMobile}>Allow them to edit</Text>
+          {isDesktop ? 
           <Text style={styles.toggleSubtitle}>
             They can add or update items on this list.
-          </Text>
+          </Text> : null}
+          
         </View>
         <Switch
           value={allowEdit}
@@ -445,32 +515,41 @@ export function ProfileModalContent({
         ]}
       >
         <Pressable
-          style={[styles.secondaryButton, isSaving && styles.buttonDisabled]}
+          style={[isDesktop?  styles.secondaryButton : styles.secondaryButtonMobile, isSaving && styles.buttonDisabled]}
           onPress={onCancel}
           disabled={isSaving}
         >
-          <Text style={styles.secondaryButtonText}>Cancel</Text>
+          <Text style={isDesktop?  styles.secondaryButtonText: styles.secondaryButtonTextMobile}>Cancel</Text>
         </Pressable>
         <Pressable
-          style={[styles.primaryButton, isSaving && styles.buttonDisabled]}
+          style={[isDesktop? styles.primaryButton : styles.primaryButtonMobile, isSaving && styles.buttonDisabled]}
           onPress={() => onSave(true)}
           disabled={isSaving}
         >
           {isSaving ? (
             <ActivityIndicator color="#FFFFFF" size="small" />
           ) : (
-            <Text style={styles.primaryButtonText}>Save & Continue</Text>
+            <Text style={styles.primaryButtonText}>
+              {isDesktop? "Save & Continue" : "Save profile"}
+              
+            </Text>
           )}
         </Pressable>
-      </View>
 
-      <Pressable
-        style={[styles.ghostButton, isSaving && styles.buttonDisabled]}
-        onPress={() => onSave(false)}
-        disabled={isSaving}
-      >
-        <Text style={styles.ghostButtonText}>Save & add another</Text>
-      </Pressable>
+       <Pressable
+          style={[isDesktop?  styles.secondaryButton : styles.secondaryButtonMobile, isSaving && styles.buttonDisabled]}
+           onPress={() => onSave(false)}
+          disabled={isSaving}
+        >
+          <View style={{flexDirection:'row', gap:13, justifyContent:'center'}}>
+            <Ionicons name="add" size={22} color="#3B0076" />
+            <Text style={isDesktop?  styles.secondaryButtonText: styles.secondaryButtonTextMobile}>
+              {isDesktop ? "Save & add another" : "Add another profile"}
+            </Text>
+          </View>
+        </Pressable>
+      </View>
+      
     </ScrollView>
   );
 }

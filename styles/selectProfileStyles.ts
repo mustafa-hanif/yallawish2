@@ -443,10 +443,12 @@ const selectProfileStyles = StyleSheet.create({
     fontSize: 26,
     color: "#1C0335",
   },
+ 
   modalTitle: {
     fontFamily: "Nunito_700Bold",
-    fontSize: 22,
+    fontSize: 24,
     color: "#1C0335",
+    lineHeight:28
   },
   modalSubtitleDesktop: {
     fontFamily: "Nunito_400Regular",
@@ -456,9 +458,9 @@ const selectProfileStyles = StyleSheet.create({
   },
   modalSubtitle: {
     fontFamily: "Nunito_400Regular",
-    fontSize: 14,
-    color: "#4A3B66",
-    lineHeight: 20,
+    fontSize: 16,
+    color: "#1C0335",
+    lineHeight: 24,
   },
   fieldRow: {
     gap: 16,
@@ -470,7 +472,7 @@ const selectProfileStyles = StyleSheet.create({
   },
   field: {
     flex: 1,
-    gap: 8,
+    gap: 10,
     position: "relative",
     overflow: "visible",
     zIndex: 0,
@@ -607,6 +609,11 @@ const selectProfileStyles = StyleSheet.create({
     fontSize: 15,
     color: "#1C0335",
   },
+  toggleTitleMobile: {
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
+    color: "#1C0335",
+  },
   toggleSubtitle: {
     fontFamily: "Nunito_400Regular",
     fontSize: 12,
@@ -632,6 +639,7 @@ const selectProfileStyles = StyleSheet.create({
     justifyContent: "flex-end",
     gap: 16,
   },
+  
   secondaryButton: {
     height: 52,
     borderRadius: 12,
@@ -642,15 +650,39 @@ const selectProfileStyles = StyleSheet.create({
     paddingHorizontal: 24,
     backgroundColor: "#FFFFFF",
   },
+  secondaryButtonMobile: {
+    height: 56,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#3B0076",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    backgroundColor: "#FFFFFF",
+  },
+
   secondaryButtonText: {
     fontFamily: "Nunito_600SemiBold",
     fontSize: 15,
     color: "#4B0082",
   },
+  secondaryButtonTextMobile:{
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
+    color: "#3B0076",
+  },
   primaryButton: {
     height: 52,
     borderRadius: 12,
     backgroundColor: "#4B0082",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+  primaryButtonMobile: {
+    height: 56,
+    borderRadius: 8,
+    backgroundColor: "#3B0076",
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
@@ -674,6 +706,17 @@ const selectProfileStyles = StyleSheet.create({
     fontSize: 15,
     color: "#4B0082",
   },
+  ghostButtonMobile : {
+    height: 56,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#3B0076",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    backgroundColor: "#FFFFFF",
+  },
+
   buttonDisabled: {
     opacity: 0.7,
   },

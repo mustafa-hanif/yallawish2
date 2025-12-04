@@ -17,7 +17,6 @@ import {
   View,
   useWindowDimensions
 } from "react-native";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import styles from "@/styles/selectProfileStyles";
@@ -564,9 +563,11 @@ export default function SelectProfileScreen() {
           onSelectDate={handleDateChange}
           onCloseWebDatePicker={closeWebDatePicker}
           onClearDate={handleClearBirthDate}
+          setBirthDate={setBirthDate}
+          birthDate={birthDate}
         />
       </ProfileModal>
-      <DateTimePickerModal
+      {/* <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"
         onConfirm={handleNativeDateConfirm}
@@ -576,7 +577,7 @@ export default function SelectProfileScreen() {
         }}
         display={Platform.OS === "ios" ? "inline" : "default"}
         maximumDate={new Date()}
-      />
+      /> */}
     </Fragment>
   );
 }
