@@ -42,11 +42,10 @@ export function DropDownField({ label, icon, placeholder = "Select", value, opti
               <Text style={styles.sortSheetTitle}>{label}</Text>
               <ScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
                 {options?.map((option, index) => (
-                  <View>
+                  <View key={option}>
                     {index !== 0 && <View style={styles.didYouBuyThisGiftSeparator} />}
 
                     <Pressable
-                      key={option}
                       onPress={() => {
                         onSelectOption(option);
                         setActiveDropdown(false);
