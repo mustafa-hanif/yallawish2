@@ -121,15 +121,15 @@ export default function ManageList() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
-  header: { minHeight: 108, paddingBottom: 16, },
+  header: { minHeight: 108, justifyContent:'flex-end' },
   headerContent: { paddingHorizontal: 16 },
   navigation: {
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
-    paddingTop: 16,
+    paddingVertical: 16
   },
-  backButton: { padding: 4 },
+  backButton: {  },
   headerTitle: { color: "#FFFFFF", fontSize: 24, fontFamily: "Nunito_700Bold", lineHeight: 28, letterSpacing: -1 },
   scrollContent: { paddingBottom: 40 },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 15 },

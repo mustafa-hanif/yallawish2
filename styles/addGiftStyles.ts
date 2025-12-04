@@ -7,6 +7,7 @@ export const styles = StyleSheet.create({
   },
   header: {
     minHeight: 108,
+    justifyContent: "flex-end",
   },
   headerContent: {
     paddingHorizontal: 16,
@@ -15,10 +16,10 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
-    paddingTop: 16,
+    paddingVertical: 16,
   },
   backButton: {
-    padding: 4,
+    // padding: 4,
   },
   headerTitle: {
     color: "#FFFFFF",
@@ -90,7 +91,7 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  sectionSeparator: { height: 0.5 , backgroundColor: '#AEAEB2', marginHorizontal: 16 },
+  sectionSeparator: { height: 0.5, backgroundColor: "#AEAEB2", marginHorizontal: 16 },
   addGiftSection: {
     paddingBottom: 16,
     gap: 16,
@@ -107,7 +108,7 @@ export const styles = StyleSheet.create({
     // borderRadius: 12,
     gap: 16,
   },
-  giftDivider: {height:1, backgroundColor:'#D1D1D6'},
+  giftDivider: { height: 1, backgroundColor: "#D1D1D6" },
   itemImageWrap: { width: 93, height: 93, borderRadius: 8, overflow: "hidden", borderWidth: 1, borderColor: "#E5E5EA", justifyContent: "center", alignItems: "center" },
   itemImage: { width: "100%", height: "100%", resizeMode: "cover" },
   itemContent: { flex: 1 },
@@ -208,7 +209,7 @@ export const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -4 },
     shadowRadius: 12,
     elevation: 8,
-    overflow:'hidden'
+    overflow: "hidden",
   },
   sheetHandle: { alignSelf: "center", width: 60, height: 6, borderRadius: 3, backgroundColor: "#C8C7CC", marginTop: 8, marginBottom: 16 },
   sheetContent: { paddingHorizontal: 16, paddingBottom: 60, gap: 20 },
@@ -238,7 +239,7 @@ export const styles = StyleSheet.create({
   previewImage: { width: 120, height: 120, borderRadius: 12, marginTop: 8, backgroundColor: "#E1DEE6" },
   addMoreButton: { marginTop: 8, alignSelf: "center", flexDirection: "row", gap: 6, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24, borderWidth: 1, borderColor: "#3B0076", backgroundColor: "#FFFFFF" },
   addMoreButtonText: { fontSize: 14, fontFamily: "Nunito_700Bold", color: "#3B0076" },
-  addYourFirstGift: { paddingTop:24, paddingHorizontal: 16, rowGap: 20 }, 
+  addYourFirstGift: { paddingTop: 24, paddingHorizontal: 16, rowGap: 20 },
   // Legacy overlay (unused now) kept for reference
   browserOverlay: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "#FFFFFF", elevation: 20 },
   browserHeader: { height: 56, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", gap: 12, borderBottomWidth: 1, borderBottomColor: "#E5E5EA", backgroundColor: "#F8F8FA" },
@@ -262,7 +263,7 @@ export const styles = StyleSheet.create({
   sortSectionTitle: { fontSize: 20, fontFamily: "Nunito_900Black", color: "#1C0335" },
   radioRow: { flexDirection: "row", alignItems: "center", gap: 22, paddingVertical: 8 },
   radioOuter: { width: 24, height: 24, borderRadius: 22, borderWidth: 2, borderColor: "#D5D2DA", alignItems: "center", justifyContent: "center" },
-  radioOuterActive: { borderColor:'#360068', backgroundColor: "#360068" },
+  radioOuterActive: { borderColor: "#360068", backgroundColor: "#360068" },
   radioInner: { width: 10, height: 10, borderRadius: 9, backgroundColor: "#ffff" },
   radioLabel: { fontSize: 18, fontFamily: "Nunito_600SemiBold", color: "#1C0335" },
   checkboxBox: { width: 24, height: 24, borderRadius: 22, borderWidth: 2, borderColor: "#D5D2DA", alignItems: "center", justifyContent: "center" },
@@ -272,15 +273,15 @@ export const styles = StyleSheet.create({
   applyBtnText: { color: "#FFFFFF", fontSize: 16, fontFamily: "Nunito_700Bold" },
   // Spacer at bottom of scroll so content not hidden behind apply bar
   sortScrollSpacer: { height: 120 },
-  selectedFilterContainer:{
-     paddingVertical: 16,
-     paddingLeft: 15, 
-     flexDirection:'row',
+  selectedFilterContainer: {
+    paddingVertical: 16,
+    paddingLeft: 15,
+    flexDirection: "row",
   },
-  filterItem: {  width: "50%" , flexDirection:'row', alignItems:'center' },
-  filterContent: { flexDirection:'row', alignItems:'center' , paddingHorizontal:8 },
-  filterTitle: { color:'#000000', fontFamily: "Nunito_700Bold",  fontSize: 14 },
-  filterValue: { textTransform:'capitalize', color:'#1C1C1CB2', fontFamily: "Nunito_700Bold",  fontSize: 14, marginLeft: 5  },
+  filterItem: { width: "50%", flexDirection: "row", alignItems: "center" },
+  filterContent: { flexDirection: "row", alignItems: "center", paddingHorizontal: 8 },
+  filterTitle: { color: "#000000", fontFamily: "Nunito_700Bold", fontSize: 14 },
+  filterValue: { textTransform: "capitalize", color: "#1C1C1CB2", fontFamily: "Nunito_700Bold", fontSize: 14, marginLeft: 5 },
 });
 
 export const desktopStyles = StyleSheet.create({
@@ -1095,5 +1096,4 @@ export const desktopStyles = StyleSheet.create({
   modalSaveButtonTextDisabled: {
     color: "#8E8E93",
   },
- 
 });

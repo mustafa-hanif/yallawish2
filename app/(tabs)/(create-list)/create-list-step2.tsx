@@ -1102,7 +1102,8 @@ const styles = StyleSheet.create({
   },
   header: {
     minHeight: 108,
-    paddingBottom: 16,
+    justifyContent:'flex-end'
+    // paddingBottom: 16,
   },
   headerContent: {
     paddingHorizontal: 16,
@@ -1142,10 +1143,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
-    paddingTop: 16,
+    paddingVertical: 16,
   },
   backButton: {
-    padding: 4,
+    // padding: 4,
   },
   headerTitle: {
     color: "#FFFFFF",

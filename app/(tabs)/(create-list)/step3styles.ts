@@ -10,7 +10,7 @@ export const styles = StyleSheet.create({
   },
   header: {
      minHeight: 108,
-    paddingBottom: 16,
+     justifyContent:'flex-end'
   },
   headerContent: {
     paddingHorizontal: 16,
@@ -19,10 +19,9 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
-    paddingTop: 16,
+    paddingVertical: 16,
   },
   backButton: {
-    padding: 4,
   },
   headerTitle: {
     color: "#FFFFFF",
