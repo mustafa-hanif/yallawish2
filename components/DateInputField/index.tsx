@@ -22,7 +22,12 @@ export function DateInputField({ label, value, onChange, variant = "default", pl
   const { width: SCREEN_WIDTH } = Dimensions.get("window");
   const isDesktop = Platform.OS === "web" && SCREEN_WIDTH >= 768;
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
-
+  
+  useEffect(() => {
+    // Reset the date picker visibility when the component is unmounted
+    return () => handleCloseModal()
+  }, []);
+  
   const handleDateConfirm = (date: Date) => {
     const formattedDate = date.toISOString().split("T")[0]; // Format the date as YYYY-MM-DD
     if (onChange) onChange(formattedDate); // Notify parent about the change  
@@ -68,12 +73,14 @@ export function DateInputField({ label, value, onChange, variant = "default", pl
   const handleCloseModal = () => {
      setDatePickerVisible(false);
   }
-  useEffect(() => {
-    // Reset the date picker visibility when the component is unmounted
-    return () => handleCloseModal()
-  }, []);
+  
 
 
+  const getSafeDate = (val?: string): Date => {
+  if (!val) return new Date();
+  const d = new Date(val);
+  return isNaN(d.getTime()) ? new Date() : d;
+};
 
   return (
     <Pressable style={styles.container} onPress={handleDatePickerVisibility}>
@@ -94,7 +101,7 @@ export function DateInputField({ label, value, onChange, variant = "default", pl
             <View style={{ backgroundColor: "#fff", padding: 20, borderRadius: 16 }}>
               <DatePicker
                 mode="single"
-                date={value ? new Date(value) : new Date()}
+                date={getSafeDate(value)}
                 onChange={(params: any) => {
                   const d = params.date;
                   if (d) {
