@@ -9,7 +9,7 @@ import TabBarBackground from "@/components/ui/TabBarBackground";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useAuth } from "@clerk/clerk-expo";
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const DESKTOP_BREAKPOINT = 1024;
 
@@ -27,20 +27,20 @@ export default function TabLayout() {
       position: "absolute",
       height: 97,
       paddingTop: 24,
-      paddingBottom:  38 + bottom,
+      paddingBottom: 38 + bottom,
       backgroundColor: "#FFFFFF",
       borderTopWidth: 1,
-      borderColor:"#D1D1D6",
+      borderColor: "#D1D1D6",
       elevation: 0,
       shadowOpacity: 0,
     },
     default: {
       height: 97,
       paddingTop: 24,
-      paddingBottom:  38 + bottom,
+      paddingBottom: 38 + bottom,
       backgroundColor: "#FFFFFF",
       borderTopWidth: 1,
-      borderColor:"#D1D1D6",
+      borderColor: "#D1D1D6",
       elevation: 0,
     },
   });
@@ -71,7 +71,6 @@ export default function TabLayout() {
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: isDesktopWeb ? { display: "none" } : baseTabBarStyle, // Apply dynamic bottom padding here
-
       }}
     >
       <Tabs.Screen
@@ -117,7 +116,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="messages"
+        name="wishlists"
         options={{
           title: "",
           tabBarIcon: ({ color }) => <Image source={require("@/assets/images/filter-mail-circle.svg")} style={{ width: 24, height: 24, tintColor: color }} contentFit="contain" />,
@@ -157,14 +156,14 @@ export default function TabLayout() {
         options={{
           href: null, // This hides it from the tab bar
           // Hide the TabBar entirely on this screen so fixed footers are not overlapped
-          tabBarStyle: { display: 'none' },
+          tabBarStyle: { display: "none" },
         }}
       />
       <Tabs.Screen
         name="view-list"
         options={{
           href: null, // Hide from tab bar
-          tabBarStyle: { display: 'none' },
+          tabBarStyle: { display: "none" },
         }}
       />
       <Tabs.Screen
@@ -177,14 +176,14 @@ export default function TabLayout() {
         name="gift-detail"
         options={{
           href: null,
-          tabBarStyle: { display: 'none' },
+          tabBarStyle: { display: "none" },
         }}
       />
       <Tabs.Screen
         name="purchase-success"
         options={{
           href: null,
-          tabBarStyle: { display: 'none' },
+          tabBarStyle: { display: "none" },
         }}
       />
     </Tabs>
