@@ -1,10 +1,9 @@
 import React from "react";
-import { Dimensions, Image, Text, View } from "react-native";
+import { Image, Text, View } from "react-native";
 import { styles } from "./style";
 
 interface WishListCardProps {}
 export default function WishListCard({ item }: WishListCardProps) {
-  const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
   const title = item?.title || "Raghavendra Suryadev Birthday";
   const date = item?.date || "Dec 27, 2026";
   const totalItems = item?.totalItems || 2;
