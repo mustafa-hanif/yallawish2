@@ -51,6 +51,7 @@ export const styles = StyleSheet.create({
     lineHeight: 28,
     fontFamily: "Nunito_700Bold",
   },
+
   sortAndFilterButton: {
     borderRadius: 5,
     borderWidth: 1,
@@ -61,11 +62,7 @@ export const styles = StyleSheet.create({
     gap: 4,
     flexDirection: "row",
   },
-  sortAndFilterButtonText: {
-    color: "#3B0172",
-    fontSize: 12,
-    fontFamily: "Nunito_600SemiBold",
-  },
+
   selectedListText: {
     color: "#1A0034",
     fontSize: 18,
