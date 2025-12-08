@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import React from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import { styles } from "./style";
@@ -6,6 +7,7 @@ interface noListFoundProps {
   currentTab?: string;
 }
 export default function NoListFound({ currentTab }: noListFoundProps) {
+  const handleClickCreateNewList = () => router.push("/create-list-step1");
   return (
     <View style={styles.noListFoundContent}>
       <View>
@@ -26,7 +28,7 @@ export default function NoListFound({ currentTab }: noListFoundProps) {
             <Text style={styles.listNotCreatedDescription}>Add your first list by clicking below</Text>
           </View>
           <View style={styles.contentCenter}>
-            <Pressable style={styles.createNewListButton}>
+            <Pressable onPress={handleClickCreateNewList} style={styles.createNewListButton}>
               <Text style={styles.createNewListButtonText}>Create New List</Text>
             </Pressable>
           </View>
