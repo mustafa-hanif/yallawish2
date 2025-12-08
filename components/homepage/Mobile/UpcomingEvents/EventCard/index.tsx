@@ -9,7 +9,6 @@ interface EventCardProps {
 }
 
 export default function EventCard({ eventDetails }: EventCardProps) {
-  console.log("eventDetails", eventDetails);
   const occasion = occasionObj[String(eventDetails?.occasion) || "birthday"];
   const count = 8;
   return (
