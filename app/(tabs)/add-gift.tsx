@@ -72,13 +72,6 @@ export default function AddGift() {
     listId: listId as any,
   });
   const items = useQuery(api.products.getListItems as any, listId ? ({ list_id: listId } as any) : "skip");
-  const seedItem = useMutation(api.products.seedDummyListItem as any);
-
-  useEffect(() => {
-    if (listId && Array.isArray(items) && items.length === 0) {
-      seedItem({ list_id: listId as any }).catch(() => { });
-    }
-  }, [items, listId, seedItem]);
 
   // All list items
   const giftItems: GiftItemType[] = useMemo(() => (Array.isArray(items) ? [...items] : []), [items]);
