@@ -2,6 +2,9 @@ import ActionBar from "@/components/wishlists/ActionBar";
 import WishListing from "@/components/wishlists/Listing";
 import NoListFound from "@/components/wishlists/NoListFound";
 import Tabs from "@/components/wishlists/Tabs";
+import { api } from "@/convex/_generated/api";
+import { useUser } from "@clerk/clerk-expo";
+import { useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -9,12 +12,16 @@ import { Image, Pressable, StatusBar, StyleSheet, Text, View } from "react-nativ
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Wishlists = () => {
+  const { user } = useUser();
+  const myLists = useQuery(api.products.getMyLists, user?.id ? { user_id: user.id } : "skip");
+
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
   const encodedReturnTo = returnTo ? String(returnTo) : undefined;
   const decodedReturnTo = encodedReturnTo ? decodeURIComponent(encodedReturnTo) : undefined;
 
   const [currentTab, setCurrentTab] = useState<string>("my-events");
 
+  console.log("============================= myLists =====================================", myLists);
   const handleBack = () => {
     if (decodedReturnTo) {
       router.replace(decodedReturnTo as any);
@@ -22,169 +29,6 @@ const Wishlists = () => {
     }
     router.back();
   };
-
-  const wishList = [
-    {
-      id: "event-001",
-      title: "Raghavendra Suryadev Birthday",
-      date: "Dec 27, 2026",
-      totalItems: 2,
-      claimedItems: 1, // Random claimed value
-      occasionType: "birthday",
-    },
-    {
-      id: "event-002",
-      title: "Sister’s Wedding",
-      date: "Jan 13, 2027",
-      totalItems: 6,
-      claimedItems: 4, // Random claimed value
-      occasionType: "wedding",
-    },
-    {
-      id: "event-003",
-      title: "John's Wedding",
-      date: "Jun 01, 2029",
-      totalItems: 2,
-      claimedItems: 1, // Random claimed value
-      occasionType: "wedding",
-    },
-    {
-      id: "event-004",
-      title: "Sara’s Graduation",
-      date: "Oct 02, 2026",
-      totalItems: 12,
-      claimedItems: 8, // Random claimed value
-      occasionType: "graduation",
-    },
-    {
-      id: "event-005",
-      title: "Grandfather’s Engagement",
-      date: "Nov 23, 2025",
-      totalItems: 10,
-      claimedItems: 6, // Random claimed value
-      occasionType: "other",
-    },
-    {
-      id: "event-006",
-      title: "Raghavendra Suryadev Wedding",
-      date: "Aug 14, 2026",
-      totalItems: 2,
-      claimedItems: 1, // Random claimed value
-      occasionType: "wedding",
-    },
-    {
-      id: "event-007",
-      title: "Alice's Baby Shower",
-      date: "Mar 10, 2027",
-      totalItems: 15,
-      claimedItems: 8, // Random claimed value
-      occasionType: "baby-shower",
-    },
-    {
-      id: "event-008",
-      title: "David's Retirement",
-      date: "Dec 05, 2025",
-      totalItems: 10,
-      claimedItems: 5, // Random claimed value
-      occasionType: "retirement",
-    },
-    {
-      id: "event-009",
-      title: "New Home Celebration",
-      date: "May 18, 2026",
-      totalItems: 8,
-      claimedItems: 3, // Random claimed value
-      occasionType: "new-home",
-    },
-    {
-      id: "event-010",
-      title: "Emma's Graduation",
-      date: "Jun 15, 2026",
-      totalItems: 12,
-      claimedItems: 6, // Random claimed value
-      occasionType: "graduation",
-    },
-    {
-      id: "event-011",
-      title: "Chris's Wedding Anniversary",
-      date: "Sep 07, 2027",
-      totalItems: 8,
-      claimedItems: 4, // Random claimed value
-      occasionType: "wedding",
-    },
-    {
-      id: "event-012",
-      title: "Sophia's Birthday Bash",
-      date: "Oct 10, 2027",
-      totalItems: 10,
-      claimedItems: 7, // Random claimed value
-      occasionType: "birthday",
-    },
-    {
-      id: "event-013",
-      title: "Michael’s Baby Shower",
-      date: "Apr 04, 2027",
-      totalItems: 18,
-      claimedItems: 10, // Random claimed value
-      occasionType: "baby-shower",
-    },
-    {
-      id: "event-014",
-      title: "Jack's New Home",
-      date: "Feb 12, 2026",
-      totalItems: 10,
-      claimedItems: 5, // Random claimed value
-      occasionType: "new-home",
-    },
-    {
-      id: "event-015",
-      title: "Sophie's Retirement Party",
-      date: "Nov 15, 2026",
-      totalItems: 14,
-      claimedItems: 9, // Random claimed value
-      occasionType: "retirement",
-    },
-    {
-      id: "event-016",
-      title: "Mason's Wedding",
-      date: "Jul 07, 2028",
-      totalItems: 18,
-      claimedItems: 12, // Random claimed value
-      occasionType: "wedding",
-    },
-    {
-      id: "event-017",
-      title: "Liam’s Graduation Ceremony",
-      date: "Dec 01, 2026",
-      totalItems: 16,
-      claimedItems: 10, // Random claimed value
-      occasionType: "graduation",
-    },
-    {
-      id: "event-018",
-      title: "Olivia's New Home Party",
-      date: "Aug 23, 2027",
-      totalItems: 13,
-      claimedItems: 8, // Random claimed value
-      occasionType: "new-home",
-    },
-    {
-      id: "event-019",
-      title: "Charlotte's Birthday Celebration",
-      date: "Jan 29, 2026",
-      totalItems: 5,
-      claimedItems: 3, // Random claimed value
-      occasionType: "birthday",
-    },
-    {
-      id: "event-020",
-      title: "Henry’s Wedding Anniversary",
-      date: "Mar 14, 2027",
-      totalItems: 18,
-      claimedItems: 15, // Random claimed value
-      occasionType: "wedding",
-    },
-  ];
 
   return (
     <View style={styles.container}>
@@ -203,10 +47,10 @@ const Wishlists = () => {
       </LinearGradient>
       <Tabs currentTab={currentTab} setCurrentTab={setCurrentTab} />
       <View style={styles.content}>
-        {wishList ? (
+        {myLists && myLists?.length ? (
           <>
             <ActionBar />
-            <WishListing wishList={wishList} />
+            <WishListing wishList={myLists} />
           </>
         ) : (
           <NoListFound currentTab={currentTab} />
