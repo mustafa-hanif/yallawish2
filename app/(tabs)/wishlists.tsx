@@ -21,7 +21,6 @@ const Wishlists = () => {
 
   const [currentTab, setCurrentTab] = useState<string>("my-events");
 
-  console.log("============================= myLists =====================================", myLists);
   const handleBack = () => {
     if (decodedReturnTo) {
       router.replace(decodedReturnTo as any);

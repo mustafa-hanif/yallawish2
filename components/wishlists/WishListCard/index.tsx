@@ -7,7 +7,6 @@ interface WishListCardProps {
   item: { _creationTime: number; _id: string; coverPhotoUri: string | null; created_at: string; eventDate: string; note: string | null; occasion: string; password: string; privacy: string; requiresPassword: boolean; shippingAddress: string; title: string; updated_at: string; user_id: string; totalItems: number; totalClaimed: number };
 }
 export default function WishListCard({ item }: WishListCardProps) {
-  console.log("\n =============== item",item, "=============== item =================== \n")
   const id = item?._id;
   const title = item?.title || "Raghavendra Suryadev Birthday";
   const date = item?.eventDate || "-----------";
