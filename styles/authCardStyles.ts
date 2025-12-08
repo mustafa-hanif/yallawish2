@@ -35,7 +35,7 @@ export const authCardStyles = StyleSheet.create({
     width: "100%",
   },
   segmentedControlMobile: {
-    marginBottom: 32
+    marginBottom: 32,
   },
   segmentedOption: {
     flex: 1,
@@ -54,13 +54,12 @@ export const authCardStyles = StyleSheet.create({
     paddingVertical: 14,
   },
 
-  
   segmentedActiveText: {
     fontFamily: "Nunito_700Bold",
     fontSize: 18,
     color: "#330065",
   },
-   segmentedActiveTextMobile: {
+  segmentedActiveTextMobile: {
     fontSize: 13.44,
   },
   segmentedInactive: {
@@ -69,11 +68,9 @@ export const authCardStyles = StyleSheet.create({
     paddingVertical: 16,
   },
   segmentedInactiveMobile: {
-   
     paddingVertical: 14,
   },
-  
- 
+
   segmentedInactiveText: {
     fontFamily: "Nunito_600SemiBold",
     fontSize: 18,
@@ -82,7 +79,7 @@ export const authCardStyles = StyleSheet.create({
   segmentedInactiveTextMobile: {
     fontFamily: "Nunito_600SemiBold",
     fontSize: 13.44,
-    color:'#330065'
+    color: "#330065",
   },
   welcomeTitle: {
     textAlign: "center",
@@ -132,6 +129,20 @@ export const authCardStyles = StyleSheet.create({
     fontSize: 24,
     fontFamily: "Nunito_700Bold",
     color: "#FFFFFF",
+  },
+  mobileOtpInput: {
+    width: 48,
+    height: 56,
+    backgroundColor: "transparent",
+    borderColor: "#FFFFFF",
+    borderWidth: 1,
+    paddingVertical: 16,
+    borderRadius: 8,
+    fontSize: 14,
+    textAlign:"center",
+    color: "#FFFFFF",
+    fontFamily: "Nunito_700Bold",
+
   },
   resendContainer: {
     alignItems: "center",
@@ -187,7 +198,7 @@ export const authCardStyles = StyleSheet.create({
   },
   inputMobile: {
     backgroundColor: "transparent",
-    borderColor: '#FFFFFF',
+    borderColor: "#FFFFFF",
     borderWidth: 1,
     paddingVertical: 16,
     borderRadius: 8,
@@ -261,7 +272,7 @@ export const authCardStyles = StyleSheet.create({
     fontSize: 14,
     textDecorationLine: "underline",
   },
-   forgotLinkMobile: {
+  forgotLinkMobile: {
     color: "#FFFFFF",
     fontFamily: "Nunito_400Regular",
     fontSize: 12,

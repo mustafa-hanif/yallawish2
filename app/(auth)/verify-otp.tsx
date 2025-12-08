@@ -5,12 +5,12 @@ import { useSignUp } from "@clerk/clerk-expo";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as React from "react";
 import {
-    Dimensions,
-    Platform,
-    Pressable,
-    Text,
-    TextInput,
-    View,
+  Dimensions,
+  Platform,
+  Pressable,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 
 const OTP_LENGTH = 6;
@@ -39,7 +39,7 @@ export default function VerifyOtpScreen() {
   const inputRefs = React.useRef<(TextInput | null)[]>([]);
 
   const code = React.useMemo(() => digits.join(""), [digits]);
-  const canVerify = code.length === OTP_LENGTH && !code.includes("");
+  const canVerify = code.length === OTP_LENGTH && digits.every(digit => digit !== "");
 
   React.useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -197,7 +197,7 @@ export default function VerifyOtpScreen() {
     <ResponsiveAuthLayout
       showHero={!isDesktop}
       heroTitle="Verify your email"
-      heroSubtitle={instructionCopy}
+      heroSubtitle={!isDesktop ? null : instructionCopy}
     >
       <View
         style={[
@@ -232,7 +232,7 @@ export default function VerifyOtpScreen() {
               value={digit}
               onChangeText={(value) => handleDigitChange(index, value)}
               onKeyPress={({ nativeEvent }) => handleKeyPress(index, nativeEvent.key)}
-              style={styles.otpInput}
+              style={isDesktop ? styles.otpInput : styles.mobileOtpInput}
               autoFocus={index === 0}
               returnKeyType="done"
             />
@@ -243,7 +243,7 @@ export default function VerifyOtpScreen() {
           onPress={handleVerify}
           icon={null}
           label={isVerifying ? "Verifying..." : "Verify code"}
-          variant="primary"
+          variant={!isDesktop ? "default" : "primary"}
           style={(!canVerify || isVerifying) ? { opacity: 0.65 } : undefined}
         />
 
