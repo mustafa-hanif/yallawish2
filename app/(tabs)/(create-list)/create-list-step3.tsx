@@ -6,6 +6,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
+  Dimensions,
   Modal,
   Platform,
   Pressable,
@@ -481,6 +482,11 @@ function MobileLayout({
   toggleFriend,
   confirmShareAndClose,
 }: SharedLayoutProps) {
+  const DESKTOP_BREAKPOINT = 1024;
+  const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+  const isDesktop = Platform.OS === "web" && SCREEN_WIDTH >= DESKTOP_BREAKPOINT;
+
   const ProgressIndicator = () => (
     <View style={styles.progressContainer}>
       <View style={styles.progressBarContainer}>
@@ -631,7 +637,7 @@ function MobileLayout({
                   <Pressable
                     key={group.id}
                     style={[
-                      styles.groupCard,
+                      !isDesktop ? styles.groupCardMobile : styles.groupCard,
                       selected && styles.groupCardSelected,
                     ]}
                     onPress={() => toggleGroup(group.id)}

@@ -242,11 +242,20 @@ export const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 12,
     justifyContent: "space-between",
+    marginTop:16
   },
   groupCard: {
     width: (Dimensions.get("window").width - 16 * 2 - 12) / 2,
     height: 140,
     borderRadius: 12,
+    overflow: "hidden",
+    backgroundColor: "#C9B7F5",
+    position: "relative",
+  },
+  groupCardMobile: {
+    width: (Dimensions.get("window").width - 16 * 2 - 12) / 2,
+    height: 152,
+    borderRadius: 8,
     overflow: "hidden",
     backgroundColor: "#C9B7F5",
     position: "relative",
@@ -284,7 +293,6 @@ export const styles = StyleSheet.create({
   },
   groupTitle: {
     fontSize: 18,
-    fontWeight: "800",
     fontFamily: "Nunito_700Bold",
     color: "#FFFFFF",
   },
