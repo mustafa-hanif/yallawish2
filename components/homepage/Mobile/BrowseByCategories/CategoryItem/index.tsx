@@ -14,7 +14,6 @@ export default function CategoryItem({ item = [] }: CategoryItemProps) {
   return (
     <View style={styles.container}>
       {item.map((category) => {
-        console.log("CategoryItemCategoryItemCategoryItem", category);
         const borderColor = category?.color;
         return (
           <View style={[styles.card, { borderColor }]} key={String(category?.id)}>
