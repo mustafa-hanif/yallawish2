@@ -10,7 +10,6 @@ interface CategoryItemProps {
   item: [category, category];
 }
 export default function CategoryItem({ item = [] }: CategoryItemProps) {
-  console.log("CategoryItem", item);
   return (
     <View style={styles.container}>
       {item.map((category) => {
