@@ -19,11 +19,11 @@ type WishListItem = {
   updated_at: string;
   user_id: string;
   totalItems: number;
-  totalClaimed: number
+  totalClaimed: number;
 };
 
 interface WishListingProps {
-  wishList: WishListItem[];
+  wishList?: WishListItem[];
 }
 
 export default function WishListing({ wishList = [] }: WishListingProps) {
