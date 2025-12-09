@@ -8,6 +8,7 @@ export const styles = StyleSheet.create({
     minWidth: 169,
     borderWidth: 1,
     borderColor: "#E5E5E5",
+    backgroundColor: "#ffff",
     padding: 8,
     gap: 8,
   },
