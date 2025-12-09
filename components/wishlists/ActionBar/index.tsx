@@ -6,19 +6,51 @@ interface ActionBarProps {
   handleToggleModal: () => void;
   search: string;
   setSearch: React.Dispatch<React.SetStateAction<string>>;
+  appliedSortBy: string;
+  setAppliedSortBy: React.Dispatch<React.SetStateAction<string | null>>;
+  appliedFilterBy: string;
+  setAppliedFilterBy: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-export default function ActionBar({ search, setSearch, handleToggleModal }: ActionBarProps) {
+const sortByObj = {
+  default: "Default",
+  dateOfEvent: "Date of Event",
+  alphabetically: "Alphabetically",
+  percentage: "List Completion %",
+  totalItems: "Total Items",
+};
+const filterByObj = {
+  pastEvents: "Past Events",
+  upcomingEvents: "Upcoming Events",
+  completed: "Completed",
+  inComplete: "Incomplete",
+};
+
+export default function ActionBar({ search, setSearch, handleToggleModal, appliedSortBy, setAppliedSortBy, appliedFilterBy, setAppliedFilterBy }: ActionBarProps) {
+  const handleRemoveSortBy = () => setAppliedSortBy(null);
+  const handleRemoveFilterBy = () => setAppliedFilterBy(null);
+
   return (
     <View style={styles.actionBarContainer}>
       <View style={styles.sortAndFilterContainer}>
-        <View>
-          <View style={styles.selectedSortAndFilterContainer}>
-            <Text style={styles.sortByText}>Sort By:</Text>
-            <Text style={styles.selectedSortValue}>Date Created (Default)</Text>
-          </View>
+        <View style={styles.filterButtons}>
+          {appliedSortBy ? (
+            <View style={styles.selectedSortAndFilterContainer}>
+              <Text style={styles.selectedSortValue}>{sortByObj?.[appliedSortBy]}</Text>
+              <Pressable onPress={handleRemoveSortBy}>
+                <Image source={require("@/assets/images/cross.png")} resizeMode="contain" />
+              </Pressable>
+            </View>
+          ) : null}
+          {appliedFilterBy ? (
+            <View style={styles.selectedSortAndFilterContainer}>
+              <Text style={styles.selectedSortValue}>{filterByObj?.[appliedFilterBy]}</Text>
+              <Pressable onPress={handleRemoveFilterBy}>
+                <Image source={require("@/assets/images/cross.png")} resizeMode="contain" />
+              </Pressable>
+            </View>
+          ) : null}
         </View>
-
         <View>
           <Pressable style={styles.sortAndFilterButton} onPress={handleToggleModal}>
             <Image source={require("@/assets/images/filterIcon.png")} />

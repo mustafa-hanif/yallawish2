@@ -37,18 +37,17 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 4,
+    gap: 6,
+    borderWidth: 0.8,
+    borderRadius: 33.79,
+    paddingVertical: 8,
+    paddingHorizontal: 13.68,
   },
-  sortByText: {
-    color: "#000000",
-    fontSize: 12,
-    lineHeight: 28,
-    fontFamily: "Nunito_700Bold",
-  },
+
   selectedSortValue: {
-    color: "#1C1C1CB2",
+    color: "#330065",
     fontSize: 12,
-    lineHeight: 28,
+    lineHeight: 12,
     fontFamily: "Nunito_700Bold",
   },
 
@@ -67,5 +66,11 @@ export const styles = StyleSheet.create({
     color: "#1A0034",
     fontSize: 18,
     fontFamily: "Nunito_700Bold",
+  },
+  filterButtons: {
+    flexDirection: "row",
+    gap: 4.02,
+    flex: 1,
+    alignItems: "center",
   },
 });

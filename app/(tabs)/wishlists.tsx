@@ -22,8 +22,12 @@ const Wishlists = () => {
 
   const [currentTab, setCurrentTab] = useState<string>("my-events");
   const [showSortSheet, setShowSortSheet] = useState(false);
-  const [tempSortBy, setTempSortBy] = useState("default");
-  const [filterBy, setFilterBy] = useState("");
+  const [sortBy, setSortBy] = useState<string | null>("default");
+  const [filterBy, setFilterBy] = useState<string | null>("upcomingEvents");
+
+  const [appliedSortBy, setAppliedSortBy] = useState<string | null>("default");
+  const [appliedFilterBy, setAppliedFilterBy] = useState<string | null>("upcomingEvents");
+
   const [search, setSearch] = useState("");
 
   const handleBack = () => {
@@ -42,6 +46,11 @@ const Wishlists = () => {
     return arr.filter((item) => item.title.toLowerCase().includes(q));
   };
 
+  const handleClickApply = () => {
+    setAppliedSortBy(sortBy);
+    setAppliedFilterBy(filterBy);
+    handleToggleModal();
+  };
   const wishList = myLists;
   return (
     <>
@@ -63,7 +72,7 @@ const Wishlists = () => {
         <View style={styles.content}>
           {wishList && wishList?.length ? (
             <>
-              <ActionBar search={search} setSearch={setSearch} handleToggleModal={handleToggleModal} />
+              <ActionBar appliedSortBy={appliedSortBy} setAppliedSortBy={setAppliedSortBy} appliedFilterBy={appliedFilterBy} setAppliedFilterBy={setAppliedFilterBy} search={search} setSearch={setSearch} handleToggleModal={handleToggleModal} />
               <WishListing wishList={searchList(myLists as any[])} />
             </>
           ) : (
@@ -87,13 +96,13 @@ const Wishlists = () => {
               </View>
               {[
                 { key: "default", label: "Default" },
-                { key: "priceAsc", label: "Date of event" },
-                { key: "priceDesc", label: "Alphabetically" },
-                { key: "newest", label: "List Completion %" },
-                { key: "oldest", label: "Total Items" },
+                { key: "dateOfEvent", label: "Date of Event" },
+                { key: "alphabetically", label: "Alphabetically" },
+                { key: "percentage", label: "List Completion %" },
+                { key: "totalItems", label: "Total Items" },
               ].map((o) => (
-                <Pressable key={o.key} style={styles.radioRow} onPress={() => setTempSortBy(o.key)}>
-                  <View style={[styles.radioOuter, tempSortBy === o.key && styles.radioOuterActive]}>{tempSortBy === o.key && <View style={styles.radioInner} />}</View>
+                <Pressable key={o.key} style={styles.radioRow} onPress={() => setSortBy(o.key)}>
+                  <View style={[styles.radioOuter, sortBy === o.key && styles.radioOuterActive]}>{sortBy === o.key && <View style={styles.radioInner} />}</View>
                   <Text style={styles.radioLabel}>{o.label}</Text>
                 </Pressable>
               ))}
@@ -105,36 +114,20 @@ const Wishlists = () => {
               </View>
               {[
                 { key: "pastEvents", label: "Past Events" },
-                { key: "upcomingEvents", label: "Upcoming events" },
+                { key: "upcomingEvents", label: "Upcoming Events" },
                 { key: "completed", label: "Completed" },
-                { key: "incomplete", label: "Incomplete" },
+                { key: "inComplete", label: "Incomplete" },
               ].map((o) => (
                 <Pressable key={o.key} style={styles.radioRow} onPress={() => setFilterBy(o.key)}>
                   <View style={[styles.radioOuter, filterBy === o.key && styles.radioOuterActive]}>{filterBy === o.key && <View style={styles.radioInner} />}</View>
                   <Text style={styles.radioLabel}>{o.label}</Text>
                 </Pressable>
               ))}
-              {/* <Pressable style={styles.radioRow} onPress={() => setTempFilterClaimed((v) => !v)}>
-                <View style={[styles.checkboxBox, tempFilterClaimed && styles.checkboxBoxActive]}>{tempFilterClaimed && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}</View>
-                <Text style={styles.radioLabel}>Claimed</Text>
-              </Pressable>
-              <Pressable style={styles.radioRow} onPress={() => setTempFilterUnclaimed((v) => !v)}>
-                <View style={[styles.checkboxBox, tempFilterUnclaimed && styles.checkboxBoxActive]}>{tempFilterUnclaimed && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}</View>
-                <Text style={styles.radioLabel}>Unclaimed</Text>
-              </Pressable> */}
             </View>
             <View style={styles.sortScrollSpacer} />
           </ScrollView>
           <View style={styles.applyBarWrapper}>
-            <Pressable
-              style={styles.applyBtnFull}
-              onPress={() => {
-                // setSortBy(tempSortBy);
-                // setFilterClaimed(tempFilterClaimed);
-                // setFilterUnclaimed(tempFilterUnclaimed);
-                // setShowSortSheet(false);
-              }}
-            >
+            <Pressable style={styles.applyBtnFull} onPress={handleClickApply}>
               <Text style={styles.applyBtnText}>Apply</Text>
             </Pressable>
           </View>
