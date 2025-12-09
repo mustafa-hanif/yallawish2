@@ -5,12 +5,12 @@ import { Text, View } from "react-native";
 import { styles } from "./style";
 
 interface EventCardProps {
-  eventDetails: { id: string; date: string; month: string; title: string; subtitle: string; color: string; dateValue: number; occasion?: string };
+  eventDetails: { id: string; date: string; month: string; title: string; subtitle: string; color: string; dateValue: number; occasion?: string; totalClaimed: number };
 }
 
 export default function EventCard({ eventDetails }: EventCardProps) {
   const occasion = occasionObj[String(eventDetails?.occasion) || "birthday"];
-  const count = 8;
+  const count = Number(eventDetails?.totalClaimed) > 0 && Number(eventDetails?.totalClaimed) < 10 ? `0${Number(eventDetails?.totalClaimed)}` : String(eventDetails?.totalClaimed);
   return (
     <Link href={{ pathname: "/add-gift", params: { listId: String(eventDetails.id) } }}>
       <View style={[styles.card, { borderColor: occasion?.borderColor }]}>

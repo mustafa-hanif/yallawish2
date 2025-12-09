@@ -32,6 +32,7 @@ type UpcomingEvent = {
   color: string;
   occasion?: string;
   dateValue: number;
+  totalClaimed: number
 };
 export function Mobile() {
   const { user } = useUser();
@@ -55,7 +56,7 @@ export function Mobile() {
           const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
           monthStr = months[dateObj.getMonth()];
         }
-        return { id: String(l._id), date: dayStr, month: monthStr, title: l.title || "Untitled", subtitle: l.note || (l.occasion ? `Occasion: ${l.occasion}` : ""), occasion: l.occasion, color: OCCASION_COLOR[String(l.occasion)] ?? "#AEAEB2", dateValue: dateObj.getTime() };
+        return { id: String(l._id), date: dayStr, month: monthStr, title: l.title || "Untitled", subtitle: l.note || (l.occasion ? `Occasion: ${l.occasion}` : ""), occasion: l.occasion, color: OCCASION_COLOR[String(l.occasion)] ?? "#AEAEB2", dateValue: dateObj.getTime(), totalClaimed: l.totalClaimed };
       })
       .sort((a: UpcomingEvent, b: UpcomingEvent) => a?.dateValue - b?.dateValue);
   }, [myLists]);
