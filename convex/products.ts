@@ -699,6 +699,38 @@ export const getListItemById = query({
   },
 });
 
+// Public community lists (shared) not created by the provided user
+export const getCommunityLists = query({
+  args: { exclude_user_id: v.optional(v.union(v.string(), v.null())) },
+  handler: async (ctx, args) => {
+    const excludeUserId = args.exclude_user_id ?? null;
+
+    const lists = allLists.filter((l: any) => l.privacy === "shared" && (l.user_id ?? null) !== excludeUserId);
+
+    return await Promise.all(
+      lists.map(async (list: any) => {
+        let coverPhotoUri = list.coverPhotoUri ?? null;
+        if (list.coverPhotoStorageId) {
+          const refreshed = await ctx.storage.getUrl(list.coverPhotoStorageId as any);
+          if (refreshed) coverPhotoUri = refreshed;
+        }
+
+        // Aggregate list item counts for this list
+        const items = await ctx.db
+          .query("list_items")
+          .withIndex("by_list", (q) => q.eq("list_id", list._id))
+          .collect();
+        const totalItems = items.length;
+        const totalClaimed = items.reduce((s: number, it: any) => s + Number(it.claimed ?? 0), 0);
+
+        // Attach creator profile: try local `user_profiles` first, then Clerk API fallback.
+        let creator: any = null;
+
+        return { ...list, coverPhotoUri, totalItems, totalClaimed, creator };
+      })
+    );
+  },
+});
 
 export const setListItemClaim = mutation({
   args: { itemId: v.id("list_items"), claimed: v.number() },

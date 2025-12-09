@@ -15,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const Wishlists = () => {
   const { user } = useUser();
   const myLists = useQuery(api.products.getMyLists, user?.id ? { user_id: user.id } : "skip");
-  console.log("myLists", myLists);
+  const communityLists = useQuery(api.products.getCommunityLists, user?.id ? { exclude_user_id: user.id } : "skip");
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
   const encodedReturnTo = returnTo ? String(returnTo) : undefined;
   const decodedReturnTo = encodedReturnTo ? decodeURIComponent(encodedReturnTo) : undefined;
@@ -51,7 +51,8 @@ const Wishlists = () => {
     setAppliedFilterBy(filterBy);
     handleToggleModal();
   };
-  const wishList = myLists;
+  const wishList = currentTab === "community-events" ? communityLists : myLists;
+  console.log("wishList",wishList)
   return (
     <>
       <View style={styles.container}>
@@ -72,8 +73,8 @@ const Wishlists = () => {
         <View style={styles.content}>
           {wishList && wishList?.length ? (
             <>
-              <ActionBar appliedSortBy={appliedSortBy} setAppliedSortBy={setAppliedSortBy} appliedFilterBy={appliedFilterBy} setAppliedFilterBy={setAppliedFilterBy} search={search} setSearch={setSearch} handleToggleModal={handleToggleModal} />
-              <WishListing wishList={searchList(myLists as any[])} />
+              <ActionBar appliedSortBy={appliedSortBy ?? "default"} setAppliedSortBy={setAppliedSortBy} appliedFilterBy={appliedFilterBy ?? "upcomingEvents"} setAppliedFilterBy={setAppliedFilterBy} search={search} setSearch={setSearch} handleToggleModal={handleToggleModal} />
+              <WishListing wishList={searchList(wishList as any[])} />
             </>
           ) : (
             <NoListFound currentTab={currentTab} />
