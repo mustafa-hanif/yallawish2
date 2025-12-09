@@ -6,9 +6,9 @@ interface ActionBarProps {
   handleToggleModal: () => void;
   search: string;
   setSearch: React.Dispatch<React.SetStateAction<string>>;
-  appliedSortBy: string;
+  appliedSortBy: string | null;
   setAppliedSortBy: React.Dispatch<React.SetStateAction<string | null>>;
-  appliedFilterBy: string;
+  appliedFilterBy: string | null;
   setAppliedFilterBy: React.Dispatch<React.SetStateAction<string | null>>;
 }
 

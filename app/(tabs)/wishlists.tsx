@@ -8,7 +8,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Image, Modal, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -23,12 +23,25 @@ const Wishlists = () => {
   const [currentTab, setCurrentTab] = useState<string>("my-events");
   const [showSortSheet, setShowSortSheet] = useState(false);
   const [sortBy, setSortBy] = useState<string | null>("default");
-  const [filterBy, setFilterBy] = useState<string | null>("upcomingEvents");
+  const [filterBy, setFilterBy] = useState<string | null>(null);
 
   const [appliedSortBy, setAppliedSortBy] = useState<string | null>("default");
-  const [appliedFilterBy, setAppliedFilterBy] = useState<string | null>("upcomingEvents");
+  const [appliedFilterBy, setAppliedFilterBy] = useState<string | null>(null);
 
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    setCurrentTab("my-events");
+  }, []);
+
+  useEffect(() => {
+    setShowSortSheet(false);
+    setSortBy("default");
+    setFilterBy(null)
+    setAppliedSortBy("default");
+    setAppliedFilterBy(null)
+    setSearch("");
+  }, [currentTab]);
 
   const handleBack = () => {
     if (decodedReturnTo) {
@@ -52,7 +65,105 @@ const Wishlists = () => {
     handleToggleModal();
   };
   const wishList = currentTab === "community-events" ? communityLists : myLists;
-  console.log("wishList",wishList)
+
+  const sortedWishList = useMemo(() => {
+    const arr = Array.isArray(wishList) ? [...wishList] : [];
+    const key = appliedSortBy;
+    if (!arr.length) return arr;
+    if (!key || key === "default") return arr;
+
+    if (key === "dateOfEvent") {
+      return arr.sort((a: any, b: any) => {
+        const da = a?.eventDate ? new Date(a.eventDate).getTime() : (a?._creationTime ?? 0);
+        const db = b?.eventDate ? new Date(b.eventDate).getTime() : (b?._creationTime ?? 0);
+        return da - db;
+      });
+    }
+
+    if (key === "alphabetically") {
+      return arr.sort((a: any, b: any) => String(a.title || "").localeCompare(String(b.title || "")));
+    }
+
+    if (key === "percentage") {
+      return arr.sort((a: any, b: any) => {
+        const pa = a?.totalItems ? (a.totalClaimed || 0) / a.totalItems : 0;
+        const pb = b?.totalItems ? (b.totalClaimed || 0) / b.totalItems : 0;
+        return pb - pa; // higher completion first
+      });
+    }
+
+    if (key === "totalItems") {
+      return arr.sort((a: any, b: any) => (b.totalItems || 0) - (a.totalItems || 0));
+    }
+
+    return arr;
+  }, [wishList, appliedSortBy]);
+
+  const filteredWishList = useMemo(() => {
+    const arr = Array.isArray(sortedWishList) ? [...sortedWishList] : [];
+    const key = appliedFilterBy;
+    if (!arr.length) return arr;
+    if (!key) return arr;
+
+    const now = Date.now();
+
+    if (key === "pastEvents") {
+      return arr
+        .filter((item: any) => {
+          const t = item?.eventDate ? new Date(item.eventDate).getTime() : (item?._creationTime ?? 0);
+          return t < now;
+        })
+        .sort((a: any, b: any) => {
+          const ta = a?.eventDate ? new Date(a.eventDate).getTime() : (a?._creationTime ?? 0);
+          const tb = b?.eventDate ? new Date(b.eventDate).getTime() : (b?._creationTime ?? 0);
+          return tb - ta; // newest past first
+        });
+    }
+
+    if (key === "upcomingEvents") {
+      return arr
+        .filter((item: any) => {
+          const t = item?.eventDate ? new Date(item.eventDate).getTime() : (item?._creationTime ?? 0);
+          return t >= now;
+        })
+        .sort((a: any, b: any) => {
+          const ta = a?.eventDate ? new Date(a.eventDate).getTime() : (a?._creationTime ?? 0);
+          const tb = b?.eventDate ? new Date(b.eventDate).getTime() : (b?._creationTime ?? 0);
+          return ta - tb; // soonest first
+        });
+    }
+
+    if (key === "completed") {
+      return arr
+        .filter((item: any) => {
+          const total = item?.totalItems || 0;
+          const claimed = item?.totalClaimed || 0;
+          return total > 0 && claimed >= total;
+        })
+        .sort((a: any, b: any) => {
+          const ta = a?.eventDate ? new Date(a.eventDate).getTime() : (a?._creationTime ?? 0);
+          const tb = b?.eventDate ? new Date(b.eventDate).getTime() : (b?._creationTime ?? 0);
+          return tb - ta; // recent completed first
+        });
+    }
+
+    if (key === "inComplete") {
+      return arr
+        .filter((item: any) => {
+          const left = (item?.totalItems || 0) - (item?.totalClaimed || 0);
+          return left > 0;
+        })
+        .sort((a: any, b: any) => {
+          const la = (a?.totalItems || 0) - (a?.totalClaimed || 0);
+          const lb = (b?.totalItems || 0) - (b?.totalClaimed || 0);
+          return lb - la; // most items left first
+        });
+    }
+
+    return arr;
+  }, [sortedWishList, appliedFilterBy]);
+
+  // debug: removed noisy logging
   return (
     <>
       <View style={styles.container}>
@@ -71,10 +182,10 @@ const Wishlists = () => {
         </LinearGradient>
         <Tabs currentTab={currentTab} setCurrentTab={setCurrentTab} />
         <View style={styles.content}>
-          {wishList && wishList?.length ? (
+          {filteredWishList && filteredWishList?.length ? (
             <>
-              <ActionBar appliedSortBy={appliedSortBy ?? "default"} setAppliedSortBy={setAppliedSortBy} appliedFilterBy={appliedFilterBy ?? "upcomingEvents"} setAppliedFilterBy={setAppliedFilterBy} search={search} setSearch={setSearch} handleToggleModal={handleToggleModal} />
-              <WishListing wishList={searchList(wishList as any[])} />
+              <ActionBar appliedSortBy={appliedSortBy} setAppliedSortBy={setAppliedSortBy} appliedFilterBy={appliedFilterBy} setAppliedFilterBy={setAppliedFilterBy} search={search} setSearch={setSearch} handleToggleModal={handleToggleModal} />
+              <WishListing wishList={searchList(filteredWishList as any[])} />
             </>
           ) : (
             <NoListFound currentTab={currentTab} />
@@ -96,7 +207,7 @@ const Wishlists = () => {
                 <Ionicons name="chevron-down" size={20} color="#1C0335" />
               </View>
               {[
-                { key: "default", label: "Default" },
+                { key: "default", label: "Date Created (Default)" },
                 { key: "dateOfEvent", label: "Date of Event" },
                 { key: "alphabetically", label: "Alphabetically" },
                 { key: "percentage", label: "List Completion %" },
