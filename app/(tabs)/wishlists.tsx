@@ -7,7 +7,7 @@ import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, usePathname } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Image, Modal, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,6 +19,7 @@ const Wishlists = () => {
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
   const encodedReturnTo = returnTo ? String(returnTo) : undefined;
   const decodedReturnTo = encodedReturnTo ? decodeURIComponent(encodedReturnTo) : undefined;
+  const pathname = usePathname();
 
   const [currentTab, setCurrentTab] = useState<string>("my-events");
   const [showSortSheet, setShowSortSheet] = useState(false);
@@ -32,14 +33,14 @@ const Wishlists = () => {
 
   useEffect(() => {
     setCurrentTab("my-events");
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     setShowSortSheet(false);
     setSortBy("default");
-    setFilterBy(null)
+    setFilterBy(null);
     setAppliedSortBy("default");
-    setAppliedFilterBy(null)
+    setAppliedFilterBy(null);
     setSearch("");
   }, [currentTab]);
 
