@@ -266,7 +266,16 @@ export const getMyLists = query({
             coverPhotoUri = refreshed;
           }
         }
-        return { ...list, coverPhotoUri };
+
+        // Aggregate list item counts for this list
+        const items = await ctx.db
+          .query("list_items")
+          .withIndex("by_list", (q) => q.eq("list_id", list._id))
+          .collect();
+        const totalItems = items.length;
+        const totalClaimed = items.reduce((s: number, it: any) => s + Number(it.claimed ?? 0), 0);
+
+        return { ...list, coverPhotoUri, totalItems, totalClaimed };
       })
     );
   },
@@ -437,12 +446,7 @@ export const seedShareData = internalMutation({
     }
 
     // Create groups
-    const groupNames = [
-      "Class of 2023",
-      "Office Mates",
-      "Adam's Family",
-      "Erin’s Classmates",
-    ];
+    const groupNames = ["Class of 2023", "Office Mates", "Adam's Family", "Erin’s Classmates"];
     const groupIds: Id<"groups">[] = [] as any;
     for (const name of groupNames) {
       const gid = await ctx.db.insert("groups", {
@@ -514,12 +518,7 @@ export const seedShareDataPublic = mutation({
     }
 
     // Groups
-    const groupNames = [
-      "Class of 2023",
-      "Office Mates",
-      "Adam's Family",
-      "Erin’s Classmates",
-    ];
+    const groupNames = ["Class of 2023", "Office Mates", "Adam's Family", "Erin’s Classmates"];
     const groupIds: Id<"groups">[] = [] as any;
     for (const name of groupNames) {
       const gid = await ctx.db.insert("groups", {
@@ -700,34 +699,6 @@ export const getListItemById = query({
   },
 });
 
-export const seedDummyListItem = mutation({
-  args: { list_id: v.id("lists") },
-  handler: async (ctx, args) => {
-    // If already has items do nothing
-    const existing = await ctx.db
-      .query("list_items")
-      .withIndex("by_list", (q) => q.eq("list_id", args.list_id))
-      .collect();
-    if (existing.length > 0) return "skipped";
-
-    const now = new Date().toISOString();
-    await ctx.db.insert("list_items", {
-      list_id: args.list_id,
-      name: "Apple AirPods Max wireless over-ear headphones",
-      description: "High-fidelity audio with Active Noise Cancellation and spatial audio.",
-      image_url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/airpods-max-select-202409-blue?wid=940&hei=1112&fmt=png-alpha&.v=1725380856538",
-      quantity: 2,
-      claimed: 1,
-      price: "1899.00",
-      currency: "AED",
-      buy_url: "https://www.apple.com/airpods-max/",
-      status: "active",
-      created_at: now,
-      updated_at: now,
-    });
-    return "ok";
-  },
-});
 
 export const setListItemClaim = mutation({
   args: { itemId: v.id("list_items"), claimed: v.number() },
