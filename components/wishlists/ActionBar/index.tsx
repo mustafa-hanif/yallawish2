@@ -5,7 +5,7 @@ import { styles } from "./style";
 interface ActionBarProps {
   handleToggleModal: () => void;
   search: string;
-  setSearch: () => void;
+  setSearch: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export default function ActionBar({ search, setSearch, handleToggleModal }: ActionBarProps) {
@@ -26,7 +26,7 @@ export default function ActionBar({ search, setSearch, handleToggleModal }: Acti
         </View>
       </View>
       <View style={styles.searchInputContainer}>
-        <TextInput value={search} onChange={setSearch} style={styles.searchInput} placeholder="Search" placeholderTextColor={"#626262"} />
+        <TextInput value={search} onChangeText={(t) => setSearch(t)} style={styles.searchInput} placeholder="Search" placeholderTextColor={"#626262"} />
         <View style={styles.iconContainer}>
           <Image style={styles.searchIcon} source={require("@/assets/images/search.png")} />
         </View>

@@ -23,7 +23,8 @@ const Wishlists = () => {
   const [currentTab, setCurrentTab] = useState<string>("my-events");
   const [showSortSheet, setShowSortSheet] = useState(false);
   const [tempSortBy, setTempSortBy] = useState("default");
-  const [search, setSearch] = useState("")
+  const [filterBy, setFilterBy] = useState("");
+  const [search, setSearch] = useState("");
 
   const handleBack = () => {
     if (decodedReturnTo) {
@@ -35,11 +36,13 @@ const Wishlists = () => {
 
   const handleToggleModal = () => setShowSortSheet((prev) => !prev);
 
-  const searchList = (arr = []) => {
-    return arr
-  }
+  const searchList = (arr: any[] = []) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return arr;
+    return arr.filter((item) => item.title.toLowerCase().includes(q));
+  };
 
-  const wishList = searchList(myLists)
+  const wishList = myLists;
   return (
     <>
       <View style={styles.container}>
@@ -61,16 +64,11 @@ const Wishlists = () => {
           {wishList && wishList?.length ? (
             <>
               <ActionBar search={search} setSearch={setSearch} handleToggleModal={handleToggleModal} />
-              <WishListing wishList={wishList} />
+              <WishListing wishList={searchList(myLists as any[])} />
             </>
           ) : (
             <NoListFound currentTab={currentTab} />
           )}
-        </View>
-        <View style={styles.bottomButtons}>
-          <Pressable style={styles.backButtonBottom}>
-            <Text style={styles.backButtonText}>Back</Text>
-          </Pressable>
         </View>
       </View>
       <Modal visible={showSortSheet} transparent animationType="fade" onRequestClose={handleToggleModal}>
@@ -105,6 +103,17 @@ const Wishlists = () => {
                 <Text style={styles.sortSectionTitle}>Filter by</Text>
                 <Ionicons name="chevron-down" size={20} color="#1C0335" />
               </View>
+              {[
+                { key: "pastEvents", label: "Past Events" },
+                { key: "upcomingEvents", label: "Upcoming events" },
+                { key: "completed", label: "Completed" },
+                { key: "incomplete", label: "Incomplete" },
+              ].map((o) => (
+                <Pressable key={o.key} style={styles.radioRow} onPress={() => setFilterBy(o.key)}>
+                  <View style={[styles.radioOuter, filterBy === o.key && styles.radioOuterActive]}>{filterBy === o.key && <View style={styles.radioInner} />}</View>
+                  <Text style={styles.radioLabel}>{o.label}</Text>
+                </Pressable>
+              ))}
               {/* <Pressable style={styles.radioRow} onPress={() => setTempFilterClaimed((v) => !v)}>
                 <View style={[styles.checkboxBox, tempFilterClaimed && styles.checkboxBoxActive]}>{tempFilterClaimed && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}</View>
                 <Text style={styles.radioLabel}>Claimed</Text>
@@ -167,24 +176,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 15,
-  },
-  bottomButtons: {
-    padding: 16,
-  },
-  backButtonBottom: {
-    height: 56,
-    borderWidth: 1,
-    borderColor: "#3B0076",
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  backButtonText: {
-    color: "#3B0076",
-    fontSize: 16,
-    fontFamily: "Nunito_700Bold",
-    lineHeight: 16,
   },
   backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.3)" },
   sortSheetContainer: { position: "absolute", left: 0, right: 0, bottom: 0, backgroundColor: "#FFFFFF", borderTopLeftRadius: 32, borderTopRightRadius: 32, maxHeight: "80%" },
