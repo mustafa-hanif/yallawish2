@@ -705,6 +705,8 @@ export const getCommunityLists = query({
   handler: async (ctx, args) => {
     const excludeUserId = args.exclude_user_id ?? null;
 
+    // Collect all lists and filter client-side for privacy and ownership
+    const allLists = await ctx.db.query("lists").collect();
     const lists = allLists.filter((l: any) => l.privacy === "shared" && (l.user_id ?? null) !== excludeUserId);
 
     return await Promise.all(
