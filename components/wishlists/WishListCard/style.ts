@@ -11,6 +11,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#ffff",
     padding: 8,
     gap: 8,
+    position: "relative",
   },
   cardHeader: {
     flexDirection: "row",
@@ -67,9 +68,44 @@ export const styles = StyleSheet.create({
     verticalAlign: "middle",
     fontFamily: "Nunito_600SemiBold",
   },
+  profile: {
+    width: 28,
+    height: 28,
+    backgroundColor: "#3B0076",
+    borderRadius: "50%",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+  },
+  profileImageUrl: {
+    width: "100%",
+    height: "100%",
+  },
+  profileInitials: {
+    color: "#FFFF",
+    fontSize: 10,
+    fontFamily: "Nunito_700Bold",
+    letterSpacing: 0,
+  },
   backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.3)" },
   sheetContainer: { position: "absolute", left: 0, right: 0, bottom: 0, backgroundColor: "#FFFFFF", borderTopLeftRadius: 32, borderTopRightRadius: 32, maxHeight: "80%" },
   sheetHandle: { width: 64, height: 6, borderRadius: 3, backgroundColor: "#C7C7CC", alignSelf: "center", marginTop: 12 },
   sheetContent: { paddingBottom: 32, paddingHorizontal: 32, paddingTop: 8, gap: 24 },
   sheetTitle: { fontSize: 24, fontFamily: "Nunito_700Bold", color: "#1C0335", textAlign: "center", marginTop: 24 },
+  actionsContainer: {
+    gap: 16,
+  },
+  actionButton: {
+    width: "45%",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  actionLabel: {
+    fontSize: 16,
+    fontFamily: "Nunito_600SemiBold",
+    color: "#1C0335",
+  },
 });

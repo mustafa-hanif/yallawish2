@@ -275,7 +275,25 @@ export const getMyLists = query({
         const totalItems = items.length;
         const totalClaimed = items.reduce((s: number, it: any) => s + Number(it.claimed ?? 0), 0);
 
-        return { ...list, coverPhotoUri, totalItems, totalClaimed };
+        let creator: any = null;
+        const uid = (list.user_id ?? null) as string | null;
+        if (uid) {
+          const profile = await ctx.db
+            .query("user_profiles")
+            .withIndex("by_user", (q) => q.eq("user_id", uid))
+            .first();
+          if (profile) {
+            creator = {
+              user_id: profile.user_id,
+              firstName: profile.firstName ?? null,
+              lastName: profile.lastName ?? null,
+              profileImageUrl: profile.profileImageUrl ?? null,
+              contactEmail: profile.contactEmail ?? null,
+            } as any;
+          }
+        }
+        
+        return { ...list, coverPhotoUri, totalItems, totalClaimed, creator };
       })
     );
   },
@@ -727,6 +745,22 @@ export const getCommunityLists = query({
 
         // Attach creator profile: try local `user_profiles` first, then Clerk API fallback.
         let creator: any = null;
+        const uid = (list.user_id ?? null) as string | null;
+        if (uid) {
+          const profile = await ctx.db
+            .query("user_profiles")
+            .withIndex("by_user", (q) => q.eq("user_id", uid))
+            .first();
+          if (profile) {
+            creator = {
+              user_id: profile.user_id,
+              firstName: profile.firstName ?? null,
+              lastName: profile.lastName ?? null,
+              profileImageUrl: profile.profileImageUrl ?? null,
+              contactEmail: profile.contactEmail ?? null,
+            } as any;
+          }
+        }
 
         return { ...list, coverPhotoUri, totalItems, totalClaimed, creator };
       })

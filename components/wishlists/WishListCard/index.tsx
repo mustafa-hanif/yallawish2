@@ -1,10 +1,35 @@
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Image, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { styles } from "./style";
 
 interface WishListCardProps {
-  item: { _creationTime: number; _id: string; coverPhotoUri: string | null; created_at: string; eventDate: string; note: string | null; occasion: string; password: string; privacy: string; requiresPassword: boolean; shippingAddress: string; title: string; updated_at: string; user_id: string; totalItems: number; totalClaimed: number };
+  item: {
+    _creationTime: number;
+    _id: string;
+    coverPhotoUri: string | null;
+    created_at: string;
+    eventDate: string;
+    note: string | null;
+    occasion: string;
+    password: string;
+    privacy: string;
+    requiresPassword: boolean;
+    shippingAddress: string;
+    title: string;
+    updated_at: string;
+    user_id: string;
+    totalItems: number;
+    totalClaimed: number;
+    creator: {
+      _id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+      profileImageUrl: string | null;
+      contactEmail: string;
+    };
+  };
 }
 export default function WishListCard({ item }: WishListCardProps) {
   const [isBottomSheet, setIsBottomSheet] = useState(false);
@@ -16,6 +41,7 @@ export default function WishListCard({ item }: WishListCardProps) {
   const purchasedItems = item?.totalClaimed ?? 0;
   const percentage = totalItems > 0 ? Math.round((purchasedItems / totalItems) * 100) : 0;
   const occasion = item?.occasion || "birthday";
+  const user = item?.creator || null;
 
   const occasionObj = {
     birthday: require("@/assets/images/birthday3.png"),
@@ -32,11 +58,43 @@ export default function WishListCard({ item }: WishListCardProps) {
   const handlePress = (id: string) => router.push({ pathname: "/view-list", params: { listId: String(id) } });
   const handleLongPress = () => setIsBottomSheet(true);
 
+  const profileInitials = useMemo(() => {
+    const name = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
+    if (name) {
+      return (
+        name
+          .split(" ")
+          .filter(Boolean)
+          .map((part) => part[0]?.toUpperCase() ?? "")
+          .join("")
+          .slice(0, 2) || "YW"
+      );
+    }
+
+    const email = user?.contactEmail ?? "";
+    if (email) {
+      const letters = email
+        .replace(/[^a-zA-Z]/g, "")
+        .slice(0, 2)
+        .toUpperCase();
+      return letters || "YW";
+    }
+
+    return "YW";
+  }, [user?.firstName, user?.lastName, user?.contactEmail]);
+
+  const quickActions = [
+    { title: "Archive", icon: require("@/assets/images/archiveList.png") },
+    { title: "Duplicate", icon: require("@/assets/images/duplicateList.png") },
+    { title: "Edit", icon: require("@/assets/images/customize.png") },
+    { title: "Delete", icon: require("@/assets/images/deleteList.png") },
+  ];
   return (
     <>
       <Pressable style={styles.card} onPress={() => handlePress(id)} onLongPress={handleLongPress}>
         <View style={styles.cardHeader}>
           <Image style={styles.cardIcon} resizeMode="contain" source={occasionIcon} />
+          <View style={styles.profile}>{user?.profileImageUrl ? <Image resizeMode="cover" style={styles.profileImageUrl} source={{ uri: user.profileImageUrl }} /> : <Text style={styles.profileInitials}>{profileInitials}</Text>}</View>
         </View>
         <View style={styles.titleContainer}>
           <Text numberOfLines={2} style={styles.title}>
@@ -68,7 +126,17 @@ export default function WishListCard({ item }: WishListCardProps) {
             <View style={styles.sheetHandle} />
           </Pressable>
           <ScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
-            <Text style={styles.sheetTitle}>Sort & Filter</Text>
+            <Text style={styles.sheetTitle}>Quick Actions</Text>
+            <View style={styles.actionsContainer}>
+              {quickActions?.map((action) => (
+                <Pressable key={action.title} style={styles.actionButton}>
+                  <Image source={action.icon} resizeMode="contain" />
+                  <View>
+                    <Text style={styles.actionLabel}>{action.title}</Text>
+                  </View>
+                </Pressable>
+              ))}
+            </View>
           </ScrollView>
         </View>
       </Modal>
