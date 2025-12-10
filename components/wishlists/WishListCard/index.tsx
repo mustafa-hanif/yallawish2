@@ -1,3 +1,4 @@
+import { useUser } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
 import { Image, Modal, Pressable, ScrollView, Text, View } from "react-native";
@@ -32,6 +33,8 @@ interface WishListCardProps {
   };
 }
 export default function WishListCard({ item }: WishListCardProps) {
+  const { user: loggedInUser } = useUser();
+
   const [isBottomSheet, setIsBottomSheet] = useState(false);
 
   const id = item?._id;
@@ -91,7 +94,7 @@ export default function WishListCard({ item }: WishListCardProps) {
   ];
   return (
     <>
-      <Pressable style={styles.card} onPress={() => handlePress(id)} onLongPress={handleLongPress}>
+      <Pressable style={styles.card} onPress={() => handlePress(id)} onLongPress={loggedInUser?.id === item?.user_id ? handleLongPress : null}>
         <View style={styles.cardHeader}>
           <Image style={styles.cardIcon} resizeMode="contain" source={occasionIcon} />
           <View style={styles.profile}>{user?.profileImageUrl ? <Image resizeMode="cover" style={styles.profileImageUrl} source={{ uri: user.profileImageUrl }} /> : <Text style={styles.profileInitials}>{profileInitials}</Text>}</View>
