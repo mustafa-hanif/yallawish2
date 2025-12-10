@@ -46,7 +46,7 @@ export default function WishListCard({ item }: WishListCardProps) {
   const occasion = item?.occasion || "birthday";
   const user = item?.creator || null;
 
-  const occasionObj = {
+  const occasionObj: Record<string, any> = {
     birthday: require("@/assets/images/birthday3.png"),
     wedding: require("@/assets/images/wedding3.png"),
     "baby-shower": require("@/assets/images/babyShower3.png"),
