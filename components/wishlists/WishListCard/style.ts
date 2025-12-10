@@ -119,4 +119,9 @@ export const styles = StyleSheet.create({
     fontFamily: "Nunito_600SemiBold",
     color: "#1C0335",
   },
+  actionButtonIcon: {
+    width: 24,
+    height: 24,
+    color: "#FFFFFF",
+  },
 });

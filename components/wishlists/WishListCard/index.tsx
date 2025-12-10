@@ -1,7 +1,8 @@
 import { useUser } from "@clerk/clerk-expo";
 import { router } from "expo-router";
-import React, { useMemo, useState } from "react";
-import { Image, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { useMemo, useRef, useState } from "react";
+import { Image, Pressable, Text, View } from "react-native";
+import ActionButton from "react-native-circular-action-menu";
 import { styles } from "./style";
 
 interface WishListCardProps {
@@ -59,7 +60,22 @@ export default function WishListCard({ item }: WishListCardProps) {
   const occasionIcon = occasionObj?.[occasion];
 
   const handlePress = (id: string) => router.push({ pathname: "/view-list", params: { listId: String(id) } });
-  const handleLongPress = () => setIsBottomSheet(true);
+  const actionBtnRef = useRef<any>(null);
+  const handleLongPress = () => {
+    // Prefer triggering via ref if supported, else fall back to state
+    try {
+      const inst = actionBtnRef.current as any;
+      if (inst && typeof inst.animateButton === "function") {
+        inst.animateButton();
+      } else if (inst && typeof inst._animateButton === "function") {
+        inst._animateButton();
+      } else {
+        setIsBottomSheet(true);
+      }
+    } catch {
+      setIsBottomSheet(true);
+    }
+  };
 
   const profileInitials = useMemo(() => {
     const name = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
@@ -94,7 +110,7 @@ export default function WishListCard({ item }: WishListCardProps) {
   ];
   return (
     <>
-      <Pressable style={styles.card} onPress={() => handlePress(id)} onLongPress={loggedInUser?.id === item?.user_id ? handleLongPress : null}>
+      <Pressable style={styles.card} onPress={() => handlePress(id)} onLongPress={handleLongPress} delayLongPress={200}>
         <View style={styles.cardHeader}>
           <Image style={styles.cardIcon} resizeMode="contain" source={occasionIcon} />
           <View style={styles.profile}>{user?.profileImageUrl ? <Image resizeMode="cover" style={styles.profileImageUrl} source={{ uri: user.profileImageUrl }} /> : <Text style={styles.profileInitials}>{profileInitials}</Text>}</View>
@@ -121,8 +137,19 @@ export default function WishListCard({ item }: WishListCardProps) {
             <Text style={styles.progressText}>{percentage}% Completed</Text>
           </View>
         </View>
+        <View style={{ zIndex: 1, position: "absolute", bottom: 0, right: 0 }}>
+          <ActionButton icon={<Text> </Text>} btnOutRange={"transparent"} buttonColor={"transparent"} ref={actionBtnRef} position={"right"} radiua={20} active={isBottomSheet}>
+            {quickActions?.map((action) => (
+              <ActionButton.Item key={action.title} title={action.title} onPress={() => setIsBottomSheet(false)}>
+                <View style={{ justifyContent: "center", alignItems: "center", width: 40, height: 40, borderWidth: 1, borderColor: "red", backgroundColor: "#ffff", borderRadius: "50%" }}>
+                  <Image source={action.icon} style={{}} />
+                </View>
+              </ActionButton.Item>
+            ))}
+          </ActionButton>
+        </View>
       </Pressable>
-      <Modal visible={isBottomSheet} transparent animationType="fade" onRequestClose={() => setIsBottomSheet(false)}>
+      {/* <Modal visible={isBottomSheet} transparent animationType="fade" onRequestClose={() => setIsBottomSheet(false)}>
         <Pressable style={styles.backdrop} onPress={() => setIsBottomSheet(false)} />
         <View style={styles.sheetContainer}>
           <Pressable onPress={() => setIsBottomSheet(false)}>
@@ -144,7 +171,7 @@ export default function WishListCard({ item }: WishListCardProps) {
             </View>
           </ScrollView>
         </View>
-      </Modal>
+      </Modal> */}
     </>
   );
 }
