@@ -31,11 +31,11 @@ export function BrowseByCategories({}: BrowseByCategoriesProp) {
   useEffect(() => {
     const intervalId = setInterval(() => {
       if (scrollingDirection === "forward") {
-        flatListRef?.current.scrollToEnd({ offset: 3, animated: true });
+        if(flatListRef?.current) flatListRef?.current?.scrollToEnd({ offset: 3, animated: true });
         setScrollingDirection("backward");
       } else {
         // Scroll back to the start
-        flatListRef?.current.scrollToOffset({ offset: 2, animated: true });
+        if(flatListRef?.current) flatListRef?.current?.scrollToOffset({ offset: 2, animated: true });
         setScrollingDirection("forward");
       }
     }, 3000);
