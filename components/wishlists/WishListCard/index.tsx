@@ -38,7 +38,6 @@ export default function WishListCard({ item }: WishListCardProps) {
         <View style={styles.cardHeader}>
           <Image style={styles.cardIcon} resizeMode="contain" source={occasionIcon} />
         </View>
-        {/* <View style={styles.content}> */}
         <View style={styles.titleContainer}>
           <Text numberOfLines={2} style={styles.title}>
             {title}
@@ -53,7 +52,6 @@ export default function WishListCard({ item }: WishListCardProps) {
             <Text style={styles.totalIteNumber}>{totalItems}</Text>
           </Text>
         </View>
-        {/* </View> */}
         <View>
           <View style={styles.progressBarContainer}>
             <View style={[styles.progressBar, { width: `${percentage}%` }]} />
