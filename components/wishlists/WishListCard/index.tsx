@@ -133,8 +133,8 @@ export default function WishListCard({ item }: WishListCardProps) {
             <View style={styles.actionsContainer}>
               {quickActions?.map((action) => (
                 <Pressable key={action.title} style={styles.actionButton}>
-                  <View style={styles.actionIcon}>
-                    <Image source={action.icon} resizeMode="contain" />
+                  <View style={styles.actionIconWrapper}>
+                    <Image style={styles.actionIcon} source={action.icon} resizeMode="contain" />
                   </View>
                   <View>
                     <Text style={[styles.actionLabel, action.title === "Delete List" && { color: "red" }]}>{action.title}</Text>

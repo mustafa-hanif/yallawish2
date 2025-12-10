@@ -101,13 +101,17 @@ export const styles = StyleSheet.create({
     gap: 14,
     paddingVertical: 6,
   },
-  actionIcon: {
-    width: 45,
-    height: 45,
+  actionIconWrapper: {
+    width: 40,
+    height: 40,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#EFEFEF",
     borderRadius: 8,
+  },
+  actionIcon: {
+    width: 16,
+    height: 16,
   },
 
   actionLabel: {
