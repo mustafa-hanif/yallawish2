@@ -88,9 +88,9 @@ export default function WishListCard({ item }: WishListCardProps) {
 
   const quickActions = [
     { title: "Archive", icon: require("@/assets/images/archiveList.png") },
-    { title: "Duplicate", icon: require("@/assets/images/duplicateList.png") },
-    { title: "Edit", icon: require("@/assets/images/customize.png") },
-    { title: "Delete", icon: require("@/assets/images/deleteList.png") },
+    { title: "Duplicate List", icon: require("@/assets/images/duplicateList.png") },
+    { title: "Edit List", icon: require("@/assets/images/Edit.png") },
+    { title: "Delete List", icon: require("@/assets/images/deleteList.png") },
   ];
   return (
     <>
@@ -133,9 +133,11 @@ export default function WishListCard({ item }: WishListCardProps) {
             <View style={styles.actionsContainer}>
               {quickActions?.map((action) => (
                 <Pressable key={action.title} style={styles.actionButton}>
-                  <Image source={action.icon} resizeMode="contain" />
+                  <View style={styles.actionIcon}>
+                    <Image source={action.icon} resizeMode="contain" />
+                  </View>
                   <View>
-                    <Text style={styles.actionLabel}>{action.title}</Text>
+                    <Text style={[styles.actionLabel, action.title === "Delete List" && { color: "red" }]}>{action.title}</Text>
                   </View>
                 </Pressable>
               ))}

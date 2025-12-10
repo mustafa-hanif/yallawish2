@@ -93,16 +93,23 @@ export const styles = StyleSheet.create({
   sheetContent: { paddingBottom: 32, paddingHorizontal: 32, paddingTop: 8, gap: 24 },
   sheetTitle: { fontSize: 24, fontFamily: "Nunito_700Bold", color: "#1C0335", textAlign: "center", marginTop: 24 },
   actionsContainer: {
-    gap: 16,
+    gap: 5,
   },
   actionButton: {
-    width: "45%",
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    paddingVertical: 12,
+    gap: 14,
+    paddingVertical: 6,
+  },
+  actionIcon: {
+    width: 45,
+    height: 45,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#EFEFEF",
     borderRadius: 8,
   },
+
   actionLabel: {
     fontSize: 16,
     fontFamily: "Nunito_600SemiBold",
