@@ -30,6 +30,7 @@ export const styles = StyleSheet.create({
     textAlign: "center",
   },
   createNewListButton: {
+    marginTop: 16,
     height: 56,
     width: 228.67,
     backgroundColor: "#3B0076",
