@@ -111,34 +111,8 @@ export default function WishListCard({ item }: WishListCardProps) {
   return (
     <>
       <Pressable style={styles.card} onPress={() => handlePress(id)} onLongPress={handleLongPress} delayLongPress={200}>
-        <View style={styles.cardHeader}>
-          <Image style={styles.cardIcon} resizeMode="contain" source={occasionIcon} />
-          <View style={styles.profile}>{user?.profileImageUrl ? <Image resizeMode="cover" style={styles.profileImageUrl} source={{ uri: user.profileImageUrl }} /> : <Text style={styles.profileInitials}>{profileInitials}</Text>}</View>
-        </View>
-        <View style={styles.titleContainer}>
-          <Text numberOfLines={2} style={styles.title}>
-            {title}
-          </Text>
-        </View>
-        <View>
-          <Text style={styles.date}>{date}</Text>
-        </View>
-        <View>
-          <Text style={styles.totalItems}>
-            Total Items:
-            <Text style={styles.totalIteNumber}>{totalItems}</Text>
-          </Text>
-        </View>
-        <View>
-          <View style={styles.progressBarContainer}>
-            <View style={[styles.progressBar, { width: `${percentage}%` }]} />
-          </View>
-          <View>
-            <Text style={styles.progressText}>{percentage}% Completed</Text>
-          </View>
-        </View>
-        <View style={{ zIndex: 1, position: "absolute", bottom: 0, right: 0 }}>
-          <ActionButton icon={<Text> </Text>} btnOutRange={"transparent"} buttonColor={"transparent"} ref={actionBtnRef} position={"right"} radiua={20} active={isBottomSheet}>
+        <View style={{ width: "100%", height: "100%", zIndex: 1, position: "absolute" }}>
+          <ActionButton icon={<Text></Text>} btnOutRange={"transparent"} buttonColor={"transparent"} ref={actionBtnRef} position={"right"} radiua={20} active={isBottomSheet}>
             {quickActions?.map((action) => (
               <ActionButton.Item key={action.title} title={action.title} onPress={() => setIsBottomSheet(false)}>
                 <View style={{ justifyContent: "center", alignItems: "center", width: 40, height: 40, borderWidth: 1, borderColor: "red", backgroundColor: "#ffff", borderRadius: "50%" }}>
@@ -147,6 +121,34 @@ export default function WishListCard({ item }: WishListCardProps) {
               </ActionButton.Item>
             ))}
           </ActionButton>
+        </View>
+        <View style={styles.cardContentWrapper}>
+          <View style={styles.cardHeader}>
+            <Image style={styles.cardIcon} resizeMode="contain" source={occasionIcon} />
+            <View style={styles.profile}>{user?.profileImageUrl ? <Image resizeMode="cover" style={styles.profileImageUrl} source={{ uri: user.profileImageUrl }} /> : <Text style={styles.profileInitials}>{profileInitials}</Text>}</View>
+          </View>
+          <View style={styles.titleContainer}>
+            <Text numberOfLines={2} style={styles.title}>
+              {title}
+            </Text>
+          </View>
+          <View>
+            <Text style={styles.date}>{date}</Text>
+          </View>
+          <View>
+            <Text style={styles.totalItems}>
+              Total Items:
+              <Text style={styles.totalIteNumber}>{Number(totalItems) < 10 && Number(totalItems) > 0 ? `0${totalItems}` : totalItems}</Text>
+            </Text>
+          </View>
+          <View>
+            <View style={styles.progressBarContainer}>
+              <View style={[styles.progressBar, { width: `${percentage}%` }]} />
+            </View>
+            <View>
+              <Text style={styles.progressText}>{percentage}% Completed</Text>
+            </View>
+          </View>
         </View>
       </Pressable>
       {/* <Modal visible={isBottomSheet} transparent animationType="fade" onRequestClose={() => setIsBottomSheet(false)}>

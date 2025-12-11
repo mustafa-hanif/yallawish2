@@ -9,9 +9,11 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E5E5E5",
     backgroundColor: "#ffff",
+    position: "relative",
+  },
+  cardContentWrapper: {
     padding: 8,
     gap: 8,
-    position: "relative",
   },
   cardHeader: {
     flexDirection: "row",
