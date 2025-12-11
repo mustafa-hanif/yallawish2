@@ -62,19 +62,20 @@ export default function WishListCard({ item }: WishListCardProps) {
   const handlePress = (id: string) => router.push({ pathname: "/view-list", params: { listId: String(id) } });
   const actionBtnRef = useRef<any>(null);
   const handleLongPress = () => {
-    // Prefer triggering via ref if supported, else fall back to state
-    setIsBottomSheet(true);
-    try {
-      const inst = actionBtnRef.current as any;
-      if (inst && typeof inst.animateButton === "function") {
-        inst.animateButton();
-      } else if (inst && typeof inst._animateButton === "function") {
-        inst._animateButton();
-      } else {
+    if (loggedInUser?.id === item?.user_id) {
+      setIsBottomSheet(true);
+      try {
+        const inst = actionBtnRef.current as any;
+        if (inst && typeof inst.animateButton === "function") {
+          inst.animateButton();
+        } else if (inst && typeof inst._animateButton === "function") {
+          inst._animateButton();
+        } else {
+          setIsBottomSheet(true);
+        }
+      } catch {
         setIsBottomSheet(true);
       }
-    } catch {
-      setIsBottomSheet(true);
     }
   };
 
