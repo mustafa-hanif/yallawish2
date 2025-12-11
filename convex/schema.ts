@@ -34,6 +34,7 @@ export default defineSchema({
     privacy: v.union(v.literal("private"), v.literal("shared")),
     requiresPassword: v.optional(v.boolean()),
     password: v.optional(v.union(v.string(), v.null())),
+    isArchived: v.optional(v.boolean()),
     created_at: v.string(),
     updated_at: v.string(),
   }).index("by_user", ["user_id"]),

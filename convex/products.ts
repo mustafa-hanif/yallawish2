@@ -161,6 +161,7 @@ export const createList = mutation({
       privacy: args.privacy,
       requiresPassword: args.requiresPassword ?? false,
       password: args.password ?? null,
+      isArchived: false,
       created_at: now,
       updated_at: now,
     });
