@@ -112,8 +112,8 @@ export const styles = StyleSheet.create({
   actionIconWrapper: {
     justifyContent: "center",
     alignItems: "center",
-    width: 40,
-    height: 40,
+    width: 43,
+    height: 43,
     borderWidth: 0.1,
     borderColor: "#00000012",
     backgroundColor: "#ffff",

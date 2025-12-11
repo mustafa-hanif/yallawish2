@@ -5,12 +5,16 @@ import { Image, Pressable, Text, View } from "react-native";
 import ActionButton from "react-native-circular-action-menu";
 import { styles } from "./style";
 
-const quickActions = [
-  { title: "Delete", icon: require("@/assets/images/deleteList.png") },
-  { title: "Archive", icon: require("@/assets/images/archiveList.png") },
-  { title: "Duplicate", icon: require("@/assets/images/duplicateList.png") },
-  { title: "Edit", icon: require("@/assets/images/Edit.png") },
-];
+const occasionObj: Record<string, any> = {
+  birthday: require("@/assets/images/birthday3.png"),
+  wedding: require("@/assets/images/wedding3.png"),
+  "baby-shower": require("@/assets/images/babyShower3.png"),
+  graduation: require("@/assets/images/graduation3.png"),
+  "new-home": require("@/assets/images/houseWarming3.png"),
+  retirement: require("@/assets/images/retirement3.png"),
+  "no-occasion": require("@/assets/images/other3.png"),
+  other: require("@/assets/images/other3.png"),
+};
 interface WishListCardProps {
   item: {
     _creationTime: number;
@@ -40,6 +44,7 @@ interface WishListCardProps {
   };
   onSelectDelete: (id: string) => void;
 }
+
 export default function WishListCard({ item, onSelectDelete }: WishListCardProps) {
   const { user: loggedInUser } = useUser();
 
@@ -53,19 +58,16 @@ export default function WishListCard({ item, onSelectDelete }: WishListCardProps
   const percentage = totalItems > 0 ? Math.round((purchasedItems / totalItems) * 100) : 0;
   const occasion = item?.occasion || "birthday";
   const user = item?.creator || null;
+  const isArchive = true;
 
-  const occasionObj: Record<string, any> = {
-    birthday: require("@/assets/images/birthday3.png"),
-    wedding: require("@/assets/images/wedding3.png"),
-    "baby-shower": require("@/assets/images/babyShower3.png"),
-    graduation: require("@/assets/images/graduation3.png"),
-    "new-home": require("@/assets/images/houseWarming3.png"),
-    retirement: require("@/assets/images/retirement3.png"),
-    "no-occasion": require("@/assets/images/other3.png"),
-    other: require("@/assets/images/other3.png"),
-  };
   const occasionIcon = occasionObj?.[occasion];
 
+  const quickActions = [
+    { title: "Delete", icon: require("@/assets/images/deleteList.png") },
+    { title: isArchive ? "Unarchive" : "Archive", icon: isArchive ?  require("@/assets/images/unarchiveList.png") : require("@/assets/images/archiveList.png") },
+    { title: "Duplicate", icon: require("@/assets/images/duplicateList.png") },
+    { title: "Edit", icon: require("@/assets/images/Edit.png") },
+  ];
   const handlePress = (id: string) => router.push({ pathname: "/view-list", params: { listId: String(id) } });
   const actionBtnRef = useRef<any>(null);
   const handleLongPress = () => {
@@ -123,16 +125,16 @@ export default function WishListCard({ item, onSelectDelete }: WishListCardProps
 
   return (
     <>
-      <View style={styles.card}>
+      <View style={[styles.card, isArchive ? { borderColor: "#FF6C6C", backgroundColor: "#F1F1F1" } : {}]}>
         <Pressable onPress={() => handlePress(id)} onLongPress={handleLongPress} delayLongPress={200} style={[styles.pressableArea, isBottomSheet && { zIndex: 10, backgroundColor: isBottomSheet ? "#FFFFFFE5" : "transparent" }]}>
-          <ActionButton onPress={() => setIsBottomSheet(false)} onOverlayPress={() => setIsBottomSheet(false)} size={0} radius={110} icon={<Text></Text>} ref={actionBtnRef} position={"right"}>
+          <ActionButton onPress={() => setIsBottomSheet(false)} onOverlayPress={() => setIsBottomSheet(false)} size={0} radius={120} icon={<Text></Text>} ref={actionBtnRef} position={"right"}>
             {quickActions?.map((action) => (
-              <ActionButton.Item key={action.title} title={action.title} onPress={() => handlePressActionButton(action.title)} size={40} buttonColor={"#FFFFFF"}>
+              <ActionButton.Item key={action.title} title={action.title} onPress={() => handlePressActionButton(action.title)} buttonColor={"#FFFFFF"}>
                 <View style={styles.actionButtonContent}>
-                  <Text style={[styles.actionTitle, action.title === "Delete" && { color: "#FF3B30" }]}>{action.title}</Text>
                   <View style={styles.actionIconWrapper}>
                     <Image source={action.icon} style={styles.actionIcon} resizeMode="contain" />
                   </View>
+                  <Text style={[styles.actionTitle, action.title === "Delete" && { color: "#FF3B30" }]}>{action.title}</Text>
                 </View>
               </ActionButton.Item>
             ))}
