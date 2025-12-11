@@ -2,15 +2,15 @@ import ActionBar from "@/components/wishlists/ActionBar";
 import DeleteConfirmation from "@/components/wishlists/DeleteConfirmationModal";
 import WishListing from "@/components/wishlists/Listing";
 import NoListFound from "@/components/wishlists/NoListFound";
+import SortAndFilterModal from "@/components/wishlists/SortAndFilterModal";
 import Tabs from "@/components/wishlists/Tabs";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-expo";
-import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams, usePathname } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { Image, Modal, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Wishlists = () => {
@@ -18,7 +18,7 @@ const Wishlists = () => {
   const myLists = useQuery(api.products.getMyLists, user?.id ? { user_id: user.id } : "skip");
   const communityLists = useQuery(api.products.getCommunityLists, user?.id ? { exclude_user_id: user.id } : "skip");
   const deleteList = useMutation(api.products.deleteList);
-  
+
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
   const encodedReturnTo = returnTo ? String(returnTo) : undefined;
   const decodedReturnTo = encodedReturnTo ? decodeURIComponent(encodedReturnTo) : undefined;
@@ -64,7 +64,7 @@ const Wishlists = () => {
     return arr.filter((item) => item.title.toLowerCase().includes(q));
   };
 
-  const handleClickApply = () => {
+  const handlePressApply = () => {
     setAppliedSortBy(sortBy);
     setAppliedFilterBy(filterBy);
     handleToggleModal();
@@ -202,59 +202,7 @@ const Wishlists = () => {
           )}
         </View>
       </View>
-      <Modal visible={showSortSheet} transparent animationType="fade" onRequestClose={handleToggleModal}>
-        <Pressable style={styles.backdrop} onPress={handleToggleModal} />
-        <View style={styles.sortSheetContainer}>
-          <Pressable onPress={handleToggleModal}>
-            <View style={styles.sortSheetHandle} />
-          </Pressable>
-          <ScrollView contentContainerStyle={styles.sortSheetContent} showsVerticalScrollIndicator={false}>
-            <Text style={styles.sortSheetTitle}>Sort & Filter</Text>
-            <View style={styles.sortDivider} />
-            <View style={styles.sortSection}>
-              <View style={styles.sortSectionHeader}>
-                <Text style={styles.sortSectionTitle}>Sort by</Text>
-                <Ionicons name="chevron-down" size={20} color="#1C0335" />
-              </View>
-              {[
-                { key: "default", label: "Date Created (Default)" },
-                { key: "dateOfEvent", label: "Date of Event" },
-                { key: "alphabetically", label: "Alphabetically" },
-                { key: "percentage", label: "List Completion %" },
-                { key: "totalItems", label: "Total Items" },
-              ].map((o) => (
-                <Pressable key={o.key} style={styles.radioRow} onPress={() => setSortBy(o.key)}>
-                  <View style={[styles.radioOuter, sortBy === o.key && styles.radioOuterActive]}>{sortBy === o.key && <View style={styles.radioInner} />}</View>
-                  <Text style={styles.radioLabel}>{o.label}</Text>
-                </Pressable>
-              ))}
-            </View>
-            <View style={styles.sortSection}>
-              <View style={styles.sortSectionHeader}>
-                <Text style={styles.sortSectionTitle}>Filter by</Text>
-                <Ionicons name="chevron-down" size={20} color="#1C0335" />
-              </View>
-              {[
-                { key: "pastEvents", label: "Past Events" },
-                { key: "upcomingEvents", label: "Upcoming Events" },
-                { key: "completed", label: "Completed" },
-                { key: "inComplete", label: "Incomplete" },
-              ].map((o) => (
-                <Pressable key={o.key} style={styles.radioRow} onPress={() => setFilterBy(o.key)}>
-                  <View style={[styles.radioOuter, filterBy === o.key && styles.radioOuterActive]}>{filterBy === o.key && <View style={styles.radioInner} />}</View>
-                  <Text style={styles.radioLabel}>{o.label}</Text>
-                </Pressable>
-              ))}
-            </View>
-            <View style={styles.sortScrollSpacer} />
-          </ScrollView>
-          <View style={styles.applyBarWrapper}>
-            <Pressable style={styles.applyBtnFull} onPress={handleClickApply}>
-              <Text style={styles.applyBtnText}>Apply</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
+      <SortAndFilterModal showSortSheet={showSortSheet} handleToggleModal={handleToggleModal} sortBy={sortBy} setSortBy={setSortBy} filterBy={filterBy} setFilterBy={setFilterBy} handlePressApply={handlePressApply} />
       <DeleteConfirmation visible={!!deleteListId} onCancel={() => setDeleteListId(null)} onDelete={() => handleDeleteList(deleteListId)} />
     </>
   );
@@ -293,26 +241,4 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 15,
   },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.3)" },
-  sortSheetContainer: { position: "absolute", left: 0, right: 0, bottom: 0, backgroundColor: "#FFFFFF", borderTopLeftRadius: 32, borderTopRightRadius: 32, maxHeight: "80%" },
-
-  sortSheetHandle: { width: 64, height: 6, borderRadius: 3, backgroundColor: "#C7C7CC", alignSelf: "center", marginTop: 12 },
-
-  sortSheetContent: { paddingBottom: 32, paddingHorizontal: 32, paddingTop: 8, gap: 24 },
-  sortSheetTitle: { fontSize: 24, fontFamily: "Nunito_700Bold", color: "#1C0335", textAlign: "center", marginTop: 24 },
-  sortDivider: { height: 1, backgroundColor: "#E5E5EA" },
-  sortSection: { gap: 12 },
-  sortSectionHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 8 },
-  sortSectionTitle: { fontSize: 20, fontFamily: "Nunito_900Black", color: "#1C0335" },
-  radioRow: { flexDirection: "row", alignItems: "center", gap: 22, paddingVertical: 8 },
-  radioOuter: { width: 24, height: 24, borderRadius: 22, borderWidth: 2, borderColor: "#D5D2DA", alignItems: "center", justifyContent: "center" },
-  radioOuterActive: { borderColor: "#360068", backgroundColor: "#360068" },
-  radioInner: { width: 10, height: 10, borderRadius: 9, backgroundColor: "#ffff" },
-  radioLabel: { fontSize: 18, fontFamily: "Nunito_700Bold", color: "#1C1C1C" },
-  checkboxBox: { width: 24, height: 24, borderRadius: 22, borderWidth: 2, borderColor: "#D5D2DA", alignItems: "center", justifyContent: "center" },
-  checkboxBoxActive: { borderColor: "#360068", backgroundColor: "#360068" },
-  applyBarWrapper: { position: "absolute", left: 0, right: 0, bottom: 0, paddingHorizontal: 24, paddingTop: 16, paddingBottom: 24, backgroundColor: "#FFFFFF", borderTopWidth: 1, borderTopColor: "#E5E5EA" },
-  applyBtnFull: { backgroundColor: "#360068", height: 56, borderRadius: 8, alignItems: "center", justifyContent: "center" },
-  applyBtnText: { color: "#FFFFFF", fontSize: 16, fontFamily: "Nunito_700Bold" },
-  sortScrollSpacer: { height: 120 },
 });
