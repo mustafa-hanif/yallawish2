@@ -105,20 +105,28 @@ export default function WishListCard({ item }: WishListCardProps) {
   }, [user?.firstName, user?.lastName, user?.contactEmail]);
 
   const quickActions = [
+    { title: "Delete", icon: require("@/assets/images/deleteList.png") },
     { title: "Archive", icon: require("@/assets/images/archiveList.png") },
-    { title: "Duplicate List", icon: require("@/assets/images/duplicateList.png") },
-    { title: "Edit List", icon: require("@/assets/images/Edit.png") },
-    { title: "Delete List", icon: require("@/assets/images/deleteList.png") },
+    { title: "Duplicate", icon: require("@/assets/images/duplicateList.png") },
+    { title: "Edit", icon: require("@/assets/images/Edit.png") },
   ];
+
+  const handlePressActionButton = (title: string) => {
+    setIsBottomSheet(false);
+  };
+  
   return (
     <>
       <View style={styles.card}>
         <Pressable onPress={() => handlePress(id)} onLongPress={handleLongPress} delayLongPress={200} style={[styles.pressableArea, isBottomSheet && { zIndex: 10, backgroundColor: isBottomSheet ? "#FFFFFFE5" : "transparent" }]}>
-          <ActionButton onPress={() => setIsBottomSheet(false)} onOverlayPress={() => setIsBottomSheet(false)} size={0} radius={100} icon={<Text></Text>} ref={actionBtnRef} position={"right"}>
+          <ActionButton onPress={() => setIsBottomSheet(false)} onOverlayPress={() => setIsBottomSheet(false)} size={0} radius={110} icon={<Text></Text>} ref={actionBtnRef} position={"right"}>
             {quickActions?.map((action) => (
-              <ActionButton.Item key={action.title} title={action.title}>
-                <View style={styles.actionIconWrapper}>
-                  <Image source={action.icon} style={styles.actionIcon} resizeMode="contain" />
+              <ActionButton.Item key={action.title} title={action.title} onPress={() => handlePressActionButton(action.title)} size={40} buttonColor={action.title === "Delete" ? "#FFEAEA" : "#FFFFFF"}>
+                <View style={styles.actionButtonContent}>
+                  <Text style={[styles.actionTitle, action.title === "Delete" && { color: "#FF3B30" }]}>{action.title}</Text>
+                  <View style={styles.actionIconWrapper}>
+                    <Image source={action.icon} style={styles.actionIcon} resizeMode="contain" />
+                  </View>
                 </View>
               </ActionButton.Item>
             ))}
