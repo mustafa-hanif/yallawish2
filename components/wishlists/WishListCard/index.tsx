@@ -63,6 +63,7 @@ export default function WishListCard({ item }: WishListCardProps) {
   const actionBtnRef = useRef<any>(null);
   const handleLongPress = () => {
     // Prefer triggering via ref if supported, else fall back to state
+    setIsBottomSheet(true);
     try {
       const inst = actionBtnRef.current as any;
       if (inst && typeof inst.animateButton === "function") {
@@ -110,18 +111,18 @@ export default function WishListCard({ item }: WishListCardProps) {
   ];
   return (
     <>
-      <Pressable style={styles.card} onPress={() => handlePress(id)} onLongPress={handleLongPress} delayLongPress={200}>
-        <View style={{ width: "100%", height: "100%", zIndex: 1, position: "absolute" }}>
-          <ActionButton icon={<Text></Text>} btnOutRange={"transparent"} buttonColor={"transparent"} ref={actionBtnRef} position={"right"} radiua={20} active={isBottomSheet}>
+      <View style={styles.card}>
+        <Pressable onPress={() => handlePress(id)} onLongPress={handleLongPress} delayLongPress={200} style={[styles.pressableArea, isBottomSheet && { zIndex: 10, backgroundColor: isBottomSheet ? "#FFFFFFE5" : "transparent" }]}>
+          <ActionButton onPress={() => setIsBottomSheet(false)} onOverlayPress={() => setIsBottomSheet(false)} size={0} radius={100} icon={<Text></Text>} ref={actionBtnRef} position={"right"}>
             {quickActions?.map((action) => (
-              <ActionButton.Item key={action.title} title={action.title} onPress={() => setIsBottomSheet(false)}>
-                <View style={{ justifyContent: "center", alignItems: "center", width: 40, height: 40, borderWidth: 1, borderColor: "red", backgroundColor: "#ffff", borderRadius: "50%" }}>
-                  <Image source={action.icon} style={{}} />
+              <ActionButton.Item key={action.title} title={action.title}>
+                <View style={styles.actionIconWrapper}>
+                  <Image source={action.icon} style={styles.actionIcon} resizeMode="contain" />
                 </View>
               </ActionButton.Item>
             ))}
           </ActionButton>
-        </View>
+        </Pressable>
         <View style={styles.cardContentWrapper}>
           <View style={styles.cardHeader}>
             <Image style={styles.cardIcon} resizeMode="contain" source={occasionIcon} />
@@ -150,30 +151,7 @@ export default function WishListCard({ item }: WishListCardProps) {
             </View>
           </View>
         </View>
-      </Pressable>
-      {/* <Modal visible={isBottomSheet} transparent animationType="fade" onRequestClose={() => setIsBottomSheet(false)}>
-        <Pressable style={styles.backdrop} onPress={() => setIsBottomSheet(false)} />
-        <View style={styles.sheetContainer}>
-          <Pressable onPress={() => setIsBottomSheet(false)}>
-            <View style={styles.sheetHandle} />
-          </Pressable>
-          <ScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
-            <Text style={styles.sheetTitle}>Quick Actions</Text>
-            <View style={styles.actionsContainer}>
-              {quickActions?.map((action) => (
-                <Pressable key={action.title} style={styles.actionButton}>
-                  <View style={styles.actionIconWrapper}>
-                    <Image style={styles.actionIcon} source={action.icon} resizeMode="contain" />
-                  </View>
-                  <View>
-                    <Text style={[styles.actionLabel, action.title === "Delete List" && { color: "red" }]}>{action.title}</Text>
-                  </View>
-                </Pressable>
-              ))}
-            </View>
-          </ScrollView>
-        </View>
-      </Modal> */}
+      </View>
     </>
   );
 }
