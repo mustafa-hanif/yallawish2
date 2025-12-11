@@ -11,6 +11,7 @@ interface SortAndFilterProps {
   filterBy: string | null;
   setFilterBy: (key: string) => void;
   handlePressApply: () => void;
+  currentTab?: string;
 }
 
 const sortArray = [
@@ -22,16 +23,29 @@ const sortArray = [
 ];
 
 const filterArray = [
+  { key: "allList", label: "All Lists" },
+  { key: "archived", label: "Archived" },
   { key: "pastEvents", label: "Past Events" },
   { key: "upcomingEvents", label: "Upcoming Events" },
   { key: "completed", label: "Completed" },
   { key: "inComplete", label: "Incomplete" },
 ];
 
-export default function SortAndFilterModal({ showSortSheet, handleToggleModal, sortBy, setSortBy, filterBy, setFilterBy, handlePressApply }: SortAndFilterProps) {
+export default function SortAndFilterModal({ currentTab, showSortSheet, handleToggleModal, sortBy, setSortBy, filterBy, setFilterBy, handlePressApply }: SortAndFilterProps) {
   const { height } = useWindowDimensions();
   const translateY = useRef(new Animated.Value(height)).current;
   const backdropOpacity = useRef(new Animated.Value(0)).current;
+
+  // Derive filters for the current tab: hide "Archived" on community-events
+  const filters = currentTab === "community-events" ? filterArray.filter((f) => f.key !== "archived") : filterArray;
+
+  // If switching to community tab while "archived" is selected, clear it
+  useEffect(() => {
+    if (currentTab === "community-events" && filterBy === "archived") {
+      // Reset to a safe default available on community tab
+      setFilterBy("allList");
+    }
+  }, [currentTab, filterBy, setFilterBy]);
 
   useEffect(() => {
     if (showSortSheet) {
@@ -78,7 +92,7 @@ export default function SortAndFilterModal({ showSortSheet, handleToggleModal, s
       <Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]}>
         <Pressable style={{ flex: 1 }} onPress={handleCloseWithAnimation} />
       </Animated.View>
-      <Animated.View style={[styles.sortSheetContainer, { transform: [{ translateY }] }] }>
+      <Animated.View style={[styles.sortSheetContainer, { transform: [{ translateY }] }]}>
         <Pressable onPress={handleCloseWithAnimation}>
           <View style={styles.sortSheetHandle} />
         </Pressable>
@@ -102,7 +116,7 @@ export default function SortAndFilterModal({ showSortSheet, handleToggleModal, s
               <Text style={styles.sortSectionTitle}>Filter by</Text>
               <Ionicons name="chevron-down" size={20} color="#1C0335" />
             </View>
-            {filterArray.map((o) => (
+            {filters.map((o) => (
               <Pressable key={o.key} style={styles.radioRow} onPress={() => setFilterBy(o.key)}>
                 <View style={[styles.radioOuter, filterBy === o.key && styles.radioOuterActive]}>{filterBy === o.key && <View style={styles.radioInner} />}</View>
                 <Text style={styles.radioLabel}>{o.label}</Text>

@@ -65,7 +65,7 @@ const Wishlists = () => {
   };
 
   const handlePressApply = () => {
-    setAppliedSortBy(sortBy);
+    sortBy === "allList" ? setAppliedSortBy(null) : setAppliedSortBy(sortBy);
     setAppliedFilterBy(filterBy);
     handleToggleModal();
   };
@@ -112,6 +112,9 @@ const Wishlists = () => {
 
     const now = Date.now();
 
+    if (key === "archived") {
+      return arr.filter((item: any) => item.isArchived === true);
+    }
     if (key === "pastEvents") {
       return arr
         .filter((item: any) => {
@@ -192,17 +195,17 @@ const Wishlists = () => {
         </LinearGradient>
         <Tabs currentTab={currentTab} setCurrentTab={setCurrentTab} />
         <View style={styles.content}>
-          {filteredWishList && filteredWishList?.length ? (
+          {wishList && wishList?.length ? (
             <>
               <ActionBar count={filteredWishList?.length} appliedSortBy={appliedSortBy} setAppliedSortBy={setAppliedSortBy} appliedFilterBy={appliedFilterBy} setAppliedFilterBy={setAppliedFilterBy} search={search} setSearch={setSearch} handleToggleModal={handleToggleModal} />
-              <WishListing wishList={searchList(filteredWishList as any[])} onSelectDelete={handleSelectDelete} />
+              <WishListing appliedFilterBy={appliedFilterBy || search} wishList={searchList(filteredWishList as any[])} onSelectDelete={handleSelectDelete} />
             </>
           ) : (
             <NoListFound currentTab={currentTab} />
           )}
         </View>
       </View>
-      <SortAndFilterModal showSortSheet={showSortSheet} handleToggleModal={handleToggleModal} sortBy={sortBy} setSortBy={setSortBy} filterBy={filterBy} setFilterBy={setFilterBy} handlePressApply={handlePressApply} />
+      <SortAndFilterModal currentTab={currentTab} showSortSheet={showSortSheet} handleToggleModal={handleToggleModal} sortBy={sortBy} setSortBy={setSortBy} filterBy={filterBy} setFilterBy={setFilterBy} handlePressApply={handlePressApply} />
       <DeleteConfirmation visible={!!deleteListId} onCancel={() => setDeleteListId(null)} onDelete={() => handleDeleteList(deleteListId)} />
     </>
   );

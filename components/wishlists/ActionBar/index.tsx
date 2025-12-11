@@ -21,6 +21,8 @@ const sortByObj: Record<string, string> = {
   totalItems: "Total Items",
 };
 const filterByObj: Record<string, string> = {
+  allList: "All Lists",
+  archived: "Archived",
   pastEvents: "Past Events",
   upcomingEvents: "Upcoming Events",
   completed: "Completed",

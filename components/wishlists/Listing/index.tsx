@@ -1,5 +1,6 @@
 import React from "react";
 import { FlatList, View } from "react-native";
+import NoListFound from "../NoListFound";
 import WishListCard from "../WishListCard";
 import { styles } from "./style";
 
@@ -25,9 +26,13 @@ type WishListItem = {
 interface WishListingProps {
   wishList?: WishListItem[];
   onSelectDelete?: (id: string) => void;
+  appliedFilterBy?: string;
 }
 
-export default function WishListing({ wishList = [], onSelectDelete }: WishListingProps) {
+export default function WishListing({ wishList = [], onSelectDelete, appliedFilterBy }: WishListingProps) {
+  if (wishList.length === 0) {
+    return <NoListFound selectedFilter={appliedFilterBy} />;
+  }
   return (
     <View style={styles.container}>
       <FlatList columnWrapperStyle={styles.columnWrapperStyle} contentContainerStyle={styles.contentContainerStyle} showsVerticalScrollIndicator={false} numColumns={2} key={2} data={wishList} renderItem={({ item }) => <WishListCard item={item} onSelectDelete={onSelectDelete} />} keyExtractor={(item) => String(item._id)} />
