@@ -47,8 +47,8 @@ interface WishListCardProps {
 }
 
 export default function WishListCard({ item, onSelectDelete }: WishListCardProps) {
+  const actionBtnRef = useRef<any>(null);
   const { user: loggedInUser } = useUser();
-
   const [isBottomSheet, setIsBottomSheet] = useState(false);
 
   const id = item?._id;
@@ -60,17 +60,16 @@ export default function WishListCard({ item, onSelectDelete }: WishListCardProps
   const occasion = item?.occasion || "birthday";
   const user = item?.creator || null;
   const isArchive = item?.isArchived || false;
-
   const occasionIcon = occasionObj?.[occasion];
 
   const quickActions = [
     { title: "Delete", icon: require("@/assets/images/deleteList.png") },
     { title: "Duplicate", icon: require("@/assets/images/duplicateList.png") },
-    { title: isArchive ? "Unarchive" : "Archive", icon: isArchive ?  require("@/assets/images/unarchiveList.png") : require("@/assets/images/archiveList.png") },
+    { title: isArchive ? "Unarchive" : "Archive", icon: isArchive ? require("@/assets/images/unarchiveList.png") : require("@/assets/images/archiveList.png") },
     { title: "Edit", icon: require("@/assets/images/Edit.png") },
   ];
+
   const handlePress = (id: string) => router.push({ pathname: "/view-list", params: { listId: String(id) } });
-  const actionBtnRef = useRef<any>(null);
   const handleLongPress = () => {
     if (loggedInUser?.id === item?.user_id) {
       setIsBottomSheet(true);
