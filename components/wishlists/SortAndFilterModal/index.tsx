@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { Animated, Easing, Modal, Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
 import { styles } from "./style";
 
 interface SortAndFilterProps {
@@ -29,11 +29,57 @@ const filterArray = [
 ];
 
 export default function SortAndFilterModal({ showSortSheet, handleToggleModal, sortBy, setSortBy, filterBy, setFilterBy, handlePressApply }: SortAndFilterProps) {
+  const { height } = useWindowDimensions();
+  const translateY = useRef(new Animated.Value(height)).current;
+  const backdropOpacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (showSortSheet) {
+      translateY.setValue(height);
+      backdropOpacity.setValue(0);
+      Animated.parallel([
+        Animated.timing(backdropOpacity, {
+          toValue: 1,
+          duration: 500,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateY, {
+          toValue: 0,
+          duration: 650,
+          easing: Easing.bezier(0.2, 0.9, 0.2, 1),
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [showSortSheet, height, translateY, backdropOpacity]);
+
+  const handleCloseWithAnimation = () => {
+    Animated.parallel([
+      Animated.timing(backdropOpacity, {
+        toValue: 0,
+        duration: 420,
+        easing: Easing.in(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(translateY, {
+        toValue: height,
+        duration: 600,
+        easing: Easing.bezier(0.4, 0, 0.6, 1),
+        useNativeDriver: true,
+      }),
+    ]).start(({ finished }) => {
+      if (finished) handleToggleModal();
+    });
+  };
+
   return (
-    <Modal visible={showSortSheet} transparent animationType="fade" onRequestClose={handleToggleModal}>
-      <Pressable style={styles.backdrop} onPress={handleToggleModal} />
-      <View style={styles.sortSheetContainer}>
-        <Pressable onPress={handleToggleModal}>
+    <Modal visible={showSortSheet} transparent animationType="none" onRequestClose={handleToggleModal}>
+      <Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]}>
+        <Pressable style={{ flex: 1 }} onPress={handleCloseWithAnimation} />
+      </Animated.View>
+      <Animated.View style={[styles.sortSheetContainer, { transform: [{ translateY }] }] }>
+        <Pressable onPress={handleCloseWithAnimation}>
           <View style={styles.sortSheetHandle} />
         </Pressable>
         <ScrollView contentContainerStyle={styles.sortSheetContent} showsVerticalScrollIndicator={false}>
@@ -70,7 +116,7 @@ export default function SortAndFilterModal({ showSortSheet, handleToggleModal, s
             <Text style={styles.applyBtnText}>Apply</Text>
           </Pressable>
         </View>
-      </View>
+      </Animated.View>
     </Modal>
   );
 }
