@@ -44,9 +44,10 @@ interface WishListCardProps {
     };
   };
   onSelectDelete: (id: string) => void;
+  handleArchiveList: (listId: string | null, isArchived: boolean) => Promise<void>;
 }
 
-export default function WishListCard({ item, onSelectDelete }: WishListCardProps) {
+export default function WishListCard({ item, onSelectDelete, handleArchiveList }: WishListCardProps) {
   const actionBtnRef = useRef<any>(null);
   const { user: loggedInUser } = useUser();
   const [isBottomSheet, setIsBottomSheet] = useState(false);
@@ -117,8 +118,8 @@ export default function WishListCard({ item, onSelectDelete }: WishListCardProps
     if (id) {
       if (title === "Edit") router.push({ pathname: "/create-list-step2", params: { listId: String(id) } });
       else if (title === "Delete") onSelectDelete(id);
-      else if (title === "Archive") {
-      }
+      else if (title === "Archive") handleArchiveList(id, true);
+      else if (title === "Unarchive") handleArchiveList(id, false);
     }
     setIsBottomSheet(false);
   };

@@ -231,6 +231,30 @@ export const updateListPrivacy = mutation({
   },
 });
 
+// Toggle list archived state
+export const setListArchived = mutation({
+  args: { listId: v.id("lists"), isArchived: v.boolean() },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.listId, {
+      isArchived: args.isArchived,
+      updated_at: new Date().toISOString(),
+    });
+    return true;
+  },
+});
+
+// Flip archived state for a list; returns the new state
+export const toggleListArchived = mutation({
+  args: { listId: v.id("lists") },
+  handler: async (ctx, args) => {
+    const list = await ctx.db.get(args.listId);
+    if (!list) return false as any;
+    const next = !Boolean((list as any).isArchived);
+    await ctx.db.patch(args.listId, { isArchived: next, updated_at: new Date().toISOString() });
+    return next as any;
+  },
+});
+
 export const getListById = query({
   args: { listId: v.id("lists") },
   handler: async (ctx, args) => {

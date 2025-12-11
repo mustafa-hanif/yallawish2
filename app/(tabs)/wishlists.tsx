@@ -18,6 +18,7 @@ const Wishlists = () => {
   const myLists = useQuery(api.products.getMyLists, user?.id ? { user_id: user.id } : "skip");
   const communityLists = useQuery(api.products.getCommunityLists, user?.id ? { exclude_user_id: user.id } : "skip");
   const deleteList = useMutation(api.products.deleteList);
+  const archiveList = useMutation(api.products.setListArchived);
 
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
   const encodedReturnTo = returnTo ? String(returnTo) : undefined;
@@ -177,6 +178,10 @@ const Wishlists = () => {
     setDeleteListId(null);
   };
 
+  const handleArchiveList = async (listId: string | null, isArchived: boolean) => {
+    await archiveList({ listId: listId as any, isArchived: isArchived });
+  };
+
   return (
     <>
       <View style={styles.container}>
@@ -198,7 +203,7 @@ const Wishlists = () => {
           {wishList && wishList?.length ? (
             <>
               <ActionBar count={filteredWishList?.length} appliedSortBy={appliedSortBy} setAppliedSortBy={setAppliedSortBy} appliedFilterBy={appliedFilterBy} setAppliedFilterBy={setAppliedFilterBy} search={search} setSearch={setSearch} handleToggleModal={handleToggleModal} />
-              <WishListing appliedFilterBy={appliedFilterBy || search} wishList={searchList(filteredWishList as any[])} onSelectDelete={handleSelectDelete} />
+              <WishListing appliedFilterBy={appliedFilterBy || search} wishList={searchList(filteredWishList as any[])} onSelectDelete={handleSelectDelete} handleArchiveList={handleArchiveList} />
             </>
           ) : (
             <NoListFound currentTab={currentTab} />
