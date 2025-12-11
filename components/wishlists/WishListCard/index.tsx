@@ -127,7 +127,7 @@ export default function WishListCard({ item, onSelectDelete }: WishListCardProps
         <Pressable onPress={() => handlePress(id)} onLongPress={handleLongPress} delayLongPress={200} style={[styles.pressableArea, isBottomSheet && { zIndex: 10, backgroundColor: isBottomSheet ? "#FFFFFFE5" : "transparent" }]}>
           <ActionButton onPress={() => setIsBottomSheet(false)} onOverlayPress={() => setIsBottomSheet(false)} size={0} radius={110} icon={<Text></Text>} ref={actionBtnRef} position={"right"}>
             {quickActions?.map((action) => (
-              <ActionButton.Item key={action.title} title={action.title} onPress={() => handlePressActionButton(action.title)} size={40} buttonColor={action.title === "Delete" ? "#FFEAEA" : "#FFFFFF"}>
+              <ActionButton.Item key={action.title} title={action.title} onPress={() => handlePressActionButton(action.title)} size={40} buttonColor={"#FFFFFF"}>
                 <View style={styles.actionButtonContent}>
                   <Text style={[styles.actionTitle, action.title === "Delete" && { color: "#FF3B30" }]}>{action.title}</Text>
                   <View style={styles.actionIconWrapper}>
