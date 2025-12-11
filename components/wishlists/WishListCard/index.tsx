@@ -59,7 +59,7 @@ export default function WishListCard({ item, onSelectDelete }: WishListCardProps
   const percentage = totalItems > 0 ? Math.round((purchasedItems / totalItems) * 100) : 0;
   const occasion = item?.occasion || "birthday";
   const user = item?.creator || null;
-  const isArchive = item?.isArchived || false;
+  const isArchive = loggedInUser?.id !== item?.user_id ? false : item?.isArchived || false;
   const occasionIcon = occasionObj?.[occasion];
 
   const quickActions = [
