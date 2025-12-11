@@ -194,7 +194,7 @@ const Wishlists = () => {
         <View style={styles.content}>
           {filteredWishList && filteredWishList?.length ? (
             <>
-              <ActionBar appliedSortBy={appliedSortBy} setAppliedSortBy={setAppliedSortBy} appliedFilterBy={appliedFilterBy} setAppliedFilterBy={setAppliedFilterBy} search={search} setSearch={setSearch} handleToggleModal={handleToggleModal} />
+              <ActionBar count={filteredWishList?.length} appliedSortBy={appliedSortBy} setAppliedSortBy={setAppliedSortBy} appliedFilterBy={appliedFilterBy} setAppliedFilterBy={setAppliedFilterBy} search={search} setSearch={setSearch} handleToggleModal={handleToggleModal} />
               <WishListing wishList={searchList(filteredWishList as any[])} onSelectDelete={handleSelectDelete} />
             </>
           ) : (

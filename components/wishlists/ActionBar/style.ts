@@ -73,4 +73,27 @@ export const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
   },
+  listCountContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  dropDownText: {
+    color: "#1A0034",
+    fontSize: 18,
+    fontFamily: "Nunito_700Bold",
+  },
+  count: {
+    backgroundColor: "#00A0FF",
+    width: 22.5,
+    height: 22.5,
+    borderRadius: 75,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  countText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontFamily: "Nunito_700Bold",
+  },
 });

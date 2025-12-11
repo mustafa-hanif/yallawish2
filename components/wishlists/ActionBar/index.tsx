@@ -10,23 +10,24 @@ interface ActionBarProps {
   setAppliedSortBy: React.Dispatch<React.SetStateAction<string | null>>;
   appliedFilterBy: string | null;
   setAppliedFilterBy: React.Dispatch<React.SetStateAction<string | null>>;
+  count?: number;
 }
 
-const sortByObj = {
+const sortByObj: Record<string, string> = {
   default: "Default",
   dateOfEvent: "Date of Event",
   alphabetically: "Alphabetically",
   percentage: "List Completion %",
   totalItems: "Total Items",
 };
-const filterByObj = {
+const filterByObj: Record<string, string> = {
   pastEvents: "Past Events",
   upcomingEvents: "Upcoming Events",
   completed: "Completed",
   inComplete: "Incomplete",
 };
 
-export default function ActionBar({ search, setSearch, handleToggleModal, appliedSortBy, setAppliedSortBy, appliedFilterBy, setAppliedFilterBy }: ActionBarProps) {
+export default function ActionBar({ count = 0, search, setSearch, handleToggleModal, appliedSortBy, setAppliedSortBy, appliedFilterBy, setAppliedFilterBy }: ActionBarProps) {
   const handleRemoveSortBy = () => setAppliedSortBy(null);
   const handleRemoveFilterBy = () => setAppliedFilterBy(null);
 
@@ -64,7 +65,12 @@ export default function ActionBar({ search, setSearch, handleToggleModal, applie
         </View>
       </View>
       <View>
-        <Text style={styles.selectedListText}>All Lists</Text>
+        <View style={styles.listCountContainer}>
+          <Text style={styles.dropDownText}>All Lists</Text>
+          <View style={styles.count}>
+            <Text style={styles.countText}>{count}</Text>
+          </View>
+        </View>
       </View>
     </View>
   );
