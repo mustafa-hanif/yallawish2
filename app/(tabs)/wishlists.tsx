@@ -1,11 +1,12 @@
 import ActionBar from "@/components/wishlists/ActionBar";
+import DeleteConfirmation from "@/components/wishlists/DeleteConfirmationModal";
 import WishListing from "@/components/wishlists/Listing";
 import NoListFound from "@/components/wishlists/NoListFound";
 import Tabs from "@/components/wishlists/Tabs";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams, usePathname } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
@@ -16,6 +17,8 @@ const Wishlists = () => {
   const { user } = useUser();
   const myLists = useQuery(api.products.getMyLists, user?.id ? { user_id: user.id } : "skip");
   const communityLists = useQuery(api.products.getCommunityLists, user?.id ? { exclude_user_id: user.id } : "skip");
+  const deleteList = useMutation(api.products.deleteList);
+  
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
   const encodedReturnTo = returnTo ? String(returnTo) : undefined;
   const decodedReturnTo = encodedReturnTo ? decodeURIComponent(encodedReturnTo) : undefined;
@@ -30,6 +33,7 @@ const Wishlists = () => {
   const [appliedFilterBy, setAppliedFilterBy] = useState<string | null>(null);
 
   const [search, setSearch] = useState("");
+  const [deleteListId, setDeleteListId] = useState<string | null>(null);
 
   useEffect(() => {
     setCurrentTab("my-events");
@@ -164,7 +168,12 @@ const Wishlists = () => {
     return arr;
   }, [sortedWishList, appliedFilterBy]);
 
-  // debug: removed noisy logging
+  const handleSelectDelete = (listId: string) => setDeleteListId(listId);
+  const handleDeleteList = async (listId: string | null) => {
+    await deleteList({ listId: listId as any });
+    setDeleteListId(null);
+  };
+
   return (
     <>
       <View style={styles.container}>
@@ -186,7 +195,7 @@ const Wishlists = () => {
           {filteredWishList && filteredWishList?.length ? (
             <>
               <ActionBar appliedSortBy={appliedSortBy} setAppliedSortBy={setAppliedSortBy} appliedFilterBy={appliedFilterBy} setAppliedFilterBy={setAppliedFilterBy} search={search} setSearch={setSearch} handleToggleModal={handleToggleModal} />
-              <WishListing wishList={searchList(filteredWishList as any[])} />
+              <WishListing wishList={searchList(filteredWishList as any[])} onSelectDelete={handleSelectDelete} />
             </>
           ) : (
             <NoListFound currentTab={currentTab} />
@@ -246,6 +255,7 @@ const Wishlists = () => {
           </View>
         </View>
       </Modal>
+      <DeleteConfirmation visible={!!deleteListId} onCancel={() => setDeleteListId(null)} onDelete={() => handleDeleteList(deleteListId)} />
     </>
   );
 };

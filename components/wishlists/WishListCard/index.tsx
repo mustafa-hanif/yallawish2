@@ -5,6 +5,12 @@ import { Image, Pressable, Text, View } from "react-native";
 import ActionButton from "react-native-circular-action-menu";
 import { styles } from "./style";
 
+const quickActions = [
+  { title: "Delete", icon: require("@/assets/images/deleteList.png") },
+  { title: "Archive", icon: require("@/assets/images/archiveList.png") },
+  { title: "Duplicate", icon: require("@/assets/images/duplicateList.png") },
+  { title: "Edit", icon: require("@/assets/images/Edit.png") },
+];
 interface WishListCardProps {
   item: {
     _creationTime: number;
@@ -32,8 +38,9 @@ interface WishListCardProps {
       contactEmail: string;
     };
   };
+  onSelectDelete: (id: string) => void;
 }
-export default function WishListCard({ item }: WishListCardProps) {
+export default function WishListCard({ item, onSelectDelete }: WishListCardProps) {
   const { user: loggedInUser } = useUser();
 
   const [isBottomSheet, setIsBottomSheet] = useState(false);
@@ -104,17 +111,16 @@ export default function WishListCard({ item }: WishListCardProps) {
     return "YW";
   }, [user?.firstName, user?.lastName, user?.contactEmail]);
 
-  const quickActions = [
-    { title: "Delete", icon: require("@/assets/images/deleteList.png") },
-    { title: "Archive", icon: require("@/assets/images/archiveList.png") },
-    { title: "Duplicate", icon: require("@/assets/images/duplicateList.png") },
-    { title: "Edit", icon: require("@/assets/images/Edit.png") },
-  ];
-
   const handlePressActionButton = (title: string) => {
+    if (id) {
+      if (title === "Edit") router.push({ pathname: "/create-list-step2", params: { listId: String(id) } });
+      else if (title === "Delete") onSelectDelete(id);
+      else if (title === "Archive") {
+      }
+    }
     setIsBottomSheet(false);
   };
-  
+
   return (
     <>
       <View style={styles.card}>

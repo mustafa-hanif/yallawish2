@@ -24,12 +24,13 @@ type WishListItem = {
 
 interface WishListingProps {
   wishList?: WishListItem[];
+  onSelectDelete?: (id: string) => void;
 }
 
-export default function WishListing({ wishList = [] }: WishListingProps) {
+export default function WishListing({ wishList = [], onSelectDelete }: WishListingProps) {
   return (
     <View style={styles.container}>
-      <FlatList columnWrapperStyle={styles.columnWrapperStyle} contentContainerStyle={styles.contentContainerStyle} showsVerticalScrollIndicator={false} numColumns={2} key={2} data={wishList} renderItem={({ item }) => <WishListCard item={item} />} keyExtractor={(item) => String(item._id)} />
+      <FlatList columnWrapperStyle={styles.columnWrapperStyle} contentContainerStyle={styles.contentContainerStyle} showsVerticalScrollIndicator={false} numColumns={2} key={2} data={wishList} renderItem={({ item }) => <WishListCard item={item} onSelectDelete={onSelectDelete} />} keyExtractor={(item) => String(item._id)} />
     </View>
   );
 }
