@@ -1,10 +1,27 @@
 import { useUser } from "@clerk/clerk-expo";
+import { Audio } from "expo-av";
+import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { useMemo, useRef, useState } from "react";
 import { Image, Pressable, Text, View, ViewToken } from "react-native";
 import ActionButton from "react-native-circular-action-menu";
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { styles } from "./style";
+
+let clickSound: Audio.Sound | null = null;
+async function playClick() {
+  try {
+    if (!clickSound) {
+      const { sound } = await Audio.Sound.createAsync(require("@/assets/sounds/fb.mp3"), { volume: 0.2 });
+      clickSound = sound;
+      await sound.playAsync();
+    } else {
+      await clickSound.replayAsync();
+    }
+  } catch {
+    // Ignore sound errors silently
+  }
+}
 
 const occasionObj: Record<string, any> = {
   birthday: require("@/assets/images/birthday3.png"),
@@ -47,7 +64,7 @@ interface WishListCardProps {
   onSelectDelete?: (id: string) => void;
   handleArchiveList?: (listId: string | null, isArchived: boolean) => Promise<void>;
   handleDuplicateList?: (listDetails: any | null) => Promise<void>;
-  viewableItems?: Animated.SharedValue<ViewToken[]>;
+  viewableItems?: any;
 }
 
 export default function WishListCard({ item, onSelectDelete, handleArchiveList, handleDuplicateList, viewableItems }: WishListCardProps) {
@@ -76,6 +93,9 @@ export default function WishListCard({ item, onSelectDelete, handleArchiveList, 
   const handlePress = (id: string) => router.push({ pathname: "/view-list", params: { listId: String(id) } });
   const handleLongPress = () => {
     if (loggedInUser?.id === item?.user_id) {
+      // Play click sound + strong haptic for a tactile long-press
+      playClick();
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
       setIsBottomSheet(true);
       try {
         const inst = actionBtnRef.current as any;
@@ -130,18 +150,13 @@ export default function WishListCard({ item, onSelectDelete, handleArchiveList, 
 
   return (
     <>
-      {/** Animated visibility style based on viewability */}
-      {/** Fallback to visible if no shared value provided */}
       {(() => {
         const rStyle = useAnimatedStyle(() => {
           if (!viewableItems?.value) {
             return { opacity: 1, transform: [{ scale: 1 }] };
           }
-          const isVisible = Boolean(
-            viewableItems.value
-              .filter((vi) => vi.isViewable)
-              .find((vi) => String((vi.item as any)?._id) === String(item._id))
-          );
+          const tokens: ViewToken[] = (viewableItems?.value as ViewToken[]) || [];
+          const isVisible = Boolean(tokens.filter((vi: ViewToken) => vi.isViewable).find((vi: ViewToken) => String((vi.item as any)?._id) === String(item._id)));
           return {
             opacity: withTiming(isVisible ? 1 : 0, { duration: 200 }),
             transform: [{ scale: withTiming(isVisible ? 1 : 0.9, { duration: 200 }) }],

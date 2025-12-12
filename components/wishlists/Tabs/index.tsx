@@ -34,7 +34,7 @@ export default function Tabs({ currentTab, setCurrentTab }: TabProps) {
       const tabWidth = containerWidth / tabs.length;
       Animated.timing(translateX, {
         toValue: activeIndex * tabWidth,
-        duration: 350,
+        duration: 550,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }).start();
