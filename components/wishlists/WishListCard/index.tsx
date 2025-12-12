@@ -43,11 +43,12 @@ interface WishListCardProps {
       contactEmail: string;
     };
   };
-  onSelectDelete: (id: string) => void;
-  handleArchiveList: (listId: string | null, isArchived: boolean) => Promise<void>;
+  onSelectDelete?: (id: string) => void;
+  handleArchiveList?: (listId: string | null, isArchived: boolean) => Promise<void>;
+  handleDuplicateList?: (listDetails: any | null) => Promise<void>;
 }
 
-export default function WishListCard({ item, onSelectDelete, handleArchiveList }: WishListCardProps) {
+export default function WishListCard({ item, onSelectDelete, handleArchiveList, handleDuplicateList }: WishListCardProps) {
   const actionBtnRef = useRef<any>(null);
   const { user: loggedInUser } = useUser();
   const [isBottomSheet, setIsBottomSheet] = useState(false);
@@ -117,9 +118,10 @@ export default function WishListCard({ item, onSelectDelete, handleArchiveList }
   const handlePressActionButton = (title: string) => {
     if (id) {
       if (title === "Edit") router.push({ pathname: "/create-list-step2", params: { listId: String(id) } });
-      else if (title === "Delete") onSelectDelete(id);
-      else if (title === "Archive") handleArchiveList(id, true);
-      else if (title === "Unarchive") handleArchiveList(id, false);
+      else if (title === "Delete" && onSelectDelete) onSelectDelete(id);
+      else if (title === "Archive" && handleArchiveList) handleArchiveList(id, true);
+      else if (title === "Unarchive" && handleArchiveList) handleArchiveList(id, false);
+      else if (title === "Duplicate" && handleDuplicateList) handleDuplicateList(item);
     }
     setIsBottomSheet(false);
   };

@@ -17,6 +17,7 @@ const Wishlists = () => {
   const { user } = useUser();
   const myLists = useQuery(api.products.getMyLists, user?.id ? { user_id: user.id } : "skip");
   const communityLists = useQuery(api.products.getCommunityLists, user?.id ? { exclude_user_id: user.id } : "skip");
+  const createList = useMutation(api.products.createList);
   const deleteList = useMutation(api.products.deleteList);
   const archiveList = useMutation(api.products.setListArchived);
 
@@ -182,6 +183,24 @@ const Wishlists = () => {
     await archiveList({ listId: listId as any, isArchived: isArchived });
   };
 
+  const handleDuplicateList = async(listDetails: any) => {
+     const newListId = await createList({
+      title: listDetails.title,
+      note: listDetails.note || null,
+      eventDate: listDetails.eventDate || null,
+      shippingAddress: listDetails.shippingAddress || null,
+      occasion: listDetails.occasion || null,
+      coverPhotoUri: listDetails.coverPhotoUri || null,
+      coverPhotoStorageId: listDetails.coverPhotoStorageId || null,
+      privacy: listDetails?.privacy || "private",
+      user_id: listDetails?.user_id || user?.id || null,
+    });
+    
+    router.push({
+      pathname: "/add-gift", params: { listId: String(newListId) }
+    })
+  }
+  
   return (
     <>
       <View style={styles.container}>
@@ -203,7 +222,7 @@ const Wishlists = () => {
           {wishList && wishList?.length ? (
             <>
               <ActionBar count={filteredWishList?.length} appliedSortBy={appliedSortBy} setAppliedSortBy={setAppliedSortBy} appliedFilterBy={appliedFilterBy} setAppliedFilterBy={setAppliedFilterBy} search={search} setSearch={setSearch} handleToggleModal={handleToggleModal} />
-              <WishListing appliedFilterBy={appliedFilterBy || search} wishList={searchList(filteredWishList as any[])} onSelectDelete={handleSelectDelete} handleArchiveList={handleArchiveList} />
+              <WishListing appliedFilterBy={appliedFilterBy || search} wishList={searchList(filteredWishList as any[])} onSelectDelete={handleSelectDelete} handleArchiveList={handleArchiveList} handleDuplicateList={handleDuplicateList}/>
             </>
           ) : (
             <NoListFound currentTab={currentTab} />

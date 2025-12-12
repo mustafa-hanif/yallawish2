@@ -27,16 +27,17 @@ interface WishListingProps {
   wishList?: WishListItem[];
   onSelectDelete?: (id: string) => void;
   handleArchiveList?: (listId: string | null, isArchived: boolean) => Promise<void>;
+  handleDuplicateList?: (listDetails: WishListItem | null) => Promise<void>;
   appliedFilterBy?: string;
 }
 
-export default function WishListing({ wishList = [], onSelectDelete, handleArchiveList, appliedFilterBy }: WishListingProps) {
+export default function WishListing({ wishList = [], onSelectDelete, handleArchiveList, appliedFilterBy, handleDuplicateList }: WishListingProps) {
   if (wishList.length === 0) {
     return <NoListFound selectedFilter={appliedFilterBy} />;
   }
   return (
     <View style={styles.container}>
-      <FlatList columnWrapperStyle={styles.columnWrapperStyle} contentContainerStyle={styles.contentContainerStyle} showsVerticalScrollIndicator={false} numColumns={2} key={2} data={wishList} renderItem={({ item }) => <WishListCard item={item} onSelectDelete={onSelectDelete} handleArchiveList={handleArchiveList} />} keyExtractor={(item) => String(item._id)} />
+      <FlatList columnWrapperStyle={styles.columnWrapperStyle} contentContainerStyle={styles.contentContainerStyle} showsVerticalScrollIndicator={false} numColumns={2} key={2} data={wishList} renderItem={({ item }) => <WishListCard item={item} onSelectDelete={onSelectDelete} handleArchiveList={handleArchiveList} handleDuplicateList={handleDuplicateList} />} keyExtractor={(item) => String(item._id)} />
     </View>
   );
 }
