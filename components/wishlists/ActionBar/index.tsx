@@ -1,3 +1,4 @@
+import * as Haptics from "expo-haptics";
 import React from "react";
 import { Image, Pressable, Text, TextInput, View } from "react-native";
 import { styles } from "./style";
@@ -33,6 +34,16 @@ export default function ActionBar({ count = 0, search, setSearch, handleToggleMo
   const handleRemoveSortBy = () => setAppliedSortBy(null);
   const handleRemoveFilterBy = () => setAppliedFilterBy(null);
 
+  const handleSearch = (text: string) => {
+    setSearch(text);
+
+    if (text.trim()) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } else {
+      Haptics.selectionAsync();
+    }
+  };
+
   return (
     <View style={styles.actionBarContainer}>
       <View style={styles.sortAndFilterContainer}>
@@ -61,7 +72,7 @@ export default function ActionBar({ count = 0, search, setSearch, handleToggleMo
         </View>
       </View>
       <View style={styles.searchInputContainer}>
-        <TextInput value={search} onChangeText={(t) => setSearch(t)} style={styles.searchInput} placeholder="Search" placeholderTextColor={"#626262"} />
+        <TextInput value={search} onChangeText={handleSearch} style={styles.searchInput} placeholder="Search" placeholderTextColor={"#626262"} />
         <View style={styles.iconContainer}>
           <Image style={styles.searchIcon} source={require("@/assets/images/search.png")} />
         </View>
