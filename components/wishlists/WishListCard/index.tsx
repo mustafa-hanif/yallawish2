@@ -1,8 +1,9 @@
 import { useUser } from "@clerk/clerk-expo";
 import { router } from "expo-router";
 import { useMemo, useRef, useState } from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { Image, Pressable, Text, View, ViewToken } from "react-native";
 import ActionButton from "react-native-circular-action-menu";
+import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { styles } from "./style";
 
 const occasionObj: Record<string, any> = {
@@ -46,9 +47,10 @@ interface WishListCardProps {
   onSelectDelete?: (id: string) => void;
   handleArchiveList?: (listId: string | null, isArchived: boolean) => Promise<void>;
   handleDuplicateList?: (listDetails: any | null) => Promise<void>;
+  viewableItems?: Animated.SharedValue<ViewToken[]>;
 }
 
-export default function WishListCard({ item, onSelectDelete, handleArchiveList, handleDuplicateList }: WishListCardProps) {
+export default function WishListCard({ item, onSelectDelete, handleArchiveList, handleDuplicateList, viewableItems }: WishListCardProps) {
   const actionBtnRef = useRef<any>(null);
   const { user: loggedInUser } = useUser();
   const [isBottomSheet, setIsBottomSheet] = useState(false);
@@ -128,50 +130,71 @@ export default function WishListCard({ item, onSelectDelete, handleArchiveList, 
 
   return (
     <>
-      <View style={[styles.card, isArchive ? { borderColor: "#FF6C6C", backgroundColor: "#F1F1F1" } : {}]}>
-        <Pressable onPress={() => handlePress(id)} onLongPress={handleLongPress} delayLongPress={200} style={[styles.pressableArea, isBottomSheet && { zIndex: 10, backgroundColor: isBottomSheet ? "#FFFFFFE5" : "transparent" }]}>
-          <ActionButton onPress={() => setIsBottomSheet(false)} onOverlayPress={() => setIsBottomSheet(false)} size={0} radius={120} icon={<Text></Text>} ref={actionBtnRef} position={"right"}>
-            {quickActions?.map((action) => (
-              <ActionButton.Item key={action.title} title={action.title} onPress={() => handlePressActionButton(action.title)} buttonColor={"#FFFFFF"}>
-                <View style={styles.actionButtonContent}>
-                  <View style={styles.actionIconWrapper}>
-                    <Image source={action.icon} style={styles.actionIcon} resizeMode="contain" />
-                  </View>
-                  <Text style={[styles.actionTitle, action.title === "Delete" && { color: "#FF3B30" }]}>{action.title}</Text>
+      {/** Animated visibility style based on viewability */}
+      {/** Fallback to visible if no shared value provided */}
+      {(() => {
+        const rStyle = useAnimatedStyle(() => {
+          if (!viewableItems?.value) {
+            return { opacity: 1, transform: [{ scale: 1 }] };
+          }
+          const isVisible = Boolean(
+            viewableItems.value
+              .filter((vi) => vi.isViewable)
+              .find((vi) => String((vi.item as any)?._id) === String(item._id))
+          );
+          return {
+            opacity: withTiming(isVisible ? 1 : 0, { duration: 200 }),
+            transform: [{ scale: withTiming(isVisible ? 1 : 0.9, { duration: 200 }) }],
+          };
+        }, [item._id]);
+
+        return (
+          <Animated.View style={[styles.card, isArchive ? { borderColor: "#FF6C6C", backgroundColor: "#F1F1F1" } : {}, rStyle]}>
+            <Pressable onPress={() => handlePress(id)} onLongPress={handleLongPress} delayLongPress={200} style={[styles.pressableArea, isBottomSheet && { zIndex: 10, backgroundColor: isBottomSheet ? "#FFFFFFE5" : "transparent" }]}>
+              <ActionButton onPress={() => setIsBottomSheet(false)} onOverlayPress={() => setIsBottomSheet(false)} size={0} radius={120} icon={<Text></Text>} ref={actionBtnRef} position={"right"}>
+                {quickActions?.map((action) => (
+                  <ActionButton.Item key={action.title} title={action.title} onPress={() => handlePressActionButton(action.title)} buttonColor={"#FFFFFF"}>
+                    <View style={styles.actionButtonContent}>
+                      <View style={styles.actionIconWrapper}>
+                        <Image source={action.icon} style={styles.actionIcon} resizeMode="contain" />
+                      </View>
+                      <Text style={[styles.actionTitle, action.title === "Delete" && { color: "#FF3B30" }]}>{action.title}</Text>
+                    </View>
+                  </ActionButton.Item>
+                ))}
+              </ActionButton>
+            </Pressable>
+            <View style={styles.cardContentWrapper}>
+              <View style={styles.cardHeader}>
+                <Image style={styles.cardIcon} resizeMode="contain" source={occasionIcon} />
+                <View style={styles.profile}>{user?.profileImageUrl ? <Image resizeMode="cover" style={styles.profileImageUrl} source={{ uri: user.profileImageUrl }} /> : <Text style={styles.profileInitials}>{profileInitials}</Text>}</View>
+              </View>
+              <View style={styles.titleContainer}>
+                <Text numberOfLines={2} style={styles.title}>
+                  {title}
+                </Text>
+              </View>
+              <View>
+                <Text style={styles.date}>{date}</Text>
+              </View>
+              <View>
+                <Text style={styles.totalItems}>
+                  Total Items:
+                  <Text style={styles.totalIteNumber}>{Number(totalItems) < 10 && Number(totalItems) > 0 ? `0${totalItems}` : totalItems}</Text>
+                </Text>
+              </View>
+              <View>
+                <View style={styles.progressBarContainer}>
+                  <View style={[styles.progressBar, { width: `${percentage}%` }]} />
                 </View>
-              </ActionButton.Item>
-            ))}
-          </ActionButton>
-        </Pressable>
-        <View style={styles.cardContentWrapper}>
-          <View style={styles.cardHeader}>
-            <Image style={styles.cardIcon} resizeMode="contain" source={occasionIcon} />
-            <View style={styles.profile}>{user?.profileImageUrl ? <Image resizeMode="cover" style={styles.profileImageUrl} source={{ uri: user.profileImageUrl }} /> : <Text style={styles.profileInitials}>{profileInitials}</Text>}</View>
-          </View>
-          <View style={styles.titleContainer}>
-            <Text numberOfLines={2} style={styles.title}>
-              {title}
-            </Text>
-          </View>
-          <View>
-            <Text style={styles.date}>{date}</Text>
-          </View>
-          <View>
-            <Text style={styles.totalItems}>
-              Total Items:
-              <Text style={styles.totalIteNumber}>{Number(totalItems) < 10 && Number(totalItems) > 0 ? `0${totalItems}` : totalItems}</Text>
-            </Text>
-          </View>
-          <View>
-            <View style={styles.progressBarContainer}>
-              <View style={[styles.progressBar, { width: `${percentage}%` }]} />
+                <View>
+                  <Text style={styles.progressText}>{percentage}% Completed</Text>
+                </View>
+              </View>
             </View>
-            <View>
-              <Text style={styles.progressText}>{percentage}% Completed</Text>
-            </View>
-          </View>
-        </View>
-      </View>
+          </Animated.View>
+        );
+      })()}
     </>
   );
 }

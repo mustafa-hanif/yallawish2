@@ -10,5 +10,6 @@ export const styles = StyleSheet.create({
   },
   columnWrapperStyle: {
     gap: 8,
+    paddingBottom: 16,
   },
 });
