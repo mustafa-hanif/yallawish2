@@ -68,8 +68,8 @@ export const profileSetupStyles = StyleSheet.create({
     backgroundColor: SECONDARY_PURPLE,
   },
   stepBadgeComplete: {
-    borderColor: ACCENT_TEAL,
-    backgroundColor: ACCENT_TEAL,
+    borderColor: SECONDARY_PURPLE,
+    backgroundColor: SECONDARY_PURPLE,
   },
   stepBadgeText: {
     fontFamily: "Nunito_600SemiBold",
@@ -77,7 +77,11 @@ export const profileSetupStyles = StyleSheet.create({
     color: "#4B3F66",
   },
   stepBadgeTextActive: {
-    color: "#FFFFFF",
+    // color: "#FFFFFF",
+    fontWeight: "600",
+  },
+  stepBadgeTextComplete: {
+    color: SECONDARY_PURPLE,
   },
   stepLabel: {
     fontFamily: "Nunito_500Medium",
@@ -86,6 +90,7 @@ export const profileSetupStyles = StyleSheet.create({
   },
   stepLabelActive: {
     color: "#1C0335",
+    fontFamily: "Nunito_700Bold",
   },
   desktopContent: {
     flex: 1,
@@ -689,4 +694,3 @@ export const profileSetupStyles = StyleSheet.create({
     color: "#4B0082",
   },
 });
-

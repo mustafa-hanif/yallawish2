@@ -15,7 +15,8 @@ export const PERSONA_OPTIONS: {
   {
     id: "giftee",
     title: "I'm creating my wishlists",
-    description: "Plan events, add gifts, and share lists so friends know what to buy.",
+    description:
+      "Plan events, add gifts, and share lists so friends know what to buy.",
   },
   {
     id: "gifter",
@@ -25,7 +26,8 @@ export const PERSONA_OPTIONS: {
   {
     id: "both",
     title: "I do a bit of both",
-    description: "Swap between making lists for yourself and buying for loved ones.",
+    description:
+      "Swap between making lists for yourself and buying for loved ones.",
   },
 ];
 
@@ -84,4 +86,3 @@ export const STORE_SUGGESTIONS = [
 ];
 
 export const SECONDARY_PURPLE = "#4B0082";
-

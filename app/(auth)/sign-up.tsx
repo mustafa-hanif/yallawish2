@@ -1,7 +1,7 @@
 import { ResponsiveAuthLayout } from "@/components/ResponsiveAuthLayout";
 import { Divider, SocialButton } from "@/components/auth";
 import { authCardStyles as styles } from "@/styles/authCardStyles";
-import { useSignUp } from "@clerk/clerk-expo";
+import { useOAuth, useSignUp } from "@clerk/clerk-expo";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import * as React from "react";
@@ -18,9 +18,15 @@ import {
 export default function SignUpScreen() {
   const { isLoaded, signUp } = useSignUp();
   const router = useRouter();
-  const { addToList, returnTo } = useLocalSearchParams<{ addToList?: string; returnTo?: string }>();
-  const decodedReturnTo = returnTo ? decodeURIComponent(String(returnTo)) : undefined;
-  const showAddToList = !!addToList && String(addToList).toLowerCase() !== "false";
+  const { addToList, returnTo } = useLocalSearchParams<{
+    addToList?: string;
+    returnTo?: string;
+  }>();
+  const decodedReturnTo = returnTo
+    ? decodeURIComponent(String(returnTo))
+    : undefined;
+  const showAddToList =
+    !!addToList && String(addToList).toLowerCase() !== "false";
   const ctaLabel = showAddToList ? "Add to list" : "Sign up";
 
   const [emailAddress, setEmailAddress] = React.useState("");
@@ -30,14 +36,33 @@ export default function SignUpScreen() {
   const [marketing, setMarketing] = React.useState(false);
   const [error, setError] = React.useState<(string | null)[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
-
+  const { startOAuthFlow: startGoogle } = useOAuth({
+    strategy: "oauth_google",
+  });
+  const { startOAuthFlow: startApple } = useOAuth({ strategy: "oauth_apple" });
   const { width: SCREEN_WIDTH } = Dimensions.get("window");
   const isDesktop = Platform.OS === "web" && SCREEN_WIDTH >= 768;
+  const onGoogle = async () => {
+    const { createdSessionId, setActive: setActiveOAuth } = await startGoogle();
+    if (createdSessionId) {
+      await setActiveOAuth?.({ session: createdSessionId });
+      const target = decodedReturnTo ? (decodedReturnTo as any) : "/(tabs)";
+      router.replace(target);
+    }
+  };
 
+  const onApple = async () => {
+    const { createdSessionId, setActive: setActiveOAuth } = await startApple();
+    if (createdSessionId) {
+      await setActiveOAuth?.({ session: createdSessionId });
+      const target = decodedReturnTo ? (decodedReturnTo as any) : "/(tabs)";
+      router.replace(target);
+    }
+  };
   // Handle submission of sign-up form
   const onSignUpPress = async () => {
     if (!isLoaded || isLoading) return;
-    
+
     // Basic validation
     if (!emailAddress.trim()) {
       setError(["Please enter your email address."]);
@@ -47,10 +72,10 @@ export default function SignUpScreen() {
       setError(["Please enter a password."]);
       return;
     }
-    
+
     setIsLoading(true);
     setError([]);
-    
+
     try {
       await signUp.create({
         emailAddress: emailAddress.trim(),
@@ -76,7 +101,12 @@ export default function SignUpScreen() {
       });
     } catch (err) {
       console.error(JSON.stringify(err, null, 2));
-      if (typeof err === "object" && err !== null && "errors" in err && Array.isArray((err as any).errors)) {
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "errors" in err &&
+        Array.isArray((err as any).errors)
+      ) {
         setError((err as any).errors.map((e: any) => e.longMessage));
       } else {
         setError(["An unknown error occurred."]);
@@ -86,31 +116,64 @@ export default function SignUpScreen() {
     }
   };
 
- const TabUI = () => (
-  <View style={[styles.segmentedControl, isDesktop ? styles.segmentedControlDesktop: styles.segmentedControlMobile]}>
-    <View style={styles.segmentedOption}>
-      <View style={{...styles.segmentedActive, ...(!isDesktop ? styles.segmentedActiveMobile : {})}}>
-        <Text style={[styles.segmentedActiveText, !isDesktop ? styles.segmentedActiveTextMobile : {}]}>Signup</Text>
+  const TabUI = () => (
+    <View
+      style={[
+        styles.segmentedControl,
+        isDesktop
+          ? styles.segmentedControlDesktop
+          : styles.segmentedControlMobile,
+      ]}
+    >
+      <View style={styles.segmentedOption}>
+        <View
+          style={{
+            ...styles.segmentedActive,
+            ...(!isDesktop ? styles.segmentedActiveMobile : {}),
+          }}
+        >
+          <Text
+            style={[
+              styles.segmentedActiveText,
+              !isDesktop ? styles.segmentedActiveTextMobile : {},
+            ]}
+          >
+            Signup
+          </Text>
+        </View>
+      </View>
+      <View style={styles.segmentedOption}>
+        <Link
+          href={{
+            pathname: "/log-in",
+            params: {
+              ...(showAddToList ? { addToList: String(addToList) || "1" } : {}),
+              ...(decodedReturnTo
+                ? { returnTo: encodeURIComponent(decodedReturnTo) }
+                : {}),
+            },
+          }}
+          asChild
+        >
+          <Pressable
+            style={{
+              ...styles.segmentedInactive,
+              ...(!isDesktop ? styles.segmentedInactiveMobile : {}),
+            }}
+          >
+            <Text
+              style={[
+                styles.segmentedInactiveText,
+                !isDesktop ? styles.segmentedInactiveTextMobile : {},
+              ]}
+            >
+              Login
+            </Text>
+          </Pressable>
+        </Link>
       </View>
     </View>
-    <View style={styles.segmentedOption}>
-      <Link
-        href={{
-          pathname: "/log-in",
-          params: {
-            ...(showAddToList ? { addToList: String(addToList) || "1" } : {}),
-            ...(decodedReturnTo ? { returnTo: encodeURIComponent(decodedReturnTo) } : {}),
-          },
-        }}
-        asChild
-      >
-        <Pressable style={{...styles.segmentedInactive, ...(!isDesktop ? styles.segmentedInactiveMobile : {})}}>
-          <Text style={[styles.segmentedInactiveText, !isDesktop ? styles.segmentedInactiveTextMobile : {}]}>Login</Text>
-        </Pressable>
-      </Link>
-    </View>
-  </View>
-);
+  );
 
   return (
     <ResponsiveAuthLayout
@@ -120,46 +183,50 @@ export default function SignUpScreen() {
       mobileLogoHeaderStyle={{ marginTop: 20, marginBottom: 20 }}
       tabs={<TabUI />}
     >
-      <View style={[
-        styles.formContainer,
-        isDesktop ? styles.formContainerDesktop : styles.formContainerMobile,
-      ]}>
+      <View
+        style={[
+          styles.formContainer,
+          isDesktop ? styles.formContainerDesktop : styles.formContainerMobile,
+        ]}
+      >
         {isDesktop ? <TabUI /> : null}
-     
-        {isDesktop && (<>
-          <Text
-            style={[
-              styles.welcomeTitle,
-              isDesktop && styles.welcomeTitleDesktop,
-            ]}
-          >
-            Welcome to YallaWish
-          </Text>
-        </>)}
+
+        {isDesktop && (
+          <>
+            <Text
+              style={[
+                styles.welcomeTitle,
+                isDesktop && styles.welcomeTitleDesktop,
+              ]}
+            >
+              Welcome to YallaWish
+            </Text>
+          </>
+        )}
 
         <View style={styles.fieldsStack}>
           <View style={[styles.nameRow, isDesktop && styles.nameRowDesktop]}>
-          <TextInput
-            style={[
-              styles.input,
-              styles.inputField,
-              isDesktop && styles.inputDesktop,
-              !isDesktop ? styles.inputMobile : {}
-            ]}
-            value={firstName}
-            placeholder={isDesktop ? "First name" : "First Name"}
-            placeholderTextColor="#FFFFFF66"
-            onChangeText={(text) => {
-              setFirstName(text);
-              if (error.length > 0) setError([]);
-            }}
-          />
             <TextInput
               style={[
                 styles.input,
                 styles.inputField,
                 isDesktop && styles.inputDesktop,
-                !isDesktop ? styles.inputMobile : {}
+                !isDesktop ? styles.inputMobile : {},
+              ]}
+              value={firstName}
+              placeholder={isDesktop ? "First name" : "First Name"}
+              placeholderTextColor="#FFFFFF66"
+              onChangeText={(text) => {
+                setFirstName(text);
+                if (error.length > 0) setError([]);
+              }}
+            />
+            <TextInput
+              style={[
+                styles.input,
+                styles.inputField,
+                isDesktop && styles.inputDesktop,
+                !isDesktop ? styles.inputMobile : {},
               ]}
               value={lastName}
               placeholder={isDesktop ? "Last name" : "Last Name"}
@@ -172,7 +239,11 @@ export default function SignUpScreen() {
           </View>
 
           <TextInput
-            style={[styles.input, isDesktop && styles.inputDesktop, !isDesktop ? styles.inputMobile : {}]}
+            style={[
+              styles.input,
+              isDesktop && styles.inputDesktop,
+              !isDesktop ? styles.inputMobile : {},
+            ]}
             autoCapitalize="none"
             value={emailAddress}
             placeholder={isDesktop ? "Email address" : "Email"}
@@ -185,7 +256,11 @@ export default function SignUpScreen() {
           />
 
           <TextInput
-            style={[styles.input, isDesktop && styles.inputDesktop, !isDesktop ? styles.inputMobile : {}]}
+            style={[
+              styles.input,
+              isDesktop && styles.inputDesktop,
+              !isDesktop ? styles.inputMobile : {},
+            ]}
             value={password}
             placeholder="Password"
             placeholderTextColor="#FFFFFF66"
@@ -204,17 +279,15 @@ export default function SignUpScreen() {
           style={styles.checkboxRow}
         >
           <View
-            style={[
-              styles.checkboxBox,
-              marketing && styles.checkboxBoxChecked,
-            ]}
+            style={[styles.checkboxBox, marketing && styles.checkboxBoxChecked]}
           >
             {marketing && (
               <Ionicons name="checkmark" size={14} color="#1B0A3A" />
             )}
           </View>
           <Text style={styles.checkboxLabel}>
-            I agree, by signing up the <Text style={styles.termsLink}>Terms &amp; Policy</Text>
+            I agree, by signing up the{" "}
+            <Text style={styles.termsLink}>Terms &amp; Policy</Text>
           </Text>
         </Pressable>
 
@@ -222,7 +295,7 @@ export default function SignUpScreen() {
           onPress={onSignUpPress}
           icon={null}
           label={isLoading ? "Signing up..." : ctaLabel}
-          variant={isDesktop? "primary" : "default"}
+          variant={isDesktop ? "primary" : "default"}
         />
 
         {error.length > 0 && (
@@ -235,7 +308,11 @@ export default function SignUpScreen() {
           </View>
         )}
 
-        <Divider text={isDesktop ? "Or continue with" : "OR" } tone="card" marginVertical={isDesktop ? 16 : 8} />
+        <Divider
+          text={isDesktop ? "Or continue with" : "OR"}
+          tone="card"
+          marginVertical={isDesktop ? 16 : 8}
+        />
 
         {isDesktop ? (
           <View style={styles.socialRowDesktop}>
@@ -267,13 +344,15 @@ export default function SignUpScreen() {
         ) : (
           <View style={styles.socialStack}>
             <SocialButton
-              onPress={() => {}}
-              icon={<Image source={require('@/assets/images/googleIcon.png')} />}
+              onPress={onGoogle}
+              icon={
+                <Image source={require("@/assets/images/googleIcon.png")} />
+              }
               label="Continue with Google"
             />
             <SocialButton
-              onPress={() => {}}
-              icon={<Image source={require('@/assets/images/appleIcon.png')} />}
+              onPress={onApple}
+              icon={<Image source={require("@/assets/images/appleIcon.png")} />}
               label="Continue with Apple"
             />
           </View>

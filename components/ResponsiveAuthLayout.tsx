@@ -1,5 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Animated, Dimensions, Easing, Image, ImageBackground, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Animated,
+  Dimensions,
+  Easing,
+  Image,
+  ImageBackground,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 type ResponsiveAuthLayoutProps = {
   children: React.ReactNode;
@@ -20,8 +33,18 @@ const BACKGROUND_IMAGES = [
   // Add more images here when provided
 ];
 
-export function ResponsiveAuthLayout({ children, heroTitle, heroSubtitle, showHero = false, mobileScrollViewStyle = {}, mobileLogoHeaderStyle = {}, tabs, showAnimation = false }: ResponsiveAuthLayoutProps) {
-  const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+export function ResponsiveAuthLayout({
+  children,
+  heroTitle,
+  heroSubtitle,
+  showHero = false,
+  mobileScrollViewStyle = {},
+  mobileLogoHeaderStyle = {},
+  tabs,
+  showAnimation = false,
+}: ResponsiveAuthLayoutProps) {
+  const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } =
+    Dimensions.get("window");
   const isDesktop = Platform.OS === "web" && SCREEN_WIDTH >= 768;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isSplash, setIsSplash] = useState(showAnimation);
@@ -43,27 +66,54 @@ export function ResponsiveAuthLayout({ children, heroTitle, heroSubtitle, showHe
 
   if (isDesktop) {
     return (
-      <ImageBackground source={BACKGROUND_IMAGES[currentImageIndex]} style={styles.desktopFullBackground} imageStyle={styles.desktopFullBackgroundImage} resizeMode="cover">
+      <ImageBackground
+        source={BACKGROUND_IMAGES[currentImageIndex]}
+        style={styles.desktopFullBackground}
+        imageStyle={styles.desktopFullBackgroundImage}
+        resizeMode="cover"
+      >
         {/* <View style={styles.desktopOverlay} /> */}
 
         {/* Logo and hero text - positioned on the left */}
         <View style={styles.desktopHeroContent}>
-          <Image source={require("@/assets/images/yallawish_logo.png")} style={styles.desktopLogo} />
+          <Image
+            source={require("@/assets/images/yallawish_logo.png")}
+            style={styles.desktopLogo}
+          />
           <View style={styles.desktopHeroText}>
-            <Text style={styles.desktopHeroTitle}>GIFTING, MADE MEANINGFUL</Text>
+            <Text style={styles.desktopHeroTitle}>
+              GIFTING, MADE MEANINGFUL
+            </Text>
             <Text style={styles.desktopHeroSubtitle}>CELEBRATE EVERYTHING</Text>
           </View>
           <View style={styles.sliderButtonContainer}>
-            {Array.from({ length: BACKGROUND_IMAGES.length }).map((_, index) => (
-              <Pressable key={`hero-carousel-dot-${index}`} onPress={() => setCurrentImageIndex(index)} style={[styles.sliderButton, currentImageIndex === index && styles.sliderButtonActive]} accessibilityRole="button" accessibilityLabel={`Show hero slide ${index + 1}`} />
-            ))}
+            {Array.from({ length: BACKGROUND_IMAGES.length }).map(
+              (_, index) => (
+                <Pressable
+                  key={`hero-carousel-dot-${index}`}
+                  onPress={() => setCurrentImageIndex(index)}
+                  style={[
+                    styles.sliderButton,
+                    currentImageIndex === index && styles.sliderButtonActive,
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Show hero slide ${index + 1}`}
+                />
+              )
+            )}
           </View>
-          <Text style={styles.desktopCopyright}>© 2025 YallaWish. All rights reserved</Text>
+          <Text style={styles.desktopCopyright}>
+            © 2025 YallaWish. All rights reserved
+          </Text>
         </View>
 
         {/* Form container - centered/right positioned */}
         <View style={styles.desktopFormWrapper}>
-          <ScrollView style={styles.desktopScrollView} contentContainerStyle={styles.desktopScrollContent} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            style={styles.desktopScrollView}
+            contentContainerStyle={styles.desktopScrollContent}
+            showsVerticalScrollIndicator={false}
+          >
             <View style={styles.desktopFormContainer}>{children}</View>
           </ScrollView>
         </View>
@@ -91,16 +141,23 @@ export function ResponsiveAuthLayout({ children, heroTitle, heroSubtitle, showHe
     if (!isSplash) {
       Animated.timing(fadeIn, {
         toValue: 1,
-        duration: 800,      // slightly longer fade
+        duration: 800, // slightly longer fade
         useNativeDriver: true,
       }).start();
     }
   }, [isSplash]);
-  
+
   return (
-    <ImageBackground source={require("@/assets/images/onboard_image.png")} style={{ width: SCREEN_WIDTH, height: "100%", overflow: "hidden" }} imageStyle={{ width: SCREEN_WIDTH, height: "100%" }} resizeMode="cover">
+    <ImageBackground
+      source={require("@/assets/images/onboard_image.png")}
+      style={{ width: SCREEN_WIDTH, height: "100%", overflow: "hidden" }}
+      imageStyle={{ width: SCREEN_WIDTH, height: "100%" }}
+      resizeMode="cover"
+    >
       {isSplash ? (
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
           <Animated.Image
             source={require("@/assets/images/yallawish_logo.png")}
             style={{
@@ -117,25 +174,38 @@ export function ResponsiveAuthLayout({ children, heroTitle, heroSubtitle, showHe
             
           </Animated.View> */}
           <SafeAreaView style={{ flex: 1 }}>
+            {/* Fixed Header: Logo and Tabs grouped together at top */}
+            <View
+              style={{
+                alignItems: "center",
+                paddingHorizontal: 20,
+                paddingTop: 40,
+                paddingBottom: 20,
+                ...mobileLogoHeaderStyle,
+              }}
+            >
+              <Image
+                source={require("@/assets/images/yallawish_logo.png")}
+                style={{
+                  width: 158,
+                  height: 38,
+                  resizeMode: "contain",
+                  marginBottom: 20,
+                }}
+              />
+              {tabs ? tabs : null}
+            </View>
+
+            {/* Scrollable Content */}
             <ScrollView
               style={{ flex: 1 }}
               contentContainerStyle={{
-                minHeight: SCREEN_HEIGHT,
                 paddingHorizontal: 20,
-                // flexDirection:''
-                paddingTop: 24,
                 paddingBottom: 24,
-
-                justifyContent: "space-between",
                 ...mobileScrollViewStyle,
               }}
             >
-              {/* Logo */}
-              <View style={{ alignItems: "center", marginTop: 16, ...mobileLogoHeaderStyle }}>
-                <Image source={require("@/assets/images/yallawish_logo.png")} style={{ width: 158, height: 38, resizeMode: "contain" }} />
-              </View>
-              {tabs ? tabs : null}
-              <Animated.View  style={{ opacity: fadeIn }}>
+              <Animated.View style={{ opacity: fadeIn }}>
                 {/* Hero text (mobile) */}
                 {showHero && heroTitle && (
                   <View style={{ paddingHorizontal: 8, marginBottom: 20 }}>

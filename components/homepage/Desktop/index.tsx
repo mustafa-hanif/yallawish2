@@ -13,7 +13,17 @@ import { useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import * as LucideIcons from "lucide-react-native";
-import { Alert, Dimensions, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Alert,
+  Dimensions,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const DESKTOP_BREAKPOINT = 1024;
@@ -66,7 +76,11 @@ export function Desktop() {
     return () => clearInterval(interval);
   }, [scrollDir]);
 
-  const profilePhoto = user?.imageUrl ?? (typeof user?.unsafeMetadata?.profileImageUrl === "string" ? (user.unsafeMetadata.profileImageUrl as string) : undefined);
+  const profilePhoto =
+    user?.imageUrl ??
+    (typeof user?.unsafeMetadata?.profileImageUrl === "string"
+      ? (user.unsafeMetadata.profileImageUrl as string)
+      : undefined);
 
   const profileInitials = useMemo(() => {
     const name = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
@@ -93,7 +107,10 @@ export function Desktop() {
     return "YW";
   }, [user?.firstName, user?.lastName, user?.emailAddresses]);
 
-  const myLists = useQuery(api.products.getMyLists, user?.id ? { user_id: user.id } : "skip");
+  const myLists = useQuery(
+    api.products.getMyLists,
+    user?.id ? { user_id: user.id } : "skip"
+  );
 
   type UpcomingEvent = {
     id: string;
@@ -117,12 +134,35 @@ export function Desktop() {
         const dayStr = String(d ?? 1).padStart(2, "0");
         let monthStr = "";
         try {
-          monthStr = new Intl.DateTimeFormat(undefined, { month: "long" }).format(dateObj).toUpperCase();
+          monthStr = new Intl.DateTimeFormat(undefined, { month: "long" })
+            .format(dateObj)
+            .toUpperCase();
         } catch {
-          const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+          const months = [
+            "JANUARY",
+            "FEBRUARY",
+            "MARCH",
+            "APRIL",
+            "MAY",
+            "JUNE",
+            "JULY",
+            "AUGUST",
+            "SEPTEMBER",
+            "OCTOBER",
+            "NOVEMBER",
+            "DECEMBER",
+          ];
           monthStr = months[dateObj.getMonth()];
         }
-        return { id: String(l._id), date: dayStr, month: monthStr, title: l.title || "Untitled", subtitle: l.note || (l.occasion ? `Occasion: ${l.occasion}` : ""), color: OCCASION_COLOR[String(l.occasion)] ?? "#AEAEB2", dateValue: dateObj.getTime() };
+        return {
+          id: String(l._id),
+          date: dayStr,
+          month: monthStr,
+          title: l.title || "Untitled",
+          subtitle: l.note || (l.occasion ? `Occasion: ${l.occasion}` : ""),
+          color: OCCASION_COLOR[String(l.occasion)] ?? "#AEAEB2",
+          dateValue: dateObj.getTime(),
+        };
       })
       .sort((a: UpcomingEvent, b: UpcomingEvent) => a.dateValue - b.dateValue);
   }, [myLists]);
@@ -262,18 +302,46 @@ export function Desktop() {
   const heroTags = lifeMomentsPrimary.slice(0, 3);
 
   const topPicks = [
-    { id: 1, name: "Nike Air Jester 1", subtitle: "Sonic Green", price: "325.32", image: require("@/assets/images/nikeShoes.png") },
-    { id: 2, name: "Oculus Quest", subtitle: "Dynamic White", price: "325.32", image: require("@/assets/images/oculus.png") },
+    {
+      id: 1,
+      name: "Nike Air Jester 1",
+      subtitle: "Sonic Green",
+      price: "325.32",
+      image: require("@/assets/images/nikeShoes.png"),
+    },
+    {
+      id: 2,
+      name: "Oculus Quest",
+      subtitle: "Dynamic White",
+      price: "325.32",
+      image: require("@/assets/images/oculus.png"),
+    },
   ];
 
   const inspirationBoards = [
-    { id: 1, title: "Build your nursery", subtitle: "All essentials items under one roof with Pottery Barn Kids", image: require("@/assets/images/nursery.png") },
-    { id: 2, title: "The wedding checklist", subtitle: "Don't know where to start? See what others do.", image: require("@/assets/images/wedding.png") },
-    { id: 3, title: "From house to home", subtitle: "Set up your space with a little oomph with Pan Home", image: require("@/assets/images/pan.png") },
+    {
+      id: 1,
+      title: "Build your nursery",
+      subtitle: "All essentials items under one roof with Pottery Barn Kids",
+      image: require("@/assets/images/nursery.png"),
+    },
+    {
+      id: 2,
+      title: "The wedding checklist",
+      subtitle: "Don't know where to start? See what others do.",
+      image: require("@/assets/images/wedding.png"),
+    },
+    {
+      id: 3,
+      title: "From house to home",
+      subtitle: "Set up your space with a little oomph with Pan Home",
+      image: require("@/assets/images/pan.png"),
+    },
   ];
 
   const handleCreateWishlist = () => router.push("/create-list-step1");
   const handlePressProfile = () => router.push("/profile-setup");
+  // const handlePressProfile = () => console.log("123");
 
   // const initialCards = [
   //   { id: 0, title: "Create List", subtitle: "Create a new wishlist for any occasion", image: require("@/assets/images/addList.png"), backgroundColor: "#F3ECFE", action: handleCreateWishlist },
@@ -342,9 +410,13 @@ export function Desktop() {
   // Cards array static for infinite loop (no state mutation needed)
   const cards = initialCards;
 
-  const mergeStyles = (...styleInputs: any[]) => StyleSheet.flatten(styleInputs.filter(Boolean));
+  const mergeStyles = (...styleInputs: any[]) =>
+    StyleSheet.flatten(styleInputs.filter(Boolean));
 
-  const renderLifeMomentCard = (moment: LifeMomentCard, variant: "primary" | "secondary") => {
+  const renderLifeMomentCard = (
+    moment: LifeMomentCard,
+    variant: "primary" | "secondary"
+  ) => {
     const textColor = moment.textColor ?? "#1C0335";
     return (
       <Pressable
@@ -356,35 +428,94 @@ export function Desktop() {
             borderColor: moment.accent,
           },
           variant === "secondary" ? styles.lifeMomentCardSecondary : null,
-          isDesktop ? responsiveStyles.lifeMomentCardDesktop : responsiveStyles.lifeMomentCardMobile
+          isDesktop
+            ? responsiveStyles.lifeMomentCardDesktop
+            : responsiveStyles.lifeMomentCardMobile
         )}
         onPress={() => {
           if (moment.href) {
             router.push(moment.href as any);
             return;
           }
-          Alert.alert("Coming soon", "More curated experiences are on the way!");
+          Alert.alert(
+            "Coming soon",
+            "More curated experiences are on the way!"
+          );
         }}
       >
-        {moment?.icon ? <Image source={moment?.icon} style={styles.renderLifeMomentCardIcon} /> : null}
+        {moment?.icon ? (
+          <Image
+            source={moment?.icon}
+            style={styles.renderLifeMomentCardIcon}
+          />
+        ) : null}
         <View>
-          <Text style={mergeStyles(styles.lifeMomentTitle, { color: textColor }, !isDesktop ? styles.lifeMomentTitleMobile : {})}>{moment.title}</Text>
-          <Text style={mergeStyles(styles.lifeMomentCaption, !isDesktop ? styles.lifeMomentCaptionMobile : {}, { color: variant === "secondary" ? "#EDE9FF" : "#5B5569" })}>{moment.caption}</Text>
+          <Text
+            style={mergeStyles(
+              styles.lifeMomentTitle,
+              { color: textColor },
+              !isDesktop ? styles.lifeMomentTitleMobile : {}
+            )}
+          >
+            {moment.title}
+          </Text>
+          <Text
+            style={mergeStyles(
+              styles.lifeMomentCaption,
+              !isDesktop ? styles.lifeMomentCaptionMobile : {},
+              { color: variant === "secondary" ? "#EDE9FF" : "#5B5569" }
+            )}
+          >
+            {moment.caption}
+          </Text>
         </View>
 
-        <Image source={require("@/assets/images/arrowRightGrey.svg")} style={styles.renderLifeMomentCardArrowIcon} />
+        <Image
+          source={require("@/assets/images/arrowRightGrey.svg")}
+          style={styles.renderLifeMomentCardArrowIcon}
+        />
       </Pressable>
     );
   };
 
   const renderCategoryCard = (category: any) => {
     return (
-      <Pressable key={category.id} style={mergeStyles(styles.categoryCard, isDesktop ? styles.categoryCardDesktop : styles.categoryCardMobile, { borderColor: category.color })}>
-        <View style={!isDesktop ? styles.categoryContentMobile : styles.categoryContent}>
-          {category?.icon && <Image source={category?.icon} style={!isDesktop ? styles.categoryIconMobile : styles.categoryIcon} contentFit="contain" />}
+      <Pressable
+        key={category.id}
+        style={mergeStyles(
+          styles.categoryCard,
+          isDesktop ? styles.categoryCardDesktop : styles.categoryCardMobile,
+          { borderColor: category.color }
+        )}
+      >
+        <View
+          style={
+            !isDesktop ? styles.categoryContentMobile : styles.categoryContent
+          }
+        >
+          {category?.icon && (
+            <Image
+              source={category?.icon}
+              style={
+                !isDesktop ? styles.categoryIconMobile : styles.categoryIcon
+              }
+              contentFit="contain"
+            />
+          )}
 
-          <Text style={!isDesktop ? styles.categoryNameMobile : styles.categoryName}>{category.name}</Text>
-          <Image style={!isDesktop ? styles.arrowWhiteIconMobile : styles.arrowWhiteIconDesktop} source={require("@/assets/images/arrowRightWhite.svg")} />
+          <Text
+            style={!isDesktop ? styles.categoryNameMobile : styles.categoryName}
+          >
+            {category.name}
+          </Text>
+          <Image
+            style={
+              !isDesktop
+                ? styles.arrowWhiteIconMobile
+                : styles.arrowWhiteIconDesktop
+            }
+            source={require("@/assets/images/arrowRightWhite.svg")}
+          />
         </View>
       </Pressable>
     );
@@ -392,7 +523,11 @@ export function Desktop() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: "#2C0077" }]}>
-      <ScrollView style={{ backgroundColor: "#FFFFFF" }} contentContainerStyle={mergeStyles(responsiveStyles.pageContainer)} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={{ backgroundColor: "#FFFFFF" }}
+        contentContainerStyle={mergeStyles(responsiveStyles.pageContainer)}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
         <View style={{ width: "100%" }}>
           {/* Top Promotional Banner */}
@@ -417,36 +552,93 @@ export function Desktop() {
           </View>
 
           {/* Main Navigation Bar */}
-          <View style={mergeStyles(styles.headerWrapper, isDesktop ? responsiveStyles.headerWrapper : null)}>
-            <View style={mergeStyles(styles.navBar, isDesktop ? responsiveStyles.navBarDesktop : null)}>
-              <Pressable onPress={() => router.replace("/")} style={styles.navBrandRow}>
-                <Image source={require("@/assets/images/yallawish_logo.png")} style={styles.navBrandLogo} contentFit="contain" />
+          <View
+            style={mergeStyles(
+              styles.headerWrapper,
+              isDesktop ? responsiveStyles.headerWrapper : null
+            )}
+          >
+            <View
+              style={mergeStyles(
+                styles.navBar,
+                isDesktop ? responsiveStyles.navBarDesktop : null
+              )}
+            >
+              <Pressable
+                onPress={() => router.replace("/")}
+                style={styles.navBrandRow}
+              >
+                <Image
+                  source={require("@/assets/images/yallawish_logo.png")}
+                  style={styles.navBrandLogo}
+                  contentFit="contain"
+                />
               </Pressable>
 
-              <View style={mergeStyles(styles.searchContainer, responsiveStyles.headerSearch)}>
+              <View
+                style={mergeStyles(
+                  styles.searchContainer,
+                  responsiveStyles.headerSearch
+                )}
+              >
                 <LucideIcons.Search size={20} color="#FFFFFF" />
-                <TextInput placeholder="Search for gifts, lists or inspirations..." style={styles.searchInput} placeholderTextColor="#D9CCFF" />
+                <TextInput
+                  placeholder="Search for gifts, lists or inspirations..."
+                  style={styles.searchInput}
+                  placeholderTextColor="#D9CCFF"
+                />
               </View>
 
               <View style={[styles.navActions, { gap: 20 }]}>
                 <SignedOut>
-                  <Pressable onPress={() => router.push("/sign-up")}>
+                  <Pressable
+                    onPress={() =>
+                      router.push({
+                        pathname: "/(auth)",
+                        params: { mode: "signup" },
+                      })
+                    }
+                  >
                     <Text style={styles.navAuthLink}>Sign up</Text>
                   </Pressable>
-                  <Pressable onPress={() => router.push("/log-in")}>
+                  <Pressable
+                    onPress={() =>
+                      router.push({
+                        pathname: "/(auth)",
+                        params: { mode: "login" },
+                      })
+                    }
+                  >
                     <Text style={styles.navAuthLink}>Login</Text>
                   </Pressable>
                 </SignedOut>
                 <SignedIn>
-                  <Pressable style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                    <Text style={[styles.navAuthLink, { marginRight: 0 }]}>Account</Text>
+                  <Pressable
+                    onPress={handlePressProfile}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
+                  >
+                    <Text style={[styles.navAuthLink, { marginRight: 0 }]}>
+                      Account
+                    </Text>
                     <LucideIcons.User size={20} color="#FFFFFF" />
                   </Pressable>
                   <Pressable>
-                    <LucideIcons.Heart size={24} color="#FFFFFF" strokeWidth={2} />
+                    <LucideIcons.Heart
+                      size={24}
+                      color="#FFFFFF"
+                      strokeWidth={2}
+                    />
                   </Pressable>
                   <Pressable>
-                    <LucideIcons.ShoppingBag size={24} color="#FFFFFF" strokeWidth={2} />
+                    <LucideIcons.ShoppingBag
+                      size={24}
+                      color="#FFFFFF"
+                      strokeWidth={2}
+                    />
                   </Pressable>
                 </SignedIn>
               </View>
@@ -465,33 +657,101 @@ export function Desktop() {
                 justifyContent: "space-between",
               }}
             >
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 32 }}>
-                <Pressable style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 32 }}
+              >
+                <Pressable
+                  style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
+                >
                   <LucideIcons.Flame size={18} color="#1C0335" />
-                  <Text style={{ fontFamily: "Nunito_600SemiBold", fontSize: 14, color: "#1C0335" }}>Trending</Text>
+                  <Text
+                    style={{
+                      fontFamily: "Nunito_600SemiBold",
+                      fontSize: 14,
+                      color: "#1C0335",
+                    }}
+                  >
+                    Trending
+                  </Text>
                 </Pressable>
-                <Pressable style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                <Pressable
+                  style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
+                >
                   <LucideIcons.Heart size={18} color="#1C0335" />
-                  <Text style={{ fontFamily: "Nunito_600SemiBold", fontSize: 14, color: "#1C0335" }}>Wedding</Text>
+                  <Text
+                    style={{
+                      fontFamily: "Nunito_600SemiBold",
+                      fontSize: 14,
+                      color: "#1C0335",
+                    }}
+                  >
+                    Wedding
+                  </Text>
                 </Pressable>
-                <Pressable style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                <Pressable
+                  style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
+                >
                   <LucideIcons.Baby size={18} color="#1C0335" />
-                  <Text style={{ fontFamily: "Nunito_600SemiBold", fontSize: 14, color: "#1C0335" }}>Baby</Text>
+                  <Text
+                    style={{
+                      fontFamily: "Nunito_600SemiBold",
+                      fontSize: 14,
+                      color: "#1C0335",
+                    }}
+                  >
+                    Baby
+                  </Text>
                 </Pressable>
-                <Pressable style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                <Pressable
+                  style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
+                >
                   <LucideIcons.Gift size={18} color="#1C0335" />
-                  <Text style={{ fontFamily: "Nunito_600SemiBold", fontSize: 14, color: "#1C0335" }}>Birthday</Text>
+                  <Text
+                    style={{
+                      fontFamily: "Nunito_600SemiBold",
+                      fontSize: 14,
+                      color: "#1C0335",
+                    }}
+                  >
+                    Birthday
+                  </Text>
                 </Pressable>
               </View>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 24 }}>
-                <Pressable>
-                  <Text style={{ fontFamily: "Nunito_600SemiBold", fontSize: 14, color: "#1C0335" }}>My Gift List</Text>
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 24 }}
+              >
+                <Pressable onPress={() => router.push("/wishlists")}>
+                  <Text
+                    style={{
+                      fontFamily: "Nunito_600SemiBold",
+                      fontSize: 14,
+                      color: "#1C0335",
+                    }}
+                  >
+                    My Gift List
+                  </Text>
                 </Pressable>
                 <Pressable>
-                  <Text style={{ fontFamily: "Nunito_600SemiBold", fontSize: 14, color: "#1C0335" }}>Why YallaWish?</Text>
+                  <Text
+                    style={{
+                      fontFamily: "Nunito_600SemiBold",
+                      fontSize: 14,
+                      color: "#1C0335",
+                    }}
+                  >
+                    Why YallaWish?
+                  </Text>
                 </Pressable>
                 <Pressable>
-                  <Text style={{ fontFamily: "Nunito_600SemiBold", fontSize: 14, color: "#1C0335" }}>YallaWish for Business</Text>
+                  <Text
+                    style={{
+                      fontFamily: "Nunito_600SemiBold",
+                      fontSize: 14,
+                      color: "#1C0335",
+                    }}
+                  >
+                    YallaWish for Business
+                  </Text>
                 </Pressable>
               </View>
             </View>
@@ -499,7 +759,13 @@ export function Desktop() {
         </View>
 
         {/* Hero */}
-        <View style={mergeStyles(styles.heroSection, isDesktop ? responsiveStyles.heroSectionDesktop : null, { paddingHorizontal: 0, paddingTop: 0, paddingBottom: 0 })}>
+        <View
+          style={mergeStyles(
+            styles.heroSection,
+            isDesktop ? responsiveStyles.heroSectionDesktop : null,
+            { paddingHorizontal: 0, paddingTop: 0, paddingBottom: 0 }
+          )}
+        >
           <View
             style={{
               width: "100%",
@@ -567,7 +833,7 @@ export function Desktop() {
                       lineHeight: isDesktop ? 68 : 40,
                     }}
                   >
-                    Celebrate Every Moment with the Perfect Gift
+                    Celebrate Every Moment with the Perfect Gift 782
                   </Text>
 
                   {/* Sub-headline */}
@@ -582,7 +848,8 @@ export function Desktop() {
                       opacity: 0.95,
                     }}
                   >
-                    Shop handpicked gifts for weddings, birthdays, and every special day in between.
+                    Shop handpicked gifts for weddings, birthdays, and every
+                    special day in between.
                   </Text>
 
                   {/* CTA Buttons */}
@@ -747,7 +1014,11 @@ export function Desktop() {
                     position: "relative",
                   }}
                 >
-                  <Image source={require("@/assets/images/homepage/homepage_image_1.png")} style={{ width: "100%", height: 400 }} contentFit="cover" />
+                  <Image
+                    source={require("@/assets/images/homepage/homepage_image_1.png")}
+                    style={{ width: "100%", height: 400 }}
+                    contentFit="cover"
+                  />
                   <View
                     style={{
                       position: "absolute",
@@ -814,7 +1085,11 @@ export function Desktop() {
                     position: "relative",
                   }}
                 >
-                  <Image source={require("@/assets/images/homepage/homepage_image_2.png")} style={{ width: "100%", height: 400 }} contentFit="cover" />
+                  <Image
+                    source={require("@/assets/images/homepage/homepage_image_2.png")}
+                    style={{ width: "100%", height: 400 }}
+                    contentFit="cover"
+                  />
                   <View
                     style={{
                       position: "absolute",
@@ -881,7 +1156,11 @@ export function Desktop() {
                     position: "relative",
                   }}
                 >
-                  <Image source={require("@/assets/images/homepage/homepage_image3.png")} style={{ width: "100%", height: 400 }} contentFit="cover" />
+                  <Image
+                    source={require("@/assets/images/homepage/homepage_image3.png")}
+                    style={{ width: "100%", height: 400 }}
+                    contentFit="cover"
+                  />
                   <View
                     style={{
                       position: "absolute",
@@ -984,11 +1263,27 @@ export function Desktop() {
                   Discover Gifts
                 </Text>
               </Pressable>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 16, paddingRight: 20 }}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ gap: 16, paddingRight: 20 }}
+              >
                 {[
-                  { title: "Birthday", products: "55 Products", image: require("@/assets/images/homepage/homepage_image_1.png") },
-                  { title: "Wedding", products: "30 Products", image: require("@/assets/images/homepage/homepage_image_2.png") },
-                  { title: "Graduation", products: "20 Products", image: require("@/assets/images/homepage/homepage_image3.png") },
+                  {
+                    title: "Birthday",
+                    products: "55 Products",
+                    image: require("@/assets/images/homepage/homepage_image_1.png"),
+                  },
+                  {
+                    title: "Wedding",
+                    products: "30 Products",
+                    image: require("@/assets/images/homepage/homepage_image_2.png"),
+                  },
+                  {
+                    title: "Graduation",
+                    products: "20 Products",
+                    image: require("@/assets/images/homepage/homepage_image3.png"),
+                  },
                 ].map((card, index) => (
                   <Pressable
                     key={index}
@@ -999,7 +1294,11 @@ export function Desktop() {
                       position: "relative",
                     }}
                   >
-                    <Image source={card.image} style={{ width: "100%", height: 350 }} contentFit="cover" />
+                    <Image
+                      source={card.image}
+                      style={{ width: "100%", height: 350 }}
+                      contentFit="cover"
+                    />
                     <View
                       style={{
                         position: "absolute",
@@ -1092,12 +1391,36 @@ export function Desktop() {
               }}
             >
               {[
-                { title: "Wedding Essentials", products: "23 Products", image: require("@/assets/images/homepage/circle1.png") },
-                { title: "Tech For Him", products: "56 Products", image: require("@/assets/images/homepage/circle2.png") },
-                { title: "Luxury For Her", products: "30 Products", image: require("@/assets/images/homepage/circle3.png") },
-                { title: "Gifts For Kids", products: "80 Products", image: require("@/assets/images/homepage/circle4.png") },
-                { title: "Home & Lifestyle", products: "99+ Products", image: require("@/assets/images/homepage/circle5.png") },
-                { title: "Personalized Gifts", products: "50 Products", image: require("@/assets/images/homepage/circle6.png") },
+                {
+                  title: "Wedding Essentials",
+                  products: "23 Products",
+                  image: require("@/assets/images/homepage/circle1.png"),
+                },
+                {
+                  title: "Tech For Him",
+                  products: "56 Products",
+                  image: require("@/assets/images/homepage/circle2.png"),
+                },
+                {
+                  title: "Luxury For Her",
+                  products: "30 Products",
+                  image: require("@/assets/images/homepage/circle3.png"),
+                },
+                {
+                  title: "Gifts For Kids",
+                  products: "80 Products",
+                  image: require("@/assets/images/homepage/circle4.png"),
+                },
+                {
+                  title: "Home & Lifestyle",
+                  products: "99+ Products",
+                  image: require("@/assets/images/homepage/circle5.png"),
+                },
+                {
+                  title: "Personalized Gifts",
+                  products: "50 Products",
+                  image: require("@/assets/images/homepage/circle6.png"),
+                },
               ].map((category, index) => (
                 <Pressable
                   key={index}
@@ -1122,7 +1445,11 @@ export function Desktop() {
                       shadowRadius: 4,
                     }}
                   >
-                    <Image source={category.image} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+                    <Image
+                      source={category.image}
+                      style={{ width: "100%", height: "100%" }}
+                      contentFit="cover"
+                    />
                   </View>
                   <Text
                     style={{
@@ -1273,7 +1600,11 @@ export function Desktop() {
                       padding: 20,
                     }}
                   >
-                    <Image source={item.image} style={{ width: "90%", height: "90%" }} contentFit="contain" />
+                    <Image
+                      source={item.image}
+                      style={{ width: "90%", height: "90%" }}
+                      contentFit="contain"
+                    />
                     <Pressable
                       style={{
                         position: "absolute",
@@ -1433,7 +1764,8 @@ export function Desktop() {
                     lineHeight: 24,
                   }}
                 >
-                  Not sure what to buy? Let us guide you. Answer a few quick questions and discover personalized gift ideas instantly.
+                  Not sure what to buy? Let us guide you. Answer a few quick
+                  questions and discover personalized gift ideas instantly.
                 </Text>
 
                 <View style={{ gap: 24 }}>
@@ -1565,12 +1897,22 @@ export function Desktop() {
                 </View>
 
                 <View style={{ position: "absolute", bottom: -40, left: 0 }}>
-                  <LucideIcons.Sparkles size={24} color="#330065" style={{ opacity: 0.6 }} />
+                  <LucideIcons.Sparkles
+                    size={24}
+                    color="#330065"
+                    style={{ opacity: 0.6 }}
+                  />
                 </View>
               </View>
 
               {/* Right Column - Placeholder */}
-              <View style={{ flex: 1, width: "100%", aspectRatio: isDesktop ? 1.4 : 1 }}>
+              <View
+                style={{
+                  flex: 1,
+                  width: "100%",
+                  aspectRatio: isDesktop ? 1.4 : 1,
+                }}
+              >
                 <View
                   style={{
                     width: "100%",
@@ -1610,7 +1952,13 @@ export function Desktop() {
           }}
         >
           <View style={responsiveStyles.sectionInner}>
-            <View style={{ flexDirection: "row", gap: 24, justifyContent: "space-between" }}>
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 24,
+                justifyContent: "space-between",
+              }}
+            >
               {[
                 {
                   id: 1,
@@ -1665,7 +2013,11 @@ export function Desktop() {
                         transform: [{ scaleX: 1.2 }],
                       }}
                     />
-                    <Image source={item.image} style={{ width: 220, height: 220 }} contentFit="contain" />
+                    <Image
+                      source={item.image}
+                      style={{ width: 220, height: 220 }}
+                      contentFit="contain"
+                    />
                   </View>
 
                   <View style={{ alignItems: "center", gap: 24 }}>
@@ -1758,7 +2110,13 @@ export function Desktop() {
               </Text>
             </View>
 
-            <View style={{ flexDirection: "row", gap: 24, justifyContent: "space-between" }}>
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 24,
+                justifyContent: "space-between",
+              }}
+            >
               {[
                 {
                   id: 1,
@@ -1804,7 +2162,11 @@ export function Desktop() {
                       padding: 20,
                     }}
                   >
-                    <Image source={item.image} style={{ width: "80%", height: "80%" }} contentFit="contain" />
+                    <Image
+                      source={item.image}
+                      style={{ width: "80%", height: "80%" }}
+                      contentFit="contain"
+                    />
                     <Pressable
                       style={{
                         position: "absolute",
@@ -1920,7 +2282,8 @@ export function Desktop() {
                   maxWidth: 900,
                 }}
               >
-                Create Your Own Gift List In Minutes, Share It With Friends & Family, And Make Every Celebration Memorable.
+                Create Your Own Gift List In Minutes, Share It With Friends &
+                Family, And Make Every Celebration Memorable.
               </Text>
 
               <View style={{ flexDirection: "row", gap: 24 }}>
@@ -1980,7 +2343,9 @@ export function Desktop() {
           }}
         >
           <View style={responsiveStyles.sectionInner}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 80 }}>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 80 }}
+            >
               {/* Left Column */}
               <View style={{ flex: 1 }}>
                 <View
@@ -2016,7 +2381,14 @@ export function Desktop() {
                   Real Feedback, Real Satisfaction
                 </Text>
 
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 16, marginBottom: 32 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 16,
+                    marginBottom: 32,
+                  }}
+                >
                   <View style={{ flexDirection: "row" }}>
                     {[1, 2, 3].map((i) => (
                       <View
@@ -2032,14 +2404,25 @@ export function Desktop() {
                           overflow: "hidden",
                         }}
                       >
-                        <Image source={require("@/assets/images/girlUser.png")} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+                        <Image
+                          source={require("@/assets/images/girlUser.png")}
+                          style={{ width: "100%", height: "100%" }}
+                          contentFit="cover"
+                        />
                       </View>
                     ))}
                   </View>
                   <View>
-                    <View style={{ flexDirection: "row", gap: 4, marginBottom: 4 }}>
+                    <View
+                      style={{ flexDirection: "row", gap: 4, marginBottom: 4 }}
+                    >
                       {[...Array(5)].map((_, i) => (
-                        <LucideIcons.Star key={i} size={16} color="#FBBF24" fill="#FBBF24" />
+                        <LucideIcons.Star
+                          key={i}
+                          size={16}
+                          color="#FBBF24"
+                          fill="#FBBF24"
+                        />
                       ))}
                     </View>
                     <Text
@@ -2063,10 +2446,19 @@ export function Desktop() {
                     lineHeight: 28,
                   }}
                 >
-                  "YallaWish made my wedding planning so much easier! I created my gift list in minutes and shared it with all my guests. Everyone loved how simple it was, and I got exactly the gifts I needed. Truly a stress-free experience!"
+                  "YallaWish made my wedding planning so much easier! I created
+                  my gift list in minutes and shared it with all my guests.
+                  Everyone loved how simple it was, and I got exactly the gifts
+                  I needed. Truly a stress-free experience!"
                 </Text>
 
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 16,
+                  }}
+                >
                   <View
                     style={{
                       width: 48,
@@ -2075,7 +2467,11 @@ export function Desktop() {
                       overflow: "hidden",
                     }}
                   >
-                    <Image source={require("@/assets/images/girlUser.png")} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+                    <Image
+                      source={require("@/assets/images/girlUser.png")}
+                      style={{ width: "100%", height: "100%" }}
+                      contentFit="cover"
+                    />
                   </View>
                   <View>
                     <Text
@@ -2101,14 +2497,25 @@ export function Desktop() {
               </View>
 
               {/* Right Column - Heart Graphic */}
-              <View style={{ flex: 1, alignItems: "center", justifyContent: "center", position: "relative" }}>
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  position: "relative",
+                }}
+              >
                 <View
                   style={{
                     opacity: 0.1,
                     transform: [{ scale: 1.5 }],
                   }}
                 >
-                  <LucideIcons.Heart size={400} color="#F472B6" fill="#FCE7F3" />
+                  <LucideIcons.Heart
+                    size={400}
+                    color="#F472B6"
+                    fill="#FCE7F3"
+                  />
                 </View>
                 <View
                   style={{
@@ -2138,13 +2545,21 @@ export function Desktop() {
           </View>
         </View>
 
-        <FAQSection isDesktop={isDesktop} responsiveStyles={responsiveStyles} mergeStyles={mergeStyles} />
+        <FAQSection
+          isDesktop={isDesktop}
+          responsiveStyles={responsiveStyles}
+          mergeStyles={mergeStyles}
+        />
 
         {/* Download App Banner */}
         <DownloadCTA isDesktop={isDesktop} />
 
         {/* Contact Form */}
-        <ContactUs isDesktop={isDesktop} responsiveStyles={responsiveStyles} mergeStyles={mergeStyles} />
+        <ContactUs
+          isDesktop={isDesktop}
+          responsiveStyles={responsiveStyles}
+          mergeStyles={mergeStyles}
+        />
 
         <Footer isDesktop={isDesktop} />
       </ScrollView>

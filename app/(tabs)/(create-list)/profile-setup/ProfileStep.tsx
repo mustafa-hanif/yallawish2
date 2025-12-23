@@ -1,9 +1,17 @@
+import { SignOutButton } from "@/components";
 import { profileSetupStyles as styles } from "@/styles/profileSetupStyles";
 import { Ionicons } from "@expo/vector-icons";
 import { allCountries } from "country-telephone-data";
 import { Image } from "expo-image";
 import React, { useMemo } from "react";
-import { ActivityIndicator, Platform, Pressable, Text, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  Platform,
+  Pressable,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { GENDER_OPTIONS } from "./constants";
 
 // Convert ISO2 country code to flag emoji
@@ -94,21 +102,30 @@ export function ProfileStep({
   const SECONDARY_PURPLE = "#4B0082";
 
   const countries = useMemo(() => {
-    const uaeIndex = allCountries.findIndex((c: any) => c.iso2?.toLowerCase() === "ae");
+    const uaeIndex = allCountries.findIndex(
+      (c: any) => c.iso2?.toLowerCase() === "ae"
+    );
     const uae = uaeIndex >= 0 ? allCountries[uaeIndex] : null;
-    const otherCountries = allCountries.filter((c: any) => c.iso2?.toLowerCase() !== "ae");
+    const otherCountries = allCountries.filter(
+      (c: any) => c.iso2?.toLowerCase() !== "ae"
+    );
     return uae ? [uae, ...otherCountries] : allCountries;
   }, []);
 
   const selectedCountry = useMemo(() => {
     const codeWithoutPlus = phoneCountryCode.replace("+", "");
-    return countries.find((c: any) => c.dialCode === codeWithoutPlus || `+${c.dialCode}` === phoneCountryCode);
+    return countries.find(
+      (c: any) =>
+        c.dialCode === codeWithoutPlus || `+${c.dialCode}` === phoneCountryCode
+    );
   }, [countries, phoneCountryCode]);
 
   const displayCountryCode = useMemo(() => {
     if (!selectedCountry) {
       const defaultCode = phoneCountryCode || "+971";
-      const defaultCountry = countries.find((c: any) => c.dialCode === defaultCode.replace("+", ""));
+      const defaultCountry = countries.find(
+        (c: any) => c.dialCode === defaultCode.replace("+", "")
+      );
       if (defaultCountry) {
         return `${getCountryFlag(defaultCountry.iso2)} +${defaultCountry.dialCode}`;
       }
@@ -123,13 +140,21 @@ export function ProfileStep({
         <View style={styles.desktopHeadingRow}>
           <View style={styles.avatarCircle}>
             {profileImagePreview ? (
-              <Image source={{ uri: profileImagePreview }} style={styles.avatarImage} contentFit="cover" />
+              <Image
+                source={{ uri: profileImagePreview }}
+                style={styles.avatarImage}
+                contentFit="cover"
+              />
             ) : (
               <Text style={styles.avatarInitials}>{initials}</Text>
             )}
           </View>
           <Pressable
-            style={[styles.uploadButton, (profileImageUploading || isSubmitting) && styles.uploadButtonDisabled]}
+            style={[
+              styles.uploadButton,
+              (profileImageUploading || isSubmitting) &&
+                styles.uploadButtonDisabled,
+            ]}
             onPress={onPickProfileImage}
             accessibilityRole="button"
             disabled={profileImageUploading || isSubmitting}
@@ -169,7 +194,7 @@ export function ProfileStep({
           </View>
         </View>
 
-        <View style={{...styles.desktopFormRow, zIndex: 1}}>
+        <View style={{ ...styles.desktopFormRow, zIndex: 1 }}>
           <View style={styles.desktopField}>
             <Text style={styles.fieldLabel}>Email address</Text>
             <TextInput
@@ -185,17 +210,35 @@ export function ProfileStep({
           <View style={styles.desktopField}>
             <Text style={styles.fieldLabel}>WhatsApp number (optional)</Text>
             <View style={styles.inlineFieldRow}>
-              <View style={[activeDropdown === "countryCode" && styles.fieldDropdownActive, { position: "relative", overflow: "visible" as any }]}>
+              <View
+                style={[
+                  activeDropdown === "countryCode" &&
+                    styles.fieldDropdownActive,
+                  { position: "relative", overflow: "visible" as any },
+                ]}
+              >
                 <Pressable
                   onPress={onToggleCountryCodeDropdown}
-                  style={[styles.desktopInput, styles.inputPressable, styles.countryCodeBox]}
+                  style={[
+                    styles.desktopInput,
+                    styles.inputPressable,
+                    styles.countryCodeBox,
+                  ]}
                 >
-                  <Text style={phoneCountryCode ? styles.inputValue : styles.inputPlaceholder}>
+                  <Text
+                    style={
+                      phoneCountryCode
+                        ? styles.inputValue
+                        : styles.inputPlaceholder
+                    }
+                  >
                     {displayCountryCode}
                   </Text>
                   <Ionicons name="chevron-down" size={18} color="#6F5F8F" />
                 </Pressable>
-                {activeDropdown === "countryCode" ? renderCountryCodeDropdown() : null}
+                {activeDropdown === "countryCode"
+                  ? renderCountryCodeDropdown()
+                  : null}
               </View>
               <TextInput
                 value={phoneNumber}
@@ -210,26 +253,35 @@ export function ProfileStep({
         </View>
 
         <View style={styles.desktopFormRow}>
-          <View style={[styles.desktopField, Platform.OS === "web" ? {} : activeDropdown === "gender" && styles.fieldDropdownActive]}>
+          <View
+            style={[
+              styles.desktopField,
+              Platform.OS === "web"
+                ? {}
+                : activeDropdown === "gender" && styles.fieldDropdownActive,
+            ]}
+          >
             <Text style={styles.fieldLabel}>Gender</Text>
             {Platform.OS === "web" ? (
               <View style={styles.webSelectWrapper}>
                 <select
                   value={gender || ""}
                   onChange={(e) => onSelectGender(e.target.value)}
-                  style={{
-                    width: "100%",
-                    height: 52,
-                    borderRadius: 12,
-                    border: "1.5px solid #DDD7E4",
-                    paddingLeft: 16,
-                    paddingRight: 16,
-                    fontFamily: "Nunito_500Medium, Nunito, sans-serif",
-                    fontSize: 16,
-                    color: "#1C0335",
-                    backgroundColor: "#FBFAFF",
-                    outline: "none",
-                  } as React.CSSProperties}
+                  style={
+                    {
+                      width: "100%",
+                      height: 52,
+                      borderRadius: 12,
+                      border: "1.5px solid #DDD7E4",
+                      paddingLeft: 16,
+                      paddingRight: 16,
+                      fontFamily: "Nunito_500Medium, Nunito, sans-serif",
+                      fontSize: 16,
+                      color: "#1C0335",
+                      backgroundColor: "#FBFAFF",
+                      outline: "none",
+                    } as React.CSSProperties
+                  }
                 >
                   <option value="">Select</option>
                   {GENDER_OPTIONS.map((option) => (
@@ -241,8 +293,15 @@ export function ProfileStep({
               </View>
             ) : (
               <>
-                <Pressable onPress={onToggleGenderDropdown} style={[styles.desktopInput, styles.inputPressable]}>
-                  <Text style={gender ? styles.inputValue : styles.inputPlaceholder}>{gender || "Select"}</Text>
+                <Pressable
+                  onPress={onToggleGenderDropdown}
+                  style={[styles.desktopInput, styles.inputPressable]}
+                >
+                  <Text
+                    style={gender ? styles.inputValue : styles.inputPlaceholder}
+                  >
+                    {gender || "Select"}
+                  </Text>
                   <Ionicons name="chevron-down" size={18} color="#6F5F8F" />
                 </Pressable>
                 {activeDropdown === "gender" ? renderGenderDropdown() : null}
@@ -254,7 +313,9 @@ export function ProfileStep({
             {Platform.OS === "web" ? (
               <input
                 type="date"
-                value={dateOfBirth ? dateOfBirth.toISOString().split("T")[0] : ""}
+                value={
+                  dateOfBirth ? dateOfBirth.toISOString().split("T")[0] : ""
+                }
                 onChange={onWebDateChange}
                 max={new Date().toISOString().split("T")[0]}
                 style={{
@@ -275,8 +336,17 @@ export function ProfileStep({
                 }}
               />
             ) : (
-              <Pressable onPress={onOpenDatePicker} style={[styles.desktopInput, styles.inputPressable]}>
-                <Text style={formattedDateOfBirth ? styles.inputValue : styles.inputPlaceholder}>
+              <Pressable
+                onPress={onOpenDatePicker}
+                style={[styles.desktopInput, styles.inputPressable]}
+              >
+                <Text
+                  style={
+                    formattedDateOfBirth
+                      ? styles.inputValue
+                      : styles.inputPlaceholder
+                  }
+                >
                   {formattedDateOfBirth || "DD/MM/YYYY"}
                 </Text>
                 <Ionicons name="calendar-outline" size={18} color="#6F5F8F" />
@@ -308,13 +378,21 @@ export function ProfileStep({
         <View style={styles.mobileAvatarRow}>
           <View style={styles.avatarCircle}>
             {profileImagePreview ? (
-              <Image source={{ uri: profileImagePreview }} style={styles.avatarImage} contentFit="cover" />
+              <Image
+                source={{ uri: profileImagePreview }}
+                style={styles.avatarImage}
+                contentFit="cover"
+              />
             ) : (
               <Text style={styles.avatarInitials}>{initials}</Text>
             )}
           </View>
           <Pressable
-            style={[styles.uploadButton, (profileImageUploading || isSubmitting) && styles.uploadButtonDisabled]}
+            style={[
+              styles.uploadButton,
+              (profileImageUploading || isSubmitting) &&
+                styles.uploadButtonDisabled,
+            ]}
             onPress={onPickProfileImage}
             disabled={profileImageUploading || isSubmitting}
           >
@@ -330,6 +408,7 @@ export function ProfileStep({
 
         <View style={styles.mobileFieldBlock}>
           <Text style={styles.fieldLabel}>First name</Text>
+          <SignOutButton />
           <TextInput
             value={firstName}
             onChangeText={onFirstNameChange}
@@ -365,17 +444,34 @@ export function ProfileStep({
         <View style={styles.mobileFieldBlock}>
           <Text style={styles.fieldLabel}>WhatsApp number (optional)</Text>
           <View style={styles.inlineFieldRow}>
-            <View style={[activeDropdown === "countryCode" && styles.fieldDropdownActive, { width: 140, overflow: "visible" as any }]}>
+            <View
+              style={[
+                activeDropdown === "countryCode" && styles.fieldDropdownActive,
+                { width: 140, overflow: "visible" as any },
+              ]}
+            >
               <Pressable
                 onPress={onToggleCountryCodeDropdown}
-                style={[styles.mobileInput, styles.inputPressable, styles.countryCodeBox]}
+                style={[
+                  styles.mobileInput,
+                  styles.inputPressable,
+                  styles.countryCodeBox,
+                ]}
               >
-                <Text style={phoneCountryCode ? styles.inputValue : styles.inputPlaceholder}>
+                <Text
+                  style={
+                    phoneCountryCode
+                      ? styles.inputValue
+                      : styles.inputPlaceholder
+                  }
+                >
                   {displayCountryCode}
                 </Text>
                 <Ionicons name="chevron-down" size={18} color="#6F5F8F" />
               </Pressable>
-              {activeDropdown === "countryCode" ? renderCountryCodeDropdown() : null}
+              {activeDropdown === "countryCode"
+                ? renderCountryCodeDropdown()
+                : null}
             </View>
             <TextInput
               value={phoneNumber}
@@ -387,26 +483,33 @@ export function ProfileStep({
             />
           </View>
         </View>
-        <View style={[styles.mobileFieldBlock, activeDropdown === "gender" && styles.fieldDropdownActive]}>
+        <View
+          style={[
+            styles.mobileFieldBlock,
+            activeDropdown === "gender" && styles.fieldDropdownActive,
+          ]}
+        >
           <Text style={styles.fieldLabel}>Gender</Text>
           {Platform.OS === "web" ? (
             <View style={styles.webSelectWrapper}>
               <select
                 value={gender || ""}
                 onChange={(e) => onSelectGender(e.target.value)}
-                style={{
-                  width: "100%",
-                  height: 52,
-                  borderRadius: 12,
-                  border: "1.5px solid #DDD7E4",
-                  paddingLeft: 16,
-                  paddingRight: 16,
-                  fontFamily: "Nunito_500Medium, Nunito, sans-serif",
-                  fontSize: 16,
-                  color: "#1C0335",
-                  backgroundColor: "#FBFAFF",
-                  outline: "none",
-                } as React.CSSProperties}
+                style={
+                  {
+                    width: "100%",
+                    height: 52,
+                    borderRadius: 12,
+                    border: "1.5px solid #DDD7E4",
+                    paddingLeft: 16,
+                    paddingRight: 16,
+                    fontFamily: "Nunito_500Medium, Nunito, sans-serif",
+                    fontSize: 16,
+                    color: "#1C0335",
+                    backgroundColor: "#FBFAFF",
+                    outline: "none",
+                  } as React.CSSProperties
+                }
               >
                 <option value="">Select</option>
                 {GENDER_OPTIONS.map((option) => (
@@ -418,8 +521,15 @@ export function ProfileStep({
             </View>
           ) : (
             <>
-              <Pressable onPress={onToggleGenderDropdown} style={[styles.mobileInput, styles.inputPressable]}>
-                <Text style={gender ? styles.inputValue : styles.inputPlaceholder}>{gender || "Select"}</Text>
+              <Pressable
+                onPress={onToggleGenderDropdown}
+                style={[styles.mobileInput, styles.inputPressable]}
+              >
+                <Text
+                  style={gender ? styles.inputValue : styles.inputPlaceholder}
+                >
+                  {gender || "Select"}
+                </Text>
                 <Ionicons name="chevron-down" size={18} color="#6F5F8F" />
               </Pressable>
               {activeDropdown === "gender" ? renderGenderDropdown() : null}
@@ -452,8 +562,17 @@ export function ProfileStep({
               }}
             />
           ) : (
-            <Pressable onPress={onOpenDatePicker} style={[styles.mobileInput, styles.inputPressable]}>
-              <Text style={formattedDateOfBirth ? styles.inputValue : styles.inputPlaceholder}>
+            <Pressable
+              onPress={onOpenDatePicker}
+              style={[styles.mobileInput, styles.inputPressable]}
+            >
+              <Text
+                style={
+                  formattedDateOfBirth
+                    ? styles.inputValue
+                    : styles.inputPlaceholder
+                }
+              >
                 {formattedDateOfBirth || "DD/MM/YYYY"}
               </Text>
               <Ionicons name="calendar-outline" size={18} color="#6F5F8F" />
@@ -475,4 +594,3 @@ export function ProfileStep({
     </>
   );
 }
-

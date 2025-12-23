@@ -21,10 +21,17 @@ export default function VerifyOtpScreen() {
   const router = useRouter();
   const { isLoaded, signUp, setActive } = useSignUp();
   const upsertUserProfile = useMutation(api.products.upsertUserProfile);
-  const { email, returnTo, addToList } = useLocalSearchParams<{ email?: string; returnTo?: string; addToList?: string }>();
-  const decodedReturnTo = returnTo ? decodeURIComponent(String(returnTo)) : undefined;
+  const { email, returnTo, addToList } = useLocalSearchParams<{
+    email?: string;
+    returnTo?: string;
+    addToList?: string;
+  }>();
+  const decodedReturnTo = returnTo
+    ? decodeURIComponent(String(returnTo))
+    : undefined;
   const emailAddress = email ? String(email) : undefined;
-  const showAddToList = addToList && String(addToList).toLowerCase() !== "false";
+  const showAddToList =
+    addToList && String(addToList).toLowerCase() !== "false";
 
   const { width } = Dimensions.get("window");
   const isDesktop = Platform.OS === "web" && width >= 768;
@@ -32,7 +39,9 @@ export default function VerifyOtpScreen() {
     ? `Enter the 6-digit code we sent to ${emailAddress}.`
     : "Enter the 6-digit code we just emailed to you.";
 
-  const [digits, setDigits] = React.useState<string[]>(Array(OTP_LENGTH).fill(""));
+  const [digits, setDigits] = React.useState<string[]>(
+    Array(OTP_LENGTH).fill("")
+  );
   const [errors, setErrors] = React.useState<string[]>([]);
   const [infoMessage, setInfoMessage] = React.useState<string | null>(null);
   const [isVerifying, setIsVerifying] = React.useState(false);
@@ -42,7 +51,8 @@ export default function VerifyOtpScreen() {
   const inputRefs = React.useRef<(TextInput | null)[]>([]);
 
   const code = React.useMemo(() => digits.join(""), [digits]);
-  const canVerify = code.length === OTP_LENGTH && digits.every(digit => digit !== "");
+  const canVerify =
+    code.length === OTP_LENGTH && digits.every((digit) => digit !== "");
 
   React.useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -55,7 +65,7 @@ export default function VerifyOtpScreen() {
   React.useEffect(() => {
     // If a user lands here without a pending sign-up, send them back to the start.
     if (isLoaded && !signUp?.status) {
-      router.replace("/sign-up");
+      router.replace({ pathname: "/(auth)", params: { mode: "signup" } });
     }
   }, [isLoaded, signUp?.status, router]);
 
@@ -165,7 +175,9 @@ export default function VerifyOtpScreen() {
           }
         }
         await setActive?.({ session: attempt.createdSessionId });
-        const target = decodedReturnTo ? (decodedReturnTo as any) : "/profile-setup";
+        const target = decodedReturnTo
+          ? (decodedReturnTo as any)
+          : "/profile-setup";
         router.replace(target);
         return;
       }
@@ -210,7 +222,9 @@ export default function VerifyOtpScreen() {
       ) {
         setErrors((err as any).errors.map((e: any) => e.longMessage));
       } else {
-        setErrors(["Unable to resend the code right now. Please try again later."]);
+        setErrors([
+          "Unable to resend the code right now. Please try again later.",
+        ]);
       }
     } finally {
       setIsResending(false);
@@ -219,10 +233,13 @@ export default function VerifyOtpScreen() {
 
   const handleBackToSignup = () => {
     router.replace({
-      pathname: "/sign-up",
+      pathname: "/(auth)",
       params: {
+        mode: "signup",
         ...(showAddToList ? { addToList: String(addToList) } : {}),
-        ...(decodedReturnTo ? { returnTo: encodeURIComponent(decodedReturnTo) } : {}),
+        ...(decodedReturnTo
+          ? { returnTo: encodeURIComponent(decodedReturnTo) }
+          : {}),
       },
     });
   };
@@ -240,9 +257,7 @@ export default function VerifyOtpScreen() {
         ]}
       >
         {isDesktop && (
-          <Text
-            style={[styles.welcomeTitle, styles.welcomeTitleDesktop]}
-          >
+          <Text style={[styles.welcomeTitle, styles.welcomeTitleDesktop]}>
             Verify your email
           </Text>
         )}
@@ -265,7 +280,9 @@ export default function VerifyOtpScreen() {
               maxLength={1}
               value={digit}
               onChangeText={(value) => handleDigitChange(index, value)}
-              onKeyPress={({ nativeEvent }) => handleKeyPress(index, nativeEvent.key)}
+              onKeyPress={({ nativeEvent }) =>
+                handleKeyPress(index, nativeEvent.key)
+              }
               style={isDesktop ? styles.otpInput : styles.mobileOtpInput}
               autoFocus={index === 0}
               returnKeyType="done"
@@ -278,7 +295,7 @@ export default function VerifyOtpScreen() {
           icon={null}
           label={isVerifying ? "Verifying..." : "Verify code"}
           variant={!isDesktop ? "default" : "primary"}
-          style={(!canVerify || isVerifying) ? { opacity: 0.65 } : undefined}
+          style={!canVerify || isVerifying ? { opacity: 0.65 } : undefined}
         />
 
         {errors.length > 0 && (
@@ -291,14 +308,10 @@ export default function VerifyOtpScreen() {
           </View>
         )}
 
-        {infoMessage && (
-          <Text style={styles.resendText}>{infoMessage}</Text>
-        )}
+        {infoMessage && <Text style={styles.resendText}>{infoMessage}</Text>}
 
         <View style={styles.resendContainer}>
-          <Text style={styles.resendText}>
-            Didn’t receive the code?
-          </Text>
+          <Text style={styles.resendText}>Didn’t receive the code?</Text>
           <Pressable
             disabled={isResending || resendCooldown > 0}
             onPress={handleResend}
@@ -306,14 +319,15 @@ export default function VerifyOtpScreen() {
             <Text
               style={[
                 styles.resendLink,
-                (isResending || resendCooldown > 0) && styles.resendLinkDisabled,
+                (isResending || resendCooldown > 0) &&
+                  styles.resendLinkDisabled,
               ]}
             >
               {isResending
                 ? "Sending..."
                 : resendCooldown > 0
-                ? `Resend available in ${resendCooldown}s`
-                : "Resend code"}
+                  ? `Resend available in ${resendCooldown}s`
+                  : "Resend code"}
             </Text>
           </Pressable>
         </View>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { FlatList, View, ViewToken } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 import NoListFound from "../NoListFound";
@@ -27,13 +27,28 @@ type WishListItem = {
 interface WishListingProps {
   wishList?: WishListItem[];
   onSelectDelete?: (id: string) => void;
-  handleArchiveList?: (listId: string | null, isArchived: boolean) => Promise<void>;
+  handleArchiveList?: (
+    listId: string | null,
+    isArchived: boolean
+  ) => Promise<void>;
   handleDuplicateList?: (listDetails: WishListItem | null) => Promise<void>;
   appliedFilterBy?: string;
 }
 
-export default function WishListing({ wishList = [], onSelectDelete, handleArchiveList, appliedFilterBy, handleDuplicateList }: WishListingProps) {
+export default function WishListing({
+  wishList = [],
+  onSelectDelete,
+  handleArchiveList,
+  appliedFilterBy,
+  handleDuplicateList,
+}: WishListingProps) {
   const viewableItems = useSharedValue<ViewToken[]>([]);
+
+  const onViewableItemsChanged = useRef(
+    ({ viewableItems: vItems }: { viewableItems: ViewToken[] }) => {
+      viewableItems.value = vItems;
+    }
+  ).current;
 
   if (wishList.length === 0) {
     return <NoListFound selectedFilter={appliedFilterBy} />;
@@ -47,9 +62,7 @@ export default function WishListing({ wishList = [], onSelectDelete, handleArchi
         numColumns={2}
         key={2}
         data={wishList}
-        onViewableItemsChanged={({ viewableItems: vItems }) => {
-          viewableItems.value = vItems;
-        }}
+        onViewableItemsChanged={onViewableItemsChanged}
         renderItem={({ item }) => (
           <WishListCard
             item={item}

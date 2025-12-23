@@ -1,5 +1,6 @@
 import ActionBar from "@/components/wishlists/ActionBar";
 import DeleteConfirmation from "@/components/wishlists/DeleteConfirmationModal";
+import { Desktop } from "@/components/wishlists/Desktop";
 import WishListing from "@/components/wishlists/Listing";
 import NoListFound from "@/components/wishlists/NoListFound";
 import SortAndFilterModal from "@/components/wishlists/SortAndFilterModal";
@@ -10,20 +11,39 @@ import { useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams, usePathname } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { Image, Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
+import {
+  Dimensions,
+  Image,
+  Platform,
+  Pressable,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const DESKTOP_BREAKPOINT = 1024;
 
 const Wishlists = () => {
   const { user } = useUser();
-  const myLists = useQuery(api.products.getMyLists, user?.id ? { user_id: user.id } : "skip");
-  const communityLists = useQuery(api.products.getCommunityLists, user?.id ? { exclude_user_id: user.id } : "skip");
+  const myLists = useQuery(
+    api.products.getMyLists,
+    user?.id ? { user_id: user.id } : "skip"
+  );
+  const communityLists = useQuery(
+    api.products.getCommunityLists,
+    user?.id ? { exclude_user_id: user.id } : "skip"
+  );
   const createList = useMutation(api.products.createList);
   const deleteList = useMutation(api.products.deleteList);
   const archiveList = useMutation(api.products.setListArchived);
 
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
   const encodedReturnTo = returnTo ? String(returnTo) : undefined;
-  const decodedReturnTo = encodedReturnTo ? decodeURIComponent(encodedReturnTo) : undefined;
+  const decodedReturnTo = encodedReturnTo
+    ? decodeURIComponent(encodedReturnTo)
+    : undefined;
   const pathname = usePathname();
 
   const [currentTab, setCurrentTab] = useState<string>("my-events");
@@ -67,7 +87,11 @@ const Wishlists = () => {
   };
 
   const handlePressApply = () => {
-    sortBy === "allList" ? setAppliedSortBy(null) : setAppliedSortBy(sortBy);
+    if (sortBy === "allList") {
+      setAppliedSortBy(null);
+    } else {
+      setAppliedSortBy(sortBy);
+    }
     setAppliedFilterBy(filterBy);
     handleToggleModal();
   };
@@ -81,14 +105,20 @@ const Wishlists = () => {
 
     if (key === "dateOfEvent") {
       return arr.sort((a: any, b: any) => {
-        const da = a?.eventDate ? new Date(a.eventDate).getTime() : (a?._creationTime ?? 0);
-        const db = b?.eventDate ? new Date(b.eventDate).getTime() : (b?._creationTime ?? 0);
+        const da = a?.eventDate
+          ? new Date(a.eventDate).getTime()
+          : (a?._creationTime ?? 0);
+        const db = b?.eventDate
+          ? new Date(b.eventDate).getTime()
+          : (b?._creationTime ?? 0);
         return da - db;
       });
     }
 
     if (key === "alphabetically") {
-      return arr.sort((a: any, b: any) => String(a.title || "").localeCompare(String(b.title || "")));
+      return arr.sort((a: any, b: any) =>
+        String(a.title || "").localeCompare(String(b.title || ""))
+      );
     }
 
     if (key === "percentage") {
@@ -100,7 +130,9 @@ const Wishlists = () => {
     }
 
     if (key === "totalItems") {
-      return arr.sort((a: any, b: any) => (b.totalItems || 0) - (a.totalItems || 0));
+      return arr.sort(
+        (a: any, b: any) => (b.totalItems || 0) - (a.totalItems || 0)
+      );
     }
 
     return arr;
@@ -120,12 +152,18 @@ const Wishlists = () => {
     if (key === "pastEvents") {
       return arr
         .filter((item: any) => {
-          const t = item?.eventDate ? new Date(item.eventDate).getTime() : (item?._creationTime ?? 0);
+          const t = item?.eventDate
+            ? new Date(item.eventDate).getTime()
+            : (item?._creationTime ?? 0);
           return t < now;
         })
         .sort((a: any, b: any) => {
-          const ta = a?.eventDate ? new Date(a.eventDate).getTime() : (a?._creationTime ?? 0);
-          const tb = b?.eventDate ? new Date(b.eventDate).getTime() : (b?._creationTime ?? 0);
+          const ta = a?.eventDate
+            ? new Date(a.eventDate).getTime()
+            : (a?._creationTime ?? 0);
+          const tb = b?.eventDate
+            ? new Date(b.eventDate).getTime()
+            : (b?._creationTime ?? 0);
           return tb - ta; // newest past first
         });
     }
@@ -133,12 +171,18 @@ const Wishlists = () => {
     if (key === "upcomingEvents") {
       return arr
         .filter((item: any) => {
-          const t = item?.eventDate ? new Date(item.eventDate).getTime() : (item?._creationTime ?? 0);
+          const t = item?.eventDate
+            ? new Date(item.eventDate).getTime()
+            : (item?._creationTime ?? 0);
           return t >= now;
         })
         .sort((a: any, b: any) => {
-          const ta = a?.eventDate ? new Date(a.eventDate).getTime() : (a?._creationTime ?? 0);
-          const tb = b?.eventDate ? new Date(b.eventDate).getTime() : (b?._creationTime ?? 0);
+          const ta = a?.eventDate
+            ? new Date(a.eventDate).getTime()
+            : (a?._creationTime ?? 0);
+          const tb = b?.eventDate
+            ? new Date(b.eventDate).getTime()
+            : (b?._creationTime ?? 0);
           return ta - tb; // soonest first
         });
     }
@@ -151,8 +195,12 @@ const Wishlists = () => {
           return total > 0 && claimed >= total;
         })
         .sort((a: any, b: any) => {
-          const ta = a?.eventDate ? new Date(a.eventDate).getTime() : (a?._creationTime ?? 0);
-          const tb = b?.eventDate ? new Date(b.eventDate).getTime() : (b?._creationTime ?? 0);
+          const ta = a?.eventDate
+            ? new Date(a.eventDate).getTime()
+            : (a?._creationTime ?? 0);
+          const tb = b?.eventDate
+            ? new Date(b.eventDate).getTime()
+            : (b?._creationTime ?? 0);
           return tb - ta; // recent completed first
         });
     }
@@ -179,12 +227,15 @@ const Wishlists = () => {
     setDeleteListId(null);
   };
 
-  const handleArchiveList = async (listId: string | null, isArchived: boolean) => {
+  const handleArchiveList = async (
+    listId: string | null,
+    isArchived: boolean
+  ) => {
     await archiveList({ listId: listId as any, isArchived: isArchived });
   };
 
-  const handleDuplicateList = async(listDetails: any) => {
-     const newListId = await createList({
+  const handleDuplicateList = async (listDetails: any) => {
+    const newListId = await createList({
       title: listDetails.title,
       note: listDetails.note || null,
       eventDate: listDetails.eventDate || null,
@@ -195,17 +246,32 @@ const Wishlists = () => {
       privacy: listDetails?.privacy || "private",
       user_id: listDetails?.user_id || user?.id || null,
     });
-    
+
     router.push({
-      pathname: "/add-gift", params: { listId: String(newListId) }
-    })
+      pathname: "/add-gift",
+      params: { listId: String(newListId) },
+    });
+  };
+
+  // Check if desktop after all hooks have been called
+  const { width } = Dimensions.get("window");
+  const isDesktopWeb = Platform.OS === "web" && width >= DESKTOP_BREAKPOINT;
+
+  if (isDesktopWeb) {
+    return <Desktop />;
   }
-  
+
   return (
     <>
       <View style={styles.container}>
         <StatusBar barStyle="light-content" backgroundColor="transparent" />
-        <LinearGradient colors={["#330065", "#45018ad7"]} style={styles.header} locations={[0, 0.7]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 2 }}>
+        <LinearGradient
+          colors={["#330065", "#45018ad7"]}
+          style={styles.header}
+          locations={[0, 0.7]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 2 }}
+        >
           <SafeAreaView edges={["top"]}>
             <View style={styles.headerContent}>
               <View style={styles.navigation}>
@@ -221,16 +287,44 @@ const Wishlists = () => {
         <View style={styles.content}>
           {wishList && wishList?.length ? (
             <>
-              <ActionBar count={filteredWishList?.length} appliedSortBy={appliedSortBy} setAppliedSortBy={setAppliedSortBy} appliedFilterBy={appliedFilterBy} setAppliedFilterBy={setAppliedFilterBy} search={search} setSearch={setSearch} handleToggleModal={handleToggleModal} />
-              <WishListing appliedFilterBy={appliedFilterBy || search} wishList={searchList(filteredWishList as any[])} onSelectDelete={handleSelectDelete} handleArchiveList={handleArchiveList} handleDuplicateList={handleDuplicateList}/>
+              <ActionBar
+                count={filteredWishList?.length}
+                appliedSortBy={appliedSortBy}
+                setAppliedSortBy={setAppliedSortBy}
+                appliedFilterBy={appliedFilterBy}
+                setAppliedFilterBy={setAppliedFilterBy}
+                search={search}
+                setSearch={setSearch}
+                handleToggleModal={handleToggleModal}
+              />
+              <WishListing
+                appliedFilterBy={appliedFilterBy || search}
+                wishList={searchList(filteredWishList as any[])}
+                onSelectDelete={handleSelectDelete}
+                handleArchiveList={handleArchiveList}
+                handleDuplicateList={handleDuplicateList}
+              />
             </>
           ) : (
             <NoListFound currentTab={currentTab} />
           )}
         </View>
       </View>
-      <SortAndFilterModal currentTab={currentTab} showSortSheet={showSortSheet} handleToggleModal={handleToggleModal} sortBy={sortBy} setSortBy={setSortBy} filterBy={filterBy} setFilterBy={setFilterBy} handlePressApply={handlePressApply} />
-      <DeleteConfirmation visible={!!deleteListId} onCancel={() => setDeleteListId(null)} onDelete={() => handleDeleteList(deleteListId)} />
+      <SortAndFilterModal
+        currentTab={currentTab}
+        showSortSheet={showSortSheet}
+        handleToggleModal={handleToggleModal}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        filterBy={filterBy}
+        setFilterBy={setFilterBy}
+        handlePressApply={handlePressApply}
+      />
+      <DeleteConfirmation
+        visible={!!deleteListId}
+        onCancel={() => setDeleteListId(null)}
+        onDelete={() => handleDeleteList(deleteListId)}
+      />
     </>
   );
 };

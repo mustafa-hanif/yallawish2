@@ -1,6 +1,7 @@
+import { profileSetupStyles as styles } from "@/styles/profileSetupStyles";
 import React from "react";
 import { Switch, Text, View } from "react-native";
-import { profileSetupStyles as styles } from "@/styles/profileSetupStyles";
+
 import { SECONDARY_PURPLE } from "./constants";
 
 type ExperienceSettingsStepProps = {
@@ -26,7 +27,10 @@ export function ExperienceSettingsStep({
   onCommunityUpdatesOptInChange,
   onShareUpdatesChange,
 }: ExperienceSettingsStepProps) {
-  const cardStyle = [styles.mobileCard, variant === "desktop" && styles.desktopStepCard];
+  const cardStyle = [
+    styles.mobileCard,
+    variant === "desktop" && styles.desktopStepCard,
+  ];
 
   return (
     <View style={cardStyle}>
@@ -45,8 +49,11 @@ export function ExperienceSettingsStep({
         <Switch
           value={reminderOptIn}
           onValueChange={onReminderOptInChange}
-          thumbColor={reminderOptIn ? "#FFFFFF" : "#F4F4F5"}
-          trackColor={{ false: "#D7CCE8", true: SECONDARY_PURPLE }}
+          thumbColor={"#FFFFFF"}
+          trackColor={{ false: "#D9D9D9", true: SECONDARY_PURPLE }}
+          //@ts-ignore
+          activeThumbColor={"#FFFFFF"}
+          activeTrackColor={{ false: "#D9D9D9", true: SECONDARY_PURPLE }}
         />
       </View>
 
@@ -60,8 +67,11 @@ export function ExperienceSettingsStep({
         <Switch
           value={aiIdeasOptIn}
           onValueChange={onAiIdeasOptInChange}
-          thumbColor={aiIdeasOptIn ? "#FFFFFF" : "#F4F4F5"}
-          trackColor={{ false: "#D7CCE8", true: SECONDARY_PURPLE }}
+          thumbColor={"#FFFFFF"}
+          trackColor={{ false: "#D9D9D9", true: SECONDARY_PURPLE }}
+          //@ts-ignore
+          activeThumbColor={"#FFFFFF"}
+          activeTrackColor={{ false: "#D9D9D9", true: SECONDARY_PURPLE }}
         />
       </View>
 
@@ -75,32 +85,39 @@ export function ExperienceSettingsStep({
         <Switch
           value={communityUpdatesOptIn}
           onValueChange={onCommunityUpdatesOptInChange}
-          thumbColor={communityUpdatesOptIn ? "#FFFFFF" : "#F4F4F5"}
-          trackColor={{ false: "#D7CCE8", true: SECONDARY_PURPLE }}
+          thumbColor={"#FFFFFF"}
+          trackColor={{ false: "#D9D9D9", true: SECONDARY_PURPLE }}
+          //@ts-ignore
+          activeThumbColor={"#FFFFFF"}
+          activeTrackColor={{ false: "#D9D9D9", true: SECONDARY_PURPLE }}
         />
       </View>
 
       <View style={styles.preferenceToggleBlock}>
         <View style={styles.preferenceToggleCopy}>
           <Text style={styles.preferenceToggleTitle}>YallaWish updates</Text>
-          <Text style={styles.preferenceToggleSubtitle}>Get launch announcements and feature previews</Text>
+          <Text style={styles.preferenceToggleSubtitle}>
+            Get launch announcements and feature previews
+          </Text>
         </View>
         <Switch
           value={shareUpdates}
           onValueChange={onShareUpdatesChange}
-          thumbColor={shareUpdates ? "#FFFFFF" : "#F4F4F5"}
-          trackColor={{ false: "#D7CCE8", true: SECONDARY_PURPLE }}
+          thumbColor={"#FFFFFF"}
+          trackColor={{ false: "#D9D9D9", true: SECONDARY_PURPLE }}
+          //@ts-ignore
+          activeThumbColor={"#FFFFFF"}
+          activeTrackColor={{ false: "#D9D9D9", true: SECONDARY_PURPLE }}
         />
       </View>
 
       <View style={styles.preferenceSummaryBox}>
         <Text style={styles.preferenceSummaryTitle}>All set!</Text>
         <Text style={styles.preferenceSummaryText}>
-          We'll combine these choices with your lists to suggest thoughtful gifts and keep you in sync with
-          the people you care about.
+          We'll combine these choices with your lists to suggest thoughtful
+          gifts and keep you in sync with the people you care about.
         </Text>
       </View>
     </View>
   );
 }
-

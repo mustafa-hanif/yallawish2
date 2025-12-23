@@ -9,9 +9,16 @@ import { Dimensions, Image, Platform, Text, View } from "react-native";
 
 export default function Page() {
   const router = useRouter();
-  const { addToList, returnTo } = useLocalSearchParams<{ addToList?: string; returnTo?: string }>();
-  const decodedReturnTo = returnTo ? decodeURIComponent(String(returnTo)) : undefined;
-  const { startOAuthFlow: startGoogle } = useOAuth({ strategy: "oauth_google" });
+  const { addToList, returnTo } = useLocalSearchParams<{
+    addToList?: string;
+    returnTo?: string;
+  }>();
+  const decodedReturnTo = returnTo
+    ? decodeURIComponent(String(returnTo))
+    : undefined;
+  const { startOAuthFlow: startGoogle } = useOAuth({
+    strategy: "oauth_google",
+  });
   const { startOAuthFlow: startApple } = useOAuth({ strategy: "oauth_apple" });
 
   const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -23,17 +30,24 @@ export default function Page() {
       const parsedReturnTo = new URL(returnTo, "http://www.example.com");
       actionParam = parsedReturnTo.searchParams.get("action") ?? undefined;
     } catch (parseError) {
-      console.warn("Invalid returnTo URL, falling back to default action", parseError);
+      console.warn(
+        "Invalid returnTo URL, falling back to default action",
+        parseError
+      );
       actionParam = undefined;
     }
   }
 
   const isBuy = String(actionParam ?? "").toLowerCase() === "buy";
-  const heroTitle = isBuy ? "Sign up to make this gift count" : "Gifting made \n personal.";
+  const heroTitle = isBuy
+    ? "Sign up to make this gift count"
+    : "Gifting made \n personal.";
   const heroSubtitle = isBuy
     ? "Buy the perfect gift from this list or even create your own to share with friends and family."
     : "Build lists for yourself or someone you love and make every gift count.";
-  const cardTitle = isBuy ? "Sign in to make this gift count" : "Welcome to YallaWish";
+  const cardTitle = isBuy
+    ? "Sign in to make this gift count"
+    : "Welcome to YallaWish";
   const cardSubtitle = isBuy
     ? "Sign in to claim this gift and keep everyone in sync."
     : "Sign in to discover gift ideas and manage your wishlists effortlessly.";
@@ -42,7 +56,9 @@ export default function Page() {
     const { createdSessionId, setActive: setActiveOAuth } = await startGoogle();
     if (createdSessionId) {
       await setActiveOAuth?.({ session: createdSessionId });
-      const target = decodedReturnTo ? (decodedReturnTo as any) : "/profile-setup";
+      const target = decodedReturnTo
+        ? (decodedReturnTo as any)
+        : "/profile-setup";
       router.replace(target);
     }
   };
@@ -51,7 +67,9 @@ export default function Page() {
     const { createdSessionId, setActive: setActiveOAuth } = await startApple();
     if (createdSessionId) {
       await setActiveOAuth?.({ session: createdSessionId });
-      const target = decodedReturnTo ? (decodedReturnTo as any) : "/profile-setup";
+      const target = decodedReturnTo
+        ? (decodedReturnTo as any)
+        : "/profile-setup";
       router.replace(target);
     }
   };
@@ -61,26 +79,24 @@ export default function Page() {
       showHero={!isDesktop}
       heroTitle={heroTitle}
       heroSubtitle={heroSubtitle}
-      mobileScrollViewStyle={{ paddingBottom: 0}}
+      mobileScrollViewStyle={{ paddingBottom: 0 }}
       mobileLogoHeaderStyle={{ marginTop: 40, marginBottom: 20 }}
       showAnimation
     >
       <View
         style={[
           styles.formContainer,
-          isDesktop ? styles.formContainerDesktop : [styles.formContainerMobile, {paddingBottom:20}],
+          isDesktop
+            ? styles.formContainerDesktop
+            : [styles.formContainerMobile, { paddingBottom: 20 }],
         ]}
       >
         {isDesktop && (
           <>
-            <Text
-              style={[styles.welcomeTitle, styles.welcomeTitleDesktop]}
-            >
+            <Text style={[styles.welcomeTitle, styles.welcomeTitleDesktop]}>
               {cardTitle}
             </Text>
-            <Text
-              style={[styles.cardSubtitle, styles.cardSubtitleDesktop]}
-            >
+            <Text style={[styles.cardSubtitle, styles.cardSubtitleDesktop]}>
               {cardSubtitle}
             </Text>
           </>
@@ -114,18 +130,18 @@ export default function Page() {
             />
           </View>
         ) : (
-          <View style={[styles.socialStack, { marginTop:50 }]}>
+          <View style={[styles.socialStack, { marginTop: 50 }]}>
             <SocialButton
               onPress={onGoogle}
-              icon={<Image source={require('@/assets/images/googleIcon.png')} />}
+              icon={
+                <Image source={require("@/assets/images/googleIcon.png")} />
+              }
               label="Continue with Google"
-  
             />
             <SocialButton
               onPress={onApple}
-              icon={<Image source={require('@/assets/images/appleIcon.png')} />}
+              icon={<Image source={require("@/assets/images/appleIcon.png")} />}
               label="Continue with Apple"
-  
             />
           </View>
         )}
@@ -135,8 +151,9 @@ export default function Page() {
         <SocialButton
           onPress={() =>
             router.push({
-              pathname: "/sign-up",
+              pathname: "/(auth)/",
               params: {
+                mode: "signup",
                 ...(addToList ? { addToList: String(addToList) } : {}),
                 ...(decodedReturnTo
                   ? { returnTo: encodeURIComponent(decodedReturnTo) }
@@ -145,7 +162,7 @@ export default function Page() {
               },
             })
           }
-          icon={<Image source={require('@/assets/images/mail.png')} />}
+          icon={<Image source={require("@/assets/images/mail.png")} />}
           label="Continue with Email"
         />
       </View>
