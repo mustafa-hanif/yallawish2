@@ -2,7 +2,8 @@
   "expo": {
     "name": "yallawish2",
     "slug": "yallawish2",
-    "version": "1.0.0",
+    "owner": "mustafahanif627",
+    "version": "1.1.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "yallawish2",
