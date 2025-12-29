@@ -12,6 +12,7 @@ import {
 import type { GiftItem as GiftItemType } from "@/components/list/GiftItemCard";
 import { api } from "@/convex/_generated/api";
 import { desktopStyles, styles } from "@/styles/addGiftStyles";
+import { getDaysToGoText } from "@/utils";
 import { Ionicons } from "@expo/vector-icons";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
@@ -232,22 +233,11 @@ export default function AddGift() {
 
   const eventDateStr = (list?.eventDate as string | undefined) ?? undefined;
   const formattedEventDate = formatEventDate(eventDateStr);
-  const daysToGoText = useMemo(() => {
-    if (!eventDateStr) return null;
-    const parts = eventDateStr.split("-").map((p) => parseInt(p, 10));
-    if (parts.length !== 3 || parts.some((n) => Number.isNaN(n))) return null;
-    const [yyyy, mm, dd] = parts;
-    const eventDate = new Date(yyyy, (mm ?? 1) - 1, dd ?? 1);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const diffMs = eventDate.getTime() - today.getTime();
-    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-    if (Number.isNaN(diffDays)) return null;
-    if (diffDays > 1) return `${String(diffDays).padStart(2, "0")} days to go`;
-    if (diffDays === 1) return "1 day to go";
-    if (diffDays === 0) return "Event is today";
-    return "Event passed";
-  }, [eventDateStr]);
+ 
+  
+    const daysToGoText = useMemo(() => {
+        return getDaysToGoText(eventDateStr);
+    }, [eventDateStr]);
 
   const lastUpdatedLabel = "Last updated: July 15, 2025 | 08:00PM";
   const listIdString = listId ? String(listId) : undefined;

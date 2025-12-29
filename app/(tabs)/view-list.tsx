@@ -2,11 +2,12 @@ import { RibbonHeader } from "@/components/RibbonHeader";
 import { ActionsBar, FooterBar, GiftItemCard, HeaderBar, ListCover, PasswordGate } from "@/components/list";
 import { api } from "@/convex/_generated/api";
 import { styles } from "@/styles/addGiftStyles";
+import { getDaysToGoText } from "@/utils";
 import { useAuth } from "@clerk/clerk-expo";
 import { useMutation, useQuery } from "convex/react";
 import * as Linking from 'expo-linking';
 import { Redirect, useLocalSearchParams, usePathname } from "expo-router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Platform, ScrollView, Share, Text, View } from "react-native";
 
 export default function ViewList() {
@@ -26,6 +27,10 @@ export default function ViewList() {
   const shareCount = Array.isArray(shares) ? shares.length : undefined;
   const occasion = list?.occasion || ""
   
+    const daysToGoText = useMemo(() => {
+      return getDaysToGoText(list?.eventDate);
+    }, [list?.eventDate]);
+
 // Password gate
   const requiresPassword: boolean = Boolean((list as any)?.requiresPassword);
   const [unlocked, setUnlocked] = useState(false);
@@ -116,7 +121,7 @@ export default function ViewList() {
     <View style={styles.container}>
       <HeaderBar title={title} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <ListCover  occasion={occasion} imageUri={coverUri} overlayText={formatEventDate((list?.eventDate ?? undefined) as string | undefined)} />
+        <ListCover   occasion={occasion} imageUri={coverUri} overlayText={String(daysToGoText || "")} />
         <View style={styles.listInfoContainer}>
           <RibbonHeader title={title} subtitle={subtitle ?? ""} occasion={occasion}/>
         </View>
