@@ -322,7 +322,7 @@ export default function CreateListStep2() {
         });
         router.push({
           pathname: "/create-list-step3",
-          params: { listId: String(listId) },
+          params: { listId: String(listId) , isEdit: String(true)},
         });
         return;
       }
@@ -593,6 +593,7 @@ export default function CreateListStep2() {
     isUploadingCover,
     occasions: OCCASION_OPTIONS,
     onOccasionSelect,
+    listId,
   };
 
   if (isDesktop) {
@@ -629,6 +630,7 @@ type SharedLayoutProps = {
   isUploadingCover: boolean;
   occasions: OccasionOption[];
   onOccasionSelect: (occasionId: OccasionOption["id"]) => void;
+  listId?: string;
 };
 
 type DesktopLayoutProps = SharedLayoutProps & {
@@ -917,6 +919,7 @@ function MobileLayout({
   isUploadingCover,
   occasions,
   onOccasionSelect,
+  listId,
 }: SharedLayoutProps) {
   const ProgressIndicator = () => (
     <View style={styles.progressContainer}>
@@ -950,7 +953,7 @@ function MobileLayout({
         </SafeAreaView>
       </LinearGradient>
 
-      <ProgressIndicator />
+      {listId ? <View style={{ paddingVertical: 16 }}/> : <ProgressIndicator />}
 
       <ScrollView
         style={styles.scrollView}

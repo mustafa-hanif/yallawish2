@@ -68,6 +68,7 @@ type SharedLayoutProps = {
   toggleFriend: (id: string) => void;
   confirmShareAndClose: () => Promise<void>;
   headerTitle?: string
+  isEdit?: boolean
 };
 
 type DesktopLayoutProps = SharedLayoutProps & {
@@ -481,6 +482,7 @@ function MobileLayout({
   toggleGroup,
   toggleFriend,
   confirmShareAndClose,
+  isEdit
 }: SharedLayoutProps) {
   const DESKTOP_BREAKPOINT = 1024;
   const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -519,7 +521,8 @@ function MobileLayout({
         </SafeAreaView>
       </LinearGradient>
 
-      <ProgressIndicator />
+      {Boolean(isEdit) ? <View style={{ paddingVertical: 16 }}/> : <ProgressIndicator />}
+
       <View style={styles.content}>
         <Text style={styles.sectionTitle}>Who can see this list?</Text>
         <ScrollView
@@ -1099,6 +1102,7 @@ export default function CreateListStep3() {
     toggleGroup,
     toggleFriend,
     confirmShareAndClose,
+    isEdit,
   };
 
   if (isDesktop) {
