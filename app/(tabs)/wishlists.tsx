@@ -1,5 +1,5 @@
+import DeleteConfirmation from "@/components/DeleteConfirmationModal";
 import ActionBar from "@/components/wishlists/ActionBar";
-import DeleteConfirmation from "@/components/wishlists/DeleteConfirmationModal";
 import { Desktop } from "@/components/wishlists/Desktop";
 import WishListing from "@/components/wishlists/Listing";
 import NoListFound from "@/components/wishlists/NoListFound";
