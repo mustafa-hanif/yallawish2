@@ -23,7 +23,7 @@ type Props = {
   title?: string | null;
 };
 
-const SWIPE_WIDTH = 120;
+const SWIPE_WIDTH = 130;
 
 export const GiftItemCard: React.FC<Props> = ({ title, item, onPress, onDelete }) => {
   const { listId } = useLocalSearchParams<{ listId?: string }>();
