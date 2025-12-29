@@ -2,7 +2,7 @@ import { RibbonHeader } from "@/components/RibbonHeader";
 import { ActionsBar, FooterBar, GiftItemCard, HeaderBar, ListCover, PasswordGate } from "@/components/list";
 import { api } from "@/convex/_generated/api";
 import { styles } from "@/styles/addGiftStyles";
-import { getDaysToGoText } from "@/utils";
+import { formatLastUpdated, getDaysToGoText } from "@/utils";
 import { useAuth } from "@clerk/clerk-expo";
 import { useMutation, useQuery } from "convex/react";
 import * as Linking from 'expo-linking';
@@ -117,6 +117,8 @@ export default function ViewList() {
     }
   };
 
+  const lastUpdatedLabel = `Last updated: ${formatLastUpdated(list?.updated_at)}`;
+
   return (
     <View style={styles.container}>
       <HeaderBar title={title} />
@@ -140,7 +142,7 @@ export default function ViewList() {
         </InfoBox> */}
       </ScrollView>
 
-      <FooterBar viewMode lastUpdated="Last updated: July 15, 2025 | 08:00PM" onShare={handleShare} onManage={() => { }} manageLabel="Close" />
+      <FooterBar viewMode lastUpdated={lastUpdatedLabel} onShare={handleShare} onManage={() => { }} manageLabel="Close" />
     </View>
   );
 }

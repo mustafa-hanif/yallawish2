@@ -12,7 +12,7 @@ import {
 import type { GiftItem as GiftItemType } from "@/components/list/GiftItemCard";
 import { api } from "@/convex/_generated/api";
 import { desktopStyles, styles } from "@/styles/addGiftStyles";
-import { getDaysToGoText } from "@/utils";
+import { formatLastUpdated, getDaysToGoText } from "@/utils";
 import { Ionicons } from "@expo/vector-icons";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
@@ -239,7 +239,7 @@ export default function AddGift() {
         return getDaysToGoText(eventDateStr);
     }, [eventDateStr]);
 
-  const lastUpdatedLabel = "Last updated: July 15, 2025 | 08:00PM";
+  const lastUpdatedLabel = `Last updated: ${formatLastUpdated(list?.updated_at)}`;
   const listIdString = listId ? String(listId) : undefined;
 
   const handleOpenGift = useCallback(
