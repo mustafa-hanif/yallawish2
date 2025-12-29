@@ -21,3 +21,26 @@ export function getDaysToGoText(eventDate?: string | null): string | null {
 
   return "Event passed";
 }
+
+
+export function formatLastUpdated(isoString) {
+  if (!isoString) return "";
+
+  const date = new Date(isoString);
+
+  const datePart = new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "2-digit",
+    year: "numeric",
+    timeZone: "Asia/Dubai", // GST (UTC+4)
+  }).format(date);
+
+  const timePart = new Intl.DateTimeFormat("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "Asia/Dubai",
+  }).format(date);
+
+  return `${datePart} | ${timePart} GST`;
+}
