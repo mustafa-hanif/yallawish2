@@ -1,3 +1,4 @@
+import DeleteConfirmation from "@/components/DeleteConfirmationModal";
 import { RibbonHeader } from "@/components/RibbonHeader";
 import { TextInputAreaField } from "@/components/TextInputAreaField";
 import { TextInputField } from "@/components/TextInputField";
@@ -27,6 +28,7 @@ import React, {
   useState,
 } from "react";
 import {
+  Alert,
   Animated,
   Easing,
   Image,
@@ -38,8 +40,8 @@ import {
   StatusBar,
   Text,
   TextInput,
-  View,
   useWindowDimensions,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
@@ -488,6 +490,31 @@ export default function AddGift() {
     });
   };
 
+  // Delete mutation for list items
+  const deleteListItemMutation = useMutation(
+    api.products.deleteListItem as any
+  );
+  // Replace Alert with DeleteConfirmation modal flow
+  const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
+
+  const onDelete = (itemId?: string) => {
+    if (!itemId) return;
+    // open confirmation modal
+    setDeleteItemId(String(itemId));
+  };
+
+  const handleDeleteItem = async (itemId: string | null) => {
+    if (!itemId) return;
+    try {
+      await deleteListItemMutation({ itemId: itemId as any });
+    } catch (e) {
+      console.warn("Failed to delete item", e);
+      Alert.alert("Delete failed", "Could not delete the item. Please try again.");
+    } finally {
+      setDeleteItemId(null);
+    }
+  };
+
   const loading = !list; // simple loading flag
 
   const title = list?.title ?? "Your List";
@@ -528,6 +555,7 @@ export default function AddGift() {
       address={address}
       lastUpdated={lastUpdatedLabel}
       occasion={occasion}
+      onDelete={onDelete}
     />
   ) : (
     <MobileLayout
@@ -553,6 +581,7 @@ export default function AddGift() {
       tempFilterClaimed={tempFilterClaimed}
       tempFilterUnclaimed={tempFilterUnclaimed}
       creator={list?.creator || null}
+      onDelete={onDelete}
     />
   );
 
@@ -892,6 +921,12 @@ export default function AddGift() {
           </Animated.View>
         )}
       </Modal>
+      {/* Delete confirmation modal for item deletion */}
+      <DeleteConfirmation
+        visible={!!deleteItemId}
+        onCancel={() => setDeleteItemId(null)}
+        onDelete={() => handleDeleteItem(deleteItemId)}
+      />
       {/* Product search browser modal */}
       <Modal
         visible={showBrowser}
@@ -1091,6 +1126,7 @@ type MobileLayoutProps = {
   tempFilterUnclaimed?: boolean;
   daysToGo: string | null;
   creator?: { firstName: string; lastName: string; profileImageUrl?: string ; contactEmail?: string } | null;
+  onDelete: (itemId: string) => void;
 };
 
 function MobileLayout({
@@ -1116,6 +1152,7 @@ function MobileLayout({
   tempFilterUnclaimed,
   daysToGo,
   creator,
+  onDelete,
 }: MobileLayoutProps) {
   return (
     <>
@@ -1153,7 +1190,7 @@ function MobileLayout({
               {displayedItems.map((item, index) => (
                 <Fragment key={item._id}>
                   {index !== 0 ? <View style={styles.giftDivider} /> : null}
-                  <GiftItemCard title={title} item={item} />
+                  <GiftItemCard title={title} item={item} onDelete={onDelete} />
                 </Fragment>
               ))}
               <Pressable style={styles.addMoreButton} onPress={onAddGift}>
@@ -1211,6 +1248,7 @@ type DesktopLayoutProps = {
   address?: string | null;
   lastUpdated: string;
   occasion?: string;
+  onDelete: (itemId: string) => void;
 };
 
 function DesktopLayout({
@@ -1237,6 +1275,7 @@ function DesktopLayout({
   address,
   lastUpdated,
   occasion,
+  onDelete,
 }: DesktopLayoutProps) {
   const privacyDisplay = getPrivacyDisplay(privacy, loading, shareCount);
   const availabilityOptions: {
@@ -1452,6 +1491,7 @@ function DesktopLayout({
                   key={item._id}
                   item={item}
                   onPress={onOpenGift}
+                  onDelete={onDelete}
                   index={index}
                 />
               ))
@@ -1544,10 +1584,11 @@ function DesktopLayout({
 type DesktopGiftItemRowProps = {
   item: GiftItemType;
   onPress: (item: GiftItemType) => void;
+  onDelete?: (itemId: string) => void;
   index: number;
 };
 
-function DesktopGiftItemRow({ item, onPress, index }: DesktopGiftItemRowProps) {
+function DesktopGiftItemRow({ item, onPress, onDelete, index }: DesktopGiftItemRowProps) {
   const quantity = Math.max(1, Number(item.quantity ?? 1));
   const claimed = Math.max(0, Number(item.claimed ?? 0));
   const claimedPct = Math.min(100, Math.round((claimed / quantity) * 100));
@@ -1653,7 +1694,10 @@ function DesktopGiftItemRow({ item, onPress, index }: DesktopGiftItemRowProps) {
                 View on store
               </Text>
             </Pressable>
-            <Pressable style={desktopStyles.deleteButton}>
+            <Pressable
+              style={desktopStyles.deleteButton}
+              onPress={() => onDelete && onDelete(String(item._id))}
+            >
               <Ionicons name="trash-outline" size={20} color="#E54848" />
             </Pressable>
           </View>

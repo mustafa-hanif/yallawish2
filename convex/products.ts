@@ -761,6 +761,14 @@ export const getListItemById = query({
   },
 });
 
+export const deleteListItem = mutation({
+  args: { itemId: v.id("list_items") },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.itemId);
+    return true;
+  },
+});
+
 // Public community lists (shared) not created by the provided user
 export const getCommunityLists = query({
   args: { exclude_user_id: v.optional(v.union(v.string(), v.null())) },
