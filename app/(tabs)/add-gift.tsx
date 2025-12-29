@@ -502,7 +502,7 @@ export default function AddGift() {
   const address = (list?.shippingAddress as string | undefined) ?? null;
   const ribbonSubtitle = subtitle || formattedEventDate || "";
   const occasion = list?.occasion || "";
-
+  // const creator = list?.creator || null;
   const layout = isDesktop ? (
     <DesktopLayout
       title={title}
@@ -552,6 +552,7 @@ export default function AddGift() {
       tempSortBy={tempSortBy}
       tempFilterClaimed={tempFilterClaimed}
       tempFilterUnclaimed={tempFilterUnclaimed}
+      creator={list?.creator || null}
     />
   );
 

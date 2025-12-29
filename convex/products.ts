@@ -269,7 +269,26 @@ export const getListById = query({
         coverPhotoUri = refreshed;
       }
     }
-    return { ...list, coverPhotoUri };
+    // Resolve creator profile (list owner) from user_profiles.by_user
+    let creator: any = null;
+    const uid = (list.user_id ?? null) as string | null;
+    if (uid) {
+      const profile = await ctx.db
+        .query("user_profiles")
+        .withIndex("by_user", (q) => q.eq("user_id", uid))
+        .first();
+      if (profile) {
+        creator = {
+          user_id: profile.user_id,
+          firstName: profile.firstName ?? null,
+          lastName: profile.lastName ?? null,
+          profileImageUrl: profile.profileImageUrl ?? null,
+          contactEmail: profile.contactEmail ?? null,
+        } as any;
+      }
+    }
+
+    return { ...list, coverPhotoUri, creator };
   },
 });
 

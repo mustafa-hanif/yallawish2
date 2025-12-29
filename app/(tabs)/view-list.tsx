@@ -26,6 +26,7 @@ export default function ViewList() {
   const privacy = list?.privacy ?? "private";
   const shareCount = Array.isArray(shares) ? shares.length : undefined;
   const occasion = list?.occasion || ""
+  const creator = list?.creator || null;
   
     const daysToGoText = useMemo(() => {
       return getDaysToGoText(list?.eventDate);
@@ -123,7 +124,7 @@ export default function ViewList() {
     <View style={styles.container}>
       <HeaderBar title={title} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <ListCover   occasion={occasion} imageUri={coverUri} overlayText={String(daysToGoText || "")} />
+        <ListCover occasion={occasion} imageUri={coverUri} overlayText={String(daysToGoText || "")}  creator={creator}/>
         <View style={styles.listInfoContainer}>
           <RibbonHeader title={title} subtitle={subtitle ?? ""} occasion={occasion}/>
         </View>
