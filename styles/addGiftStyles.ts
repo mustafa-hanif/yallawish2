@@ -34,6 +34,7 @@ export const styles = StyleSheet.create({
   coverContainer: {
     height: 180,
     width: "100%",
+    position: "relative",
   },
   coverImage: {
     height: "100%",
@@ -621,6 +622,28 @@ export const styles = StyleSheet.create({
     fontFamily: "Nunito_700Bold",
     fontSize: 14,
     marginLeft: 5,
+  },
+  listCoverProfile: {
+    position: "absolute",
+    width: 33.3,
+    height: 33.3,
+    backgroundColor: "#3B0076",
+    borderRadius: "50%",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+    top: 21,
+    left: 21,
+  },
+  listCoverProfileImageUrl: {
+    width: "100%",
+    height: "100%",
+  },
+  listCoverProfileInitials: {
+    color: "#FFFF",
+    fontSize: 12,
+    fontFamily: "Nunito_700Bold",
+    letterSpacing: 0,
   },
 });
 

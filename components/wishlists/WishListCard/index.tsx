@@ -1,3 +1,4 @@
+import { getProfileInitials } from "@/utils";
 import { useUser } from "@clerk/clerk-expo";
 import { Audio } from "expo-av";
 import * as Haptics from "expo-haptics";
@@ -112,30 +113,11 @@ export default function WishListCard({ item, onSelectDelete, handleArchiveList, 
     }
   };
 
-  const profileInitials = useMemo(() => {
-    const name = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
-    if (name) {
-      return (
-        name
-          .split(" ")
-          .filter(Boolean)
-          .map((part) => part[0]?.toUpperCase() ?? "")
-          .join("")
-          .slice(0, 2) || "YW"
-      );
-    }
+  const profileInitials = useMemo(
+  () => getProfileInitials(user),
+  [user?.firstName, user?.lastName, user?.contactEmail]
+);
 
-    const email = user?.contactEmail ?? "";
-    if (email) {
-      const letters = email
-        .replace(/[^a-zA-Z]/g, "")
-        .slice(0, 2)
-        .toUpperCase();
-      return letters || "YW";
-    }
-
-    return "YW";
-  }, [user?.firstName, user?.lastName, user?.contactEmail]);
 
   const handlePressActionButton = (title: string) => {
     if (id) {

@@ -22,7 +22,6 @@ export function getDaysToGoText(eventDate?: string | null): string | null {
   return "Event passed";
 }
 
-
 export function formatLastUpdated(isoString) {
   if (!isoString) return "";
 
@@ -43,4 +42,40 @@ export function formatLastUpdated(isoString) {
   }).format(date);
 
   return `${datePart} | ${timePart} GST`;
+}
+
+// utils/getProfileInitials.js
+
+export function getProfileInitials(user: { firstName?: string; lastName?: string; contactEmail?: string } | null | undefined, fallback = "YW") {
+  if (!user) return fallback;
+
+  const firstName = user.firstName ?? "";
+  const lastName = user.lastName ?? "";
+
+  // 1️⃣ Try first + last name
+  const fullName = `${firstName} ${lastName}`.trim();
+  if (fullName) {
+    const initials = fullName
+      .split(" ")
+      .filter(Boolean)
+      .map((part) => part[0]?.toUpperCase() ?? "")
+      .join("")
+      .slice(0, 2);
+
+    if (initials) return initials;
+  }
+
+  // 2️⃣ Fallback to email
+  const email = user.contactEmail ?? "";
+  if (email) {
+    const letters = email
+      .replace(/[^a-zA-Z]/g, "")
+      .slice(0, 2)
+      .toUpperCase();
+
+    if (letters) return letters;
+  }
+
+  // 3️⃣ Final fallback
+  return fallback;
 }
