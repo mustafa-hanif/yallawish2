@@ -1089,6 +1089,7 @@ type MobileLayoutProps = {
   tempFilterClaimed?: boolean;
   tempFilterUnclaimed?: boolean;
   daysToGo: string | null;
+  creator?: { firstName: string; lastName: string; profileImageUrl?: string ; email?: string } | null;
 };
 
 function MobileLayout({
@@ -1113,6 +1114,7 @@ function MobileLayout({
   tempFilterClaimed,
   tempFilterUnclaimed,
   daysToGo,
+  creator,
 }: MobileLayoutProps) {
   return (
     <>
@@ -1122,6 +1124,7 @@ function MobileLayout({
           imageUri={coverUri}
           overlayText={String(daysToGo || "")}
           occasion={occasion}
+          creator={creator}
         />
 
         <View style={styles.listInfoContainer}>
