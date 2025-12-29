@@ -190,7 +190,7 @@ export function ResponsiveAuthLayout({
                   width: 158,
                   height: 38,
                   resizeMode: "contain",
-                  marginBottom: 20,
+                  marginBottom: 30,
                 }}
               />
               {tabs ? tabs : null}

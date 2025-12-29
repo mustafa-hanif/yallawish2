@@ -24,12 +24,15 @@ import {
   Text,
   TextInput,
   View,
-  useWindowDimensions
+  useWindowDimensions,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 
 type FormFieldProps = {
   label: string;
@@ -73,7 +76,9 @@ const FormField = React.memo(
         <View style={styles.floatingLabel}>
           <Text style={[styles.floatingLabelText, labelStyle]}>{label}</Text>
         </View>
-        {rightIcon && <View style={styles.rightIconContainer}>{rightIcon}</View>}
+        {rightIcon && (
+          <View style={styles.rightIconContainer}>{rightIcon}</View>
+        )}
       </View>
     </View>
   )
@@ -117,7 +122,7 @@ type OccasionOption = {
   borderColor: string;
   icon: (color: string, size: number) => React.ReactNode;
   mobileIcon?: React.ReactNode;
-  backgroundColor?: string
+  backgroundColor?: string;
 };
 
 const OCCASION_OPTIONS: OccasionOption[] = [
@@ -126,48 +131,54 @@ const OCCASION_OPTIONS: OccasionOption[] = [
     title: "Birthday",
     borderColor: "#FC0",
     icon: (color, size) => <Ionicons name="gift" size={size} color={color} />,
-    mobileIcon: <Image source={require("@/assets/images/birthdayIcon.png")}/>,
-    backgroundColor: "#FFF6D2"
+    mobileIcon: <Image source={require("@/assets/images/birthdayIcon.png")} />,
+    backgroundColor: "#FFF6D2",
   },
   {
     id: "wedding",
     title: "Wedding",
     borderColor: "#FF3B30",
     icon: (color, size) => <Ionicons name="heart" size={size} color={color} />,
-    mobileIcon: <Image source={require("@/assets/images/weddingIcon.png")}/>,
-    backgroundColor: "#FFE0E0"
+    mobileIcon: <Image source={require("@/assets/images/weddingIcon.png")} />,
+    backgroundColor: "#FFE0E0",
   },
   {
     id: "baby-shower",
     title: "Baby Shower",
     borderColor: "#91DA93",
     icon: (color, size) => <Ionicons name="person" size={size} color={color} />,
-    mobileIcon: <Image source={require("@/assets/images/babyShowerIcon.png")}/>,
-    backgroundColor: "#F0F9F0"
+    mobileIcon: (
+      <Image source={require("@/assets/images/babyShowerIcon.png")} />
+    ),
+    backgroundColor: "#F0F9F0",
   },
   {
     id: "graduation",
     title: "Graduation",
     borderColor: "#32ADE6",
     icon: (color, size) => <Ionicons name="school" size={size} color={color} />,
-    mobileIcon: <Image source={require("@/assets/images/graduationIcon.png")}/>,
-    backgroundColor: "#D9F3FF"
+    mobileIcon: (
+      <Image source={require("@/assets/images/graduationIcon.png")} />
+    ),
+    backgroundColor: "#D9F3FF",
   },
   {
     id: "new-home",
     title: "New Home",
     borderColor: "#A2845E",
     icon: (color, size) => <Ionicons name="home" size={size} color={color} />,
-    mobileIcon: <Image source={require("@/assets/images/newHomeIcon.png")}/>,
-    backgroundColor: "#F5E8D5"
+    mobileIcon: <Image source={require("@/assets/images/newHomeIcon.png")} />,
+    backgroundColor: "#F5E8D5",
   },
   {
     id: "retirement",
     title: "Retirement",
     borderColor: "#FF9500",
     icon: (color, size) => <Ionicons name="person" size={size} color={color} />,
-    mobileIcon: <Image source={require("@/assets/images/retirementIcon.png")}/>,
-    backgroundColor: "#FFEBCC"
+    mobileIcon: (
+      <Image source={require("@/assets/images/retirementIcon.png")} />
+    ),
+    backgroundColor: "#FFEBCC",
   },
   {
     id: "no-occasion",
@@ -176,16 +187,18 @@ const OCCASION_OPTIONS: OccasionOption[] = [
     icon: (color, size) => (
       <Ionicons name="document-text" size={size} color={color} />
     ),
-    mobileIcon: <Image source={require("@/assets/images/noOccasionIcon.png")}/>,
-    backgroundColor: "#F4F4F4"
+    mobileIcon: (
+      <Image source={require("@/assets/images/noOccasionIcon.png")} />
+    ),
+    backgroundColor: "#F4F4F4",
   },
   {
     id: "other",
     title: "Other",
     borderColor: "#D1D1D6",
     icon: (color, size) => <Ionicons name="gift" size={size} color={color} />,
-    mobileIcon: <Image source={require("@/assets/images/otherIcon.png")}/>,
-    backgroundColor: "#E9E9E9"
+    mobileIcon: <Image source={require("@/assets/images/otherIcon.png")} />,
+    backgroundColor: "#E9E9E9",
   },
 ];
 
@@ -206,7 +219,7 @@ export default function CreateListStep2() {
   const createList = useMutation(api.products.createList);
   const updateListDetails = useMutation(api.products.updateListDetails);
   const generateCoverUploadUrl = useMutation(
-    api.products.generateListCoverUploadUrl as any,
+    api.products.generateListCoverUploadUrl as any
   );
   const getCoverUrl = useMutation(api.products.getListCoverUrl as any);
   const { user } = useUser();
@@ -233,7 +246,7 @@ export default function CreateListStep2() {
 
   const updateFormData = (
     field: keyof FormData,
-    value: string | Occasion | null,
+    value: string | Occasion | null
   ) => {
     setFormData((prev) => ({
       ...prev,
@@ -349,7 +362,7 @@ export default function CreateListStep2() {
         if (status !== "granted") {
           Alert.alert(
             "Permission required",
-            "Please allow photo library access to upload a cover photo.",
+            "Please allow photo library access to upload a cover photo."
           );
           return;
         }
@@ -372,7 +385,7 @@ export default function CreateListStep2() {
 
       const asset = result.assets?.[0];
       console.log("[ImageUpload] Selected asset:", asset);
-      
+
       if (!asset?.uri) {
         console.error("[ImageUpload] No asset URI found");
         Alert.alert("Error", "Failed to get image. Please try again.");
@@ -383,7 +396,7 @@ export default function CreateListStep2() {
       const mime = asset.mimeType ?? "";
       const ext = uri.split(".").pop()?.toLowerCase();
       console.log("[ImageUpload] URI:", uri, "MIME:", mime, "EXT:", ext);
-      
+
       const isValidType =
         mime.startsWith("image/jpeg") ||
         mime.startsWith("image/png") ||
@@ -411,7 +424,7 @@ export default function CreateListStep2() {
       console.log("[ImageUpload] Generating upload URL...");
       const uploadUrl = await generateCoverUploadUrl();
       console.log("[ImageUpload] Upload URL:", uploadUrl);
-      
+
       if (typeof uploadUrl !== "string" || uploadUrl.length === 0) {
         throw new Error("Failed to get upload URL");
       }
@@ -422,12 +435,12 @@ export default function CreateListStep2() {
         // Web platform: use fetch with blob
         console.log("[ImageUpload] Web platform detected, processing blob...");
         let blob: Blob;
-        
+
         // Check if we have a File object directly (some web implementations provide this)
-        if (asset && 'file' in asset && asset.file instanceof File) {
+        if (asset && "file" in asset && asset.file instanceof File) {
           console.log("[ImageUpload] Using File object directly");
           blob = asset.file;
-        } else if (uri.startsWith('blob:')) {
+        } else if (uri.startsWith("blob:")) {
           // For blob URLs, fetch the blob
           console.log("[ImageUpload] Fetching blob URL...");
           const response = await fetch(uri);
@@ -436,7 +449,7 @@ export default function CreateListStep2() {
           }
           blob = await response.blob();
           console.log("[ImageUpload] Blob fetched, size:", blob.size);
-        } else if (uri.startsWith('data:')) {
+        } else if (uri.startsWith("data:")) {
           // For data URLs, convert to blob
           console.log("[ImageUpload] Converting data URL to blob...");
           const response = await fetch(uri);
@@ -463,13 +476,20 @@ export default function CreateListStep2() {
           },
         });
 
-        console.log("[ImageUpload] Upload response status:", uploadResponse.status);
+        console.log(
+          "[ImageUpload] Upload response status:",
+          uploadResponse.status
+        );
 
         if (!uploadResponse.ok) {
-          const errorText = await uploadResponse.text().catch(() => '');
-          console.error("[ImageUpload] Upload failed:", uploadResponse.status, errorText);
+          const errorText = await uploadResponse.text().catch(() => "");
+          console.error(
+            "[ImageUpload] Upload failed:",
+            uploadResponse.status,
+            errorText
+          );
           throw new Error(
-            `Upload failed with status ${uploadResponse.status}: ${errorText}`,
+            `Upload failed with status ${uploadResponse.status}: ${errorText}`
           );
         }
 
@@ -478,8 +498,11 @@ export default function CreateListStep2() {
           console.log("[ImageUpload] Upload response:", parsed);
           storageId = parsed?.storageId;
         } catch (parseError) {
-          console.error("[ImageUpload] Failed to parse upload response", parseError);
-          const responseText = await uploadResponse.text().catch(() => '');
+          console.error(
+            "[ImageUpload] Failed to parse upload response",
+            parseError
+          );
+          const responseText = await uploadResponse.text().catch(() => "");
           console.error("[ImageUpload] Response body:", responseText);
           throw new Error("Unexpected response from upload service");
         }
@@ -514,7 +537,7 @@ export default function CreateListStep2() {
       console.log("[ImageUpload] Getting public URL for storageId:", storageId);
       const publicUrl = await getCoverUrl({ storageId } as any);
       console.log("[ImageUpload] Public URL:", publicUrl);
-      
+
       updateFormData("coverPhotoUri", publicUrl);
       updateFormData("coverPhotoStorageId", storageId);
       console.log("[ImageUpload] Upload completed successfully!");
@@ -523,8 +546,7 @@ export default function CreateListStep2() {
       const errorMessage = e instanceof Error ? e.message : "Unknown error";
       console.error("[ImageUpload] Error message:", errorMessage);
       Alert.alert("Upload failed", `Something went wrong: ${errorMessage}`);
-    }
-    finally {
+    } finally {
       setIsUploadingCover(false);
       console.log("[ImageUpload] Upload process finished");
     }
@@ -596,7 +618,7 @@ type SharedLayoutProps = {
   characterCount: number;
   updateFormData: (
     field: keyof FormData,
-    value: string | Occasion | null,
+    value: string | Occasion | null
   ) => void;
   handleNoteChange: (text: string) => void;
   handleBack: () => void;
@@ -766,11 +788,7 @@ function DesktopLayout({
                   >
                     {formData.eventDate || "DD/MM/YYYY"}
                   </Text>
-                  <Ionicons
-                    name="calendar-outline"
-                    size={20}
-                    color="#AEAEB2"
-                  />
+                  <Ionicons name="calendar-outline" size={20} color="#AEAEB2" />
                 </Pressable>
               </View>
             </View>
@@ -809,7 +827,9 @@ function DesktopLayout({
             </View>
 
             <View style={styles.desktopOccasionSection}>
-              <Text style={styles.desktopSectionHeading}>Choose Occasion *</Text>
+              <Text style={styles.desktopSectionHeading}>
+                Choose Occasion *
+              </Text>
               <View style={styles.desktopOccasionGrid}>
                 {occasions.map((option) => (
                   <DesktopOccasionCard
@@ -940,8 +960,12 @@ function MobileLayout({
           <Text style={styles.sectionTitle}>Giftlist details</Text>
 
           <View style={styles.formContainer}>
-            <TextInputField label="Event title *" value={formData.eventTitle} onChangeText={(text) => updateFormData("eventTitle", text)}/>
-            <TextInputAreaField 
+            <TextInputField
+              label="Event title *"
+              value={formData.eventTitle}
+              onChangeText={(text) => updateFormData("eventTitle", text)}
+            />
+            <TextInputAreaField
               label="Add note (optional)"
               placeholderTextColor="#D1D1D6"
               placeholder="Share a sweet message, special instructions, or anything you'd like your guests to know"
@@ -949,23 +973,22 @@ function MobileLayout({
               onChangeText={handleNoteChange}
             />
 
-              <DateInputField 
-                label="Event date (optional)"
-                value={formData.eventDate}
-                onChange={(date) => updateFormData("eventDate", date)}
-                placeholder="Select a date"
+            <DateInputField
+              label="Event date (optional)"
+              value={formData.eventDate}
+              onChange={(date) => updateFormData("eventDate", date)}
+              placeholder="Select a date"
+            />
 
-              />
-
-              <TextInputAreaField  
-                height={92}
-                label="Shipping Address (optional)"
-                value={formData.shippingAddress}
-                onChangeText={(text) => updateFormData("shippingAddress", text)} 
-                placeholder="Apt/house #, building/community area, city..."
-                // icon={<Ionicons name="information-circle-outline" size={16} color="#AEAEB2" />}
-                showCounter={false}
-              />
+            <TextInputAreaField
+              height={92}
+              label="Shipping Address (optional)"
+              value={formData.shippingAddress}
+              onChangeText={(text) => updateFormData("shippingAddress", text)}
+              placeholder="Apt/house #, building/community area, city..."
+              // icon={<Ionicons name="information-circle-outline" size={16} color="#AEAEB2" />}
+              showCounter={false}
+            />
 
             <View style={styles.coverPhotoSection}>
               <Text style={styles.coverPhotoLabel}>Cover photo (optional)</Text>
@@ -1047,33 +1070,37 @@ type OccasionItemProps = {
 };
 
 function OccasionItem({ option, isSelected, onSelect }: OccasionItemProps) {
-      const scale = useSharedValue(0);
+  const scale = useSharedValue(0);
 
-      React.useEffect(() => {
-        scale.value = withTiming(isSelected ? 1 : 0, { duration:700 });
-      }, [isSelected]);
+  React.useEffect(() => {
+    scale.value = withTiming(isSelected ? 1 : 0, { duration: 700 });
+  }, [isSelected]);
 
-      const bgStyle = useAnimatedStyle(() => ({transform: [{ scaleX: scale.value }],}));
-
+  const bgStyle = useAnimatedStyle(() => ({
+    transform: [{ scaleX: scale.value }],
+  }));
 
   return (
-     <Pressable onPress={() => onSelect(option.id)} style={[styles.occasionItem, { borderLeftColor: option.borderColor }]}>
+    <Pressable
+      onPress={() => onSelect(option.id)}
+      style={[styles.occasionItem, { borderLeftColor: option.borderColor }]}
+    >
       <Animated.View
-            style={[
-              {
-                position: "absolute",
-                left: 0,
-                right: 0,
-                top: 0,
-                bottom: 0,
-                backgroundColor: option.backgroundColor,
-                borderTopRightRadius: 40,
-                borderBottomRightRadius: 40,
-                transformOrigin: "left",
-              },
-              bgStyle,
-            ]}
-          />
+        style={[
+          {
+            position: "absolute",
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0,
+            backgroundColor: option.backgroundColor,
+            borderTopRightRadius: 40,
+            borderBottomRightRadius: 40,
+            transformOrigin: "left",
+          },
+          bgStyle,
+        ]}
+      />
 
       {/* Content on top */}
       <View style={styles.occasionContent}>
@@ -1083,14 +1110,25 @@ function OccasionItem({ option, isSelected, onSelect }: OccasionItemProps) {
         </View>
 
         <View
-          style={[
-            styles.radioButton,
-            isSelected && styles.radioButtonSelected,
-          ]}
+          style={[styles.radioButton, isSelected && styles.radioButtonSelected]}
         >
           {isSelected && <View style={styles.radioButtonInner} />}
         </View>
       </View>
+      {isSelected && option.title === "Other" && (
+        <View
+          style={{
+            marginTop: 24,
+          }}
+        >
+          <TextInput
+            // label="Event title *"
+            style={[styles.input, styles.inputField, styles.inputMobile]}
+            value={"text"}
+            // onChangeText={(text) => updateFormData("eventTitle", text)}
+          />
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -1102,8 +1140,31 @@ const styles = StyleSheet.create({
   },
   header: {
     minHeight: 108,
-    justifyContent:'flex-end'
+    justifyContent: "flex-end",
     // paddingBottom: 16,
+  },
+  input: {
+    width: "100%",
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.42)",
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    fontFamily: "Nunito_500Medium",
+    fontSize: 16,
+    color: "#1C0335",
+    backgroundColor: "rgba(12,0,32,0.32)",
+  },
+  inputDesktop: {
+    backgroundColor: "rgba(255,255,255,0.08)",
+  },
+  inputMobile: {
+    backgroundColor: "white",
+    borderColor: "#AEAEB2",
+    borderWidth: 1,
+    paddingVertical: 16,
+    borderRadius: 8,
+    fontSize: 14,
   },
   headerContent: {
     paddingHorizontal: 16,
@@ -1164,6 +1225,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     width: screenWidth - 32,
     gap: 4,
+  },
+  inputField: {
+    flex: 1,
   },
   progressSegment: {
     flex: 1,
@@ -1371,7 +1435,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 16,
     alignItems: "center",
-    justifyContent:'center'
+    justifyContent: "center",
   },
   continueButtonDisabled: {
     backgroundColor: "#D1D1D6",
@@ -1389,7 +1453,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 16,
     alignItems: "center",
-    justifyContent:'center'
+    justifyContent: "center",
   },
   backButtonText: {
     color: "#3B0076",

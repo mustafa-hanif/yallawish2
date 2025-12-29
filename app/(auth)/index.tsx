@@ -528,7 +528,7 @@ export default function AuthScreen() {
       showHero={!isDesktop}
       heroTitle={heroTitle}
       heroSubtitle={heroSubtitle}
-      mobileLogoHeaderStyle={{ marginTop: 20, marginBottom: 10 }}
+      mobileLogoHeaderStyle={{ marginTop: 20, marginBottom: 0 }}
       tabs={<TabUI />}
     >
       <View

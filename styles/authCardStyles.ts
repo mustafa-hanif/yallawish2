@@ -35,7 +35,7 @@ export const authCardStyles = StyleSheet.create({
     width: "100%",
   },
   segmentedControlMobile: {
-    marginBottom: 32,
+    marginBottom: 10,
   },
   segmentedOption: {
     flex: 1,
@@ -139,10 +139,9 @@ export const authCardStyles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 8,
     fontSize: 14,
-    textAlign:"center",
+    textAlign: "center",
     color: "#FFFFFF",
     fontFamily: "Nunito_700Bold",
-
   },
   resendContainer: {
     alignItems: "center",
