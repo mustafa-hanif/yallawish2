@@ -7,7 +7,7 @@ type Props = {
   imageUri?: string | null;
   overlayText?: string;
   occasion?: string;
-  creator?: { firstName?: string; lastName?: string; profileImageUrl?: string; email?: string } | null;
+  creator?: { firstName?: string; lastName?: string; profileImageUrl?: string; contactEmail?: string } | null;
 };
 
 export const ListCover: React.FC<Props> = ({ imageUri, overlayText, occasion, creator = null }) => {
