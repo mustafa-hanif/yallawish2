@@ -1097,8 +1097,8 @@ function OccasionItem({ option, isSelected, onSelect }: OccasionItemProps) {
             top: 0,
             bottom: 0,
             backgroundColor: option.backgroundColor,
-            borderTopRightRadius: 40,
-            borderBottomRightRadius: 40,
+            borderTopRightRadius: option.title === "Other" ? 16 : 40,
+            borderBottomRightRadius: option.title === "Other" ? 16 : 40,
             transformOrigin: "left",
           },
           bgStyle,
@@ -1121,13 +1121,13 @@ function OccasionItem({ option, isSelected, onSelect }: OccasionItemProps) {
       {isSelected && option.title === "Other" && (
         <View
           style={{
-            marginTop: 24,
+            marginTop: 28,
           }}
         >
+          <Text style={styles.specifyText}>Please specify</Text>
           <TextInput
             // label="Event title *"
             style={[styles.input, styles.inputField, styles.inputMobile]}
-            value={"text"}
             // onChangeText={(text) => updateFormData("eventTitle", text)}
           />
         </View>
@@ -1147,6 +1147,7 @@ const styles = StyleSheet.create({
     // paddingBottom: 16,
   },
   input: {
+    height: 56,
     width: "100%",
     borderRadius: 18,
     borderWidth: 1.5,
@@ -1771,4 +1772,9 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito_700Bold",
     color: "#FFFFFF",
   },
+  specifyText: {
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
+    marginBottom: 12
+  }
 });
