@@ -6,7 +6,7 @@ import { useAuth } from "@clerk/clerk-expo";
 import { useMutation, useQuery } from "convex/react";
 import * as Linking from 'expo-linking';
 import { Redirect, useLocalSearchParams, usePathname } from "expo-router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Platform, ScrollView, Share, Text, View } from "react-native";
 
 export default function ViewList() {
@@ -26,6 +26,23 @@ export default function ViewList() {
   const shareCount = Array.isArray(shares) ? shares.length : undefined;
   const occasion = list?.occasion || ""
   
+    const daysToGoText = useMemo(() => {
+      if (!list?.eventDate) return null;
+      const parts = list?.eventDate.split("-").map((p) => parseInt(p, 10));
+      if (parts.length !== 3 || parts.some((n) => Number.isNaN(n))) return null;
+      const [yyyy, mm, dd] = parts;
+      const eventDate = new Date(yyyy, (mm ?? 1) - 1, dd ?? 1);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const diffMs = eventDate.getTime() - today.getTime();
+      const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+      if (Number.isNaN(diffDays)) return null;
+      if (diffDays > 1) return `${String(diffDays).padStart(2, "0")} days to go`;
+      if (diffDays === 1) return "1 day to go";
+      if (diffDays === 0) return "Event is today";
+      return "Event passed";
+    }, [list?.eventDate]);
+
 // Password gate
   const requiresPassword: boolean = Boolean((list as any)?.requiresPassword);
   const [unlocked, setUnlocked] = useState(false);
@@ -116,7 +133,7 @@ export default function ViewList() {
     <View style={styles.container}>
       <HeaderBar title={title} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <ListCover  occasion={occasion} imageUri={coverUri} overlayText={formatEventDate((list?.eventDate ?? undefined) as string | undefined)} />
+        <ListCover   occasion={occasion} imageUri={coverUri} overlayText={String(daysToGoText || "")} />
         <View style={styles.listInfoContainer}>
           <RibbonHeader title={title} subtitle={subtitle ?? ""} occasion={occasion}/>
         </View>
