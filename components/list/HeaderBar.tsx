@@ -13,7 +13,13 @@ export const HeaderBar: React.FC<Props> = ({ title, onBack }) => {
   return (
     <>
       <StatusBar barStyle="light-content" backgroundColor="transparent" />
-      <LinearGradient colors={["#330065", "#45018ad7"]} style={styles.header} locations={[0, 0.7]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 2 }} style={styles.header}>
+      <LinearGradient
+        colors={["#330065", "#45018ad7"]}
+        style={styles.header}
+        locations={[0, 0.7]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 2 }}
+      >
         <SafeAreaView edges={["top"]}>
           <View style={styles.headerContent}>
             <View style={styles.navigation}>
@@ -22,7 +28,15 @@ export const HeaderBar: React.FC<Props> = ({ title, onBack }) => {
                   <Image source={require("@/assets/images/backArrow.png")} />
                 </Pressable>
               ) : null}
-              <Text style={styles.headerTitle}>{title}</Text>
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={styles.headerTitle}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {title}
+                </Text>
+              </View>
             </View>
           </View>
         </SafeAreaView>

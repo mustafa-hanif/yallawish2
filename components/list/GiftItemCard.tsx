@@ -12,7 +12,7 @@ export type GiftItem = {
   price?: string | number | null;
   buy_url?: string | null;
   description?: string | null;
-  title?: string | null
+  title?: string | null;
 };
 
 type Props = {
@@ -22,21 +22,46 @@ type Props = {
 
 export const GiftItemCard: React.FC<Props> = ({ title, item, onPress }) => {
   const { listId } = useLocalSearchParams<{ listId?: string }>();
-  const pct = Math.min(100, Math.max(0, (item.claimed / Math.max(1, item.quantity)) * 100));
-  const truncate = (text: string, len: number) => (text.length > len ? text.slice(0, len - 1) + "…" : text);
+  const pct = Math.min(
+    100,
+    Math.max(0, (item.claimed / Math.max(1, item.quantity)) * 100)
+  );
+  const truncate = (text: string, len: number) =>
+    text.length > len ? text.slice(0, len - 1) + "…" : text;
   const goDetail = () => {
     if (onPress) return onPress(item);
-    router.push({ pathname: "/gift-detail", params: { itemId: String(item._id), ...(listId ? { listId: String(listId) } : {}), ...(title ? { eventTitle: String(title) } : {}) } });
+    router.push({
+      pathname: "/gift-detail",
+      params: {
+        itemId: String(item._id),
+        ...(listId ? { listId: String(listId) } : {}),
+        ...(title ? { eventTitle: String(title) } : {}),
+      },
+    });
   };
   const isSoldOut = Number(item.claimed ?? 0) >= Number(item.quantity ?? 1);
   return (
     <View style={styles.itemCard}>
-      <View style={styles.itemImageWrap}>{item.image_url ? <Image source={{ uri: item.image_url }} style={styles.itemImage} /> : <View style={[styles.itemImage, { backgroundColor: "#EEE" }]} />}</View>
+      <View style={styles.itemImageWrap}>
+        {item.image_url ? (
+          <Image source={{ uri: item.image_url }} style={styles.itemImage} />
+        ) : (
+          <View style={[styles.itemImage, { backgroundColor: "#EEE" }]} />
+        )}
+      </View>
       <View style={styles.itemContent}>
         <Text style={styles.itemName}>{truncate(item.name, 38)}</Text>
-        <View style={{ flexDirection: "row", justifyContent: "flex-start", gap: 8, alignItems: "center" }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "flex-start",
+            gap: 8,
+            alignItems: "center",
+          }}
+        >
           <Text style={styles.itemQuantity}>
-            Quantity: <Text style={styles.itemQuantityValue}>{item.quantity}</Text>
+            Quantity:{" "}
+            <Text style={styles.itemQuantityValue}>{item.quantity}</Text>
           </Text>
           <View style={styles.claimBadgeWrap}>
             {isSoldOut ? (
@@ -45,20 +70,34 @@ export const GiftItemCard: React.FC<Props> = ({ title, item, onPress }) => {
               </View>
             ) : (
               <View style={styles.claimBadge}>
-                <Text style={styles.claimBadgeText}>{item.claimed} Claimed</Text>
+                <Text style={styles.claimBadgeText}>
+                  {item.claimed} Claimed
+                </Text>
               </View>
             )}
           </View>
         </View>
         <View style={[styles.priceRow, { justifyContent: "space-between" }]}>
           {item.price != null && (
-            <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 4 }}>
-              <Image resizeMode="contain" style={{ width: 16, height: 16 }} source={require("@/assets/images/dirham.png")} />
-              <Text style={styles.itemPrice}>{item.price}</Text>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 4,
+              }}
+            >
+              {/* <Image resizeMode="contain" style={{ width: 16, height: 16 }} source={require("@/assets/images/dirham.png")} /> */}
+              <Text style={styles.itemPrice}>AED {item.price}</Text>
             </View>
           )}
-          <Pressable onPress={isSoldOut ? undefined : goDetail} disabled={isSoldOut}>
-            <Text style={[styles.buyNow, isSoldOut && styles.buyNowDisabled]}>Buy Now</Text>
+          <Pressable
+            onPress={isSoldOut ? undefined : goDetail}
+            disabled={isSoldOut}
+          >
+            <Text style={[styles.buyNow, isSoldOut && styles.buyNowDisabled]}>
+              View on store
+            </Text>
           </Pressable>
         </View>
         <View style={styles.progressTrack}>

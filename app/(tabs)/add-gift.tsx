@@ -1,16 +1,30 @@
 import { RibbonHeader } from "@/components/RibbonHeader";
 import { TextInputAreaField } from "@/components/TextInputAreaField";
 import { TextInputField } from "@/components/TextInputField";
-import { ActionsBar, FooterBar, GiftItemCard, HeaderBar, InfoBox, ListCover } from "@/components/list";
+import {
+  ActionsBar,
+  FooterBar,
+  GiftItemCard,
+  HeaderBar,
+  InfoBox,
+  ListCover,
+} from "@/components/list";
 import type { GiftItem as GiftItemType } from "@/components/list/GiftItemCard";
 import { api } from "@/convex/_generated/api";
 import { desktopStyles, styles } from "@/styles/addGiftStyles";
 import { Ionicons } from "@expo/vector-icons";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Linking from 'expo-linking';
+import * as Linking from "expo-linking";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Animated,
   Easing,
@@ -24,25 +38,29 @@ import {
   Text,
   TextInput,
   View,
-  useWindowDimensions
+  useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { WebView } from 'react-native-webview';
+import { WebView } from "react-native-webview";
 
-type SortOption = 'default' | 'priceAsc' | 'priceDesc' | 'newest' | 'oldest';
+type SortOption = "default" | "priceAsc" | "priceDesc" | "newest" | "oldest";
 
 const SORT_OPTIONS: { key: SortOption; label: string }[] = [
-  { key: 'default', label: 'Default' },
-  { key: 'priceAsc', label: 'Price: Low to High' },
-  { key: 'priceDesc', label: 'Price: High to Low' },
-  { key: 'newest', label: 'Newest' },
-  { key: 'oldest', label: 'Oldest' },
+  { key: "default", label: "Default" },
+  { key: "priceAsc", label: "Price: Low to High" },
+  { key: "priceDesc", label: "Price: High to Low" },
+  { key: "newest", label: "Newest" },
+  { key: "oldest", label: "Oldest" },
 ];
 
 const DESKTOP_BREAKPOINT = 1024;
 const FALLBACK_COVER = require("@/assets/images/nursery.png");
 
-const getPrivacyDisplay = (privacy: string, loading: boolean, shareCount?: number) => {
+const getPrivacyDisplay = (
+  privacy: string,
+  loading: boolean,
+  shareCount?: number
+) => {
   if (loading) {
     return {
       label: "Loading...",
@@ -71,22 +89,32 @@ export default function AddGift() {
   const list = useQuery(api.products.getListById, {
     listId: listId as any,
   });
-  const items = useQuery(api.products.getListItems as any, listId ? ({ list_id: listId } as any) : "skip");
+  const items = useQuery(
+    api.products.getListItems as any,
+    listId ? ({ list_id: listId } as any) : "skip"
+  );
 
   // All list items
-  const giftItems: GiftItemType[] = useMemo(() => (Array.isArray(items) ? [...items] : []), [items]);
+  const giftItems: GiftItemType[] = useMemo(
+    () => (Array.isArray(items) ? [...items] : []),
+    [items]
+  );
 
   // Sort & Filter state
-  const [sortBy, setSortBy] = useState<SortOption>('default');
+  const [sortBy, setSortBy] = useState<SortOption>("default");
   const [filterClaimed, setFilterClaimed] = useState(false);
   const [filterUnclaimed, setFilterUnclaimed] = useState(false);
 
   // Derived displayed items
   let displayedItems: GiftItemType[] = giftItems;
   if (filterClaimed && !filterUnclaimed) {
-    displayedItems = displayedItems.filter((i) => (i.claimed ?? 0) >= (i.quantity ?? 1));
+    displayedItems = displayedItems.filter(
+      (i) => (i.claimed ?? 0) >= (i.quantity ?? 1)
+    );
   } else if (filterUnclaimed && !filterClaimed) {
-    displayedItems = displayedItems.filter((i) => (i.claimed ?? 0) < (i.quantity ?? 1));
+    displayedItems = displayedItems.filter(
+      (i) => (i.claimed ?? 0) < (i.quantity ?? 1)
+    );
   }
   try {
     displayedItems = [...displayedItems].sort((a, b) => {
@@ -95,14 +123,19 @@ export default function AddGift() {
       const ad = (a as any)?.created_at || "";
       const bd = (b as any)?.created_at || "";
       switch (sortBy) {
-        case 'priceAsc': return aPrice - bPrice;
-        case 'priceDesc': return bPrice - aPrice;
-        case 'newest': return bd.localeCompare(ad);
-        case 'oldest': return ad.localeCompare(bd);
-        default: return 0;
+        case "priceAsc":
+          return aPrice - bPrice;
+        case "priceDesc":
+          return bPrice - aPrice;
+        case "newest":
+          return bd.localeCompare(ad);
+        case "oldest":
+          return ad.localeCompare(bd);
+        default:
+          return 0;
       }
     });
-  } catch { }
+  } catch {}
   // @ts-ignore generated after adding convex action
   const scrape = useAction((api as any).scrape.productMetadata);
 
@@ -110,7 +143,8 @@ export default function AddGift() {
   const formatEventDate = (dateStr?: string) => {
     if (!dateStr) return "";
     const parts = dateStr.split("-").map((p) => parseInt(p, 10));
-    if (parts.length !== 3 || parts.some((n) => Number.isNaN(n))) return dateStr;
+    if (parts.length !== 3 || parts.some((n) => Number.isNaN(n)))
+      return dateStr;
     const [y, m, d] = parts;
     const date = new Date(y, (m ?? 1) - 1, d ?? 1); // local time to avoid TZ shift
     try {
@@ -121,7 +155,20 @@ export default function AddGift() {
         year: "numeric",
       }).format(date);
     } catch {
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
       return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
     }
   };
@@ -135,22 +182,25 @@ export default function AddGift() {
     return "all";
   }, [filterClaimed, filterUnclaimed]);
 
-  const handleAvailabilityChange = useCallback((value: "all" | "claimed" | "unclaimed") => {
-    switch (value) {
-      case "claimed":
-        setFilterClaimed(true);
-        setFilterUnclaimed(false);
-        break;
-      case "unclaimed":
-        setFilterClaimed(false);
-        setFilterUnclaimed(true);
-        break;
-      default:
-        setFilterClaimed(false);
-        setFilterUnclaimed(false);
-        break;
-    }
-  }, [setFilterClaimed, setFilterUnclaimed]);
+  const handleAvailabilityChange = useCallback(
+    (value: "all" | "claimed" | "unclaimed") => {
+      switch (value) {
+        case "claimed":
+          setFilterClaimed(true);
+          setFilterUnclaimed(false);
+          break;
+        case "unclaimed":
+          setFilterClaimed(false);
+          setFilterUnclaimed(true);
+          break;
+        default:
+          setFilterClaimed(false);
+          setFilterUnclaimed(false);
+          break;
+      }
+    },
+    [setFilterClaimed, setFilterUnclaimed]
+  );
 
   const totals = useMemo(() => {
     return giftItems.reduce(
@@ -169,7 +219,14 @@ export default function AddGift() {
         }
         return acc;
       },
-      { totalItems: 0, totalQuantity: 0, fullyClaimed: 0, claimedCount: 0, unclaimedCount: 0, claimedUnits: 0 }
+      {
+        totalItems: 0,
+        totalQuantity: 0,
+        fullyClaimed: 0,
+        claimedCount: 0,
+        unclaimedCount: 0,
+        claimedUnits: 0,
+      }
     );
   }, [giftItems]);
 
@@ -195,17 +252,22 @@ export default function AddGift() {
   const lastUpdatedLabel = "Last updated: July 15, 2025 | 08:00PM";
   const listIdString = listId ? String(listId) : undefined;
 
-  const handleOpenGift = useCallback((item: GiftItemType) => {
-    router.push({
-      pathname: "/gift-detail",
-      params: {
-        itemId: String(item._id),
-        ...(listIdString ? { listId: listIdString } : {}),
-      },
-    });
-  }, [listIdString]);
+  const handleOpenGift = useCallback(
+    (item: GiftItemType) => {
+      router.push({
+        pathname: "/gift-detail",
+        params: {
+          itemId: String(item._id),
+          ...(listIdString ? { listId: listIdString } : {}),
+        },
+      });
+    },
+    [listIdString]
+  );
 
-  const handleBack = () => { router.back(); };
+  const handleBack = () => {
+    router.back();
+  };
 
   // Bottom sheet + form state
   const [showSheet, setShowSheet] = useState(false);
@@ -218,7 +280,10 @@ export default function AddGift() {
       useNativeDriver: true,
     }).start();
   }, [showSheet, sheetAnim]);
-  const translateY = sheetAnim.interpolate({ inputRange: [0, 1], outputRange: [600, 0] });
+  const translateY = sheetAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [600, 0],
+  });
 
   const [link, setLink] = useState("");
   const [search, setSearch] = useState("");
@@ -233,11 +298,13 @@ export default function AddGift() {
   // In-sheet browser state
   const [showBrowser, setShowBrowser] = useState(false);
   const [browserUrl, setBrowserUrl] = useState<string | null>(null); // initial search url
-  const [currentBrowserUrl, setCurrentBrowserUrl] = useState<string | null>(null); // updated as user navigates
+  const [currentBrowserUrl, setCurrentBrowserUrl] = useState<string | null>(
+    null
+  ); // updated as user navigates
   // Sort & Filter sheet visibility
   const [showSortSheet, setShowSortSheet] = useState(false);
   // Temp draft selections while sheet open
-  const [tempSortBy, setTempSortBy] = useState<SortOption>('default');
+  const [tempSortBy, setTempSortBy] = useState<SortOption>("default");
   const [tempFilterClaimed, setTempFilterClaimed] = useState(false);
   const [tempFilterUnclaimed, setTempFilterUnclaimed] = useState(false);
   const [isUrlValid, setIsUrlValid] = useState(true);
@@ -265,7 +332,10 @@ export default function AddGift() {
     // Only validate if it looks like a URL (starts with http:// or https://)
     // Keywords without http/https prefix are considered valid
     const trimmedLink = link.trim();
-    if (trimmedLink.startsWith("http://") || trimmedLink.startsWith("https://")) {
+    if (
+      trimmedLink.startsWith("http://") ||
+      trimmedLink.startsWith("https://")
+    ) {
       setIsUrlValid(validateUrl(link));
     } else {
       // It's a keyword, not a URL, so it's valid
@@ -274,7 +344,12 @@ export default function AddGift() {
   }, [link]);
 
   const DESCRIPTION_LIMIT = 400;
-  const canSave = !!listId && (link.trim().length > 0 || name.trim().length > 0) && quantity > 0 && !saving && (link.trim().length === 0 || isUrlValid); ;
+  const canSave =
+    !!listId &&
+    (link.trim().length > 0 || name.trim().length > 0) &&
+    quantity > 0 &&
+    !saving &&
+    (link.trim().length === 0 || isUrlValid);
 
   const validateUrl = (value: string) => {
     const urlPattern = /^(https?:\/\/[^\s$.?#].[^\s]*)$/i;
@@ -283,10 +358,22 @@ export default function AddGift() {
 
   const handleAddGift = () => setShowSheet(true);
   const closeSheet = () => setShowSheet(false);
-  const incQty = useCallback(() => setQuantity(q => Math.min(99, q + 1)), []);
-  const decQty = useCallback(() => setQuantity(q => Math.max(1, q - 1)), []);
-  const resetForm = () => { setLink(""); setSearch(""); setQuantity(1); setPrice(""); setName(""); setDescription(""); setImageUrl(null); setScrapeError(null); };
-  const handleCancel = () => { closeSheet(); resetForm(); };
+  const incQty = useCallback(() => setQuantity((q) => Math.min(99, q + 1)), []);
+  const decQty = useCallback(() => setQuantity((q) => Math.max(1, q - 1)), []);
+  const resetForm = () => {
+    setLink("");
+    setSearch("");
+    setQuantity(1);
+    setPrice("");
+    setName("");
+    setDescription("");
+    setImageUrl(null);
+    setScrapeError(null);
+  };
+  const handleCancel = () => {
+    closeSheet();
+    resetForm();
+  };
   const createItem = useMutation(api.products.createListItem as any);
   const handleSave = async () => {
     if (!canSave || !listId) return;
@@ -299,11 +386,11 @@ export default function AddGift() {
         image_url: imageUrl || null,
         quantity,
         price: price || null,
-        currency: 'AED',
+        currency: "AED",
         buy_url: link || null,
       });
     } catch (e) {
-      console.warn('Failed to save gift', e);
+      console.warn("Failed to save gift", e);
     } finally {
       setSaving(false);
       closeSheet();
@@ -315,10 +402,10 @@ export default function AddGift() {
     // On web, use the link input value; on mobile, use the search field
     const searchQuery = Platform.OS === "web" ? link.trim() : search.trim();
     if (!searchQuery) return;
-    
+
     const q = encodeURIComponent(searchQuery);
     const url = `https://www.google.com/search?q=${q}&tbm=shop`;
-    
+
     if (Platform.OS === "web" && typeof window !== "undefined") {
       // On web, open in a new tab
       window.open(url, "_blank");
@@ -352,7 +439,17 @@ export default function AddGift() {
         const meta = await scrape({ url: link });
         if (cancelled) return;
         if (meta.ok) {
-          if (!name && meta.title) setName(meta.title);
+          if (!name && meta.title) {
+            // Clean title by removing common e-commerce site prefixes
+            let cleanTitle = meta.title
+              .replace(/^amazon\.com\s*:\s*/i, "")
+              .replace(/^amazon\s*:\s*/i, "")
+              .replace(/^ebay\s*:\s*/i, "")
+              .replace(/^walmart\.com\s*:\s*/i, "")
+              .replace(/^target\.com\s*:\s*/i, "")
+              .trim();
+            setName(cleanTitle);
+          }
           if (!price && meta.price) setPrice(meta.price);
           if (meta.image) setImageUrl(meta.image);
         } else {
@@ -364,35 +461,41 @@ export default function AddGift() {
         if (!cancelled) setScraping(false);
       }
     }, 600);
-    return () => { cancelled = true; clearTimeout(t); };
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [link]);
 
   const handleShare = async () => {
     try {
       if (!listId) return;
-      let url = '';
-      if (Platform.OS === 'web' && typeof window !== 'undefined') {
-        const origin = window.location?.origin || '';
+      let url = "";
+      if (Platform.OS === "web" && typeof window !== "undefined") {
+        const origin = window.location?.origin || "";
         const qs = `listId=${encodeURIComponent(String(listId))}`;
         url = `${origin}/view-list?${qs}`;
         // copy to clipboard
-        await navigator.clipboard.writeText(url).catch(() => { });
+        await navigator.clipboard.writeText(url).catch(() => {});
       } else {
-        url = Linking.createURL('view-list', {
+        url = Linking.createURL("view-list", {
           queryParams: { listId: String(listId) },
         });
       }
 
       await Share.share({ message: url, url });
     } catch (e) {
-      console.warn('Share failed', e);
+      console.warn("Share failed", e);
     }
   };
 
   const handleManageList = () => {
     if (!listId) return;
-    router.push({ pathname: "/manage-list", params: { listId: String(listId) } });
+    router.push({
+      pathname: "/manage-list",
+      params: { listId: String(listId) },
+    });
   };
 
   const loading = !list; // simple loading flag
@@ -401,11 +504,14 @@ export default function AddGift() {
   const subtitle = list?.note ?? "";
   const coverUri = list?.coverPhotoUri as string | undefined;
   const privacy = list?.privacy ?? "private";
-  const shares = useQuery(api.products.getListShares as any, listId ? ({ list_id: listId } as any) : "skip");
+  const shares = useQuery(
+    api.products.getListShares as any,
+    listId ? ({ list_id: listId } as any) : "skip"
+  );
   const shareCount = Array.isArray(shares) ? shares.length : undefined;
   const address = (list?.shippingAddress as string | undefined) ?? null;
   const ribbonSubtitle = subtitle || formattedEventDate || "";
-  const occasion = list?.occasion || ""
+  const occasion = list?.occasion || "";
 
   const layout = isDesktop ? (
     <DesktopLayout
@@ -463,7 +569,12 @@ export default function AddGift() {
     <View style={isDesktop ? desktopStyles.container : styles.container}>
       {layout}
       {/** Bottom Sheet / Modal **/}
-      <Modal visible={showSheet} transparent animationType={isDesktop ? "fade" : "none"} onRequestClose={closeSheet}>
+      <Modal
+        visible={showSheet}
+        transparent
+        animationType={isDesktop ? "fade" : "none"}
+        onRequestClose={closeSheet}
+      >
         <Pressable style={styles.backdrop} onPress={closeSheet} />
         {isDesktop ? (
           <View style={desktopStyles.modalContainer}>
@@ -471,12 +582,18 @@ export default function AddGift() {
               {/* Header */}
               <View style={desktopStyles.modalHeader}>
                 <Text style={desktopStyles.modalTitle}>Add a Gift</Text>
-                <Pressable onPress={closeSheet} style={desktopStyles.modalCloseButton}>
+                <Pressable
+                  onPress={closeSheet}
+                  style={desktopStyles.modalCloseButton}
+                >
                   <Ionicons name="close" size={24} color="#8E8EA9" />
                 </Pressable>
               </View>
 
-              <ScrollView contentContainerStyle={desktopStyles.modalScrollContent} showsVerticalScrollIndicator={false}>
+              <ScrollView
+                contentContainerStyle={desktopStyles.modalScrollContent}
+                showsVerticalScrollIndicator={false}
+              >
                 {/* Web Link Section */}
                 <View style={desktopStyles.modalFieldGroup}>
                   <Text style={desktopStyles.modalFieldLabel}>Web Link</Text>
@@ -491,18 +608,33 @@ export default function AddGift() {
                       placeholder="Type, paste or search"
                       placeholderTextColor="#8E8EA9"
                     />
-                    <Pressable onPress={openSearchBrowser} style={desktopStyles.modalSearchButton}>
-                      <Text style={desktopStyles.modalSearchButtonText}>Search via</Text>
+                    <Pressable
+                      onPress={openSearchBrowser}
+                      style={desktopStyles.modalSearchButton}
+                    >
+                      <Text style={desktopStyles.modalSearchButtonText}>
+                        Search via
+                      </Text>
                       <View style={desktopStyles.googleLogo}>
                         <Text style={desktopStyles.googleG}>G</Text>
                       </View>
                     </Pressable>
                   </View>
                   {!isUrlValid && link.trim().length > 0 && (
-                    <Text style={desktopStyles.modalErrorText}>Invalid URL</Text>
+                    <Text style={desktopStyles.modalErrorText}>
+                      Invalid URL
+                    </Text>
                   )}
-                  {scrapeError && <Text style={desktopStyles.modalErrorText}>{scrapeError}</Text>}
-                  {scraping && <Text style={desktopStyles.modalScrapingText}>Loading...</Text>}
+                  {scrapeError && (
+                    <Text style={desktopStyles.modalErrorText}>
+                      {scrapeError}
+                    </Text>
+                  )}
+                  {scraping && (
+                    <Text style={desktopStyles.modalScrapingText}>
+                      Loading...
+                    </Text>
+                  )}
                 </View>
 
                 {/* Product Image and Details Row */}
@@ -511,14 +643,26 @@ export default function AddGift() {
                   <View style={desktopStyles.modalImageContainer}>
                     {imageUrl ? (
                       <View style={desktopStyles.modalImageWrapper}>
-                        <Image source={{ uri: imageUrl }} style={desktopStyles.modalProductImage} resizeMode="contain" />
+                        <Image
+                          source={{ uri: imageUrl }}
+                          style={desktopStyles.modalProductImage}
+                          resizeMode="contain"
+                        />
                         <Pressable style={desktopStyles.modalImageEditButton}>
-                          <Ionicons name="image-outline" size={20} color="#3B0076" />
+                          <Ionicons
+                            name="image-outline"
+                            size={20}
+                            color="#3B0076"
+                          />
                         </Pressable>
                       </View>
                     ) : (
                       <View style={desktopStyles.modalImagePlaceholder}>
-                        <Ionicons name="image-outline" size={48} color="#D1D1D6" />
+                        <Ionicons
+                          name="image-outline"
+                          size={48}
+                          color="#D1D1D6"
+                        />
                       </View>
                     )}
                   </View>
@@ -526,7 +670,9 @@ export default function AddGift() {
                   {/* Price and Quantity Section */}
                   <View style={desktopStyles.modalPriceQtyColumn}>
                     <View style={desktopStyles.modalFieldGroup}>
-                      <Text style={desktopStyles.modalFieldLabel}>Price of gift</Text>
+                      <Text style={desktopStyles.modalFieldLabel}>
+                        Price of gift
+                      </Text>
                       <TextInput
                         value={price}
                         onChangeText={setPrice}
@@ -537,14 +683,28 @@ export default function AddGift() {
                       />
                     </View>
                     <View style={desktopStyles.modalFieldGroup}>
-                      <Text style={desktopStyles.modalFieldLabel}>Quantity</Text>
+                      <Text style={desktopStyles.modalFieldLabel}>
+                        Quantity
+                      </Text>
                       <View style={desktopStyles.modalQtyRow}>
-                        <Pressable onPress={decQty} style={desktopStyles.modalQtyButton}>
-                          <Text style={desktopStyles.modalQtyButtonText}>–</Text>
+                        <Pressable
+                          onPress={decQty}
+                          style={desktopStyles.modalQtyButton}
+                        >
+                          <Text style={desktopStyles.modalQtyButtonText}>
+                            –
+                          </Text>
                         </Pressable>
-                        <Text style={desktopStyles.modalQtyValue}>{String(quantity).padStart(2, '0')}</Text>
-                        <Pressable onPress={incQty} style={desktopStyles.modalQtyButton}>
-                          <Text style={desktopStyles.modalQtyButtonText}>+</Text>
+                        <Text style={desktopStyles.modalQtyValue}>
+                          {String(quantity).padStart(2, "0")}
+                        </Text>
+                        <Pressable
+                          onPress={incQty}
+                          style={desktopStyles.modalQtyButton}
+                        >
+                          <Text style={desktopStyles.modalQtyButtonText}>
+                            +
+                          </Text>
                         </Pressable>
                       </View>
                     </View>
@@ -553,7 +713,9 @@ export default function AddGift() {
 
                 {/* Name of Gift */}
                 <View style={desktopStyles.modalFieldGroup}>
-                  <Text style={desktopStyles.modalFieldLabel}>Name of Gift</Text>
+                  <Text style={desktopStyles.modalFieldLabel}>
+                    Name of Gift
+                  </Text>
                   <View style={desktopStyles.modalInputRow}>
                     <TextInput
                       value={name}
@@ -573,53 +735,90 @@ export default function AddGift() {
                     <TextInput
                       placeholder="Prefer color white, size medium etc"
                       value={description}
-                      onChangeText={t => t.length <= DESCRIPTION_LIMIT && setDescription(t)}
+                      onChangeText={(t) =>
+                        t.length <= DESCRIPTION_LIMIT && setDescription(t)
+                      }
                       style={desktopStyles.modalTextarea}
                       multiline
                       placeholderTextColor="#8E8EA9"
                     />
-                    <Text style={desktopStyles.modalCharCount}>{description.length}/100</Text>
+                    <Text style={desktopStyles.modalCharCount}>
+                      {description.length}/100
+                    </Text>
                   </View>
                 </View>
               </ScrollView>
 
               {/* Footer Buttons */}
               <View style={desktopStyles.modalFooter}>
-                <Pressable style={desktopStyles.modalCancelButton} onPress={handleCancel}>
-                  <Text style={desktopStyles.modalCancelButtonText}>Cancel</Text>
+                <Pressable
+                  style={desktopStyles.modalCancelButton}
+                  onPress={handleCancel}
+                >
+                  <Text style={desktopStyles.modalCancelButtonText}>
+                    Cancel
+                  </Text>
                 </Pressable>
                 <Pressable
-                  style={[desktopStyles.modalSaveButton, (!canSave) && desktopStyles.modalSaveButtonDisabled]}
+                  style={[
+                    desktopStyles.modalSaveButton,
+                    !canSave && desktopStyles.modalSaveButtonDisabled,
+                  ]}
                   onPress={handleSave}
                   disabled={!canSave}
                 >
-                  <Text style={[desktopStyles.modalSaveButtonText, (!canSave) && desktopStyles.modalSaveButtonTextDisabled]}>
-                    {saving ? 'Saving...' : 'Save'}
+                  <Text
+                    style={[
+                      desktopStyles.modalSaveButtonText,
+                      !canSave && desktopStyles.modalSaveButtonTextDisabled,
+                    ]}
+                  >
+                    {saving ? "Saving..." : "Save"}
                   </Text>
                 </Pressable>
               </View>
             </View>
           </View>
         ) : (
-          <Animated.View style={[styles.sheetContainer, { transform: [{ translateY }] }]}>
-            <Pressable style={{backgroundColor:'#FFFF', borderWidth:0}} onPress={closeSheet}>
+          <Animated.View
+            style={[styles.sheetContainer, { transform: [{ translateY }] }]}
+          >
+            <Pressable
+              style={{ backgroundColor: "#FFFF", borderWidth: 0 }}
+              onPress={closeSheet}
+            >
               <View style={styles.sheetHandle} />
             </Pressable>
-            <ScrollView contentContainerStyle={{...styles.sheetContent, paddingHorizontal:0, gap:0}} showsVerticalScrollIndicator={false}>
-              <View style={{ padding:16, gap: 20, backgroundColor:'#ffff'}}>
+            <ScrollView
+              contentContainerStyle={{
+                ...styles.sheetContent,
+                paddingHorizontal: 0,
+                gap: 0,
+              }}
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={{ padding: 16, gap: 20, backgroundColor: "#ffff" }}>
                 <Text style={styles.sheetTitle}> Add a gift item</Text>
 
                 <TextInputField
                   label="Add a web link"
                   value={link}
-                  onChangeText={setLink} 
-                  icon={<Image source={require("@/assets/images/externalLink.png")} />}
+                  onChangeText={setLink}
+                  icon={
+                    <Image
+                      source={require("@/assets/images/externalLink.png")}
+                    />
+                  }
                   keyboardType="url"
                   placeholder="https://"
                   autoCapitalize="none"
                   autoCorrect={false}
-                  error={[ ...(!isUrlValid && link.trim().length > 0 ? ["Invalid URL"]: []), ...(scrapeError ? [String(scrapeError)]: []) ]}
-
+                  error={[
+                    ...(!isUrlValid && link.trim().length > 0
+                      ? ["Invalid URL"]
+                      : []),
+                    ...(scrapeError ? [String(scrapeError)] : []),
+                  ]}
                 />
                 <View style={styles.orDivider}>
                   <View style={styles.orLine} />
@@ -627,51 +826,72 @@ export default function AddGift() {
                   <View style={styles.orLine} />
                 </View>
 
-                 <TextInputField
+                <TextInputField
                   label="Search via Google"
                   value={search}
-                  onChangeText={setSearch} 
+                  onChangeText={setSearch}
                   placeholder="Search products"
-                  icon={<Pressable onPress={openSearchBrowser}><Image source={require("@/assets/images/search.png")} /></Pressable>}
+                  icon={
+                    <Pressable onPress={openSearchBrowser}>
+                      <Image source={require("@/assets/images/search.png")} />
+                    </Pressable>
+                  }
                 />
-
               </View>
-              <View style={{ padding:16, paddingTop:24,  gap: 20}}>
+              <View style={{ padding: 16, paddingTop: 24, gap: 20 }}>
                 <View style={styles.fieldGroup}>
                   <Text style={styles.fieldLabel}>Desired quantity</Text>
                   <View style={styles.qtyRow}>
-                    <Pressable onPress={decQty} style={styles.qtyBtn}><Text style={styles.qtyBtnText}>–</Text></Pressable>
-                    <Text style={styles.qtyValue}>{String(quantity).padStart(2, '0')}</Text>
-                    <Pressable onPress={incQty} style={styles.qtyBtn}><Text style={styles.qtyBtnText}>+</Text></Pressable>
+                    <Pressable onPress={decQty} style={styles.qtyBtn}>
+                      <Text style={styles.qtyBtnText}>–</Text>
+                    </Pressable>
+                    <Text style={styles.qtyValue}>
+                      {String(quantity).padStart(2, "0")}
+                    </Text>
+                    <Pressable onPress={incQty} style={styles.qtyBtn}>
+                      <Text style={styles.qtyBtnText}>+</Text>
+                    </Pressable>
                   </View>
                 </View>
                 <TextInputField
                   label="Price of gift"
                   value={price}
-                  onChangeText={setPrice} 
-                  keyboardType="decimal-pad" 
-                  inputLabelContainerStyle={{backgroundColor:'#F2F2F7'}}
+                  onChangeText={setPrice}
+                  keyboardType="decimal-pad"
+                  inputLabelContainerStyle={{ backgroundColor: "#F2F2F7" }}
                 />
 
                 <TextInputField
                   label="Name of gift"
                   value={name}
                   onChangeText={setName}
-                  inputLabelContainerStyle={{backgroundColor:'#F2F2F7'}}
+                  inputLabelContainerStyle={{ backgroundColor: "#F2F2F7" }}
                   icon={<Image source={require("@/assets/images/Edit.png")} />}
                 />
-               
-                <TextInputAreaField 
+
+                <TextInputAreaField
                   label="Description (optional)"
                   placeholder="Prefer white, size M."
                   value={description}
-                  onChangeText={t => t.length <= DESCRIPTION_LIMIT && setDescription(t)}
-                  inputLabelContainerStyle={{backgroundColor:'#F2F2F7'}}
+                  onChangeText={(t) =>
+                    t.length <= DESCRIPTION_LIMIT && setDescription(t)
+                  }
+                  inputLabelContainerStyle={{ backgroundColor: "#F2F2F7" }}
                   descriptionLimit={DESCRIPTION_LIMIT}
-                  
                 />
-                <Pressable style={[styles.saveBtn, (!canSave) && styles.saveBtnDisabled]} onPress={handleSave} disabled={!canSave}>
-                  <Text style={[styles.saveBtnText, (!canSave) && styles.saveBtnTextDisabled]}>{saving ? 'Saving...' : 'Save'}</Text>
+                <Pressable
+                  style={[styles.saveBtn, !canSave && styles.saveBtnDisabled]}
+                  onPress={handleSave}
+                  disabled={!canSave}
+                >
+                  <Text
+                    style={[
+                      styles.saveBtnText,
+                      !canSave && styles.saveBtnTextDisabled,
+                    ]}
+                  >
+                    {saving ? "Saving..." : "Save"}
+                  </Text>
                 </Pressable>
                 <Pressable style={styles.cancelBtn} onPress={handleCancel}>
                   <Text style={styles.cancelBtnText}>Cancel</Text>
@@ -682,22 +902,36 @@ export default function AddGift() {
         )}
       </Modal>
       {/* Product search browser modal */}
-      <Modal visible={showBrowser} animationType="slide" presentationStyle="fullScreen" onRequestClose={() => setShowBrowser(false)}>
-        
-        <LinearGradient 
+      <Modal
+        visible={showBrowser}
+        animationType="slide"
+        presentationStyle="fullScreen"
+        onRequestClose={() => setShowBrowser(false)}
+      >
+        <LinearGradient
           colors={["#330065", "#45018ad7"]}
           locations={[0, 0.7]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 2 }}
-          
         >
-          <View style={[styles.browserHeader, {backgroundColor:'transparent', height: 80}]}>
-              <View style={[styles.navigation, { paddingBottom: 16}]}>
-                <Pressable onPress={() => { setShowBrowser(false); setTimeout(() => setShowSheet(true), 60); }} style={styles.backButton}>
-                    <Image source={require("@/assets/images/backArrow.png")} />
-                </Pressable>
-                <Text style={styles.headerTitle}>Search via Google</Text>
-              </View>
+          <View
+            style={[
+              styles.browserHeader,
+              { backgroundColor: "transparent", height: 80 },
+            ]}
+          >
+            <View style={[styles.navigation, { paddingBottom: 16 }]}>
+              <Pressable
+                onPress={() => {
+                  setShowBrowser(false);
+                  setTimeout(() => setShowSheet(true), 60);
+                }}
+                style={styles.backButton}
+              >
+                <Image source={require("@/assets/images/backArrow.png")} />
+              </Pressable>
+              <Text style={styles.headerTitle}>Search via Google</Text>
+            </View>
           </View>
         </LinearGradient>
         <View style={styles.browserModalContainer}>
@@ -709,8 +943,14 @@ export default function AddGift() {
               style={styles.webview}
             />
           )}
-          <SafeAreaView edges={['bottom']} style={styles.browserActionBarWrapper}>
-            <Pressable style={styles.browserActionBar} onPress={handleBrowserAdd}>
+          <SafeAreaView
+            edges={["bottom"]}
+            style={styles.browserActionBarWrapper}
+          >
+            <Pressable
+              style={styles.browserActionBar}
+              onPress={handleBrowserAdd}
+            >
               <Ionicons name="add" size={20} color="#FFFFFF" />
               <Text style={styles.browserActionBarText}>Add Product</Text>
             </Pressable>
@@ -718,13 +958,24 @@ export default function AddGift() {
         </View>
       </Modal>
       {/* Sort & Filter Bottom Sheet (designed) */}
-      <Modal visible={showSortSheet} transparent animationType="fade" onRequestClose={() => setShowSortSheet(false)}>
-        <Pressable style={styles.backdrop} onPress={() => setShowSortSheet(false)} />
+      <Modal
+        visible={showSortSheet}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowSortSheet(false)}
+      >
+        <Pressable
+          style={styles.backdrop}
+          onPress={() => setShowSortSheet(false)}
+        />
         <View style={styles.sortSheetContainer}>
           <Pressable onPress={() => setShowSortSheet(false)}>
             <View style={styles.sortSheetHandle} />
           </Pressable>
-          <ScrollView contentContainerStyle={styles.sortSheetContent} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            contentContainerStyle={styles.sortSheetContent}
+            showsVerticalScrollIndicator={false}
+          >
             <Text style={styles.sortSheetTitle}>Sort & Filter</Text>
             <View style={styles.sortDivider} />
             <View style={styles.sortSection}>
@@ -733,14 +984,23 @@ export default function AddGift() {
                 <Ionicons name="chevron-down" size={20} color="#1C0335" />
               </View>
               {[
-                { key: 'default', label: 'Default' },
-                { key: 'priceAsc', label: 'Price Lowest - Highest' },
-                { key: 'priceDesc', label: 'Price Highest - Lowest' },
-                { key: 'newest', label: 'Most Recent to Oldest' },
-                { key: 'oldest', label: 'Oldest to Most Recent' },
-              ].map(o => (
-                <Pressable key={o.key} style={styles.radioRow} onPress={() => setTempSortBy(o.key as SortOption)}>
-                  <View style={[styles.radioOuter, tempSortBy === o.key && styles.radioOuterActive]}>
+                { key: "default", label: "Default" },
+                { key: "priceAsc", label: "Price Lowest - Highest" },
+                { key: "priceDesc", label: "Price Highest - Lowest" },
+                { key: "newest", label: "Most Recent to Oldest" },
+                { key: "oldest", label: "Oldest to Most Recent" },
+              ].map((o) => (
+                <Pressable
+                  key={o.key}
+                  style={styles.radioRow}
+                  onPress={() => setTempSortBy(o.key as SortOption)}
+                >
+                  <View
+                    style={[
+                      styles.radioOuter,
+                      tempSortBy === o.key && styles.radioOuterActive,
+                    ]}
+                  >
                     {tempSortBy === o.key && <View style={styles.radioInner} />}
                   </View>
                   <Text style={styles.radioLabel}>{o.label}</Text>
@@ -749,18 +1009,40 @@ export default function AddGift() {
             </View>
             <View style={styles.sortSection}>
               <View style={styles.sortSectionHeader}>
-                <Text style={styles.sortSectionTitle}>Filter by Availability</Text>
+                <Text style={styles.sortSectionTitle}>
+                  Filter by Availability
+                </Text>
                 <Ionicons name="chevron-down" size={20} color="#1C0335" />
               </View>
-              <Pressable style={styles.radioRow} onPress={() => setTempFilterClaimed(v => !v)}>
-                <View style={[styles.checkboxBox, tempFilterClaimed && styles.checkboxBoxActive]}>
-                  {tempFilterClaimed && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}
+              <Pressable
+                style={styles.radioRow}
+                onPress={() => setTempFilterClaimed((v) => !v)}
+              >
+                <View
+                  style={[
+                    styles.checkboxBox,
+                    tempFilterClaimed && styles.checkboxBoxActive,
+                  ]}
+                >
+                  {tempFilterClaimed && (
+                    <Ionicons name="checkmark" size={10} color="#FFFFFF" />
+                  )}
                 </View>
                 <Text style={styles.radioLabel}>Claimed</Text>
               </Pressable>
-              <Pressable style={styles.radioRow} onPress={() => setTempFilterUnclaimed(v => !v)}>
-                <View style={[styles.checkboxBox, tempFilterUnclaimed && styles.checkboxBoxActive]}>
-                  {tempFilterUnclaimed && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}
+              <Pressable
+                style={styles.radioRow}
+                onPress={() => setTempFilterUnclaimed((v) => !v)}
+              >
+                <View
+                  style={[
+                    styles.checkboxBox,
+                    tempFilterUnclaimed && styles.checkboxBoxActive,
+                  ]}
+                >
+                  {tempFilterUnclaimed && (
+                    <Ionicons name="checkmark" size={10} color="#FFFFFF" />
+                  )}
                 </View>
                 <Text style={styles.radioLabel}>Unclaimed</Text>
               </Pressable>
@@ -812,12 +1094,11 @@ type MobileLayoutProps = {
   shareCount?: number;
   address?: string | null;
   lastUpdated: string;
-  occasion?: string
-  tempSortBy?: string
-  tempFilterClaimed?: boolean
-  tempFilterUnclaimed?: boolean
+  occasion?: string;
+  tempSortBy?: string;
+  tempFilterClaimed?: boolean;
+  tempFilterUnclaimed?: boolean;
   daysToGo: string | null;
-
 };
 
 function MobileLayout({
@@ -841,13 +1122,17 @@ function MobileLayout({
   tempSortBy,
   tempFilterClaimed,
   tempFilterUnclaimed,
-  daysToGo
+  daysToGo,
 }: MobileLayoutProps) {
   return (
     <>
       <HeaderBar title={title} onBack={handleBack} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <ListCover imageUri={coverUri} overlayText={String(daysToGo || "")} occasion={occasion}/>
+        <ListCover
+          imageUri={coverUri}
+          overlayText={String(daysToGo || "")}
+          occasion={occasion}
+        />
 
         <View style={styles.listInfoContainer}>
           <RibbonHeader occasion={occasion} title={title} subtitle={subtitle} />
@@ -861,9 +1146,13 @@ function MobileLayout({
           shareCount={shareCount}
         />
         {displayedItems.length > 0 ? (
-          <SelectedFilter tempSortBy={String(tempSortBy)} tempFilterClaimed={Boolean(tempFilterClaimed)} tempFilterUnclaimed={Boolean(tempFilterUnclaimed)}/>
+          <SelectedFilter
+            tempSortBy={String(tempSortBy)}
+            tempFilterClaimed={Boolean(tempFilterClaimed)}
+            tempFilterUnclaimed={Boolean(tempFilterUnclaimed)}
+          />
         ) : null}
-        
+
         <View style={styles.addGiftSection}>
           {displayedItems.length > 0 ? (
             <>
@@ -871,7 +1160,6 @@ function MobileLayout({
                 <Fragment key={item._id}>
                   {index !== 0 ? <View style={styles.giftDivider} /> : null}
                   <GiftItemCard title={title} item={item} />
-                  
                 </Fragment>
               ))}
               <Pressable style={styles.addMoreButton} onPress={onAddGift}>
@@ -881,7 +1169,7 @@ function MobileLayout({
             </>
           ) : (
             <View style={styles.addYourFirstGift}>
-              <Text style={styles.addGiftTitle}>  Add your first gift item</Text>
+              <Text style={styles.addGiftTitle}> Add your first gift item</Text>
               <Pressable style={styles.addGiftButton} onPress={onAddGift}>
                 <Ionicons name="add" size={24} color="#3B0076" />
                 <Text style={styles.addGiftButtonText}>Add a gift</Text>
@@ -891,11 +1179,16 @@ function MobileLayout({
         </View>
 
         <InfoBox>
-          To learn more on how to add gifts from web browser, <Text style={styles.linkText}>click here</Text>
+          To learn more on how to add gifts from web browser,{" "}
+          <Text style={styles.linkText}>click here</Text>
         </InfoBox>
       </ScrollView>
 
-      <FooterBar lastUpdated={lastUpdated} onShare={onShare} onManage={onManage} />
+      <FooterBar
+        lastUpdated={lastUpdated}
+        onShare={onShare}
+        onManage={onManage}
+      />
     </>
   );
 }
@@ -923,7 +1216,7 @@ type DesktopLayoutProps = {
   loading: boolean;
   address?: string | null;
   lastUpdated: string;
-  occasion?: string
+  occasion?: string;
 };
 
 function DesktopLayout({
@@ -949,20 +1242,28 @@ function DesktopLayout({
   loading,
   address,
   lastUpdated,
-  occasion
+  occasion,
 }: DesktopLayoutProps) {
   const privacyDisplay = getPrivacyDisplay(privacy, loading, shareCount);
-  const availabilityOptions: { value: "all" | "claimed" | "unclaimed"; label: string }[] = [
+  const availabilityOptions: {
+    value: "all" | "claimed" | "unclaimed";
+    label: string;
+  }[] = [
     { value: "all", label: "All" },
     { value: "claimed", label: "Claimed" },
     { value: "unclaimed", label: "Unclaimed" },
   ];
-  const availabilityLabel = availabilityOptions.find((opt) => opt.value === availability)?.label ?? "All";
-  const sortLabel = SORT_OPTIONS.find((opt) => opt.key === sortBy)?.label ?? "Default";
+  const availabilityLabel =
+    availabilityOptions.find((opt) => opt.value === availability)?.label ??
+    "All";
+  const sortLabel =
+    SORT_OPTIONS.find((opt) => opt.key === sortBy)?.label ?? "Default";
   const visibilityText = React.useMemo(() => {
     if (loading) return "Loading privacy";
     if (privacy === "shared") {
-      return (shareCount ?? 0) === 0 ? "Visible to Everyone" : "Visible to My People";
+      return (shareCount ?? 0) === 0
+        ? "Visible to Everyone"
+        : "Visible to My People";
     }
     if (privacy === "public") return "Visible to Everyone";
     return "Only Me";
@@ -971,13 +1272,17 @@ function DesktopLayout({
   const [showSortMenu, setShowSortMenu] = React.useState(false);
 
   return (
-    <SafeAreaView style={desktopStyles.safeArea} edges={Platform.OS === "web" ? [] : ["top"]}>
+    <SafeAreaView
+      style={desktopStyles.safeArea}
+      edges={Platform.OS === "web" ? [] : ["top"]}
+    >
       <StatusBar barStyle="dark-content" />
       <ScrollView contentContainerStyle={desktopStyles.scrollContent}>
         <View style={desktopStyles.maxWidth}>
           <View style={desktopStyles.topBar}>
             <Text style={desktopStyles.breadcrumbText}>
-              Home / My List / <Text style={desktopStyles.breadcrumbCurrent}>{title}</Text>
+              Home / My List /{" "}
+              <Text style={desktopStyles.breadcrumbCurrent}>{title}</Text>
             </Text>
             <View style={desktopStyles.topActions}>
               <Pressable style={desktopStyles.manageButton} onPress={onManage}>
@@ -993,10 +1298,18 @@ function DesktopLayout({
 
           <View style={desktopStyles.heroCardWrapper}>
             <View style={desktopStyles.heroCard}>
-              <Image source={coverUri ? { uri: coverUri } : FALLBACK_COVER} style={desktopStyles.heroImage} />
+              <Image
+                source={coverUri ? { uri: coverUri } : FALLBACK_COVER}
+                style={desktopStyles.heroImage}
+              />
               <View style={desktopStyles.heroOverlay}>
-                <Pressable style={desktopStyles.changeCoverButton} onPress={onManage}>
-                  <Text style={desktopStyles.changeCoverText}>Change cover photo</Text>
+                <Pressable
+                  style={desktopStyles.changeCoverButton}
+                  onPress={onManage}
+                >
+                  <Text style={desktopStyles.changeCoverText}>
+                    Change cover photo
+                  </Text>
                 </Pressable>
               </View>
             </View>
@@ -1004,7 +1317,9 @@ function DesktopLayout({
               <RibbonHeader
                 occasion={occasion}
                 title={title}
-                subtitle={[ribbonSubtitle, daysToGo].filter(Boolean).join(" - ")}
+                subtitle={[ribbonSubtitle, daysToGo]
+                  .filter(Boolean)
+                  .join(" - ")}
               />
             </View>
           </View>
@@ -1027,7 +1342,9 @@ function DesktopLayout({
               style={desktopStyles.statCard}
             >
               <Text style={desktopStyles.statCardLabel}>All Claimed</Text>
-              <Text style={desktopStyles.statCardValue}>{totals.fullyClaimed}</Text>
+              <Text style={desktopStyles.statCardValue}>
+                {totals.fullyClaimed}
+              </Text>
             </LinearGradient>
             <LinearGradient
               colors={["#F2994A", "#FFB366"]}
@@ -1036,7 +1353,9 @@ function DesktopLayout({
               style={desktopStyles.statCard}
             >
               <Text style={desktopStyles.statCardLabel}>Items Claimed</Text>
-              <Text style={desktopStyles.statCardValue}>{totals.claimedCount}</Text>
+              <Text style={desktopStyles.statCardValue}>
+                {totals.claimedCount}
+              </Text>
             </LinearGradient>
             <LinearGradient
               colors={["#4D4D4D", "#666666"]}
@@ -1045,13 +1364,26 @@ function DesktopLayout({
               style={desktopStyles.statCard}
             >
               <Text style={desktopStyles.statCardLabel}>Items Unclaimed</Text>
-              <Text style={desktopStyles.statCardValue}>{totals.unclaimedCount}</Text>
+              <Text style={desktopStyles.statCardValue}>
+                {totals.unclaimedCount}
+              </Text>
             </LinearGradient>
           </View>
 
           <View style={desktopStyles.controlsRow}>
-            <Pressable style={desktopStyles.visibilityTrigger} onPress={onManage}>
-              <Ionicons name={privacyDisplay.icon === "globe-outline" ? "eye-outline" : privacyDisplay.icon} size={18} color="#3B0076" />
+            <Pressable
+              style={desktopStyles.visibilityTrigger}
+              onPress={onManage}
+            >
+              <Ionicons
+                name={
+                  privacyDisplay.icon === "globe-outline"
+                    ? "eye-outline"
+                    : privacyDisplay.icon
+                }
+                size={18}
+                color="#3B0076"
+              />
               <Text style={desktopStyles.visibilityText}>{visibilityText}</Text>
               <Ionicons name="chevron-down" size={16} color="#3B0076" />
             </Pressable>
@@ -1063,7 +1395,9 @@ function DesktopLayout({
                   style={desktopStyles.filterButton}
                   onPress={() => setShowAvailabilityMenu(true)}
                 >
-                  <Text style={desktopStyles.filterButtonText}>{availabilityLabel}</Text>
+                  <Text style={desktopStyles.filterButtonText}>
+                    {availabilityLabel}
+                  </Text>
                   <Ionicons name="chevron-down" size={14} color="#3B0076" />
                 </Pressable>
               </View>
@@ -1073,7 +1407,9 @@ function DesktopLayout({
                   style={desktopStyles.filterButton}
                   onPress={() => setShowSortMenu(true)}
                 >
-                  <Text style={desktopStyles.filterButtonText}>{sortLabel}</Text>
+                  <Text style={desktopStyles.filterButtonText}>
+                    {sortLabel}
+                  </Text>
                   <Ionicons name="chevron-down" size={14} color="#3B0076" />
                 </Pressable>
               </View>
@@ -1098,9 +1434,13 @@ function DesktopLayout({
 
           <View style={desktopStyles.listSummaryRow}>
             <View style={desktopStyles.listSummaryLeft}>
-              <Text style={desktopStyles.listSummaryLabel}>Total items in list:</Text>
+              <Text style={desktopStyles.listSummaryLabel}>
+                Total items in list:
+              </Text>
               <View style={desktopStyles.listSummaryBadge}>
-                <Text style={desktopStyles.listSummaryBadgeText}>{totalItemsCount}</Text>
+                <Text style={desktopStyles.listSummaryBadgeText}>
+                  {totalItemsCount}
+                </Text>
               </View>
             </View>
             <Pressable style={desktopStyles.summaryShare} onPress={onShare}>
@@ -1114,7 +1454,12 @@ function DesktopLayout({
           <View style={desktopStyles.itemsColumn}>
             {displayedItems.length > 0 ? (
               displayedItems.map((item, index) => (
-                <DesktopGiftItemRow key={item._id} item={item} onPress={onOpenGift} index={index} />
+                <DesktopGiftItemRow
+                  key={item._id}
+                  item={item}
+                  onPress={onOpenGift}
+                  index={index}
+                />
               ))
             ) : (
               <View style={desktopStyles.emptyState}>
@@ -1122,9 +1467,14 @@ function DesktopLayout({
                 <Text style={desktopStyles.emptySubtitle}>
                   Start adding items to make this list shine.
                 </Text>
-                <Pressable style={desktopStyles.addButtonSecondary} onPress={onAddGift}>
+                <Pressable
+                  style={desktopStyles.addButtonSecondary}
+                  onPress={onAddGift}
+                >
                   <Ionicons name="add" size={18} color="#3B0076" />
-                  <Text style={desktopStyles.addButtonSecondaryText}>Add a gift</Text>
+                  <Text style={desktopStyles.addButtonSecondaryText}>
+                    Add a gift
+                  </Text>
                 </Pressable>
               </View>
             )}
@@ -1140,7 +1490,10 @@ function DesktopLayout({
         animationType="fade"
         onRequestClose={() => setShowAvailabilityMenu(false)}
       >
-        <Pressable style={desktopStyles.menuBackdrop} onPress={() => setShowAvailabilityMenu(false)}>
+        <Pressable
+          style={desktopStyles.menuBackdrop}
+          onPress={() => setShowAvailabilityMenu(false)}
+        >
           <View style={desktopStyles.menuCard}>
             {availabilityOptions.map((option) => (
               <Pressable
@@ -1167,7 +1520,10 @@ function DesktopLayout({
         animationType="fade"
         onRequestClose={() => setShowSortMenu(false)}
       >
-        <Pressable style={desktopStyles.menuBackdrop} onPress={() => setShowSortMenu(false)}>
+        <Pressable
+          style={desktopStyles.menuBackdrop}
+          onPress={() => setShowSortMenu(false)}
+        >
           <View style={desktopStyles.menuCard}>
             {SORT_OPTIONS.map((option) => (
               <Pressable
@@ -1203,7 +1559,11 @@ function DesktopGiftItemRow({ item, onPress, index }: DesktopGiftItemRowProps) {
   const claimedPct = Math.min(100, Math.round((claimed / quantity) * 100));
   const isSoldOut = claimed >= quantity;
   const hasClaims = claimed > 0 && !isSoldOut;
-  const statusLabel = isSoldOut ? "All Claimed" : hasClaims ? `${claimed} Claimed` : "Unclaimed";
+  const statusLabel = isSoldOut
+    ? "All Claimed"
+    : hasClaims
+      ? `${claimed} Claimed`
+      : "Unclaimed";
   const badgeStyle = isSoldOut
     ? desktopStyles.statusBadgeSuccess
     : hasClaims
@@ -1240,7 +1600,9 @@ function DesktopGiftItemRow({ item, onPress, index }: DesktopGiftItemRowProps) {
     if (typeof item.price === "number" && Number.isFinite(item.price)) {
       formattedPrice = formatPriceNumber(item.price);
     } else if (typeof item.price === "string") {
-      const numericPart = item.price.replace(/[^0-9.,-]/g, "").replace(/,/g, "");
+      const numericPart = item.price
+        .replace(/[^0-9.,-]/g, "")
+        .replace(/,/g, "");
       const parsed = Number(numericPart);
       if (!Number.isNaN(parsed) && numericPart.length > 0) {
         formattedPrice = formatPriceNumber(parsed);
@@ -1253,11 +1615,16 @@ function DesktopGiftItemRow({ item, onPress, index }: DesktopGiftItemRowProps) {
   return (
     <View style={desktopStyles.itemRow}>
       <View style={desktopStyles.itemIndexBubble}>
-        <Text style={desktopStyles.itemIndexText}>{String(index + 1).padStart(2, "0")}</Text>
+        <Text style={desktopStyles.itemIndexText}>
+          {String(index + 1).padStart(2, "0")}
+        </Text>
       </View>
       <View style={desktopStyles.itemImageWrapper}>
         {item.image_url ? (
-          <Image source={{ uri: item.image_url }} style={desktopStyles.itemImage} />
+          <Image
+            source={{ uri: item.image_url }}
+            style={desktopStyles.itemImage}
+          />
         ) : (
           <View style={desktopStyles.itemImagePlaceholder} />
         )}
@@ -1276,14 +1643,20 @@ function DesktopGiftItemRow({ item, onPress, index }: DesktopGiftItemRowProps) {
           </View>
           <View style={desktopStyles.itemActionsColumn}>
             <Pressable
-              style={[desktopStyles.buyButton, isSoldOut && desktopStyles.buyButtonDisabled]}
+              style={[
+                desktopStyles.buyButton,
+                isSoldOut && desktopStyles.buyButtonDisabled,
+              ]}
               onPress={() => onPress(item)}
               disabled={isSoldOut}
             >
               <Text
-                style={[desktopStyles.buyButtonText, isSoldOut && desktopStyles.buyButtonTextDisabled]}
+                style={[
+                  desktopStyles.buyButtonText,
+                  isSoldOut && desktopStyles.buyButtonTextDisabled,
+                ]}
               >
-                Buy Now
+                View on store
               </Text>
             </Pressable>
             <Pressable style={desktopStyles.deleteButton}>
@@ -1299,51 +1672,57 @@ function DesktopGiftItemRow({ item, onPress, index }: DesktopGiftItemRowProps) {
               <Text style={desktopStyles.priceText}>{formattedPrice}</Text>
             </View>
           )}
-          <Text style={desktopStyles.quantityText}>Quantity: {quantityLabel}</Text>
+          <Text style={desktopStyles.quantityText}>
+            Quantity: {quantityLabel}
+          </Text>
           <View style={[desktopStyles.statusBadge, badgeStyle]}>
-            <Text style={[desktopStyles.statusBadgeText, badgeTextStyle]}>{statusLabel}</Text>
+            <Text style={[desktopStyles.statusBadgeText, badgeTextStyle]}>
+              {statusLabel}
+            </Text>
           </View>
         </View>
 
         <View style={desktopStyles.progressTrack}>
-          <View style={[desktopStyles.progressFill, { width: `${claimedPct}%` }]} />
+          <View
+            style={[desktopStyles.progressFill, { width: `${claimedPct}%` }]}
+          />
         </View>
       </View>
     </View>
   );
 }
 
-
-function SelectedFilter({ tempSortBy, tempFilterClaimed, tempFilterUnclaimed}:{
-  tempSortBy: string, tempFilterClaimed: boolean, tempFilterUnclaimed: boolean
-  }) {
-  let availabilityValue = 'All'
-  if(tempFilterClaimed === false && tempFilterUnclaimed === false){
-    availabilityValue = 'All'
+function SelectedFilter({
+  tempSortBy,
+  tempFilterClaimed,
+  tempFilterUnclaimed,
+}: {
+  tempSortBy: string;
+  tempFilterClaimed: boolean;
+  tempFilterUnclaimed: boolean;
+}) {
+  let availabilityValue = "All";
+  if (tempFilterClaimed === false && tempFilterUnclaimed === false) {
+    availabilityValue = "All";
+  } else if (tempFilterClaimed === true && tempFilterUnclaimed === true) {
+    availabilityValue = "All";
+  } else if (tempFilterClaimed === true && tempFilterUnclaimed === false) {
+    availabilityValue = "Claimed";
+  } else if (tempFilterClaimed === false && tempFilterUnclaimed === true) {
+    availabilityValue = "UnClaimed";
   }
-  else if(tempFilterClaimed === true && tempFilterUnclaimed === true){
-    availabilityValue = 'All'
-  }
-  else if(tempFilterClaimed === true && tempFilterUnclaimed === false){
-    availabilityValue = 'Claimed'
-  }
-
-  else if(tempFilterClaimed === false && tempFilterUnclaimed === true){
-    availabilityValue = 'UnClaimed'
-  }
-
 
   return (
     <View style={styles.selectedFilterContainer}>
       <View style={styles.filterItem}>
-        <Image source={require("@/assets/images/sortIcon.png")}/>
+        <Image source={require("@/assets/images/sortIcon.png")} />
         <View style={styles.filterContent}>
           <Text style={styles.filterTitle}>Sort:</Text>
           <Text style={styles.filterValue}>{String(tempSortBy)}</Text>
         </View>
       </View>
-        <View style={styles.filterItem}>
-        <Image source={require("@/assets/images/availabilityIcon.png")}/>
+      <View style={styles.filterItem}>
+        <Image source={require("@/assets/images/availabilityIcon.png")} />
         <View style={styles.filterContent}>
           <Text style={styles.filterTitle}>Availability:</Text>
           <Text style={styles.filterValue}>{availabilityValue}</Text>

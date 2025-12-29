@@ -30,8 +30,8 @@ export default function PickCard({ pickItem }: PickCardProps) {
           </View>
         </View>
         <View style={styles.priceContainer}>
-          <Image style={styles.currency} source={require("@/assets/images/dirham.png")} resizeMode="contain" />
-          <Text style={styles.price}>325.32</Text>
+          {/* <Image style={styles.currency} source={require("@/assets/images/dirham.png")} resizeMode="contain" /> */}
+          <Text style={styles.price}>AED 325.32</Text>
         </View>
       </View>
     </View>
