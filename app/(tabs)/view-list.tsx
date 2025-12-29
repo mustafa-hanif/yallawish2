@@ -2,6 +2,7 @@ import { RibbonHeader } from "@/components/RibbonHeader";
 import { ActionsBar, FooterBar, GiftItemCard, HeaderBar, ListCover, PasswordGate } from "@/components/list";
 import { api } from "@/convex/_generated/api";
 import { styles } from "@/styles/addGiftStyles";
+import { getDaysToGoText } from "@/utils";
 import { useAuth } from "@clerk/clerk-expo";
 import { useMutation, useQuery } from "convex/react";
 import * as Linking from 'expo-linking';
@@ -27,20 +28,7 @@ export default function ViewList() {
   const occasion = list?.occasion || ""
   
     const daysToGoText = useMemo(() => {
-      if (!list?.eventDate) return null;
-      const parts = list?.eventDate.split("-").map((p) => parseInt(p, 10));
-      if (parts.length !== 3 || parts.some((n) => Number.isNaN(n))) return null;
-      const [yyyy, mm, dd] = parts;
-      const eventDate = new Date(yyyy, (mm ?? 1) - 1, dd ?? 1);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const diffMs = eventDate.getTime() - today.getTime();
-      const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-      if (Number.isNaN(diffDays)) return null;
-      if (diffDays > 1) return `${String(diffDays).padStart(2, "0")} days to go`;
-      if (diffDays === 1) return "1 day to go";
-      if (diffDays === 0) return "Event is today";
-      return "Event passed";
+      return getDaysToGoText(list?.eventDate);
     }, [list?.eventDate]);
 
 // Password gate
