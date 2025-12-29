@@ -209,6 +209,32 @@ export const styles = StyleSheet.create({
     overflow: "hidden",
   },
   progressFill: { backgroundColor: "#3B0076", height: "100%" },
+  // Swipe action styles
+  rightActionContainer: {
+    justifyContent: "center",
+    alignItems: "flex-end",
+    width: 96,
+    // keep same height as card padding (~112)
+    paddingVertical: 8,
+  },
+  rightAction: {
+    backgroundColor: "#FF3B30",
+    width: 110,
+    height: '99%',
+    borderRadius: 7,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 8,
+  },
+  rightActionIcon: {
+    tintColor: "#FFFFFF",
+    marginBottom: 10
+  },
+  rightActionText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontFamily: "Nunito_700Bold",
+  },
   infoBox: {
     backgroundColor: "#F5EDFE",
     borderRadius: 8,

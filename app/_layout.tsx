@@ -14,6 +14,7 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import useGoogleFonts from "@/hooks/useFonts";
 import { Dimensions, Platform } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -40,36 +41,38 @@ export default function RootLayout() {
   }
 
   return (
-    <ClerkProvider publishableKey="pk_test_cHJvZm91bmQtc3RhZy04Ny5jbGVyay5hY2NvdW50cy5kZXYk" tokenCache={tokenCache}>
-      <ConvexProvider client={convex}>
-        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-          {isDesktop ? (
-            <>
-              <Stack>
-                <Stack.Screen name="index" options={{ headerShown: false }} />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="desktopHomepage" options={{ headerShown: false }} />
-                <Stack.Screen name="(auth)" options={{ headerShown: false, title: "" }} />
-                <Stack.Screen name="(admin)/admin" options={{ headerShown: false ,  title: ""}} />
-                <Stack.Screen name="+not-found" />
-              </Stack>
-              <StatusBar style="auto" />
-            </>
-          ) : (
-            <>
-              <Stack>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="(auth)" options={{ headerShown: false, title: "" }} />
-                <Stack.Screen name="index" options={{ headerShown: false }} />
-                <Stack.Screen name="desktopHomepage" options={{ headerShown: false }} />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ClerkProvider publishableKey="pk_test_cHJvZm91bmQtc3RhZy04Ny5jbGVyay5hY2NvdW50cy5kZXYk" tokenCache={tokenCache}>
+        <ConvexProvider client={convex}>
+          <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+            {isDesktop ? (
+              <>
+                <Stack>
+                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen name="desktopHomepage" options={{ headerShown: false }} />
+                  <Stack.Screen name="(auth)" options={{ headerShown: false, title: "" }} />
+                  <Stack.Screen name="(admin)/admin" options={{ headerShown: false ,  title: ""}} />
+                  <Stack.Screen name="+not-found" />
+                </Stack>
+                <StatusBar style="auto" />
+              </>
+            ) : (
+              <>
+                <Stack>
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen name="(auth)" options={{ headerShown: false, title: "" }} />
+                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                  <Stack.Screen name="desktopHomepage" options={{ headerShown: false }} />
 
-                <Stack.Screen name="+not-found" />
-              </Stack>
-              <StatusBar style="auto" />
-            </>
-          )}
-        </ThemeProvider>
-      </ConvexProvider>
-    </ClerkProvider>
+                  <Stack.Screen name="+not-found" />
+                </Stack>
+                <StatusBar style="auto" />
+              </>
+            )}
+          </ThemeProvider>
+        </ConvexProvider>
+      </ClerkProvider>
+    </GestureHandlerRootView>
   );
 }
