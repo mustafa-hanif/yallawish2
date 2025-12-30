@@ -635,7 +635,7 @@ function MobileLayout({
                     key={group.id}
                     style={[
                       !isDesktop ? styles.groupCardMobile : styles.groupCard,
-                      selected && styles.groupCardSelected,
+                      // selected && styles.groupCardSelected,
                     ]}
                     onPress={() => toggleGroup(group.id)}
                   >
