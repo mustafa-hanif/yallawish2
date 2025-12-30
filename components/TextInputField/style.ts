@@ -40,4 +40,9 @@ export const styles = StyleSheet.create({
     minWidth: 50,
   },
   errorText: { fontSize: 12, color: "#B00020", fontFamily: "Nunito_700Bold" },
+  hintText: {
+    fontSize: 12,
+    fontFamily: "Nunito_300Light",
+    color: "#8E8E93",
+  },
 });
