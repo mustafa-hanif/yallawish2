@@ -128,13 +128,13 @@ export default function ViewList() {
         <View style={styles.listInfoContainer}>
           <RibbonHeader title={title} subtitle={subtitle ?? ""} occasion={occasion}/>
         </View>
-        <ActionsBar privacy={privacy} loading={loading} address={(list?.shippingAddress as string | undefined) ?? null} shareCount={shareCount} />
+        <ActionsBar isViewMode privacy={privacy} loading={loading} address={(list?.shippingAddress as string | undefined) ?? null} shareCount={shareCount} />
 
         <View style={styles.addGiftSection}>
           {Array.isArray(items) && items.length > 0 ? (
             items.map((item: any) => <GiftItemCard key={item._id} item={item} />)
           ) : (
-            <Text style={{ textAlign: "center", color: "#8E8E93" }}>No gifts yet.</Text>
+            <Text style={{ textAlign: "center", color: "#8E8E93" }}>No gifts yett.</Text>
           )}
         </View>
 

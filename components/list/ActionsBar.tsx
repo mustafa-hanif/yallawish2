@@ -10,9 +10,10 @@ type Props = {
   onFilterPress?: () => void;
   address?: string | null;
   shareCount?: number; // number of explicit shares; 0 implies public when privacy === 'shared'
+  isViewMode?: boolean;
 };
 
-export const ActionsBar: React.FC<Props> = ({ privacy, loading, onFilterPress, address, shareCount }) => {
+export const ActionsBar: React.FC<Props> = ({ privacy, loading, onFilterPress, address, shareCount, isViewMode = false  }) => {
   const [showAddress, setShowAddress] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
 
@@ -44,7 +45,8 @@ export const ActionsBar: React.FC<Props> = ({ privacy, loading, onFilterPress, a
           <Text style={styles.privacyStatus}>{title}</Text>
           <Text style={styles.privacyDesc}>{desc}</Text>
         </View>
-        <Ionicons style={{alignSelf:'flex-end'}} name="settings-sharp" size={18} color="#007AFF" />
+        {!isViewMode &&  <Ionicons style={{alignSelf:'flex-end'}} name="settings-sharp" size={18} color="#007AFF" />}
+        
       </View>
       <View style={styles.actionButtons}>
         <Pressable style={{...styles.iconButton, ...(showAddress && {backgroundColor:'#3B0076'})}} onPress={() => setShowAddress(true)}>
