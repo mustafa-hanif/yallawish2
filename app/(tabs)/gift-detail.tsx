@@ -286,6 +286,7 @@ export default function GiftDetail() {
     if (countdown <= 0) {
       if (buyUrl) {
         Linking.openURL(buyUrl);
+        setCountdown(5)
       }
       setShowLeaving(false);
       return;
@@ -811,7 +812,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
 
                   <Text style={mobileStyles.sectionLabel}>Add a note</Text>
                   <View style={mobileStyles.noteField}>
-                    <TextInput value={note} onChangeText={setNote} placeholder="Here’s a little gift to make your day better! 🎉" placeholderTextColor="#B1A6C4" multiline style={mobileStyles.noteInput} />
+                    <TextInput value={note} onChangeText={setNote} placeholder="Here’s a little gift to make your day better! 🎉" placeholderTextColor="#B1A6C4" multiline style={[mobileStyles.noteInput, {verticalAlign:"top", paddingTop:0}]} />
                     <Text style={mobileStyles.charCounter}>
                       {remainingChars}/{NOTE_LIMIT}
                     </Text>
