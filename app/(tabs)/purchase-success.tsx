@@ -1,8 +1,9 @@
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 
+import { useIsFocused } from '@react-navigation/native';
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Image, Platform, Pressable, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import ConfettiCannon from "react-native-confetti-cannon";
 
@@ -24,6 +25,13 @@ export default function PurchaseSuccess() {
   const isDesktop = Platform.OS === "web" && width >= DESKTOP_BREAKPOINT;
   const { user } = useUser();
   const confettiRef = useRef<any>(null);
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (isFocused) {
+      confettiRef.current?.start?.();
+    }
+  }, [isFocused]);
 
   const buyerName = user?.fullName || user?.firstName || "there";
 
@@ -41,11 +49,11 @@ export default function PurchaseSuccess() {
     router.replace("/create-list-step1");
   };
 
-  if (isDesktop) {
+    if (isDesktop) {
     return (
       <View style={desktopStyles.container}>
         <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-        <ConfettiCannon ref={confettiRef} count={120} origin={{ x: width / 2, y: -10 }} fadeOut autoStart fallSpeed={3000} explosionSpeed={450} />
+        <ConfettiCannon ref={confettiRef} count={120} origin={{ x: width / 2, y: -10 }} fadeOut autoStart={false} fallSpeed={3000} explosionSpeed={450} />
         <SafeAreaView style={desktopStyles.safeArea}>
           <View style={desktopStyles.header}>
             <Image source={require("@/assets/images/yallawish_logo.png")} style={desktopStyles.logo} />
@@ -91,7 +99,7 @@ export default function PurchaseSuccess() {
   return (
     <View style={mobileStyles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" />
-      <ConfettiCannon ref={confettiRef} count={120} origin={{ x: 200, y: -10 }} fadeOut autoStart fallSpeed={3000} explosionSpeed={450} />
+      <ConfettiCannon ref={confettiRef} count={120} origin={{ x: 200, y: -10 }} fadeOut autoStart={false} fallSpeed={3000} explosionSpeed={450} />
       <SafeAreaView style={mobileStyles.safeArea}>
         <View>
           <Image source={require("@/assets/images/giftBox.png")} resizeMode="contain" />
