@@ -1389,7 +1389,7 @@ const CopyToMyListSheet: React.FC<CopyToMyListSheetProps> = ({
           <Text style={{ color: '#1C0335', fontSize: 24, fontFamily: 'Nunito_700Bold' }}>Copy Item to your list</Text>
           <Text style={{ color: '#1C0335', marginTop: 6 , fontFamily: 'Nunito_400Regular'}}>Choose a list to add this item to</Text>
 
-          <ScrollView style={sheetStyles.list} contentContainerStyle={{ paddingBottom: 16 }}>
+          <ScrollView  showsVerticalScrollIndicator={false}  style={sheetStyles.list} contentContainerStyle={{ paddingBottom: 16 }}>
             {loading ? (
               <View style={sheetStyles.emptyState}>
                 <Text style={sheetStyles.emptyStateText}>Loading your lists…</Text>
@@ -1413,7 +1413,9 @@ const CopyToMyListSheet: React.FC<CopyToMyListSheetProps> = ({
                       <View style={sharedStyles.occasionIconContainer}>
                         <Image source={occasion.mobileIcon}/>
                       </View>
-                      <Text style={sheetStyles.listTitle}>{entry.title || "Untitled list"}</Text>
+                      <View style={{width:'70%'}}>
+                        <Text numberOfLines={1} style={sheetStyles.listTitle}>{entry.title || "Untitled list"}</Text>
+                      </View>
                     </View>
                     <View
                       style={[
