@@ -48,11 +48,16 @@ export function PasswordGate({ title, listId, requiresPassword, passwordValue, o
   if (!requiresPassword || unlocked) return null;
 
   return (
-    <ImageBackground source={require("@/assets/images/onboard_image.png")} style={{ width: SCREEN_WIDTH, height: "100%", overflow: "hidden" }} imageStyle={{ width: SCREEN_WIDTH, height: "100%" }} resizeMode="cover">
+    <ImageBackground
+      source={require("@/assets/images/onboard_image.png")}
+      style={{ flex: 1, width: SCREEN_WIDTH, overflow: "hidden" }}
+      imageStyle={{ resizeMode: "cover" }}
+      resizeMode="cover"
+    >
       <StatusBar barStyle="light-content" backgroundColor="transparent" />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <ScrollView contentContainerStyle={{ flexGrow: 1, paddingVertical: 24, paddingHorizontal: 16, gap: 51 }} keyboardShouldPersistTaps="handled">
+          <ScrollView contentContainerStyle={{ flexGrow: 1, paddingVertical: 24, paddingHorizontal: 16, gap: 51, backgroundColor: 'transparent' }} keyboardShouldPersistTaps="handled">
             <View style={{ alignItems: "center", marginTop: 16 }}>
               <Image source={require("@/assets/images/yallawish_logo.png")} style={{ width: 158, height: 38, resizeMode: "contain" }} />
             </View>
@@ -76,9 +81,9 @@ export function PasswordGate({ title, listId, requiresPassword, passwordValue, o
 
                 <View style={{ marginTop: 21 }}>
                   <View style={{ flexDirection: "row", alignItems: "center", borderWidth: 1.5, borderColor: pwdError ? "#FF4D4F" : "#FFFFFF", borderRadius: 8, paddingHorizontal: 12, height: 56 }}>
-                    <TextInput value={password} onChangeText={setPassword} placeholder="Password*" placeholderTextColor="rgba(255,255,255,0.5)" secureTextEntry={!showPwd} style={{ flex: 1, color: "#FFFFFF" }} />
+                    <TextInput key={`pwd-${showPwd}`} value={password} onChangeText={setPassword} placeholder="Password*" placeholderTextColor="rgba(255,255,255,0.5)" secureTextEntry={!showPwd} autoCapitalize="none" textContentType="password" style={{ flex: 1, color: "#FFFFFF" }} />
                     <Pressable onPress={() => setShowPwd((v) => !v)}>
-                      <Ionicons name={showPwd ? "eye" : "eye-off"} size={20} color="#FFFFFF66" />
+                      <Ionicons name={!showPwd ? "eye" : "eye-off"} size={20} color="#FFFFFF66" />
                     </Pressable>
                   </View>
                   {pwdError && <Text style={{ color: "#FF4D4F", marginTop: 4, fontSize: 16, fontFamily: "Nunito_700Bold" }}>{pwdError}</Text>}
