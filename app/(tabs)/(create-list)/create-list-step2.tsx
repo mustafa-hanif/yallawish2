@@ -772,6 +772,7 @@ function DesktopLayout({
                   onChangeText={(text) => updateFormData("eventTitle", text)}
                   placeholder="Event Title"
                   placeholderTextColor="#8E8EA9"
+                  maxLength={32}
                 />
               </View>
               <View style={styles.desktopFieldColumn}>
@@ -967,6 +968,7 @@ function MobileLayout({
               label="Event title *"
               value={formData.eventTitle}
               onChangeText={(text) => updateFormData("eventTitle", text)}
+              maxLength={32}
             />
             <TextInputAreaField
               label="Add note (optional)"
