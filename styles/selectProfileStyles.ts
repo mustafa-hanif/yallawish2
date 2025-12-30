@@ -249,7 +249,8 @@ const selectProfileStyles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   mobileHeaderGradient: {
-    paddingBottom: 16,
+      minHeight: 108,
+     justifyContent:'flex-end'
   },
   mobileHeaderContent: {
     paddingHorizontal: 16,
@@ -258,15 +259,17 @@ const selectProfileStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
-    paddingTop: 16,
+    paddingVertical: 16,
   },
   mobileBackButton: {
     padding: 4,
   },
   mobileHeaderTitle: {
-    fontFamily: "Nunito_700Bold",
-    fontSize: 24,
     color: "#FFFFFF",
+    fontSize: 24,
+    fontFamily: "Nunito_700Bold",
+    lineHeight: 28,
+    letterSpacing: -1,
   },
   mobileBody: {
     flex: 1,
