@@ -579,6 +579,11 @@ export default function CreateListStep2() {
       />
     ) : null;
 
+    const onWebDateChange = (e: any) => {
+      const value = e?.target?.value ?? "";
+      if (value) updateFormData("eventDate", value);
+    }
+
   const layoutProps: SharedLayoutProps = {
     headerTitle,
     formData,
@@ -594,6 +599,7 @@ export default function CreateListStep2() {
     occasions: OCCASION_OPTIONS,
     onOccasionSelect,
     listId,
+    onWebDateChange
   };
 
   if (isDesktop) {
@@ -631,10 +637,12 @@ type SharedLayoutProps = {
   occasions: OccasionOption[];
   onOccasionSelect: (occasionId: OccasionOption["id"]) => void;
   listId?: string;
+  onWebDateChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
 type DesktopLayoutProps = SharedLayoutProps & {
   steps: StepItem[];
+  onWebDateChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
 function DesktopLayout({
@@ -652,6 +660,7 @@ function DesktopLayout({
   occasions,
   onOccasionSelect,
   steps,
+  onWebDateChange,
 }: DesktopLayoutProps) {
   return (
     <SafeAreaView style={styles.desktopSafeArea} edges={["top"]}>
@@ -779,20 +788,46 @@ function DesktopLayout({
                 <Text style={styles.desktopFieldLabel}>
                   Event Date (optional)
                 </Text>
-                <Pressable
-                  onPress={showDatePicker}
-                  style={styles.desktopDateInput}
-                >
-                  <Text
-                    style={[
-                      styles.desktopDateText,
-                      !formData.eventDate && styles.desktopDatePlaceholder,
-                    ]}
+
+                {Platform.OS === "web" ? (
+                  <input
+                    type="date"
+                    value={formData.eventDate ?? ""}
+                    onChange={onWebDateChange}
+                    style={{
+                      width: "100%",
+                      paddingTop: 15.5,
+                      paddingBottom: 15.5,
+                      borderRadius: 12,
+                      borderWidth: 1.5,
+                      borderStyle: "solid",
+                      borderColor: "#D8C9F6",
+                      paddingLeft: 20,
+                      paddingRight: 20,
+                      fontFamily: "Nunito_400Regular",
+                      fontSize: 16,
+                      color: formData.eventDate ? "#1C0335" : "#8E8EA9",
+                      outline: "none",
+                      boxSizing: "border-box",
+                      backgroundColor: "#FFFFFF",
+                    }}
+                  />
+                ) : 
+                  <Pressable
+                    onPress={showDatePicker}
+                    style={styles.desktopDateInput}
                   >
-                    {formData.eventDate || "DD/MM/YYYY"}
-                  </Text>
-                  <Ionicons name="calendar-outline" size={20} color="#AEAEB2" />
-                </Pressable>
+                    <Text
+                      style={[
+                        styles.desktopDateText,
+                        !formData.eventDate && styles.desktopDatePlaceholder,
+                      ]}
+                    >
+                      {formData.eventDate || "DD/MM/YYYY"}
+                    </Text>
+                    <Ionicons name="calendar-outline" size={20} color="#AEAEB2" />
+                  </Pressable>
+                }
               </View>
             </View>
 
