@@ -89,7 +89,7 @@ export const GiftItemCard: React.FC<Props> = ({ title, item, onPress, onDelete, 
             </View>
           </View>
           <View style={[styles.priceRow, { justifyContent: "space-between" }]}>
-            {item.price != null && (
+            {item.price != null ? (
               <View
                 style={{
                   flexDirection: "row",
@@ -101,7 +101,7 @@ export const GiftItemCard: React.FC<Props> = ({ title, item, onPress, onDelete, 
                 {/* <Image resizeMode="contain" style={{ width: 16, height: 16 }} source={require("@/assets/images/dirham.png")} /> */}
                 <Text style={styles.itemPrice}>AED {item.price}</Text>
               </View>
-            )}
+            ): <View />}
             <Pressable onPress={isSoldOut ? undefined : goDetail} disabled={isSoldOut}>
               <Text style={[styles.buyNow, isSoldOut && styles.buyNowDisabled]}>View on store</Text>
             </Pressable>
