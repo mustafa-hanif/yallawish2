@@ -132,7 +132,7 @@ export default function ViewList() {
 
         <View style={styles.addGiftSection}>
           {Array.isArray(items) && items.length > 0 ? (
-            items.map((item: any) => <GiftItemCard key={item._id} item={item} />)
+            items.map((item: any) => <GiftItemCard swipe={false} key={item._id} item={item} />)
           ) : (
             <Text style={{ textAlign: "center", color: "#8E8E93" }}>No gifts yett.</Text>
           )}

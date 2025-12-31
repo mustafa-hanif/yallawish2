@@ -21,11 +21,12 @@ type Props = {
   onPress?: (item: GiftItem) => void;
   onDelete?: (itemId: string) => void;
   title?: string | null;
+  swipe?: boolean;
 };
 
 const SWIPE_WIDTH = 130;
 
-export const GiftItemCard: React.FC<Props> = ({ title, item, onPress, onDelete }) => {
+export const GiftItemCard: React.FC<Props> = ({ title, item, onPress, onDelete, swipe = true}) => {
   const { listId } = useLocalSearchParams<{ listId?: string }>();
   const swipeableRef = React.useRef<any>(null);
   const pct = Math.min(100, Math.max(0, (item.claimed / Math.max(1, item.quantity)) * 100));
@@ -59,7 +60,7 @@ export const GiftItemCard: React.FC<Props> = ({ title, item, onPress, onDelete }
     </View>
   );
   return (
-    <Swipeable ref={swipeableRef} overshootRight={false} renderRightActions={renderRightActions}>
+    <Swipeable  ref={swipeableRef} overshootRight={false} renderRightActions={renderRightActions} enabled={swipe}>
       <View style={styles.itemCard}>
         <View style={styles.itemImageWrap}>{item.image_url ? <Image source={{ uri: item.image_url }} style={styles.itemImage} /> : <View style={[styles.itemImage, { backgroundColor: "#EEE" }]} />}</View>
         <View style={styles.itemContent}>
