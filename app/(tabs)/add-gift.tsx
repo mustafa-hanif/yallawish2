@@ -1476,10 +1476,10 @@ function DesktopLayout({
                 </Text>
               </View>
             </View>
-            <Pressable style={desktopStyles.summaryShare} onPress={onShare}>
+            {/* <Pressable style={desktopStyles.summaryShare} onPress={onShare}>
               <Text style={desktopStyles.summaryShareText}>Share List</Text>
               <Ionicons name="share-social-outline" size={16} color="#3B0076" />
-            </Pressable>
+            </Pressable> */}
           </View>
 
           <View style={desktopStyles.sectionDivider} />
