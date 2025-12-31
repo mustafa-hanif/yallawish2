@@ -4,11 +4,12 @@ import { api } from "@/convex/_generated/api";
 import { styles } from "@/styles/addGiftStyles";
 import { formatLastUpdated, getDaysToGoText } from "@/utils";
 import { useAuth } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
 import * as Linking from 'expo-linking';
 import { Redirect, useLocalSearchParams, usePathname } from "expo-router";
 import React, { useMemo, useState } from "react";
-import { Platform, ScrollView, Share, Text, View } from "react-native";
+import { Modal, Platform, Pressable, ScrollView, Share, Text, View } from "react-native";
 
 export default function ViewList() {
   const { listId } = useLocalSearchParams<{ listId?: string }>();
@@ -35,6 +36,16 @@ export default function ViewList() {
 // Password gate
   const requiresPassword: boolean = Boolean((list as any)?.requiresPassword);
   const [unlocked, setUnlocked] = useState(false);
+
+  // Sort & Filter sheet state
+  type SortOption = "default" | "priceAsc" | "priceDesc" | "newest" | "oldest";
+  const [showSortSheet, setShowSortSheet] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>("default");
+  const [tempSortBy, setTempSortBy] = useState<SortOption>("default");
+  const [filterClaimed, setFilterClaimed] = useState(false);
+  const [filterUnclaimed, setFilterUnclaimed] = useState(false);
+  const [tempFilterClaimed, setTempFilterClaimed] = useState(false);
+  const [tempFilterUnclaimed, setTempFilterUnclaimed] = useState(false);
 
   // Enforce private access: only owner may view
   if (list && privacy === "private") {
@@ -120,6 +131,38 @@ export default function ViewList() {
 
   const lastUpdatedLabel = `Last updated: ${formatLastUpdated(list?.updated_at)}`;
 
+  const visibleItems = useMemo(() => {
+    if (!Array.isArray(items)) return [];
+    let arr = [...items];
+
+    // Availability filters
+    if (filterClaimed && !filterUnclaimed) {
+      arr = arr.filter((i: any) => (i.claimed ?? 0) > 0);
+    } else if (!filterClaimed && filterUnclaimed) {
+      arr = arr.filter((i: any) => (i.claimed ?? 0) === 0);
+    }
+
+    // Sorting
+    switch (sortBy) {
+      case "priceAsc":
+        arr.sort((a: any, b: any) => (Number(a.price) || 0) - (Number(b.price) || 0));
+        break;
+      case "priceDesc":
+        arr.sort((a: any, b: any) => (Number(b.price) || 0) - (Number(a.price) || 0));
+        break;
+      case "newest":
+        arr.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+      case "oldest":
+        arr.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        break;
+      default:
+        break;
+    }
+
+    return arr;
+  }, [items, sortBy, filterClaimed, filterUnclaimed]);
+
   return (
     <View style={styles.container}>
       <HeaderBar title={title} />
@@ -128,11 +171,15 @@ export default function ViewList() {
         <View style={styles.listInfoContainer}>
           <RibbonHeader title={title} subtitle={subtitle ?? ""} occasion={occasion}/>
         </View>
-        <ActionsBar isViewMode privacy={privacy} loading={loading} address={(list?.shippingAddress as string | undefined) ?? null} shareCount={shareCount} />
+        <ActionsBar 
+          sortby={sortBy}
+          filterClaimed={filterClaimed}
+          filterUnclaimed={filterUnclaimed}
+          onFilterPress={() => setShowSortSheet(true)} isViewMode privacy={privacy} loading={loading} address={(list?.shippingAddress as string | undefined) ?? null} shareCount={shareCount} />
 
         <View style={styles.addGiftSection}>
-          {Array.isArray(items) && items.length > 0 ? (
-            items.map((item: any) => <GiftItemCard swipe={false} key={item._id} item={item} />)
+          {Array.isArray(visibleItems) && visibleItems.length > 0 ? (
+            visibleItems.map((item: any) => <GiftItemCard swipe={false} key={item._id} item={item} />)
           ) : (
             <Text style={{ textAlign: "center", color: "#8E8E93" }}>No gifts yett.</Text>
           )}
@@ -142,6 +189,113 @@ export default function ViewList() {
           View only mode. Ask the list owner to share edit access if you need to add items.
         </InfoBox> */}
       </ScrollView>
+        
+      <Modal
+        visible={showSortSheet}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowSortSheet(false)}
+      >
+        <Pressable
+          style={styles.backdrop}
+          onPress={() => setShowSortSheet(false)}
+        />
+        <View style={styles.sortSheetContainer}>
+          <Pressable onPress={() => setShowSortSheet(false)}>
+            <View style={styles.sortSheetHandle} />
+          </Pressable>
+          <ScrollView
+            contentContainerStyle={styles.sortSheetContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <Text style={styles.sortSheetTitle}>Sort & Filter</Text>
+            <View style={styles.sortDivider} />
+            <View style={styles.sortSection}>
+              <View style={styles.sortSectionHeader}>
+                <Text style={styles.sortSectionTitle}>Sort by</Text>
+                <Ionicons name="chevron-down" size={20} color="#1C0335" />
+              </View>
+              {[
+                { key: "default", label: "Default" },
+                { key: "priceAsc", label: "Price Lowest - Highest" },
+                { key: "priceDesc", label: "Price Highest - Lowest" },
+                { key: "newest", label: "Most Recent to Oldest" },
+                { key: "oldest", label: "Oldest to Most Recent" },
+              ].map((o) => (
+                <Pressable
+                  key={o.key}
+                  style={styles.radioRow}
+                  onPress={() => setTempSortBy(o.key as SortOption)}
+                >
+                  <View
+                    style={[
+                      styles.radioOuter,
+                      tempSortBy === o.key && styles.radioOuterActive,
+                    ]}
+                  >
+                    {tempSortBy === o.key && <View style={styles.radioInner} />}
+                  </View>
+                  <Text style={styles.radioLabel}>{o.label}</Text>
+                </Pressable>
+              ))}
+            </View>
+            <View style={styles.sortSection}>
+              <View style={styles.sortSectionHeader}>
+                <Text style={styles.sortSectionTitle}>
+                  Filter by Availability
+                </Text>
+                <Ionicons name="chevron-down" size={20} color="#1C0335" />
+              </View>
+              <Pressable
+                style={styles.radioRow}
+                onPress={() => setTempFilterClaimed((v) => !v)}
+              >
+                <View
+                  style={[
+                    styles.checkboxBox,
+                    tempFilterClaimed && styles.checkboxBoxActive,
+                  ]}
+                >
+                  {tempFilterClaimed && (
+                    <Ionicons name="checkmark" size={10} color="#FFFFFF" />
+                  )}
+                </View>
+                <Text style={styles.radioLabel}>Claimed</Text>
+              </Pressable>
+              <Pressable
+                style={styles.radioRow}
+                onPress={() => setTempFilterUnclaimed((v) => !v)}
+              >
+                <View
+                  style={[
+                    styles.checkboxBox,
+                    tempFilterUnclaimed && styles.checkboxBoxActive,
+                  ]}
+                >
+                  {tempFilterUnclaimed && (
+                    <Ionicons name="checkmark" size={10} color="#FFFFFF" />
+                  )}
+                </View>
+                <Text style={styles.radioLabel}>Unclaimed</Text>
+              </Pressable>
+            </View>
+            <View style={styles.sortScrollSpacer} />
+          </ScrollView>
+          <View style={styles.applyBarWrapper}>
+            <Pressable
+              style={styles.applyBtnFull}
+              onPress={() => {
+                setSortBy(tempSortBy);
+                setFilterClaimed(tempFilterClaimed);
+                setFilterUnclaimed(tempFilterUnclaimed);
+                setShowSortSheet(false);
+              }}
+            >
+              <Text style={styles.applyBtnText}>Apply</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
 
       <FooterBar viewMode lastUpdated={lastUpdatedLabel} onShare={handleShare} onManage={() => { }} manageLabel="Close" />
     </View>

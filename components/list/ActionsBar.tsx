@@ -12,9 +12,12 @@ type Props = {
   shareCount?: number; // number of explicit shares; 0 implies public when privacy === 'shared'
   isViewMode?: boolean;
   onPressSettings?: () => void;
+  sortby?: string;
+  filterUnclaimed?: boolean;
+  filterClaimed?: boolean;
 };
 
-export const ActionsBar: React.FC<Props> = ({ privacy, loading, onFilterPress, address, shareCount, isViewMode = false, onPressSettings = () => {} }) => {
+export const ActionsBar: React.FC<Props> = ({ privacy, loading, onFilterPress, address, shareCount, isViewMode = false, onPressSettings = () => {}, sortby, filterUnclaimed, filterClaimed }) => {
   const [showAddress, setShowAddress] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
 
@@ -42,14 +45,14 @@ export const ActionsBar: React.FC<Props> = ({ privacy, loading, onFilterPress, a
               <Image style={styles.filterItemIcon} source={require("@/assets/images/filtersLines.png")} />
               <View>
                 <Text style={styles.filterItemTitle}>Price:</Text>
-                <Text style={styles.filterItemValue}>Highest to lowest</Text>
+                <Text style={styles.filterItemValue}>{sortby === "priceAsc" ? "Lowest to highest" : sortby === "priceDesc" ? "Highest to lowest" : "Default"}</Text>
               </View>
             </View>
             <View style={styles.filterItem}>
               <Image style={styles.filterItemIcon} source={require("@/assets/images/availabilityIcon.png")} />
               <View>
                 <Text style={styles.filterItemTitle}>Availability:</Text>
-                <Text style={styles.filterItemValue}>Default</Text>
+                <Text style={styles.filterItemValue}>{filterClaimed ? "Claimed" : filterUnclaimed ? "Unclaimed" : "All"} </Text>
               </View>
             </View>
             {/* <Image source={iconName} resizeMode="contain" style={{ width: 24, height: 24 }} />
