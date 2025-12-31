@@ -220,7 +220,7 @@ export const styles = StyleSheet.create({
   rightAction: {
     backgroundColor: "#FF3B30",
     width: 110,
-    height: '99%',
+    height: "99%",
     borderRadius: 7,
     justifyContent: "center",
     alignItems: "center",
@@ -228,7 +228,7 @@ export const styles = StyleSheet.create({
   },
   rightActionIcon: {
     tintColor: "#FFFFFF",
-    marginBottom: 10
+    marginBottom: 10,
   },
   rightActionText: {
     color: "#FFFFFF",
@@ -635,7 +635,7 @@ export const styles = StyleSheet.create({
     paddingLeft: 15,
     flexDirection: "row",
   },
-  filterItem: { width: "50%", flexDirection: "row", alignItems: "center" },
+  filterItem: { flexDirection: "row", gap: 8, flex: 1 },
   filterContent: {
     flexDirection: "row",
     alignItems: "center",
@@ -670,6 +670,26 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Nunito_700Bold",
     letterSpacing: 0,
+  },
+  filterContainer: {
+    flexDirection: "row",
+    flex: 1,
+  },
+  filterItemIcon: {
+    width: 16,
+    height: 16,
+    tintColor: "#8D8D8D",
+    marginTop: 5,
+  },
+  filterItemTitle: {
+    fontSize: 12,
+    fontFamily: "Nunito_700Bold",
+    color: "#000000",
+  },
+  filterItemValue: {
+    fontSize: 12,
+    fontFamily: "Nunito_700Bold",
+    color: "#1C1C1CB2",
   },
 });
 
