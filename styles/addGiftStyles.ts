@@ -719,6 +719,8 @@ export const desktopStyles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 16,
     marginBottom: 28,
+    zIndex: 100,
+    overflow: "visible",
   },
   breadcrumbText: {
     fontSize: 14,
@@ -733,6 +735,7 @@ export const desktopStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+    overflow: "visible",
   },
   manageButton: {
     flexDirection: "row",

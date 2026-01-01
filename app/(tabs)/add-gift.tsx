@@ -14,6 +14,7 @@ import type { GiftItem as GiftItemType } from "@/components/list/GiftItemCard";
 import { api } from "@/convex/_generated/api";
 import { desktopStyles, styles } from "@/styles/addGiftStyles";
 import { formatLastUpdated, getDaysToGoText } from "@/utils";
+import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
@@ -89,9 +90,15 @@ const getPrivacyDisplay = (
 
 export default function AddGift() {
   const { listId } = useLocalSearchParams<{ listId?: string }>();
+  const { user } = useUser();
+  
   const list = useQuery(api.products.getListById, {
     listId: listId as any,
   });
+  const createList = useMutation(api.products.createList);
+  const deleteList = useMutation(api.products.deleteList);
+  const archiveList = useMutation(api.products.setListArchived);
+
   const items = useQuery(
     api.products.getListItems as any,
     listId ? ({ list_id: listId } as any) : "skip"
@@ -299,6 +306,8 @@ export default function AddGift() {
   const [tempFilterClaimed, setTempFilterClaimed] = useState(false);
   const [tempFilterUnclaimed, setTempFilterUnclaimed] = useState(false);
   const [isUrlValid, setIsUrlValid] = useState(true);
+  const [deleteListId, setDeleteListId] = useState<string | null>(null);
+  
 
   const openSortSheet = useCallback(() => {
     setTempSortBy(sortBy);
@@ -540,6 +549,52 @@ export default function AddGift() {
   const address = (list?.shippingAddress as string | undefined) ?? null;
   const ribbonSubtitle = subtitle || formattedEventDate || "";
   const occasion = list?.occasion || "";
+
+    const handleArchiveList = async (listId: string | null, isArchived: boolean) => {
+    await archiveList({ listId: listId as any, isArchived: isArchived });
+  };
+
+   const handleDuplicateList = async (listDetails: any) => {
+      const newListId = await createList({
+        title: listDetails.title,
+        note: listDetails.note || null,
+        eventDate: listDetails.eventDate || null,
+        shippingAddress: listDetails.shippingAddress || null,
+        occasion: listDetails.occasion || null,
+        coverPhotoUri: listDetails.coverPhotoUri || null,
+        coverPhotoStorageId: listDetails.coverPhotoStorageId || null,
+        privacy: listDetails?.privacy || "private",
+        user_id: listDetails?.user_id || user?.id || null,
+      });
+  
+      router.push({
+        pathname: "/add-gift",
+        params: { listId: String(newListId) },
+      });
+    };
+
+    const handleSelectDelete = (listId: string) => setDeleteListId(listId);
+
+  const handleDeleteList = async (listId: string | null) => {
+    await deleteList({ listId: listId as any });
+    setDeleteListId(null);
+    router.replace("/");
+  };
+
+  const onSelectManageListDropdown = (action: string) => {
+    if(action === "archive"){
+      handleArchiveList(listId ? String(listId) : null, !(list?.isArchived || false));
+    }  if(action === "unArchive"){
+      handleArchiveList(listId ? String(listId) : null, !(list?.isArchived || false));
+    } else if(action === "duplicateList"){
+      handleDuplicateList(list);
+    } else if(action === "editList"){
+      router.push({ pathname: "/create-list-step2", params: { listId: String(listId) } });
+    } else if(action === "delete"){
+      handleSelectDelete(listId ? String(listId) : "");
+    }
+
+  }
   // const creator = list?.creator || null;
   const layout = isDesktop ? (
     <DesktopLayout
@@ -567,6 +622,8 @@ export default function AddGift() {
       lastUpdated={lastUpdatedLabel}
       occasion={occasion}
       onDelete={onDelete}
+      onSelectManageListDropdown={onSelectManageListDropdown}
+      isArchived={list?.isArchived || false}
     />
   ) : (
     <MobileLayout
@@ -1101,6 +1158,11 @@ export default function AddGift() {
           </View>
         </View>
       </Modal>
+      <DeleteConfirmation
+        visible={!!deleteListId}
+        onCancel={() => setDeleteListId(null)}
+        onDelete={() => handleDeleteList(deleteListId)}
+      />
     </View>
   );
 }
@@ -1272,6 +1334,8 @@ type DesktopLayoutProps = {
   lastUpdated: string;
   occasion?: string;
   onDelete: (itemId: string) => void;
+  onSelectManageListDropdown: (action: string) => void;
+  isArchived?: boolean;
 };
 
 function DesktopLayout({
@@ -1299,6 +1363,8 @@ function DesktopLayout({
   lastUpdated,
   occasion,
   onDelete,
+  onSelectManageListDropdown,
+  isArchived
 }: DesktopLayoutProps) {
   const privacyDisplay = getPrivacyDisplay(privacy, loading, shareCount);
   const availabilityOptions: {
@@ -1309,6 +1375,7 @@ function DesktopLayout({
     { value: "claimed", label: "Claimed" },
     { value: "unclaimed", label: "Unclaimed" },
   ];
+  const [isShowDropDownMenu, setIsShowDropDownMenu] = React.useState(false);
   const availabilityLabel =
     availabilityOptions.find((opt) => opt.value === availability)?.label ??
     "All";
@@ -1327,6 +1394,12 @@ function DesktopLayout({
   const [showAvailabilityMenu, setShowAvailabilityMenu] = React.useState(false);
   const [showSortMenu, setShowSortMenu] = React.useState(false);
 
+  const dropdownOptions = [
+    ...[(isArchived ? { id:"11", icon: require("@/assets/images/unarchiveList.png"), title:"Unarchive", action: "unArchive"}: { id:"1", icon: require("@/assets/images/archiveList.png"), title:"Archive", action: "archive"})],
+    { id:"2", icon: require("@/assets/images/duplicateList.png"), title:"Duplicate List", action: "duplicateList"},
+    { id: "3", icon: require("@/assets/images/Edit.png"), title:"Edit List", action: "editList"},
+    { id:"4", icon: require("@/assets/images/deleteList.png"), title:"Delete", action: "delete" },
+  ]
   return (
     <SafeAreaView
       style={desktopStyles.safeArea}
@@ -1341,13 +1414,46 @@ function DesktopLayout({
               <Text style={desktopStyles.breadcrumbCurrent}>{title}</Text>
             </Text>
             <View style={desktopStyles.topActions}>
-              <Pressable style={desktopStyles.manageButton} onPress={onManage}>
-                <Ionicons name="settings-outline" size={18} color="#3B0076" />
-                <Text style={desktopStyles.manageButtonText}>Manage List</Text>
-              </Pressable>
-              <Pressable style={desktopStyles.addButton} onPress={onAddGift}>
+              <View style={{ position:'relative', zIndex: 100}}>
+                <Pressable style={[desktopStyles.manageButton, { shadowOffset:{width: 0, height: 0},gap:10,  borderWidth:2, borderColor:'#330065', borderRadius:8, paddingHorizontal: 24, paddingVertical:8, height: 48}]} onPress={() => setIsShowDropDownMenu((prev) => !prev)}>
+                  <Text style={desktopStyles.manageButtonText}>Manage List</Text>
+                  <Ionicons name="caret-down" size={18} color="#3B0076" />
+                </Pressable>
+                {isShowDropDownMenu && (
+                  <View style={{ padding:16, shadowColor: "#000", shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.2, shadowRadius: 12, borderRadius:8, top: '100%', left: 0, marginTop: 8, zIndex: 9999, position:'absolute', width: 287, minHeight:200, backgroundColor:'#ffff'}}>
+                    <Text style={{fontSize:16, fontFamily:'Nunito_700Bold'}}>Manage List</Text>
+                    <View style={{rowGap: 12, marginTop: 8}}>
+                      {dropdownOptions.map((option) => (
+                        <Pressable 
+                          key={option.id} 
+                          style={({hovered}:  { hovered?: boolean }) => ({
+                            backgroundColor: hovered ? '#EFEFEF' : 'transparent',
+                            borderRadius: 8, flexDirection:'row', alignItems:'center', columnGap:13, padding: 4
+                          })}
+                          onPress={() => {
+                            setIsShowDropDownMenu(false);
+                            onSelectManageListDropdown(option.action);
+                          }}
+                        >
+                          <View style={{width:40, height: 40, justifyContent:'center', alignItems:'center', borderRadius: 8, backgroundColor:'#EFEFEF'}}>
+                            <Image source={option.icon} resizeMode="contain" style={{width: 16, height: 16}} />
+                          </View>
+                          <View>
+                            <Text style={{fontSize:16, fontFamily:'Nunito_600SemiBold', color: option?.title === 'Delete' ? '#FF3B30' : '#000000'}}>{option.title}</Text>
+                          </View>
+                        </Pressable>
+                      ))}
+                    </View>
+                  </View>
+                )}
+              </View>
+              <Pressable style={[desktopStyles.addButton, { shadowOffset:{width: 0, height: 0},gap:10,  backgroundColor:'#330065', borderRadius:8, paddingHorizontal: 24, paddingVertical:8, height: 48}]} onPress={onAddGift}>
                 <Ionicons name="add" size={20} color="#FFFFFF" />
-                <Text style={desktopStyles.addButtonText}>Add a Gift</Text>
+                <Text style={[{...desktopStyles.addButtonText}, {color: '#FFFFFF'}]}>Add a Gift</Text>
+              </Pressable>
+               <Pressable style={[desktopStyles.addButton, { shadowOffset:{width: 0, height: 0},gap:10,  backgroundColor:'#330065', borderRadius:8, paddingHorizontal: 24, paddingVertical:8, height: 48}]} onPress={onShare}>
+                <Ionicons name="share-social-outline" size={20} color="#FFFFFF" />
+                <Text style={[{...desktopStyles.addButtonText}, {color: '#FFFFFF'}]}>Share list</Text>
               </Pressable>
             </View>
           </View>
