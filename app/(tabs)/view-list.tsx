@@ -1,24 +1,45 @@
 import { RibbonHeader } from "@/components/RibbonHeader";
-import { ActionsBar, FooterBar, GiftItemCard, HeaderBar, ListCover, PasswordGate } from "@/components/list";
+import {
+  ActionsBar,
+  FooterBar,
+  GiftItemCard,
+  HeaderBar,
+  ListCover,
+  PasswordGate,
+} from "@/components/list";
 import { api } from "@/convex/_generated/api";
 import { styles } from "@/styles/addGiftStyles";
 import { formatLastUpdated, getDaysToGoText } from "@/utils";
 import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
-import * as Linking from 'expo-linking';
+import * as Linking from "expo-linking";
 import { Redirect, useLocalSearchParams, usePathname } from "expo-router";
 import React, { useMemo, useState } from "react";
-import { Modal, Platform, Pressable, ScrollView, Share, Text, View } from "react-native";
+import {
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  Share,
+  Text,
+  View,
+} from "react-native";
 
 export default function ViewList() {
   const { listId } = useLocalSearchParams<{ listId?: string }>();
   const { isSignedIn, userId } = useAuth();
   const pathname = usePathname();
   const list = useQuery(api.products.getListById, { listId: listId as any });
-  const items = useQuery(api.products.getListItems as any, listId ? ({ list_id: listId } as any) : "skip");
+  const items = useQuery(
+    api.products.getListItems as any,
+    listId ? ({ list_id: listId } as any) : "skip"
+  );
   const requestPassword = useMutation(api.products.requestListPassword);
-  const shares = useQuery(api.products.getListShares as any, listId ? ({ list_id: listId } as any) : "skip");
+  const shares = useQuery(
+    api.products.getListShares as any,
+    listId ? ({ list_id: listId } as any) : "skip"
+  );
   const loading = !list;
 
   const title = list?.title ?? "Your List";
@@ -26,14 +47,14 @@ export default function ViewList() {
   const coverUri = list?.coverPhotoUri as string | undefined;
   const privacy = list?.privacy ?? "private";
   const shareCount = Array.isArray(shares) ? shares.length : undefined;
-  const occasion = list?.occasion || ""
+  const occasion = list?.occasion || "";
   const creator = list?.creator || null;
-  
-    const daysToGoText = useMemo(() => {
-      return getDaysToGoText(list?.eventDate);
-    }, [list?.eventDate]);
 
-// Password gate
+  const daysToGoText = useMemo(() => {
+    return getDaysToGoText(list?.eventDate);
+  }, [list?.eventDate]);
+
+  // Password gate
   const requiresPassword: boolean = Boolean((list as any)?.requiresPassword);
   const [unlocked, setUnlocked] = useState(false);
 
@@ -49,20 +70,42 @@ export default function ViewList() {
 
   // Enforce private access: only owner may view
   if (list && privacy === "private") {
-    const isOwner = userId && list.user_id && String(userId) === String(list.user_id);
+    const isOwner =
+      userId && list.user_id && String(userId) === String(list.user_id);
     const qs = listId ? `?listId=${encodeURIComponent(String(listId))}` : "";
     const returnTo = `${pathname}${qs}`;
     if (!isSignedIn) {
       // Redirect unauthenticated users to sign-in, preserving returnTo
-      return <Redirect href={{ pathname: "/sign-in", params: { returnTo: encodeURIComponent(returnTo) } }} />;
+      return (
+        <Redirect
+          href={{
+            pathname: "/sign-in",
+            params: { returnTo: encodeURIComponent(returnTo) },
+          }}
+        />
+      );
     }
     if (!isOwner) {
       // Signed-in but not the owner: show simple private notice
       return (
         <View style={styles.container}>
           <HeaderBar title="Private List" />
-          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-            <Text style={{ fontFamily: 'Nunito_700Bold', color: '#1C0335', fontSize: 18, textAlign: 'center' }}>
+          <View
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 24,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "Nunito_700Bold",
+                color: "#1C0335",
+                fontSize: 18,
+                textAlign: "center",
+              }}
+            >
               This list is private and only visible to its owner.
             </Text>
           </View>
@@ -89,7 +132,7 @@ export default function ViewList() {
               email: data.email,
             } as any);
           } catch (e) {
-            console.error('Failed to submit password request', e);
+            console.error("Failed to submit password request", e);
           }
         }}
       />
@@ -99,13 +142,32 @@ export default function ViewList() {
   const formatEventDate = (dateStr?: string) => {
     if (!dateStr) return "";
     const parts = dateStr.split("-").map((p) => parseInt(p, 10));
-    if (parts.length !== 3 || parts.some((n) => Number.isNaN(n))) return dateStr;
+    if (parts.length !== 3 || parts.some((n) => Number.isNaN(n)))
+      return dateStr;
     const [y, m, d] = parts;
     const date = new Date(y, (m ?? 1) - 1, d ?? 1);
     try {
-      return new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" }).format(date);
+      return new Intl.DateTimeFormat(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }).format(date);
     } catch {
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
       return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
     }
   };
@@ -113,19 +175,19 @@ export default function ViewList() {
   const handleShare = async () => {
     try {
       if (!listId) return;
-      let url = '';
-      if (Platform.OS === 'web' && typeof window !== 'undefined') {
-        const origin = window.location?.origin || '';
+      let url = "";
+      if (Platform.OS === "web" && typeof window !== "undefined") {
+        const origin = window.location?.origin || "";
         const qs = `listId=${encodeURIComponent(String(listId))}`;
         url = `${origin}/view-list?${qs}`;
       } else {
-        url = Linking.createURL('view-list', {
+        url = Linking.createURL("view-list", {
           queryParams: { listId: String(listId) },
         });
       }
       await Share.share({ message: url, url });
     } catch (e) {
-      console.warn('Share failed', e);
+      console.warn("Share failed", e);
     }
   };
 
@@ -145,16 +207,26 @@ export default function ViewList() {
     // Sorting
     switch (sortBy) {
       case "priceAsc":
-        arr.sort((a: any, b: any) => (Number(a.price) || 0) - (Number(b.price) || 0));
+        arr.sort(
+          (a: any, b: any) => (Number(a.price) || 0) - (Number(b.price) || 0)
+        );
         break;
       case "priceDesc":
-        arr.sort((a: any, b: any) => (Number(b.price) || 0) - (Number(a.price) || 0));
+        arr.sort(
+          (a: any, b: any) => (Number(b.price) || 0) - (Number(a.price) || 0)
+        );
         break;
       case "newest":
-        arr.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        arr.sort(
+          (a: any, b: any) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
         break;
       case "oldest":
-        arr.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        arr.sort(
+          (a: any, b: any) =>
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
         break;
       default:
         break;
@@ -167,21 +239,40 @@ export default function ViewList() {
     <View style={styles.container}>
       <HeaderBar title={title} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <ListCover occasion={occasion} imageUri={coverUri} overlayText={String(daysToGoText || "")}  creator={creator}/>
+        <ListCover
+          occasion={occasion}
+          imageUri={coverUri}
+          overlayText={String(daysToGoText || "")}
+          creator={creator}
+        />
         <View style={styles.listInfoContainer}>
-          <RibbonHeader title={title} subtitle={subtitle ?? ""} occasion={occasion}/>
+          <RibbonHeader
+            title={title}
+            subtitle={subtitle ?? ""}
+            occasion={occasion}
+          />
         </View>
-        <ActionsBar 
+        <ActionsBar
           sortby={sortBy}
           filterClaimed={filterClaimed}
           filterUnclaimed={filterUnclaimed}
-          onFilterPress={() => setShowSortSheet(true)} isViewMode privacy={privacy} loading={loading} address={(list?.shippingAddress as string | undefined) ?? null} shareCount={shareCount} />
+          onFilterPress={() => setShowSortSheet(true)}
+          isViewMode
+          privacy={privacy}
+          loading={loading}
+          address={(list?.shippingAddress as string | undefined) ?? null}
+          shareCount={shareCount}
+        />
 
         <View style={styles.addGiftSection}>
           {Array.isArray(visibleItems) && visibleItems.length > 0 ? (
-            visibleItems.map((item: any) => <GiftItemCard swipe={false} key={item._id} item={item} />)
+            visibleItems.map((item: any) => (
+              <GiftItemCard swipe={false} key={item._id} item={item} />
+            ))
           ) : (
-            <Text style={{ textAlign: "center", color: "#8E8E93" }}>No gifts yett.</Text>
+            <Text style={{ textAlign: "center", color: "#8E8E93" }}>
+              No gifts yett.
+            </Text>
           )}
         </View>
 
@@ -189,7 +280,7 @@ export default function ViewList() {
           View only mode. Ask the list owner to share edit access if you need to add items.
         </InfoBox> */}
       </ScrollView>
-        
+
       <Modal
         visible={showSortSheet}
         transparent
@@ -297,7 +388,13 @@ export default function ViewList() {
         </View>
       </Modal>
 
-      <FooterBar viewMode lastUpdated={lastUpdatedLabel} onShare={handleShare} onManage={() => { }} manageLabel="Close" />
+      <FooterBar
+        viewMode
+        lastUpdated={lastUpdatedLabel}
+        onShare={handleShare}
+        onManage={() => {}}
+        manageLabel="Close"
+      />
     </View>
   );
 }

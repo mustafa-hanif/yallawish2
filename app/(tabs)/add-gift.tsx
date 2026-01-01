@@ -235,11 +235,10 @@ export default function AddGift() {
 
   const eventDateStr = (list?.eventDate as string | undefined) ?? undefined;
   const formattedEventDate = formatEventDate(eventDateStr);
- 
-  
-    const daysToGoText = useMemo(() => {
-        return getDaysToGoText(eventDateStr);
-    }, [eventDateStr]);
+
+  const daysToGoText = useMemo(() => {
+    return getDaysToGoText(eventDateStr);
+  }, [eventDateStr]);
 
   const lastUpdatedLabel = `Last updated: ${formatLastUpdated(list?.updated_at)}`;
   const listIdString = listId ? String(listId) : undefined;
@@ -518,7 +517,10 @@ export default function AddGift() {
       await deleteListItemMutation({ itemId: itemId as any });
     } catch (e) {
       console.warn("Failed to delete item", e);
-      Alert.alert("Delete failed", "Could not delete the item. Please try again.");
+      Alert.alert(
+        "Delete failed",
+        "Could not delete the item. Please try again."
+      );
     } finally {
       setDeleteItemId(null);
     }
@@ -1134,7 +1136,12 @@ type MobileLayoutProps = {
   tempFilterClaimed?: boolean;
   tempFilterUnclaimed?: boolean;
   daysToGo: string | null;
-  creator?: { firstName: string; lastName: string; profileImageUrl?: string ; contactEmail?: string } | null;
+  creator?: {
+    firstName: string;
+    lastName: string;
+    profileImageUrl?: string;
+    contactEmail?: string;
+  } | null;
   onDelete: (itemId: string) => void;
 };
 
@@ -1184,6 +1191,13 @@ function MobileLayout({
           onFilterPress={onOpenSortSheet}
           address={address}
           shareCount={shareCount}
+          onPressSettings={() =>
+            listId &&
+            router.push({
+              pathname: "/create-list-step3",
+              params: { listId: String(listId), isEdit: String(true) },
+            })
+          }
         />
         {displayedItems.length > 0 ? (
           <SelectedFilter
@@ -1525,13 +1539,27 @@ function DesktopLayout({
 
           <Text style={desktopStyles.lastUpdated}>{lastUpdated}</Text>
 
-          {displayedItems.length > 0  && (
-          <Pressable style={{width:626, height:48, backgroundColor:'#330065', borderRadius: 8, margin:'auto', marginTop: 39, justifyContent:'center', alignItems:'center', flexDirection: 'row' }} onPress={onAddGift}>
+          {displayedItems.length > 0 && (
+            <Pressable
+              style={{
+                width: 626,
+                height: 48,
+                backgroundColor: "#330065",
+                borderRadius: 8,
+                margin: "auto",
+                marginTop: 39,
+                justifyContent: "center",
+                alignItems: "center",
+                flexDirection: "row",
+              }}
+              onPress={onAddGift}
+            >
               <Ionicons name="add" size={18} color="#ffff" />
-              <Text style={{...desktopStyles.shareLinkText, color:'#ffff'}}>Add more gifts</Text>
-          </Pressable>
+              <Text style={{ ...desktopStyles.shareLinkText, color: "#ffff" }}>
+                Add more gifts
+              </Text>
+            </Pressable>
           )}
-
         </View>
       </ScrollView>
 
@@ -1605,7 +1633,12 @@ type DesktopGiftItemRowProps = {
   index: number;
 };
 
-function DesktopGiftItemRow({ item, onPress, onDelete, index }: DesktopGiftItemRowProps) {
+function DesktopGiftItemRow({
+  item,
+  onPress,
+  onDelete,
+  index,
+}: DesktopGiftItemRowProps) {
   const quantity = Math.max(1, Number(item.quantity ?? 1));
   const claimed = Math.max(0, Number(item.claimed ?? 0));
   const claimedPct = Math.min(100, Math.round((claimed / quantity) * 100));

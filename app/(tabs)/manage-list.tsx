@@ -4,18 +4,41 @@ import { useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Image, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ManageList() {
   const { listId } = useLocalSearchParams<{ listId?: string }>();
-  const list = useQuery(api.products.getListById, listId ? ({ listId } as any) : "skip");
+  const list = useQuery(
+    api.products.getListById,
+    listId ? ({ listId } as any) : "skip"
+  );
   const deleteList = useMutation(api.products.deleteList);
 
   const [archiveExpanded, setArchiveExpanded] = useState(true);
-  const [archivingScope, setArchivingScope] = useState<"self" | "everyone" | null>(null);
+  const [archivingScope, setArchivingScope] = useState<
+    "self" | "everyone" | null
+  >(null);
 
-  const handleBack = () => router.back();
+  const handleBack = () => {
+    if (listId) {
+      router.push({
+        pathname: "/add-gift",
+        params: { listId: String(listId) },
+      });
+    } else {
+      router.back();
+    }
+  };
 
   const handleDelete = async () => {
     if (!listId) return;
@@ -27,12 +50,22 @@ export default function ManageList() {
         onPress: async () => {
           await deleteList({ listId: listId as any });
           router.push("/(tabs)/index" as any); // fallback to home tab
-        }
-      }
+        },
+      },
     ]);
   };
 
-  const Row = ({ icon, label, right, onPress }: { icon: React.ReactNode; label: string; right?: React.ReactNode; onPress?: () => void }) => (
+  const Row = ({
+    icon,
+    label,
+    right,
+    onPress,
+  }: {
+    icon: React.ReactNode;
+    label: string;
+    right?: React.ReactNode;
+    onPress?: () => void;
+  }) => (
     <Pressable style={styles.row} onPress={onPress} disabled={!onPress}>
       <View style={styles.rowLeft}>
         {icon}
@@ -42,9 +75,23 @@ export default function ManageList() {
     </Pressable>
   );
 
-  const ArchiveOption = ({ value, label }: { value: "self" | "everyone"; label: string }) => (
-    <Pressable style={styles.archiveOption} onPress={() => setArchivingScope(value)}>
-      <View style={[styles.radioOuter, archivingScope === value && styles.radioOuterActive]}> 
+  const ArchiveOption = ({
+    value,
+    label,
+  }: {
+    value: "self" | "everyone";
+    label: string;
+  }) => (
+    <Pressable
+      style={styles.archiveOption}
+      onPress={() => setArchivingScope(value)}
+    >
+      <View
+        style={[
+          styles.radioOuter,
+          archivingScope === value && styles.radioOuterActive,
+        ]}
+      >
         {archivingScope === value && <View style={styles.radioInner} />}
       </View>
       <Text style={styles.archiveLabel}>{label}</Text>
@@ -54,7 +101,7 @@ export default function ManageList() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" />
-      <LinearGradient 
+      <LinearGradient
         colors={["#330065", "#45018ad7"]}
         locations={[0, 0.7]}
         start={{ x: 0, y: 0 }}
@@ -65,7 +112,7 @@ export default function ManageList() {
           <View style={styles.headerContent}>
             <View style={styles.navigation}>
               <Pressable onPress={handleBack} style={styles.backButton}>
-                 <Image source={require("@/assets/images/backArrow.png")} />
+                <Image source={require("@/assets/images/backArrow.png")} />
               </Pressable>
               <Text style={styles.headerTitle}>Manage List</Text>
             </View>
@@ -74,20 +121,50 @@ export default function ManageList() {
       </LinearGradient>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        
-        <Row icon={<Image source={require("@/assets/images/customize.png")} />} label="Customize" right={<Ionicons name="chevron-forward" size={20} color="#1C0335" />} onPress={() => listId && router.push({ pathname: '/create-list-step2', params: { listId: String(listId) } })} />
+        <Row
+          icon={<Image source={require("@/assets/images/customize.png")} />}
+          label="Customize"
+          right={<Ionicons name="chevron-forward" size={20} color="#1C0335" />}
+          onPress={() =>
+            listId &&
+            router.push({
+              pathname: "/create-list-step2",
+              params: { listId: String(listId) },
+            })
+          }
+        />
         <View style={styles.sectionSeparator} />
         <View style={styles.sectionSeparator} />
-        <Row icon={<Image source={require("@/assets/images/manageVisibility.png")} />} label="Manage Visibility" right={<Ionicons name="chevron-forward" size={20} color="#1C0335" />} onPress={() => listId && router.push({ pathname: '/create-list-step3', params: { listIdd: String(listId) , isEdit: String(true) } })} />
+        <Row
+          icon={
+            <Image source={require("@/assets/images/manageVisibility.png")} />
+          }
+          label="Manage Visibility"
+          right={<Ionicons name="chevron-forward" size={20} color="#1C0335" />}
+          onPress={() =>
+            listId &&
+            router.push({
+              pathname: "/create-list-step3",
+              params: { listId: String(listId), isEdit: String(true) },
+            })
+          }
+        />
 
         <View style={styles.sectionSeparator} />
 
-        <Pressable style={styles.row} onPress={() => setArchiveExpanded((p) => !p)}>
+        <Pressable
+          style={styles.row}
+          onPress={() => setArchiveExpanded((p) => !p)}
+        >
           <View style={styles.rowLeft}>
             <Image source={require("@/assets/images/archiveList.png")} />
             <Text style={styles.rowLabel}>Archive List</Text>
           </View>
-          <Ionicons name={archiveExpanded ? "chevron-up" : "chevron-down"} size={20} color="#1C0335" />
+          <Ionicons
+            name={archiveExpanded ? "chevron-up" : "chevron-down"}
+            size={20}
+            color="#1C0335"
+          />
         </Pressable>
         {archiveExpanded && (
           <View style={styles.archiveOptionsWrap}>
@@ -98,20 +175,26 @@ export default function ManageList() {
 
         <View style={styles.sectionSeparator} />
 
-        <Row icon={<Image source={require("@/assets/images/duplicateList.png")} />} label="Duplicate List" />
+        <Row
+          icon={<Image source={require("@/assets/images/duplicateList.png")} />}
+          label="Duplicate List"
+        />
         <View style={styles.sectionSeparator} />
         <View style={styles.sectionSeparator} />
 
         <Pressable style={styles.deleteRow} onPress={handleDelete}>
-            <Image source={require("@/assets/images/deleteList.png")} />
-            <Text style={styles.deleteLabel}>Delete List</Text>
+          <Image source={require("@/assets/images/deleteList.png")} />
+          <Text style={styles.deleteLabel}>Delete List</Text>
         </Pressable>
 
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      <View style={styles.footer}> 
-        <Pressable style={[styles.footerButton, styles.footerPrimary]} onPress={handleBack}>
+      <View style={styles.footer}>
+        <Pressable
+          style={[styles.footerButton, styles.footerPrimary]}
+          onPress={handleBack}
+        >
           <Text style={styles.footerPrimaryText}>Back to list</Text>
         </Pressable>
       </View>
@@ -120,33 +203,89 @@ export default function ManageList() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF' },
-  header: { minHeight: 108, justifyContent:'flex-end' },
+  container: { flex: 1, backgroundColor: "#FFFFFF" },
+  header: { minHeight: 108, justifyContent: "flex-end" },
   headerContent: { paddingHorizontal: 16 },
   navigation: {
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
-    paddingVertical: 16
+    paddingVertical: 16,
   },
-  backButton: {  },
-  headerTitle: { color: "#FFFFFF", fontSize: 24, fontFamily: "Nunito_700Bold", lineHeight: 28, letterSpacing: -1 },
+  backButton: {},
+  headerTitle: {
+    color: "#FFFFFF",
+    fontSize: 24,
+    fontFamily: "Nunito_700Bold",
+    lineHeight: 28,
+    letterSpacing: -1,
+  },
   scrollContent: { paddingBottom: 40 },
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 15 },
-  rowLeft: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  rowLabel: { fontSize: 17.49, fontFamily: 'Nunito_700Bold', color: '#1C0335', letterSpacing:0 },
-  rowRight: { },
-  sectionSeparator: { height:0.5 , backgroundColor: '#a7a7a7c3' },
-  archiveOptionsWrap: { paddingLeft: 60, gap: 12, paddingTop: 12, paddingBottom: 12 },
-  archiveOption: { flexDirection: 'row', alignItems: 'center', gap: 22 },
-  archiveLabel: { fontSize: 18, fontFamily: 'Nunito_700Bold', color: '#1C1C1C' },
-  radioOuter: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: '#AEAEB2', alignItems: 'center', justifyContent: 'center' },
-  radioOuterActive: { borderColor: '#3B0076' },
-  radioInner: { width: 12, height: 12, borderRadius: 6, backgroundColor: '#3B0076' },
-  deleteRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 18 },
-  deleteLabel: { fontSize: 16, fontFamily: 'Nunito_700Bold', color: '#FF3B30' },
-  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#FFFFFF', padding: 16},
-  footerButton: { borderRadius: 8, paddingVertical: 16, alignItems: 'center' },
-  footerPrimary: { backgroundColor: '#28004E' },
-  footerPrimaryText: { color: '#FFFFFF', fontSize: 16, fontFamily: 'Nunito_700Bold' }
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 15,
+  },
+  rowLeft: { flexDirection: "row", alignItems: "center", gap: 16 },
+  rowLabel: {
+    fontSize: 17.49,
+    fontFamily: "Nunito_700Bold",
+    color: "#1C0335",
+    letterSpacing: 0,
+  },
+  rowRight: {},
+  sectionSeparator: { height: 0.5, backgroundColor: "#a7a7a7c3" },
+  archiveOptionsWrap: {
+    paddingLeft: 60,
+    gap: 12,
+    paddingTop: 12,
+    paddingBottom: 12,
+  },
+  archiveOption: { flexDirection: "row", alignItems: "center", gap: 22 },
+  archiveLabel: {
+    fontSize: 18,
+    fontFamily: "Nunito_700Bold",
+    color: "#1C1C1C",
+  },
+  radioOuter: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "#AEAEB2",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  radioOuterActive: { borderColor: "#3B0076" },
+  radioInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#3B0076",
+  },
+  deleteRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+  },
+  deleteLabel: { fontSize: 16, fontFamily: "Nunito_700Bold", color: "#FF3B30" },
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#FFFFFF",
+    padding: 16,
+  },
+  footerButton: { borderRadius: 8, paddingVertical: 16, alignItems: "center" },
+  footerPrimary: { backgroundColor: "#28004E" },
+  footerPrimaryText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontFamily: "Nunito_700Bold",
+  },
 });
