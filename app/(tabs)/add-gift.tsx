@@ -1515,6 +1515,14 @@ function DesktopLayout({
           </View>
 
           <Text style={desktopStyles.lastUpdated}>{lastUpdated}</Text>
+
+          {displayedItems.length > 0  && (
+          <Pressable style={{width:626, height:48, backgroundColor:'#330065', borderRadius: 8, margin:'auto', marginTop: 39, justifyContent:'center', alignItems:'center', flexDirection: 'row' }} onPress={onAddGift}>
+              <Ionicons name="add" size={18} color="#ffff" />
+              <Text style={{...desktopStyles.shareLinkText, color:'#ffff'}}>Add more gifts</Text>
+          </Pressable>
+          )}
+
         </View>
       </ScrollView>
 
