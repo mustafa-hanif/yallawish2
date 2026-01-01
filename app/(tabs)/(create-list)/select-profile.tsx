@@ -422,8 +422,8 @@ export default function SelectProfileScreen() {
       <StatusBar barStyle="light-content" backgroundColor="transparent" />
       
       <LinearGradient
-        colors={["#330065", "#6600CB"]}
-        locations={[0, 0.7]}  
+        colors={["#330065", "#45018ad7"]}
+        locations={[0, 0.7]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 2 }}
         style={styles.mobileHeaderGradient}

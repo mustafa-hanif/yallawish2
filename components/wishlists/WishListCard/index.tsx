@@ -76,9 +76,12 @@ export default function WishListCard({ item, onSelectDelete, handleArchiveList, 
   const id = item?._id;
   const title = item?.title || "Raghavendra Suryadev Birthday";
   const date = item?.eventDate || "-----------";
-  const totalItems = item?.totalItems ?? 0;
-  const purchasedItems = item?.totalClaimed ?? 0;
-  const percentage = totalItems > 0 ? Math.round((purchasedItems / totalItems) * 100) : 0;
+  const totalItems = Number(item?.totalItems ?? 0) || 0;
+  const purchasedItems = Number(item?.totalClaimed ?? 0) || 0;
+  // Compute percentage safely and clamp between 0 and 100
+  const rawPercent = totalItems > 0 ? (purchasedItems / totalItems) * 100 : 0;
+  let percentage = Number.isFinite(rawPercent) ? Math.round(rawPercent) : 0;
+  percentage = Math.max(0, Math.min(100, percentage));
   const occasion = item?.occasion || "birthday";
   const user = item?.creator || null;
   const isArchive = loggedInUser?.id !== item?.user_id ? false : item?.isArchived || false;

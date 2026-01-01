@@ -146,12 +146,14 @@ const PublicPasswordSettings = React.memo(function PublicPasswordSettingsBase({
   password,
   setPassword,
   styles: optionStyles,
+  isSelected,
 }: {
   requirePassword: boolean;
   setRequirePassword: (v: boolean) => void;
   password: string;
   setPassword: (v: string) => void;
   styles: typeof styles;
+  isSelected: boolean;
 }) {
   const onChangePassword = useCallback(
     (text: string) => {
@@ -169,29 +171,20 @@ const PublicPasswordSettings = React.memo(function PublicPasswordSettingsBase({
           onValueChange={setRequirePassword}
           trackColor={{ false: "#D1D1D6", true: "#3B0076" }}
           thumbColor="#FFFFFF"
+          disabled={!isSelected}
         />
       </View>
-      <View
-        style={[
-          optionStyles.passwordInputWrapper,
-          !requirePassword && { opacity: 0.5 },
-        ]}
-      >
-        <TextInput
-          style={optionStyles.passwordInput}
-          placeholder="Enter Password"
-          placeholderTextColor="#AEAEB2"
-          value={password}
-          onChangeText={onChangePassword}
-          editable={requirePassword}
-          secureTextEntry
-          maxLength={20}
-          autoCorrect={false}
-          autoCapitalize="none"
-          blurOnSubmit={false}
-        />
-        <Text style={optionStyles.passwordHint}>Maximum 20 characters</Text>
-      </View>
+      <TextInputField
+        inputLabelContainerStyle={isSelected ? {backgroundColor: "#F5EDFE"} : {backgroundColor: "#FFF"}}
+        label="Enter Password"
+        variant="password"
+        secureTextEntry
+        value={password}
+        onChangeText={onChangePassword}
+        editable={requirePassword}
+        maxLength={20}
+        hint="Maximum 20 characters"
+      />
     </View>
   );
 });
@@ -564,6 +557,7 @@ function MobileLayout({
               setSelectedOption={setSelectedOption}
             >
               <PublicPasswordSettings
+                isSelected={selectedOption === "public"}
                 requirePassword={requirePassword}
                 setRequirePassword={setRequirePassword}
                 password={password}
@@ -584,9 +578,9 @@ function MobileLayout({
         >
           <Text style={styles.buttonPrimaryText}>Yalla! Let’s add gifts</Text>
         </Pressable>
-        <Pressable style={[styles.button, styles.buttonSecondary]} onPress={handleBack}>
+        {/* <Pressable style={[styles.button, styles.buttonSecondary]} onPress={handleBack}>
           <Text style={styles.buttonSecondaryText}>Back</Text>
-        </Pressable>
+        </Pressable> */}
 
         </View>
       </View>
@@ -641,7 +635,7 @@ function MobileLayout({
                     key={group.id}
                     style={[
                       !isDesktop ? styles.groupCardMobile : styles.groupCard,
-                      selected && styles.groupCardSelected,
+                      // selected && styles.groupCardSelected,
                     ]}
                     onPress={() => toggleGroup(group.id)}
                   >

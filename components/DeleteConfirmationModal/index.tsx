@@ -3,11 +3,12 @@ import { Image, Modal, Pressable, Text, View } from "react-native";
 import { styles } from "./style";
 
 interface DeleteConfirmationProps {
+  text?: string;
   visible: boolean;
   onCancel: () => void;
   onDelete: () => void;
 }
-export default function DeleteConfirmation({ visible, onCancel, onDelete }: DeleteConfirmationProps) {
+export default function DeleteConfirmation({ text = "", visible, onCancel, onDelete }: DeleteConfirmationProps) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={() => onCancel()}>
       <Pressable style={styles.backdrop} onPress={onCancel}>
@@ -16,7 +17,7 @@ export default function DeleteConfirmation({ visible, onCancel, onDelete }: Dele
             <Image style={styles.icon} resizeMode="contain" source={require("@/assets/images/deleteList.png")} />
           </View>
           <View>
-            <Text style={styles.heading}>Are you sure you want to{"\n"}delete this list?</Text>
+            <Text style={styles.heading}>{text || "Are you sure you want to\ndelete this list?"}</Text>
           </View>
           <View style={styles.buttonWrapper}>
             <Pressable onPress={onCancel} style={styles.cancelButton}>

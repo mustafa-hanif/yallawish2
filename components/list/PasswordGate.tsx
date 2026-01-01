@@ -1,7 +1,7 @@
 // import { Ionicons } from '@expo/vector-icons';
 import { Ionicons } from "@expo/vector-icons";
 import React, { useMemo, useState } from "react";
-import { Dimensions, Image, ImageBackground, Pressable, StatusBar, Text, TextInput, View } from "react-native";
+import { Dimensions, Image, ImageBackground, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StatusBar, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 // import { Image, Pressable, Text, TextInput, View } from 'react-native';
 
 export type PasswordGateProps = {
@@ -14,7 +14,7 @@ export type PasswordGateProps = {
 };
 
 export function PasswordGate({ title, listId, requiresPassword, passwordValue, onUnlocked, onRequestPassword }: PasswordGateProps) {
-  const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+  const { width: SCREEN_WIDTH } = Dimensions.get("window");
   const [unlocked, setUnlocked] = useState(false);
   const [showRequest, setShowRequest] = useState(false);
   const [password, setPassword] = useState("");
@@ -48,13 +48,20 @@ export function PasswordGate({ title, listId, requiresPassword, passwordValue, o
   if (!requiresPassword || unlocked) return null;
 
   return (
-    <>
-      <ImageBackground source={require("@/assets/images/onboard_image.png")} style={{ width: SCREEN_WIDTH, height: "100%", overflow: "hidden", paddingVertical: 24, paddingHorizontal: 16, gap: 51 }} imageStyle={{ width: SCREEN_WIDTH, height: "100%" }} resizeMode="cover">
-        <StatusBar barStyle="light-content" backgroundColor="transparent" />
-        <View style={{ alignItems: "center", marginTop: 16 }}>
-          <Image source={require("@/assets/images/yallawish_logo.png")} style={{ width: 158, height: 38, resizeMode: "contain" }} />
-        </View>
-        <View style={{ justifyContent: "flex-end", paddingHorizontal: 15, paddingBottom: 16, height: 626, backgroundColor: "#32194b97", width: "100%", borderColor: "#6A3D9C", borderWidth: 0.98, borderRadius: 20.23 }}>
+    <ImageBackground
+      source={require("@/assets/images/onboard_image.png")}
+      style={{ flex: 1, width: SCREEN_WIDTH, overflow: "hidden" }}
+      imageStyle={{ resizeMode: "cover" }}
+      resizeMode="cover"
+    >
+      <StatusBar barStyle="light-content" backgroundColor="transparent" />
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <ScrollView contentContainerStyle={{ flexGrow: 1, paddingVertical: 24, paddingHorizontal: 16, gap: 51, backgroundColor: 'transparent' }} keyboardShouldPersistTaps="handled">
+            <View style={{ alignItems: "center", marginTop: 16 }}>
+              <Image source={require("@/assets/images/yallawish_logo.png")} style={{ width: 158, height: 38, resizeMode: "contain" }} />
+            </View>
+            <View style={{ justifyContent: "flex-end", paddingHorizontal: 15, paddingBottom: 16, flex: 1, backgroundColor: "#32194b97", width: "100%", borderColor: "#6A3D9C", borderWidth: 0.98, borderRadius: 20.23 }}>
           {!showRequest ? (
             <View>
               <View style={{ justifyContent: "center", alignItems: "center" }}>
@@ -74,9 +81,9 @@ export function PasswordGate({ title, listId, requiresPassword, passwordValue, o
 
                 <View style={{ marginTop: 21 }}>
                   <View style={{ flexDirection: "row", alignItems: "center", borderWidth: 1.5, borderColor: pwdError ? "#FF4D4F" : "#FFFFFF", borderRadius: 8, paddingHorizontal: 12, height: 56 }}>
-                    <TextInput value={password} onChangeText={setPassword} placeholder="Password*" placeholderTextColor="rgba(255,255,255,0.5)" secureTextEntry={!showPwd} style={{ flex: 1, color: "#FFFFFF" }} />
+                    <TextInput key={`pwd-${showPwd}`} value={password} onChangeText={setPassword} placeholder="Password*" placeholderTextColor="rgba(255,255,255,0.5)" secureTextEntry={!showPwd} autoCapitalize="none" textContentType="password" style={{ flex: 1, color: "#FFFFFF" }} />
                     <Pressable onPress={() => setShowPwd((v) => !v)}>
-                      <Ionicons name={showPwd ? "eye" : "eye-off"} size={20} color="#FFFFFF66" />
+                      <Ionicons name={!showPwd ? "eye" : "eye-off"} size={20} color="#FFFFFF66" />
                     </Pressable>
                   </View>
                   {pwdError && <Text style={{ color: "#FF4D4F", marginTop: 4, fontSize: 16, fontFamily: "Nunito_700Bold" }}>{pwdError}</Text>}
@@ -121,8 +128,10 @@ export function PasswordGate({ title, listId, requiresPassword, passwordValue, o
               </View>
             </View>
           )}
-        </View>
-      </ImageBackground>
-    </>
+            </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 }
