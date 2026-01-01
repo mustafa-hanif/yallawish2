@@ -329,7 +329,7 @@ export default function AuthScreen() {
 
           {!isDesktop && (
             <Pressable
-              onPress={() => {}}
+              onPress={() => router.push("/forgot-password")}
               accessibilityRole="button"
               accessibilityLabel="Forgot password"
             >
@@ -340,7 +340,10 @@ export default function AuthScreen() {
 
         {isDesktop && (
           <Pressable
-            onPress={() => {}}
+            onPress={() => {
+              setActiveTab("signup");
+              router.replace("/forgot-password");
+            }}
             style={styles.forgotLinkWrapper}
             accessibilityRole="button"
             accessibilityLabel="Forgot password"
@@ -569,7 +572,6 @@ export default function AuthScreen() {
               variant="icon"
               accessibilityLabel="Continue with Apple"
             />
-            1
             {/* <SocialButton
               onPress={() => {}}
               icon={<Ionicons name="logo-whatsapp" size={26} color="#FFFFFF" />}

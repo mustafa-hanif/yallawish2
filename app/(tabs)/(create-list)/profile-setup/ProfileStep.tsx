@@ -167,6 +167,7 @@ export function ProfileStep({
               </Text>
             )}
           </Pressable>
+          <SignOutButton />
         </View>
 
         <View style={styles.desktopFormRow}>
