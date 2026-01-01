@@ -428,7 +428,9 @@ export default function AddGift() {
       try {
         setScraping(true);
         setScrapeError(null);
+        console.log("Scraping URL:", link);
         const meta = await scrape({ url: link });
+        console.log("Scrape result:", JSON.stringify(meta, null, 2));
         if (cancelled) return;
         if (meta.ok) {
           if (!name && meta.title) {
@@ -443,11 +445,18 @@ export default function AddGift() {
             setName(cleanTitle);
           }
           if (!price && meta.price) setPrice(meta.price);
-          if (meta.image) setImageUrl(meta.image);
+          if (meta.image) {
+            console.log("Setting image URL:", meta.image);
+            setImageUrl(meta.image);
+          } else {
+            console.log("No image in scrape result");
+          }
         } else {
+          console.log("Scrape failed:", meta.error);
           setScrapeError(meta.error || "Could not extract data");
         }
       } catch (e: any) {
+        console.error("Scrape exception:", e);
         if (!cancelled) setScrapeError(e.message);
       } finally {
         if (!cancelled) setScraping(false);
