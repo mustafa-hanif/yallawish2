@@ -1459,10 +1459,11 @@ function DesktopLayout({
           </View>
 
           <View style={desktopStyles.heroCardWrapper}>
-            <View style={desktopStyles.heroCard}>
+            <View style={[desktopStyles.heroCard, {height: 260, borderRadius: 8, overflow:'hidden'}]}>
               <Image
                 source={coverUri ? { uri: coverUri } : FALLBACK_COVER}
-                style={desktopStyles.heroImage}
+                style={[desktopStyles.heroImage, {height: '100%', borderRadius: 0}]}
+                resizeMode="cover"
               />
               <View style={desktopStyles.heroOverlay}>
                 <Pressable
