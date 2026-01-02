@@ -596,7 +596,7 @@ function MobileLayout({
           onPress={handleContinue}
           disabled={!selectedOption}
         >
-          <Text style={styles.buttonPrimaryText}>Yalla! Let’s add gifts</Text>
+          <Text style={styles.buttonPrimaryText}>{Boolean(isEdit) ? "Save Changes" : "Yalla! Let’s add gifts"}</Text>
         </Pressable>
         {/* <Pressable style={[styles.button, styles.buttonSecondary]} onPress={handleBack}>
           <Text style={styles.buttonSecondaryText}>Back</Text>
@@ -727,7 +727,7 @@ function MobileLayout({
               style={[styles.button, styles.buttonPrimary]}
               onPress={confirmShareAndClose}
             >
-              <Text style={styles.buttonPrimaryText}>Yalla! Let’s add gifts</Text>
+              <Text style={styles.buttonPrimaryText}>{Boolean(isEdit) ? "Save Changes" : "Yalla! Let’s add gifts"}</Text>
             </Pressable>
             <Pressable
               style={[styles.button, styles.buttonSecondary, { marginBottom: 20, marginTop: 20 }]}
@@ -766,6 +766,8 @@ function DesktopLayout({
   toggleFriend,
   confirmShareAndClose,
   steps,
+  isEdit,
+  headerTitle
 }: DesktopLayoutProps) {
   const isContinueDisabled = !selectedOption;
 
@@ -778,7 +780,7 @@ function DesktopLayout({
             <Ionicons name="chevron-back" size={20} color="#4B0082" />
             <Text style={desktopStyles.desktopBackText}>Back</Text>
           </Pressable>
-          <Text style={desktopStyles.desktopTitle}>Create Gift List</Text>
+          <Text style={desktopStyles.desktopTitle}>{headerTitle}</Text>
           <Text style={desktopStyles.desktopSubtitle}>
             To create your gift list, please provide the following details:
           </Text>
@@ -894,7 +896,7 @@ function DesktopLayout({
                   isContinueDisabled && desktopStyles.desktopPrimaryButtonDisabled,
                 ]}
               >
-                <Text style={desktopStyles.desktopPrimaryButtonText}>Yalla! Let’s add gifts</Text>
+                <Text style={desktopStyles.desktopPrimaryButtonText}>{Boolean(isEdit) ? "Save Changes" : "Yalla! Let’s add gifts"}</Text>
               </Pressable>
             </View>
           </View>
@@ -1124,7 +1126,7 @@ export default function CreateListStep3() {
     toggleGroup,
     toggleFriend,
     confirmShareAndClose,
-    isEdit,
+    isEdit: Boolean(isEdit),
   };
 
   if (isDesktop) {
