@@ -7,6 +7,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Dimensions,
+  FlatList,
   Modal,
   Platform,
   Pressable,
@@ -327,6 +328,7 @@ function DesktopShareModal({
   toggleFriend,
   confirmShareAndClose,
 }: DesktopShareModalProps) {
+
   return (
     <Modal
       visible={visible}
@@ -340,107 +342,118 @@ function DesktopShareModal({
           onPress={onRequestClose}
         />
         <View style={desktopStyles.shareModal}>
-          <View style={desktopStyles.shareModalTitleRow}>
-            <Text style={desktopStyles.shareModalTitle}>Share with your people</Text>
+          <View style={[desktopStyles.shareModalTitleRow, {marginBottom: 0}]}>
+            <View>
+              <View>
+                <Text style={desktopStyles.shareModalTitle}>My People</Text>
+              </View>
+              <View>
+                <Text style={desktopStyles.shareModalSubtitle}>Share with your friends and groups</Text>
+              </View>
+            </View>
             <Pressable onPress={onRequestClose}>
               <Ionicons name="close" size={24} color="#1C0335" />
             </Pressable>
           </View>
-          <View style={desktopStyles.shareModalBody}>
-            <View style={desktopStyles.shareModalColumn}>
-              <Text style={desktopStyles.shareModalSubtitle}>Groups</Text>
-              <View style={desktopStyles.shareModalSearchBox}>
-                <TextInput
+              <View style={[desktopStyles.shareModalSearchBox, { marginTop: 0}]}>
+              <Ionicons name="search-outline" size={20} color="#AEAEB2" />
+              <TextInput
                   style={desktopStyles.shareModalSearchInput}
-                  placeholder="Search groups"
-                  placeholderTextColor="#8E8E93"
-                  value={groupQuery}
-                  onChangeText={setGroupQuery}
-                />
-                <Ionicons name="search-outline" size={20} color="#1C0335" />
-              </View>
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={desktopStyles.shareModalGroupGrid}
-              >
-                {filteredGroups.map((group) => {
-                  const selected = selectedGroups.includes(group.id);
-                  return (
-                    <Pressable
-                      key={group.id}
-                      style={[
-                        desktopStyles.shareModalGroupCard,
-                        selected && desktopStyles.shareModalGroupSelected,
-                      ]}
-                      onPress={() => toggleGroup(group.id)}
-                    >
-                      <View style={styles.groupImage} />
-                      <View style={styles.groupOverlay} />
-                      <View
-                        style={[
-                          desktopStyles.shareModalGroupCheck,
-                          selected && desktopStyles.shareModalGroupCheckSelected,
-                        ]}
-                      >
-                        {selected && <Ionicons name="checkmark" size={16} color="#FFFFFF" />}
-                      </View>
-                      <View style={desktopStyles.shareModalGroupText}>
-                        <Text style={desktopStyles.shareModalGroupTitle}>{group.name}</Text>
-                        <Text style={desktopStyles.shareModalGroupBy}>Created By: You</Text>
-                      </View>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
-            </View>
-            <View style={desktopStyles.shareModalSeparator} />
-            <View style={desktopStyles.shareModalColumn}>
-              <Text style={desktopStyles.shareModalSubtitle}>Friends</Text>
-              <View style={desktopStyles.shareModalSearchBox}>
-                <TextInput
-                  style={desktopStyles.shareModalSearchInput}
-                  placeholder="Search by name or email"
-                  placeholderTextColor="#8E8E93"
-                  value={friendQuery}
-                  onChangeText={setFriendQuery}
-                />
-                <Ionicons name="search-outline" size={20} color="#1C0335" />
-              </View>
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={desktopStyles.shareModalFriendList}
-              >
-                {filteredFriends.map((friend) => {
-                  const selected = selectedFriends.includes(friend.id);
-                  return (
-                    <Pressable
-                      key={friend.id}
-                      style={desktopStyles.shareModalFriendRow}
-                      onPress={() => toggleFriend(friend.id)}
-                    >
-                      <View style={desktopStyles.shareModalFriendAvatar}>
-                        <Text style={desktopStyles.shareModalFriendInitials}>
-                          {getInitials(friend.name)}
-                        </Text>
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={desktopStyles.shareModalFriendName}>{friend.name}</Text>
-                        <Text style={desktopStyles.shareModalFriendEmail}>{friend.email}</Text>
-                      </View>
-                      <View
-                        style={[
-                          desktopStyles.shareModalFriendCheckbox,
-                          selected && desktopStyles.shareModalFriendCheckboxSelected,
-                        ]}
-                      >
-                        {selected && <Ionicons name="checkmark" size={16} color="#FFFFFF" />}
-                      </View>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
-            </View>
+                  placeholder="Search groups or friends by name, email..."
+                  placeholderTextColor="#AEAEB2"
+                  value={groupQuery || friendQuery}
+                  onChangeText={(e) => { 
+                    setGroupQuery(e); 
+                    setFriendQuery(e); 
+                }}
+              />
           </View>
+          <ScrollView showsHorizontalScrollIndicator={false}>
+            <View style={desktopStyles.headingSection}>
+              <View style={desktopStyles.headingItem}>
+                <Text style={desktopStyles.heading}>Groups</Text>
+                <View style={desktopStyles.headingCountWrap}>
+                  <Text style={desktopStyles.headingCount}>{filteredGroups.length}</Text>
+                </View>
+              </View>
+              <View style={desktopStyles.headingItem}>
+                <Text style={desktopStyles.selectedText}>Selected</Text>
+                  <Text style={desktopStyles.selectedCount}>{selectedGroups.length > 0 && selectedGroups.length < 9 ? `0${selectedGroups.length}` : selectedGroups.length}</Text>
+              </View>
+            </View>
+            <FlatList
+              data={filteredGroups}
+              showsHorizontalScrollIndicator={false}
+              horizontal
+              keyExtractor={(item) => item.id}
+              ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
+              renderItem={({ item }) => {
+                const selected = selectedGroups.includes(item.id);
+                return (
+                  <Pressable key={item.id} style={[desktopStyles.shareModalGroupCard, selected && desktopStyles.shareModalGroupSelected]} onPress={() => toggleGroup(item.id)}>
+                    <View style={styles.groupImage} />
+                    <View style={styles.groupOverlay} />
+                    <View style={[desktopStyles.shareModalGroupCheck, selected && desktopStyles.shareModalGroupCheckSelected]}>{selected && <Ionicons name="checkmark" size={15} color="#330065" />}</View>
+                    <View />
+                    <View style={desktopStyles.shareModalGroupText}>
+                      <Text numberOfLines={1} style={desktopStyles.shareModalGroupTitle}>{item.name}</Text>
+                      <Text numberOfLines={1} style={desktopStyles.shareModalGroupBy}>Created By: <Text style={desktopStyles.shareModalGroupByHighlight}>You</Text></Text>
+                    </View>
+                  </Pressable>
+                );
+              }}
+            />
+              <View style={[desktopStyles.headingSection, { marginTop: 20, marginBottom: 0 }]}>
+              <View style={desktopStyles.headingItem}>
+                <Text style={desktopStyles.heading}>Friends</Text>
+                <View style={desktopStyles.headingCountWrap}>
+                  <Text style={desktopStyles.headingCount}>{filteredFriends.length}</Text>
+                </View>
+              </View>
+              <View style={desktopStyles.headingItem}>
+                <Text style={desktopStyles.selectedText}>Selected</Text>
+                  <Text style={desktopStyles.selectedCount}>{selectedFriends.length > 0 && selectedFriends.length < 9 ? `0${selectedFriends.length}` : selectedFriends.length}</Text>
+              </View>
+            </View>
+            <FlatList
+              data={filteredFriends}
+              showsHorizontalScrollIndicator={false}
+              numColumns={2}
+              keyExtractor={(item) => item.id}
+              style={{ maxHeight: 210 }}
+              renderItem={({ item ,index }) => {
+                const selected = selectedFriends.includes(item.id);
+                const isLeftColumn = index % 2 === 0;
+                return (
+                  <>
+                  <Pressable
+                    key={item.id}
+                    style={[desktopStyles.shareModalFriendRow, isLeftColumn ? {  } : { marginLeft: 20 }]}
+                    onPress={() => toggleFriend(item.id)}
+                  >
+                    <View style={desktopStyles.shareModalFriendAvatar}>
+                      <Text style={desktopStyles.shareModalFriendInitials}>
+                        {getInitials(item.name)}
+                      </Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={desktopStyles.shareModalFriendName}>{item.name}</Text>
+                      <Text style={desktopStyles.shareModalFriendEmail}>{item.email}</Text>
+                    </View>
+                    <View
+                      style={[
+                        desktopStyles.shareModalFriendCheckbox,
+                        selected && desktopStyles.shareModalFriendCheckboxSelected,
+                      ]}
+                    >
+                      {selected && <Ionicons name="checkmark" size={16} color="#FFFFFF" />}
+                    </View>
+                  </Pressable>
+                  </>
+                );
+              }}
+            />
+          </ScrollView>
           <View style={desktopStyles.shareModalFooter}>
             <Pressable onPress={onRequestClose} style={desktopStyles.desktopSecondaryButton}>
               <Text style={desktopStyles.desktopSecondaryButtonText}>Cancel</Text>
@@ -449,7 +462,7 @@ function DesktopShareModal({
               onPress={confirmShareAndClose}
               style={desktopStyles.desktopPrimaryButton}
             >
-              <Text style={desktopStyles.desktopPrimaryButtonText}>Save</Text>
+              <Text style={desktopStyles.desktopPrimaryButtonText}>Done</Text>
             </Pressable>
           </View>
         </View>
