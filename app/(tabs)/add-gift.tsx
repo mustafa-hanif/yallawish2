@@ -17,6 +17,8 @@ import { formatLastUpdated, getDaysToGoText } from "@/utils";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useAction, useMutation, useQuery } from "convex/react";
+import * as FileSystem from "expo-file-system";
+import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Linking from "expo-linking";
 import { router, useLocalSearchParams } from "expo-router";
@@ -29,6 +31,7 @@ import React, {
   useState,
 } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Animated,
   Easing,
@@ -308,6 +311,16 @@ export default function AddGift() {
   const [isUrlValid, setIsUrlValid] = useState(true);
   const [deleteListId, setDeleteListId] = useState<string | null>(null);
   
+  // Cover photo upload state
+  const [showCoverUploadModal, setShowCoverUploadModal] = useState(false);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [coverUploadError, setCoverUploadError] = useState<string | null>(null);
+
+  // Convex mutations for cover photo
+  const generateCoverUploadUrl = useMutation(api.products.generateListCoverUploadUrl);
+  const getCoverUrl = useMutation(api.products.getListCoverUrl);
+  const updateListDetails = useMutation(api.products.updateListDetails);
+  
 
   const openSortSheet = useCallback(() => {
     setTempSortBy(sortBy);
@@ -426,6 +439,216 @@ export default function AddGift() {
     setShowBrowser(false);
     // Reopen sheet so user can confirm/edit
     setTimeout(() => setShowSheet(true), 60);
+  };
+
+  // Handle cover photo upload
+  const handleCoverPhotoUpload = async () => {
+    try {
+      console.log("[CoverUpload] Starting image picker...");
+      setCoverUploadError(null);
+
+      if (isUploadingCover) {
+        console.log("[CoverUpload] Already uploading, skipping");
+        return;
+      }
+
+      // Request permissions for mobile
+      if (Platform.OS !== "web") {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== "granted") {
+          setCoverUploadError("Permission denied to access photos");
+          return;
+        }
+      }
+
+      // Launch image picker
+      console.log("[CoverUpload] Launching image library...");
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: Platform.OS !== "web",
+        aspect: Platform.OS !== "web" ? [16, 9] : undefined,
+        quality: 0.9,
+      });
+
+      console.log("[CoverUpload] Image picker result:", result);
+
+      if (result.canceled) {
+        console.log("[CoverUpload] User canceled");
+        return;
+      }
+
+      const asset = result.assets?.[0];
+      console.log("[CoverUpload] Selected asset:", asset);
+
+      if (!asset?.uri) {
+        console.error("[CoverUpload] No asset URI found");
+        setCoverUploadError("Failed to get image. Please try again.");
+        return;
+      }
+
+      const uri = asset.uri;
+      const mime = asset.mimeType ?? "";
+      const ext = uri.split(".").pop()?.toLowerCase();
+      console.log("[CoverUpload] URI:", uri, "MIME:", mime, "EXT:", ext);
+
+      // Validate file type using MIME type and extension
+      const isValidType =
+        mime.startsWith("image/jpeg") ||
+        mime.startsWith("image/png") ||
+        ext === "jpg" ||
+        ext === "jpeg" ||
+        ext === "png";
+
+      if (!isValidType) {
+        console.error("[CoverUpload] Invalid file type");
+        setCoverUploadError("Only JPG and PNG images are supported");
+        return;
+      }
+
+      // Validate file size (4MB max)
+      const sizeBytes = asset.fileSize;
+      console.log("[CoverUpload] File size:", sizeBytes);
+      if (typeof sizeBytes === "number" && sizeBytes > 4 * 1024 * 1024) {
+        console.error("[CoverUpload] File too large");
+        setCoverUploadError("Image must be less than 4MB");
+        return;
+      }
+
+      // Start upload
+      console.log("[CoverUpload] Starting upload process...");
+      setIsUploadingCover(true);
+
+      // Generate upload URL from Convex
+      console.log("[CoverUpload] Generating upload URL...");
+      const uploadUrl = await generateCoverUploadUrl();
+      console.log("[CoverUpload] Upload URL:", uploadUrl);
+
+      if (typeof uploadUrl !== "string" || uploadUrl.length === 0) {
+        throw new Error("Failed to get upload URL");
+      }
+
+      // Upload file to Convex storage
+      let storageId: string | undefined;
+
+      if (Platform.OS === "web") {
+        // Web platform: use fetch with blob
+        console.log("[CoverUpload] Web platform detected, processing blob...");
+        let blob: Blob;
+
+        // Check if we have a File object directly
+        if (asset && "file" in asset && asset.file instanceof File) {
+          console.log("[CoverUpload] Using File object directly");
+          blob = asset.file;
+        } else if (uri.startsWith("blob:")) {
+          console.log("[CoverUpload] Fetching blob URL...");
+          const response = await fetch(uri);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch blob: ${response.status}`);
+          }
+          blob = await response.blob();
+          console.log("[CoverUpload] Blob fetched, size:", blob.size);
+        } else if (uri.startsWith("data:")) {
+          console.log("[CoverUpload] Converting data URL to blob...");
+          const response = await fetch(uri);
+          blob = await response.blob();
+          console.log("[CoverUpload] Blob created, size:", blob.size);
+        } else {
+          console.log("[CoverUpload] Fetching as regular URL...");
+          const response = await fetch(uri);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch image: ${response.status}`);
+          }
+          blob = await response.blob();
+          console.log("[CoverUpload] Blob fetched, size:", blob.size);
+        }
+
+        console.log("[CoverUpload] Uploading blob to:", uploadUrl);
+        const uploadResponse = await fetch(uploadUrl, {
+          method: "POST",
+          body: blob,
+          headers: {
+            "Content-Type": mime && mime.length > 0 ? mime : "application/octet-stream",
+          },
+        });
+
+        console.log("[CoverUpload] Upload response status:", uploadResponse.status);
+
+        if (!uploadResponse.ok) {
+          const errorText = await uploadResponse.text().catch(() => "");
+          console.error("[CoverUpload] Upload failed:", uploadResponse.status, errorText);
+          throw new Error(`Upload failed with status ${uploadResponse.status}: ${errorText}`);
+        }
+
+        try {
+          const parsed = await uploadResponse.json();
+          console.log("[CoverUpload] Upload response:", parsed);
+          storageId = parsed?.storageId;
+        } catch (parseError) {
+          console.error("[CoverUpload] Failed to parse upload response", parseError);
+          const responseText = await uploadResponse.text().catch(() => "");
+          console.error("[CoverUpload] Response body:", responseText);
+          throw new Error("Unexpected response from upload service");
+        }
+      } else {
+        // Native platforms: use FileSystem
+        console.log("[CoverUpload] Native platform detected, using FileSystem...");
+        const uploadResult = await FileSystem.uploadAsync(uploadUrl, uri, {
+          httpMethod: "POST",
+          headers: {
+            "Content-Type": mime && mime.length > 0 ? mime : "application/octet-stream",
+          },
+        });
+
+        console.log("[CoverUpload] Upload result status:", uploadResult.status);
+
+        if (uploadResult.status !== 200) {
+          throw new Error(`Upload failed with status ${uploadResult.status}`);
+        }
+
+        try {
+          const parsed = JSON.parse(uploadResult.body ?? "{}");
+          console.log("[CoverUpload] Upload response:", parsed);
+          storageId = parsed?.storageId;
+        } catch (parseError) {
+          console.error("[CoverUpload] Failed to parse upload response", parseError);
+          throw new Error("Unexpected response from upload service");
+        }
+      }
+
+      if (!storageId) {
+        console.error("[CoverUpload] No storageId returned");
+        throw new Error("No storageId returned from upload");
+      }
+
+      // Get the permanent URL
+      console.log("[CoverUpload] Getting public URL for storageId:", storageId);
+      const publicUrl = await getCoverUrl({ storageId } as any);
+      console.log("[CoverUpload] Public URL:", publicUrl);
+
+      // Update list with new cover photo
+      if (listId) {
+        await updateListDetails({
+          listId: listId as any,
+          title: list?.title || "Your List",
+          coverPhotoUri: publicUrl,
+          coverPhotoStorageId: storageId,
+        });
+      }
+
+      console.log("[CoverUpload] Upload completed successfully!");
+
+      // Close modal
+      setShowCoverUploadModal(false);
+      setIsUploadingCover(false);
+      setCoverUploadError(null);
+
+    } catch (error) {
+      console.error("[CoverUpload] Error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      console.error("[CoverUpload] Error message:", errorMessage);
+      setCoverUploadError(`Failed to upload: ${errorMessage}`);
+      setIsUploadingCover(false);
+    }
   };
 
   // Scrape on link change (debounced)
@@ -614,6 +837,7 @@ export default function AddGift() {
       onAddGift={handleAddGift}
       onShare={handleShare}
       onManage={handleManageList}
+      onChangeCover={() => setShowCoverUploadModal(true)}
       onOpenGift={handleOpenGift}
       privacy={privacy}
       shareCount={shareCount}
@@ -995,6 +1219,117 @@ export default function AddGift() {
         onCancel={() => setDeleteItemId(null)}
         onDelete={() => handleDeleteItem(deleteItemId)}
       />
+      
+      {/* Cover Photo Upload Modal */}
+      {isDesktop && (
+        <Modal
+          visible={showCoverUploadModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => !isUploadingCover && setShowCoverUploadModal(false)}
+        >
+          <Pressable 
+            style={desktopStyles.uploadBackdrop} 
+            onPress={() => !isUploadingCover && setShowCoverUploadModal(false)}
+          >
+            <Pressable 
+              style={desktopStyles.uploadModalCard}
+              onPress={(e) => e.stopPropagation()}
+            >
+              <View style={desktopStyles.uploadModalHeader}>
+                <Text style={desktopStyles.uploadModalTitle}>
+                  {coverUri ? "Change Cover Photo" : "Upload Cover Photo"}
+                </Text>
+                <Pressable
+                  onPress={() => !isUploadingCover && setShowCoverUploadModal(false)}
+                  disabled={isUploadingCover}
+                >
+                  <Ionicons name="close" size={24} color="#8E8E93" />
+                </Pressable>
+              </View>
+
+              {/* Image Preview or Upload Zone */}
+              <View style={desktopStyles.uploadContent}>
+                {coverUri ? (
+                  <View style={desktopStyles.uploadPreviewContainer}>
+                    <Image
+                      source={{ uri: coverUri }}
+                      style={desktopStyles.uploadPreviewImage}
+                      resizeMode="cover"
+                    />
+                  </View>
+                ) : (
+                  <Pressable
+                    style={[
+                      desktopStyles.uploadZone,
+                      isUploadingCover && desktopStyles.uploadZoneDisabled,
+                    ]}
+                    onPress={handleCoverPhotoUpload}
+                    disabled={isUploadingCover}
+                  >
+                    {isUploadingCover ? (
+                      <ActivityIndicator size="large" color="#3B0076" />
+                    ) : (
+                      <>
+                        <Ionicons name="cloud-upload-outline" size={48} color="#3B0076" />
+                        <Text style={desktopStyles.uploadZoneTitle}>
+                          Drag and drop your files here
+                        </Text>
+                        <Text style={desktopStyles.uploadZoneSubtitle}>
+                          Maximum file size: 4MB. Only JPG, JPEG and PNG with a ratio of 16:9
+                        </Text>
+                        {/* <Pressable style={desktopStyles.browseButton}>
+                          <Text style={desktopStyles.browseButtonText}>
+                            Browse Files
+                          </Text>
+                        </Pressable> */}
+                      </>
+                    )}
+                  </Pressable>
+                )}
+
+                {/* Error Message */}
+                {coverUploadError && (
+                  <Text style={desktopStyles.uploadErrorText}>
+                    {coverUploadError}
+                  </Text>
+                )}
+
+                {/* Supported Formats */}
+                <Text style={desktopStyles.uploadSupportedFormats}>
+                  Supported file formats: JPEG, PNG. Max size: 4MB. Only JPG, JPEG and PNG with a ratio of 16:9
+                </Text>
+              </View>
+
+              {/* Action Buttons */}
+              <View style={desktopStyles.uploadModalFooter}>
+                {/* <Pressable
+                  style={desktopStyles.uploadCancelButton}
+                  onPress={() => !isUploadingCover && setShowCoverUploadModal(false)}
+                  disabled={isUploadingCover}
+                >
+                  <Text style={desktopStyles.uploadCancelButtonText}>
+                    Cancel
+                  </Text>
+                </Pressable> */}
+                <Pressable
+                  style={[
+                    desktopStyles.uploadSubmitButton,
+                    isUploadingCover && desktopStyles.uploadSubmitButtonDisabled,
+                  ]}
+                  onPress={handleCoverPhotoUpload}
+                  disabled={isUploadingCover}
+                >
+                  <Text style={desktopStyles.uploadSubmitButtonText}>
+                    {isUploadingCover ? "Uploading..." : coverUri ? "Change Photo" : "Upload"}
+                  </Text>
+                </Pressable>
+              </View>
+            </Pressable>
+          </Pressable>
+        </Modal>
+      )}
+      
       {/* Product search browser modal */}
       <Modal
         visible={showBrowser}
@@ -1326,6 +1661,7 @@ type DesktopLayoutProps = {
   onAddGift: () => void;
   onShare: () => void;
   onManage: () => void;
+  onChangeCover: () => void;
   onOpenGift: (item: GiftItemType) => void;
   privacy: string;
   shareCount?: number;
@@ -1355,6 +1691,7 @@ function DesktopLayout({
   onAddGift,
   onShare,
   onManage,
+  onChangeCover,
   onOpenGift,
   privacy,
   shareCount,
@@ -1468,7 +1805,7 @@ function DesktopLayout({
               <View style={desktopStyles.heroOverlay}>
                 <Pressable
                   style={desktopStyles.changeCoverButton}
-                  onPress={onManage}
+                  onPress={onChangeCover}
                 >
                   <Text style={desktopStyles.changeCoverText}>
                     Change cover photo

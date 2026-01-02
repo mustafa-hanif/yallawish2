@@ -182,13 +182,13 @@ export const updateListDetails = mutation({
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.listId, {
-      title: args.title,
-      note: args.note ?? null,
-      eventDate: args.eventDate ?? null,
-      shippingAddress: args.shippingAddress ?? null,
-      occasion: args.occasion ?? null,
-      coverPhotoUri: args.coverPhotoUri ?? null,
-      coverPhotoStorageId: args.coverPhotoStorageId ?? null,
+      ...(args.title ? {title: args.title} : {}),
+      ...(args.note !== undefined ? {note: args.note} : {}),
+      ...(args.eventDate !== undefined ? {eventDate: args.eventDate} : {}),
+      ...(args.shippingAddress !== undefined ? {shippingAddress: args.shippingAddress} : {}),
+      ...(args.occasion !== undefined ? {occasion: args.occasion} : {}),
+      ...(args.coverPhotoUri !== undefined ? {coverPhotoUri: args.coverPhotoUri} : {}),
+      ...(args.coverPhotoStorageId !== undefined ? {coverPhotoStorageId: args.coverPhotoStorageId} : {}), 
       updated_at: new Date().toISOString(),
     });
     return true;
