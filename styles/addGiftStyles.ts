@@ -795,15 +795,17 @@ export const desktopStyles = StyleSheet.create({
     paddingRight: 20,
   },
   changeCoverButton: {
-    backgroundColor: "#13D5CF",
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 999,
+    backgroundColor: "#03FFEE",
+    paddingHorizontal: 9,
+    height: 28,
+    borderRadius: 4,
+    justifyContent: "center",
+    alignItems: "center",
   },
   changeCoverText: {
     color: "#1C0335",
     fontFamily: "Nunito_700Bold",
-    fontSize: 13,
+    fontSize: 14,
   },
   ribbonContainer: {
     position: "absolute",
