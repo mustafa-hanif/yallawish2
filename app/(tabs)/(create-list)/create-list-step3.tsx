@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Dimensions,
   Modal,
@@ -248,6 +248,7 @@ const DesktopPublicPasswordSettings = React.memo(function DesktopPublicPasswordS
   password: string;
   setPassword: (value: string) => void;
 }) {
+  const [isVisible, setIsVisible] = useState(false);
   return (
     <View style={desktopStyles.desktopPublicExtras}>
       <View style={desktopStyles.desktopPasswordRow}>
@@ -267,12 +268,18 @@ const DesktopPublicPasswordSettings = React.memo(function DesktopPublicPasswordS
           value={password}
           onChangeText={setPassword}
           editable={requirePassword}
-          secureTextEntry
+          secureTextEntry={!isVisible}
           maxLength={20}
           autoCorrect={false}
           autoCapitalize="none"
           blurOnSubmit={false}
         />
+        <View style={desktopStyles.desktopPasswordToggle}>
+          <Pressable onPress={() => setIsVisible(!isVisible)}>
+            <Ionicons name={isVisible ? "eye-off-outline" : "eye-outline"} size={20} color="#1C0335" />
+          </Pressable>
+        </View>
+        {/* {isVisible ? () :} */}
         <Text style={desktopStyles.desktopPasswordHint}>Maximum 20 characters</Text>
       </View>
     </View>
@@ -976,7 +983,15 @@ export default function CreateListStep3() {
       const hasShares = (currentShares?.length ?? 0) > 0;
       setSelectedOption(hasShares ? "my-people" : "public");
     }
+   
   }, [existing?.privacy, currentShares, selectedOption]);
+
+  useEffect(() => {
+     if(selectedOption !== 'public'){
+      setPassword("")
+      setRequirePassword(false)
+    }
+  },[selectedOption])
 
   const groups = React.useMemo<GroupOption[]>(() => {
     return (myGroups ?? []).map((group) => ({ id: String(group._id), name: group.name }));

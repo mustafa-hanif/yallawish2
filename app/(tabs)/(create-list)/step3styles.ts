@@ -592,6 +592,7 @@ export const desktopStyles = StyleSheet.create({
   },
   desktopPasswordInputWrapper: {
     gap: 8,
+    position: "relative",
   },
   desktopPasswordInput: {
     borderWidth: 1,
@@ -603,6 +604,11 @@ export const desktopStyles = StyleSheet.create({
     fontFamily: "Nunito_400Regular",
     color: "#1C0335",
     backgroundColor: "#FBF8FF",
+  },
+  desktopPasswordToggle:{
+    position: "absolute",
+    right: 16,
+    top: '20%',
   },
   desktopPasswordHint: {
     fontSize: 13,
