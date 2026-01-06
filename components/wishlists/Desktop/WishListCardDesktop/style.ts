@@ -24,8 +24,8 @@ export const styles = StyleSheet.create({
     gap: 16,
   },
   cardIcon: {
-    height: 72,
-    width: 72,
+    height: 56,
+    width: 56,
     borderRadius: 8,
     resizeMode: "contain",
   },
@@ -39,7 +39,7 @@ export const styles = StyleSheet.create({
   },
   title: {
     color: "#1A0034",
-    fontSize: 24,
+    fontSize: 22,
     verticalAlign: "top",
     fontFamily: "Nunito_700Bold",
   },

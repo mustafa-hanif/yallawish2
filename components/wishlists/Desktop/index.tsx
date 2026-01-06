@@ -12,6 +12,7 @@ import { responsiveStylesHome } from "@/styles/homePageResponsiveStyles";
 
 import DeleteConfirmation from "@/components/DeleteConfirmationModal";
 import * as LucideIcons from "lucide-react-native";
+import ListDetails from "./ListDetails";
 import ListsControlPanel from "./ListsControlPanel";
 import NoListFoundDesktop from "./NoListFoundDesktop";
 import SortAndFilterDropDown from "./SortAndFilterDropDown";
@@ -20,12 +21,7 @@ import WishListCardDesktop from "./WishListCardDesktop";
 export function Desktop() {
   const isDesktop = true;
   const { user } = useUser();
-  const myLists = useQuery(api.products.getMyLists, user?.id ? { user_id: user.id } : "skip");
-  const communityLists = useQuery(api.products.getCommunityLists, user?.id ? { exclude_user_id: user.id } : "skip");
-  const createList = useMutation(api.products.createList);
-  const deleteList = useMutation(api.products.deleteList);
-  const archiveList = useMutation(api.products.setListArchived);
-
+  
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
   const encodedReturnTo = returnTo ? String(returnTo) : undefined;
   const decodedReturnTo = encodedReturnTo ? decodeURIComponent(encodedReturnTo) : undefined;
@@ -41,7 +37,20 @@ export function Desktop() {
 
   const [search, setSearch] = useState("");
   const [deleteListId, setDeleteListId] = useState<string | null>(null);
-
+  const [selectedListId, setSelectedListId] = useState<string | null>(null);
+  const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
+  
+  const myLists = useQuery(api.products.getMyLists, user?.id ? { user_id: user.id } : "skip");
+  const communityLists = useQuery(api.products.getCommunityLists, user?.id ? { exclude_user_id: user.id } : "skip");
+  const selectedList = useQuery(api.products.getListById, selectedListId ? { listId: selectedListId as any } : "skip");
+  const selectedListItems = useQuery(
+    api.products.getListItems as any,
+    selectedListId ? ({ list_id: selectedListId } as any) : "skip"
+  );
+  const createList = useMutation(api.products.createList);
+  const deleteList = useMutation(api.products.deleteList);
+  const archiveList = useMutation(api.products.setListArchived);
+  const deleteListItemMutation = useMutation(api.products.deleteListItem as any);
   useEffect(() => {
     setCurrentTab("my-events");
   }, [pathname]);
@@ -188,6 +197,21 @@ export function Desktop() {
     setDeleteListId(null);
   };
 
+    const handleDeleteItem = async (itemId: string | null) => {
+      if (!itemId) return;
+      try {
+        await deleteListItemMutation({ itemId: itemId as any });
+      } catch (e) {
+        console.warn("Failed to delete item", e);
+        Alert.alert(
+          "Delete failed",
+          "Could not delete the item. Please try again."
+        );
+      } finally {
+        setDeleteItemId(null);
+      }
+    };
+
   const handleArchiveList = async (listId: string | null, isArchived: boolean) => {
     await archiveList({ listId: listId as any, isArchived: isArchived });
   };
@@ -212,6 +236,11 @@ export function Desktop() {
   };
 
   console.log("wishList", wishList);
+  const onRemoveItem = (itemId?: string) => {
+    if (!itemId) return;
+    // open confirmation modal
+    setDeleteItemId(String(itemId));
+  };
   return (
     <>
       <ScrollView contentContainerStyle={styles.container}>
@@ -226,11 +255,29 @@ export function Desktop() {
                 </View>
                 <Tabs currentTab={currentTab} setCurrentTab={setCurrentTab} />
                 <View style={{ height: 18 }} />
-                <FlatList data={filteredWishList} contentContainerStyle={{ rowGap: 16, paddingVertical: 12 }} showsVerticalScrollIndicator={false} keyExtractor={(item) => String(item._id)} renderItem={({ item }) => <WishListCardDesktop item={item} onSelectDelete={handleSelectDelete} handleArchiveList={handleArchiveList} handleDuplicateList={handleDuplicateList} />} />
+                <FlatList data={filteredWishList} contentContainerStyle={{ rowGap: 16, paddingVertical: 12 }} showsVerticalScrollIndicator={false} keyExtractor={(item) => String(item._id)} renderItem={({ item }) => <WishListCardDesktop item={item} onSelectDelete={handleSelectDelete} handleArchiveList={handleArchiveList} handleDuplicateList={handleDuplicateList} onSelect={() => setSelectedListId(String(item._id))} isSelected={selectedListId === String(item._id)} />} />
               </View>
 
               {/* Main Content */}
-              <View style={styles.mainContent}></View>
+              <View style={styles.mainContent}>
+                {selectedList && selectedListItems ? (
+                  <ListDetails 
+                    list={selectedList} 
+                    items={selectedListItems || []}
+                    onRemoveItem={onRemoveItem}
+                    onUpdateQuantity={(itemId, quantity) => {
+                      // TODO: Implement update quantity
+                      console.log('Update quantity:', itemId, quantity);
+                    }}
+                  />
+                ) : (
+                  <View style={styles.emptyState}>
+                    <Text style={styles.emptyStateText}>
+                      Select a list to view details
+                    </Text>
+                  </View>
+                )}
+              </View>
             </View>
           </>
         ) : (
@@ -460,6 +507,7 @@ export function Desktop() {
           </View>
         </View>
         <DeleteConfirmation visible={!!deleteListId} onCancel={() => setDeleteListId(null)} onDelete={() => handleDeleteList(deleteListId)} />
+        <DeleteConfirmation visible={!!deleteItemId} onCancel={() => setDeleteItemId(null)} onDelete={() => handleDeleteItem(deleteItemId)} />
       </ScrollView>
     </>
   );
@@ -486,5 +534,17 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     flex: 1,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F5F5F5",
+    borderRadius: 15,
+  },
+  emptyStateText: {
+    fontFamily: "Nunito_600SemiBold",
+    fontSize: 16,
+    color: "#8E8E93",
   },
 });
