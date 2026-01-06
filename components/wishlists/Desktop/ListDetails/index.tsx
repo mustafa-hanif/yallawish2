@@ -1,6 +1,7 @@
 import { getDaysToGoText } from "@/utils";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import { Plus, Trash2 } from "lucide-react-native";
 import React from "react";
 import { FlatList, Image, ImageBackground, Pressable, Text, View } from "react-native";
@@ -47,6 +48,9 @@ export default function ListDetails({ list, items, onRemoveItem, onUpdateQuantit
     onUpdateQuantity?.(itemId, newQty);
   };
 
+  const handlePressEditDetails = () => {
+     router.push({ pathname: "/create-list-step2", params: { listId: String(list._id) } })
+  }
   return (
     <View style={styles.container}>
       <ImageBackground source={image_url ? { uri: image_url } : require("@/assets/images/nursery.png")} resizeMode="cover" style={styles.header}>
@@ -77,7 +81,7 @@ export default function ListDetails({ list, items, onRemoveItem, onUpdateQuantit
               </View>
             </View>
             <View>
-              <Pressable style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 15.5, borderColor: "#1C1C1C", borderWidth: 1 }}>
+              <Pressable onPress={handlePressEditDetails} style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 15.5, borderColor: "#1C1C1C", borderWidth: 1 }}>
                 <Image source={require("@/assets/images/edit.svg")} />
                 <Text>Edit Details</Text>
               </Pressable>
