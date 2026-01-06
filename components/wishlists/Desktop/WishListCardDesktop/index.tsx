@@ -51,9 +51,11 @@ interface WishListCardDesktopProps {
   handleDuplicateList?: (listDetails: any | null) => Promise<void>;
   viewableItems?: any;
   isActive?: boolean;
+  onSelect?: () => void;
+  isSelected?: boolean;
 }
 
-export default function WishListCardDesktop({ item, onSelectDelete, handleArchiveList, handleDuplicateList, viewableItems }: WishListCardDesktopProps) {
+export default function WishListCardDesktop({ item, onSelectDelete, handleArchiveList, handleDuplicateList, viewableItems, onSelect, isSelected }: WishListCardDesktopProps) {
   const actionBtnRef = useRef<any>(null);
   const chevronRef = useRef<View>(null);
   const { user: loggedInUser } = useUser();
@@ -81,7 +83,9 @@ export default function WishListCardDesktop({ item, onSelectDelete, handleArchiv
     { title: "Edit", icon: require("@/assets/images/Edit.png") },
   ];
 
-  const handlePress = (id: string) => router.push({ pathname: "/view-list", params: { listId: String(id) } });
+  const handlePress = (id: string) => {
+    onSelect?.();
+  };
   const handleLongPress = () => {
     // if (loggedInUser?.id === item?.user_id) {
     //   // Play click sound + strong haptic for a tactile long-press
@@ -131,7 +135,7 @@ export default function WishListCardDesktop({ item, onSelectDelete, handleArchiv
         }, [item._id]);
 
         return (
-          <Pressable onPress={() => handlePress(item._id)} style={[styles.card, isActive ? { backgroundColor: "#ffff" } : {}, isArchive ? { borderColor: "#FF6C6C", backgroundColor: "#F1F1F1" } : {}, rStyle]}>
+          <Pressable onPress={() => handlePress(item._id)} style={[styles.card, isSelected ? { backgroundColor: "#ffff" } : {}, isArchive ? { borderColor: "#FF6C6C", backgroundColor: "#F1F1F1" } : {}, rStyle]}>
             <View style={styles.cardContentWrapper}>
               <View style={styles.iconAndDetails}>
                 <Image style={styles.cardIcon} resizeMode="contain" source={occasionIcon} />
