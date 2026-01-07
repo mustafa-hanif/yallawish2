@@ -11,6 +11,8 @@ import { Image } from "expo-image";
 import { responsiveStylesHome } from "@/styles/homePageResponsiveStyles";
 
 import DeleteConfirmation from "@/components/DeleteConfirmationModal";
+import { DownloadCTA } from "@/components/homepage/DownloadCTA";
+import { Footer } from "@/components/homepage/Footer";
 import * as LucideIcons from "lucide-react-native";
 import ListDetails from "./ListDetails";
 import ListsControlPanel from "./ListsControlPanel";
@@ -21,7 +23,7 @@ import WishListCardDesktop from "./WishListCardDesktop";
 export function Desktop() {
   const isDesktop = true;
   const { user } = useUser();
-  
+
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
   const encodedReturnTo = returnTo ? String(returnTo) : undefined;
   const decodedReturnTo = encodedReturnTo ? decodeURIComponent(encodedReturnTo) : undefined;
@@ -39,14 +41,11 @@ export function Desktop() {
   const [deleteListId, setDeleteListId] = useState<string | null>(null);
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
-  
+
   const myLists = useQuery(api.products.getMyLists, user?.id ? { user_id: user.id } : "skip");
   const communityLists = useQuery(api.products.getCommunityLists, user?.id ? { exclude_user_id: user.id } : "skip");
   const selectedList = useQuery(api.products.getListById, selectedListId ? { listId: selectedListId as any } : "skip");
-  const selectedListItems = useQuery(
-    api.products.getListItems as any,
-    selectedListId ? ({ list_id: selectedListId } as any) : "skip"
-  );
+  const selectedListItems = useQuery(api.products.getListItems as any, selectedListId ? ({ list_id: selectedListId } as any) : "skip");
   const createList = useMutation(api.products.createList);
   const deleteList = useMutation(api.products.deleteList);
   const archiveList = useMutation(api.products.setListArchived);
@@ -187,15 +186,15 @@ export function Desktop() {
           return lb - la; // most items left first
         });
     }
-  
+
     return arr;
   }, [sortedWishList, appliedFilterBy]);
 
   useEffect(() => {
-    if(filteredWishList.length !== 0){
+    if (filteredWishList.length !== 0) {
       setSelectedListId(filteredWishList[0]._id);
     }
-  },[filteredWishList])
+  }, [filteredWishList]);
 
   const handleSelectDelete = (listId: string) => setDeleteListId(listId);
   const handleDeleteList = async (listId: string | null) => {
@@ -203,20 +202,17 @@ export function Desktop() {
     setDeleteListId(null);
   };
 
-    const handleDeleteItem = async (itemId: string | null) => {
-      if (!itemId) return;
-      try {
-        await deleteListItemMutation({ itemId: itemId as any });
-      } catch (e) {
-        console.warn("Failed to delete item", e);
-        Alert.alert(
-          "Delete failed",
-          "Could not delete the item. Please try again."
-        );
-      } finally {
-        setDeleteItemId(null);
-      }
-    };
+  const handleDeleteItem = async (itemId: string | null) => {
+    if (!itemId) return;
+    try {
+      await deleteListItemMutation({ itemId: itemId as any });
+    } catch (e) {
+      console.warn("Failed to delete item", e);
+      Alert.alert("Delete failed", "Could not delete the item. Please try again.");
+    } finally {
+      setDeleteItemId(null);
+    }
+  };
 
   const handleArchiveList = async (listId: string | null, isArchived: boolean) => {
     await archiveList({ listId: listId as any, isArchived: isArchived });
@@ -266,21 +262,19 @@ export function Desktop() {
               {/* Main Content */}
               <View style={styles.mainContent}>
                 {selectedList && selectedListItems ? (
-                  <ListDetails 
+                  <ListDetails
                     currentTab={currentTab}
-                    list={selectedList} 
+                    list={selectedList}
                     items={selectedListItems || []}
                     onRemoveItem={onRemoveItem}
                     onUpdateQuantity={(itemId, quantity) => {
                       // TODO: Implement update quantity
-                      console.log('Update quantity:', itemId, quantity);
+                      console.log("Update quantity:", itemId, quantity);
                     }}
                   />
                 ) : (
                   <View style={styles.emptyState}>
-                    <Text style={styles.emptyStateText}>
-                      Select a list to view details
-                    </Text>
+                    <Text style={styles.emptyStateText}>Select a list to view details</Text>
                   </View>
                 )}
               </View>
@@ -514,6 +508,11 @@ export function Desktop() {
         </View>
         <DeleteConfirmation visible={!!deleteListId} onCancel={() => setDeleteListId(null)} onDelete={() => handleDeleteList(deleteListId)} />
         <DeleteConfirmation visible={!!deleteItemId} onCancel={() => setDeleteItemId(null)} onDelete={() => handleDeleteItem(deleteItemId)} />
+        {/* Download App Banner */}
+        <View style={{backgroundColor:'#ffff'}}>
+          <DownloadCTA isDesktop={isDesktop} />
+        </View>
+        <Footer isDesktop={isDesktop} />
       </ScrollView>
     </>
   );
