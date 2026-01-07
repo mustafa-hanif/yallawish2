@@ -3,8 +3,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { Plus, Trash2 } from "lucide-react-native";
-import React from "react";
-import { FlatList, Image, ImageBackground, Pressable, Text, View } from "react-native";
+import React, { useMemo, useState } from "react";
+import { FlatList, Image, ImageBackground, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { styles } from "./style";
 
 interface GiftItem {
@@ -31,6 +31,8 @@ interface ListDetailsProps {
 }
 
 export default function ListDetails({  list, items, onRemoveItem, onUpdateQuantity, currentTab }: ListDetailsProps) {
+  type SortOption = "default" | "priceAsc" | "priceDesc" | "newest" | "oldest";
+
   const loading = false;
   const privacy = "shared";
   const address = list.shippingAddress || null;
@@ -43,6 +45,51 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
   const iconName = isShared ? (isPublic ? require("@/assets/images/publicIcon.png") : require("@/assets/images/myPeopleIcon.png")) : require("@/assets/images/privateIcon.png");
   const image_url = list.coverPhotoUri || null;
   const totalItems = items?.length || 0;
+
+  // Sort & Filter state
+  const [showSortSheet, setShowSortSheet] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>("default");
+  const [filterClaimed, setFilterClaimed] = useState(false);
+  const [filterUnclaimed, setFilterUnclaimed] = useState(false);
+
+  // Temp state used inside modal before applying
+  const [tempSortBy, setTempSortBy] = useState<SortOption>(sortBy);
+  const [tempFilterClaimed, setTempFilterClaimed] = useState(filterClaimed);
+  const [tempFilterUnclaimed, setTempFilterUnclaimed] = useState(filterUnclaimed);
+
+  // Derived items based on filters and sort
+  const visibleItems = useMemo(() => {
+    let result = [...(items || [])];
+
+    // Availability filters
+    const claimedOn = filterClaimed;
+    const unclaimedOn = filterUnclaimed;
+
+    if (claimedOn && !unclaimedOn) {
+      result = result.filter((it) => (it.claimed ?? 0) > 0);
+    } else if (!claimedOn && unclaimedOn) {
+      result = result.filter((it) => (it.claimed ?? 0) === 0);
+    } // both on or both off -> no filter
+
+    // Sorting
+    switch (sortBy) {
+      case "priceAsc":
+        result.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
+        break;
+      case "priceDesc":
+        result.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
+        break;
+      case "newest":
+      case "oldest":
+        // If timestamp fields exist in future (e.g., createdAt), implement here.
+        // For now, keep default ordering.
+        break;
+      case "default":
+      default:
+        break;
+    }
+    return result;
+  }, [items, sortBy, filterClaimed, filterUnclaimed]);
 
   const handleQuantityChange = (itemId: string, currentQty: number, increment: boolean) => {
     const newQty = increment ? currentQty + 1 : Math.max(1, currentQty - 1);
@@ -125,13 +172,24 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
               <Text style={styles.itemCountText}>{totalItems}</Text>
             </View>
           </View>
+            <Pressable style={styles.sortAndFilterButton}  
+              onPress={() => {
+              setTempSortBy(sortBy);
+              setTempFilterClaimed(filterClaimed);
+              setTempFilterUnclaimed(filterUnclaimed);
+              setShowSortSheet(true);
+            }}>
+              <Image style={styles.filterIcon} source={require("@/assets/images/filterIcon.png")} />
+              <Text style={styles.sortAndFilterText}>Sort & Filter</Text>
+            </Pressable>
+
         </View>
       </View>
       {/* Items Section */}
       <View style={{ flex: 1 }}>
         <FlatList
           contentContainerStyle={{ paddingBottom: 10, paddingTop: 24, gap: 24 }}
-          data={items}
+          data={visibleItems}
           keyExtractor={(item) => item._id}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => {
@@ -173,6 +231,82 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
           }}
         />
       </View>
+      {/* Sort & Filter Modal */}
+      <Modal
+        visible={showSortSheet}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowSortSheet(false)}
+      >
+        <Pressable style={styles.backdrop} onPress={() => setShowSortSheet(false)} />
+        <View style={styles.sortSheetContainer}>
+          <Pressable onPress={() => setShowSortSheet(false)}>
+            <View style={styles.sortSheetHandle} />
+          </Pressable>
+          <ScrollView contentContainerStyle={styles.sortSheetContent} showsVerticalScrollIndicator={false}>
+            <Text style={styles.sortSheetTitle}>Sort & Filter</Text>
+            <View style={styles.sortDivider} />
+
+            <View style={styles.sortSection}>
+              <View style={styles.sortSectionHeader}>
+                <Text style={styles.sortSectionTitle}>Sort by</Text>
+                <Ionicons name="chevron-down" size={20} color="#1C0335" />
+              </View>
+              {[
+                { key: "default", label: "Default" },
+                { key: "priceAsc", label: "Price Lowest - Highest" },
+                { key: "priceDesc", label: "Price Highest - Lowest" },
+                { key: "newest", label: "Most Recent to Oldest" },
+                { key: "oldest", label: "Oldest to Most Recent" },
+              ].map((o) => (
+                <Pressable key={o.key} style={styles.radioRow} onPress={() => setTempSortBy(o.key as SortOption)}>
+                  <View style={[styles.radioOuter, tempSortBy === o.key && styles.radioOuterActive]}>
+                    {tempSortBy === o.key && <View style={styles.radioInner} />}
+                  </View>
+                  <Text style={styles.radioLabel}>{o.label}</Text>
+                </Pressable>
+              ))}
+            </View>
+
+            <View style={styles.sortSection}>
+              <View style={styles.sortSectionHeader}>
+                <Text style={styles.sortSectionTitle}>Filter by Availability</Text>
+                <Ionicons name="chevron-down" size={20} color="#1C0335" />
+              </View>
+
+              <Pressable style={styles.radioRow} onPress={() => setTempFilterClaimed((v) => !v)}>
+                <View style={[styles.checkboxBox, tempFilterClaimed && styles.checkboxBoxActive]}>
+                  {tempFilterClaimed && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}
+                </View>
+                <Text style={styles.radioLabel}>Claimed</Text>
+              </Pressable>
+
+              <Pressable style={styles.radioRow} onPress={() => setTempFilterUnclaimed((v) => !v)}>
+                <View style={[styles.checkboxBox, tempFilterUnclaimed && styles.checkboxBoxActive]}>
+                  {tempFilterUnclaimed && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}
+                </View>
+                <Text style={styles.radioLabel}>Unclaimed</Text>
+              </Pressable>
+            </View>
+
+            <View style={styles.sortScrollSpacer} />
+          </ScrollView>
+
+          <View style={styles.applyBarWrapper}>
+            <Pressable
+              style={styles.applyBtnFull}
+              onPress={() => {
+                setSortBy(tempSortBy);
+                setFilterClaimed(tempFilterClaimed);
+                setFilterUnclaimed(tempFilterUnclaimed);
+                setShowSortSheet(false);
+              }}
+            >
+              <Text style={styles.applyBtnText}>Apply</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
      
     </View>
   );
