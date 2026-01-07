@@ -235,7 +235,6 @@ export function Desktop() {
     });
   };
 
-  console.log("wishList", wishList);
   const onRemoveItem = (itemId?: string) => {
     if (!itemId) return;
     // open confirmation modal
