@@ -53,9 +53,10 @@ interface WishListCardDesktopProps {
   isActive?: boolean;
   onSelect?: () => void;
   isSelected?: boolean;
+  currentTab?: string;
 }
 
-export default function WishListCardDesktop({ item, onSelectDelete, handleArchiveList, handleDuplicateList, viewableItems, onSelect, isSelected }: WishListCardDesktopProps) {
+export default function WishListCardDesktop({  item, onSelectDelete, handleArchiveList, handleDuplicateList, viewableItems, onSelect, isSelected, currentTab }: WishListCardDesktopProps) {
   const actionBtnRef = useRef<any>(null);
   const chevronRef = useRef<View>(null);
   const { user: loggedInUser } = useUser();
@@ -85,25 +86,6 @@ export default function WishListCardDesktop({ item, onSelectDelete, handleArchiv
 
   const handlePress = (id: string) => {
     onSelect?.();
-  };
-  const handleLongPress = () => {
-    // if (loggedInUser?.id === item?.user_id) {
-    //   // Play click sound + strong haptic for a tactile long-press
-    //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    //   setIsShowDropDownMenu(true);
-    //   try {
-    //     const inst = actionBtnRef.current as any;
-    //     if (inst && typeof inst.animateButton === "function") {
-    //       inst.animateButton();
-    //     } else if (inst && typeof inst._animateButton === "function") {
-    //       inst._animateButton();
-    //     } else {
-    //       setIsShowDropDownMenu(true);
-    //     }
-    //   } catch {
-    //     setIsShowDropDownMenu(true);
-    //   }
-    // }
   };
 
   const profileInitials = useMemo(() => getProfileInitials(user), [user?.firstName, user?.lastName, user?.contactEmail]);
@@ -150,12 +132,13 @@ export default function WishListCardDesktop({ item, onSelectDelete, handleArchiv
                   </View>
                   <View>
                     <Text style={styles.totalItems}>
-                      Total Items:
+                      Total Items: {" "}
                       <Text style={styles.totalIteNumber}>{Number(totalItems) < 10 && Number(totalItems) > 0 ? `0${totalItems}` : totalItems}</Text>
                     </Text>
                   </View>
                 </View>
                 <View style={styles.profileAndDropDownContainer}>
+                  {currentTab === "my-events" && (
                   <View ref={chevronRef} collapsable={false}>
                     <Pressable onPress={() => {
                       chevronRef.current?.measureInWindow((x, y, width, height) => {
@@ -166,6 +149,7 @@ export default function WishListCardDesktop({ item, onSelectDelete, handleArchiv
                       <Ionicons name={"chevron-down"} size={15} color="#1C0335" />
                     </Pressable>
                   </View>
+                  )}
                   <View style={styles.profile}>{user?.profileImageUrl ? <Image resizeMode="cover" style={styles.profileImageUrl} source={{ uri: user.profileImageUrl }} /> : <Text style={styles.profileInitials}>{profileInitials}</Text>}</View>
                 </View>
               </View>

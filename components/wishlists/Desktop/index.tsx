@@ -254,7 +254,7 @@ export function Desktop() {
                 </View>
                 <Tabs currentTab={currentTab} setCurrentTab={setCurrentTab} />
                 <View style={{ height: 18 }} />
-                <FlatList data={filteredWishList} contentContainerStyle={{ rowGap: 16, paddingVertical: 12 }} showsVerticalScrollIndicator={false} keyExtractor={(item) => String(item._id)} renderItem={({ item }) => <WishListCardDesktop item={item} onSelectDelete={handleSelectDelete} handleArchiveList={handleArchiveList} handleDuplicateList={handleDuplicateList} onSelect={() => setSelectedListId(String(item._id))} isSelected={selectedListId === String(item._id)} />} />
+                <FlatList data={filteredWishList} contentContainerStyle={{ rowGap: 16, paddingVertical: 12 }} showsVerticalScrollIndicator={false} keyExtractor={(item) => String(item._id)} renderItem={({ item }) => <WishListCardDesktop item={item} onSelectDelete={handleSelectDelete} handleArchiveList={handleArchiveList} handleDuplicateList={handleDuplicateList} onSelect={() => setSelectedListId(String(item._id))} isSelected={selectedListId === String(item._id)} currentTab={currentTab} />} />
               </View>
 
               {/* Main Content */}
