@@ -309,9 +309,10 @@ export const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.25)",
   },
   sortSheetContainer: {
+    width: "25%",
     position: "absolute",
-    left: 0,
-    right: 0,
+    // left: 0,
+    right: 1,
     bottom: 0,
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 20,
