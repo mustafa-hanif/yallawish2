@@ -4,7 +4,7 @@ import { useUser } from "@clerk/clerk-expo";
 import { useMutation, useQuery } from "convex/react";
 import { router, useLocalSearchParams, usePathname } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
-import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { Image } from "expo-image";
 
@@ -245,18 +245,39 @@ export function Desktop() {
   return (
     <>
       <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.headerWrapper}>
+          <View style={responsiveStylesHome.sectionInner}>
+            <View style={styles.headerRow}>
+              <Text style={styles.headerTitle}>My Lists</Text>
+              <Pressable style={styles.createButton} onPress={() => router.push("/create-list-step1")}>
+                <Text style={styles.createButtonText}>Create New List</Text>
+              </Pressable>
+              <View style={styles.searchContainer}>
+                <LucideIcons.Search size={18} color="#330065" />
+                <TextInput style={styles.searchInput} placeholder="Search for gifts, lists or inspirations..." placeholderTextColor="#330065" value={search} onChangeText={setSearch} />
+              </View>
+            </View>
+          </View>
+        </View>
+        {/* Header */}
         {wishList && wishList?.length ? (
           <>
             <View style={styles.contentContainer}>
               {/* Left Sidebar */}
               <View style={styles.sidebar}>
                 <View style={{ position: "relative", zIndex: 10002 }}>
-                  <ListsControlPanel count={filteredWishList.length} handleToggleModal={handleToggleModal} />
+                  <ListsControlPanel count={searchList(filteredWishList).length} handleToggleModal={handleToggleModal} />
                   <SortAndFilterDropDown currentTab={currentTab} showSortSheet={showSortSheet} handleToggleModal={handleToggleModal} sortBy={sortBy} setSortBy={setSortBy} filterBy={filterBy} setFilterBy={setFilterBy} handlePressApply={handlePressApply} />
                 </View>
                 <Tabs currentTab={currentTab} setCurrentTab={setCurrentTab} />
                 <View style={{ height: 18 }} />
-                <FlatList data={filteredWishList} contentContainerStyle={{ rowGap: 16, paddingVertical: 12 }} showsVerticalScrollIndicator={false} keyExtractor={(item) => String(item._id)} renderItem={({ item }) => <WishListCardDesktop item={item} onSelectDelete={handleSelectDelete} handleArchiveList={handleArchiveList} handleDuplicateList={handleDuplicateList} onSelect={() => setSelectedListId(String(item._id))} isSelected={selectedListId === String(item._id)} currentTab={currentTab} />} />
+                <FlatList
+                  data={searchList(filteredWishList)}
+                  contentContainerStyle={{ rowGap: 16, paddingVertical: 12 }}
+                  showsVerticalScrollIndicator={false}
+                  keyExtractor={(item) => String(item._id)}
+                  renderItem={({ item }) => <WishListCardDesktop item={item} onSelectDelete={handleSelectDelete} handleArchiveList={handleArchiveList} handleDuplicateList={handleDuplicateList} onSelect={() => setSelectedListId(String(item._id))} isSelected={selectedListId === String(item._id)} currentTab={currentTab} />}
+                />
               </View>
 
               {/* Main Content */}
@@ -509,7 +530,7 @@ export function Desktop() {
         <DeleteConfirmation visible={!!deleteListId} onCancel={() => setDeleteListId(null)} onDelete={() => handleDeleteList(deleteListId)} />
         <DeleteConfirmation visible={!!deleteItemId} onCancel={() => setDeleteItemId(null)} onDelete={() => handleDeleteItem(deleteItemId)} />
         {/* Download App Banner */}
-        <View style={{backgroundColor:'#ffff'}}>
+        <View style={{ backgroundColor: "#ffff" }}>
           <DownloadCTA isDesktop={isDesktop} />
         </View>
         <Footer isDesktop={isDesktop} />
@@ -523,13 +544,59 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFFFF",
   },
+  headerWrapper: {
+    backgroundColor: "#FFFFFF",
+    paddingTop: 28,
+    paddingBottom: 18,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  headerTitle: {
+    fontFamily: "Nunito_700Bold",
+    fontSize: 24,
+    color: "#330065",
+    marginRight: 12,
+  },
+  searchContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "#ffff",
+    borderWidth: 1,
+    borderColor: "#330065",
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontFamily: "Nunito_400Regular",
+    fontSize: 14,
+    color: "#1A0034",
+    outlineColor:'transparent'
+  },
+  createButton: {
+    backgroundColor: "#330065",
+    borderRadius: 5,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+  },
+  createButtonText: {
+    fontFamily: "Nunito_600SemiBold",
+    fontSize: 12,
+    color: "#FFFFFF",
+  },
   contentContainer: {
-    paddingTop: 82,
     flexDirection: "row",
     height: 700,
     gap: 24,
     maxWidth: 1800,
     paddingHorizontal: 150,
+    backgroundColor: "#FFFFFF",
   },
   sidebar: {
     width: 413,
