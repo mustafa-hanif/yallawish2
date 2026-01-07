@@ -29,7 +29,7 @@ export const styles = StyleSheet.create({
 
   listTitle: {
     fontFamily: "Nunito_700Bold",
-    fontSize: 32,
+    fontSize: 28,
     color: "#00000",
   },
 

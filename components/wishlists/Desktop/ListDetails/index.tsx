@@ -1,8 +1,9 @@
+import AddGiftModal from "@/components/list/AddGiftModal";
 import { getDaysToGoText } from "@/utils";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { Plus, Trash2 } from "lucide-react-native";
+import { Plus, PlusCircle, Trash2 } from "lucide-react-native";
 import React, { useMemo, useState } from "react";
 import { FlatList, Image, ImageBackground, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { styles } from "./style";
@@ -45,6 +46,7 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
   const iconName = isShared ? (isPublic ? require("@/assets/images/publicIcon.png") : require("@/assets/images/myPeopleIcon.png")) : require("@/assets/images/privateIcon.png");
   const image_url = list.coverPhotoUri || null;
   const totalItems = items?.length || 0;
+  const [showAddGift, setShowAddGift] = useState(false);
 
   // Sort & Filter state
   const [showSortSheet, setShowSortSheet] = useState(false);
@@ -119,11 +121,11 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
           </View>
 
           <View style={{ width: "100%", flexDirection: "row", gap: 21, justifyContent: "space-between", alignItems: "center", paddingHorizontal: 16, paddingVertical: 25, borderTopWidth: 0.4, borderBottomWidth: 0.4, borderColor: "#7E7E7E" }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+            <View style={{ overflow: "hidden", flexDirection: "row", alignItems: "center", gap: 16 }}>
               <View>
                 <Image resizeMode="contain" style={{ width: 56, height: 65 }} source={require("@/assets/images/baloons.png")} />
               </View>
-              <View>
+              <View style={{  maxWidth: 550, }}>
                 <Text numberOfLines={1} style={styles.listTitle}>
                   {list.title}
                 </Text>
@@ -172,16 +174,29 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
               <Text style={styles.itemCountText}>{totalItems}</Text>
             </View>
           </View>
-            <Pressable style={styles.sortAndFilterButton}  
-              onPress={() => {
-              setTempSortBy(sortBy);
-              setTempFilterClaimed(filterClaimed);
-              setTempFilterUnclaimed(filterUnclaimed);
-              setShowSortSheet(true);
-            }}>
-              <Image style={styles.filterIcon} source={require("@/assets/images/filterIcon.png")} />
-              <Text style={styles.sortAndFilterText}>Sort & Filter</Text>
-            </Pressable>
+            <View style={{flexDirection:'row', alignItems:'center', gap:12}}>
+              {currentTab === "my-events" && (
+              <Pressable
+                style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}
+                onPress={() => setShowAddGift(true)}
+              >
+                <PlusCircle size={20} color="#36006C" />
+                <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 16, color: "#421A95" }}>
+                  Add more items
+                </Text>
+              </Pressable>
+              )}
+              <Pressable style={styles.sortAndFilterButton}  
+                onPress={() => {
+                setTempSortBy(sortBy);
+                setTempFilterClaimed(filterClaimed);
+                setTempFilterUnclaimed(filterUnclaimed);
+                setShowSortSheet(true);
+              }}>
+                <Image style={styles.filterIcon} source={require("@/assets/images/filterIcon.png")} />
+                <Text style={styles.sortAndFilterText}>Sort & Filter</Text>
+              </Pressable>
+            </View>
 
         </View>
       </View>
@@ -307,6 +322,13 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
           </View>
         </View>
       </Modal>
+      {/* Add Gift Modal */}
+      <AddGiftModal
+        visible={showAddGift}
+        onClose={() => setShowAddGift(false)}
+        listId={String(list._id)}
+        onSaved={() => setShowAddGift(false)}
+      />
      
     </View>
   );
