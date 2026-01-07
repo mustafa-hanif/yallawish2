@@ -362,8 +362,13 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
         animationType="fade"
         onRequestClose={closeItemModal}
       >
-        <Pressable style={{ flex: 1, backgroundColor: "#00000055" }} onPress={closeItemModal} />
-        <View style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0, justifyContent: "center", alignItems: "center", padding: 16 }}>
+        {/* Backdrop that receives outside clicks */}
+        <Pressable
+          onPress={closeItemModal}
+          style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0, backgroundColor: "#00000055" }}
+        />
+        {/* Content container ignores outside clicks so backdrop handles them */}
+        <View pointerEvents="box-none" style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0, justifyContent: "center", alignItems: "center", padding: 16 }}>
           <View style={{ width: '90%', maxWidth: "95%", borderRadius: 16, backgroundColor: "#FFFFFF", shadowColor: "#000", shadowOpacity: 0.15, shadowRadius: 10, elevation: 4 }}>
             <View style={{ padding: 24, flexDirection: "row", gap: 20 }}>
               <View style={{ borderWidth: 0.01, borderColor:'#cebfbfff', width: 269, height: 262, borderRadius: 12, overflow: "hidden", backgroundColor: "#F6F6F6" }}>
