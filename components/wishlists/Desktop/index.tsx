@@ -187,9 +187,15 @@ export function Desktop() {
           return lb - la; // most items left first
         });
     }
-
+  
     return arr;
   }, [sortedWishList, appliedFilterBy]);
+
+  useEffect(() => {
+    if(filteredWishList.length !== 0){
+      setSelectedListId(filteredWishList[0]._id);
+    }
+  },[filteredWishList])
 
   const handleSelectDelete = (listId: string) => setDeleteListId(listId);
   const handleDeleteList = async (listId: string | null) => {
@@ -261,6 +267,7 @@ export function Desktop() {
               <View style={styles.mainContent}>
                 {selectedList && selectedListItems ? (
                   <ListDetails 
+                    currentTab={currentTab}
                     list={selectedList} 
                     items={selectedListItems || []}
                     onRemoveItem={onRemoveItem}

@@ -27,9 +27,10 @@ interface ListDetailsProps {
   items: GiftItem[];
   onRemoveItem?: (itemId: string) => void;
   onUpdateQuantity?: (itemId: string, quantity: number) => void;
+  currentTab?: string;
 }
 
-export default function ListDetails({ list, items, onRemoveItem, onUpdateQuantity }: ListDetailsProps) {
+export default function ListDetails({  list, items, onRemoveItem, onUpdateQuantity, currentTab }: ListDetailsProps) {
   const loading = false;
   const privacy = "shared";
   const address = list.shippingAddress || null;
@@ -62,9 +63,11 @@ export default function ListDetails({ list, items, onRemoveItem, onUpdateQuantit
                 <Text style={styles.privacyStatus}>{title}</Text>
                 <Text style={styles.privacyDesc}>{desc}</Text>
               </View>
-              <Pressable style={{ alignSelf: "flex-end" }}>
-                <Ionicons name="settings-sharp" size={18} color="#007AFF" />
-              </Pressable>
+              {currentTab === "my-events" && (
+                <Pressable style={{ alignSelf: "flex-end" }}>
+                  <Ionicons name="settings-sharp" size={18} color="#007AFF" />
+                </Pressable>
+              )}
             </View>
           </View>
 
@@ -80,12 +83,14 @@ export default function ListDetails({ list, items, onRemoveItem, onUpdateQuantit
                 <Text style={styles.eventDate}>{date}</Text>
               </View>
             </View>
-            <View>
-              <Pressable onPress={handlePressEditDetails} style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 15.5, borderColor: "#1C1C1C", borderWidth: 1 }}>
-                <Image source={require("@/assets/images/edit.svg")} />
-                <Text>Edit Details</Text>
-              </Pressable>
-            </View>
+            {currentTab === "my-events" && (
+              <View>
+                <Pressable onPress={handlePressEditDetails} style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 15.5, borderColor: "#1C1C1C", borderWidth: 1 }}>
+                  <Image source={require("@/assets/images/edit.svg")} />
+                  <Text>Edit Details</Text>
+                </Pressable>
+              </View>
+            )}
           </View>
 
           <View style={styles.eventDetails}>
@@ -158,9 +163,11 @@ export default function ListDetails({ list, items, onRemoveItem, onUpdateQuantit
                   </View>
                 </View>
 
-                <Pressable style={styles.removeButton} onPress={() => onRemoveItem?.(item._id)}>
-                  <Text style={styles.removeButtonText}>Remove</Text>
-                </Pressable>
+                {currentTab === "my-events" && (
+                  <Pressable style={styles.removeButton} onPress={() => onRemoveItem?.(item._id)}>
+                    <Text style={styles.removeButtonText}>Remove</Text>
+                  </Pressable>
+                )}
               </View>
             );
           }}
