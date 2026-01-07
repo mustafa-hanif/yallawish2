@@ -87,7 +87,7 @@ export function Desktop() {
       setAppliedSortBy(sortBy);
     }
     setAppliedFilterBy(filterBy);
-    handleToggleModal();
+    setShowSortSheet(false);
   };
   const wishList = currentTab === "community-events" ? communityLists : myLists;
 

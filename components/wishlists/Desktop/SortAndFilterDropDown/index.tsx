@@ -87,7 +87,6 @@ export default function SortAndFilterDropDown({ currentTab, showSortSheet, handl
             transform: [{ scale: scaleAnim }]
           }
         ]}
-        onBlur={handleToggleModal}
       >
         <ScrollView 
           contentContainerStyle={styles.dropdownContent} 
@@ -142,7 +141,12 @@ export default function SortAndFilterDropDown({ currentTab, showSortSheet, handl
           </View>
 
           {/* Apply Button */}
-          <Pressable style={styles.applyBtn} onPress={handlePressApply}>
+          <Pressable
+            style={styles.applyBtn}
+            onPress={() => {
+              handlePressApply();
+            }}
+          >
             <Text style={styles.applyBtnText}>Apply</Text>
           </Pressable>
         </ScrollView>
