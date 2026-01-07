@@ -15,6 +15,8 @@ interface GiftItem {
   price: number;
   quantity: number;
   claimed?: number;
+  buy_url?: string;
+  color?: string;
 }
 
 interface ListDetailsProps {
@@ -47,6 +49,8 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
   const image_url = list.coverPhotoUri || null;
   const totalItems = items?.length || 0;
   const [showAddGift, setShowAddGift] = useState(false);
+  const [showItemModal, setShowItemModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<GiftItem | null>(null);
 
   // Sort & Filter state
   const [showSortSheet, setShowSortSheet] = useState(false);
@@ -96,6 +100,27 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
   const handleQuantityChange = (itemId: string, currentQty: number, increment: boolean) => {
     const newQty = increment ? currentQty + 1 : Math.max(1, currentQty - 1);
     onUpdateQuantity?.(itemId, newQty);
+  };
+
+  const openItemModal = (item: GiftItem) => {
+    setSelectedItem(item);
+    setShowItemModal(true);
+  };
+
+  const closeItemModal = () => {
+    setShowItemModal(false);
+    setSelectedItem(null);
+  };
+
+  const viewAtStore = async () => {
+    if (!selectedItem?.buy_url) return;
+    try {
+      // Prefer native Linking for cross-platform
+      const { Linking } = require("react-native");
+      await Linking.openURL(selectedItem.buy_url);
+    } catch (e) {
+      console.warn("Failed to open store URL", e);
+    }
   };
 
   const handlePressEditDetails = () => {
@@ -210,7 +235,7 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
           renderItem={({ item }) => {
             return (
               <View key={item._id} style={styles.giftCard}>
-                <View style={styles.giftCardContent}>
+                <Pressable style={styles.giftCardContent} onPress={() => openItemModal(item)}>
                   <Image resizeMode="cover" source={{ uri: item.image_url || "https://via.placeholder.com/80" }} style={styles.giftImage} />
 
                   <View style={styles.giftInfo}>
@@ -234,7 +259,7 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
                       </View>
                     </View>
                   </View>
-                </View>
+                </Pressable>
 
                 {currentTab === "my-events" && (
                   <Pressable style={styles.removeButton} onPress={() => onRemoveItem?.(item._id)}>
@@ -329,6 +354,59 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
         listId={String(list._id)}
         onSaved={() => setShowAddGift(false)}
       />
+
+      {/* Item Quick View Modal */}
+      <Modal
+        visible={showItemModal}
+        transparent
+        animationType="fade"
+        onRequestClose={closeItemModal}
+      >
+        <Pressable style={{ flex: 1, backgroundColor: "#00000055" }} onPress={closeItemModal} />
+        <View style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0, justifyContent: "center", alignItems: "center", padding: 16 }}>
+          <View style={{ width: '90%', maxWidth: "95%", borderRadius: 16, backgroundColor: "#FFFFFF", shadowColor: "#000", shadowOpacity: 0.15, shadowRadius: 10, elevation: 4 }}>
+            <View style={{ padding: 24, flexDirection: "row", gap: 20 }}>
+              <View style={{ borderWidth: 0.01, borderColor:'#cebfbfff', width: 269, height: 262, borderRadius: 12, overflow: "hidden", backgroundColor: "#F6F6F6" }}>
+                {selectedItem?.image_url ? (
+                  <Image source={{ uri: selectedItem.image_url }} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
+                ) : (
+                  <View style={{ flex: 1 }} />
+                )}
+              </View>
+              <View style={{ flex: 1 , justifyContent:'center'}}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  {(() => {
+                    let host: string | null = null;
+                    try {
+                      host = selectedItem?.buy_url ? new URL(selectedItem.buy_url).hostname.replace("www.", "") : null;
+                    } catch {}
+                    return host ? <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 11, color: "#7A7A7A", textTransform: "lowercase" }}>{host}</Text> : null;
+                  })()}
+                </View>
+                <Text numberOfLines={1} style={{ fontFamily: "Nunito_700Bold", fontSize: 24, color: "#1A0034", marginTop: 4 }}>{selectedItem?.name}</Text>
+                <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 32, color: "#00A0FF", marginTop: 6 }}>AED {Number(selectedItem?.price || 0).toFixed(2)}</Text>
+                <View style={{ flexDirection: "row", gap: 16, marginTop: 8 }}>
+                  {selectedItem?.color ? (
+                    <Text style={{ fontFamily: "Nunito_400Regular", fontSize: 18, color: "#1C0335" }}>Color: {selectedItem.color}</Text>
+                  ) : null}
+                  <Text style={{ fontFamily: "Nunito_400Regular", fontSize: 18, color: "#1C0335" }}>Desired: {selectedItem?.quantity ?? 0}</Text>
+                  <Text style={{ fontFamily: "Nunito_400Regular", fontSize: 18, color: "#1C0335" }}>Purchased: {selectedItem?.claimed ?? 0}</Text>
+                </View>
+
+                <View style={{ marginTop: 18 }}>
+                  <Pressable
+                    disabled={!selectedItem?.buy_url}
+                    onPress={viewAtStore}
+                    style={{ opacity: selectedItem?.buy_url ? 1 : 0.6, alignSelf: "flex-start", paddingVertical: 10, paddingHorizontal: 28, borderRadius: 100, backgroundColor: "#36006C" }}
+                  >
+                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 16, color: "#FFFFFF" }}>View at store</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
      
     </View>
   );
