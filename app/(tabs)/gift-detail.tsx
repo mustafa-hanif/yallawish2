@@ -861,18 +861,22 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({ item, price, listTitle, b
                 <Text style={desktopStyles.formTitle}>Please fill-up the details below</Text>
 
                 <View style={desktopStyles.fieldBlock}>
-                  <Text style={desktopStyles.fieldLabel}>I bought</Text>
+                  <Text style={desktopStyles.fieldLabel}>I Bought</Text>
                   <View style={desktopStyles.stepper}>
-                    <Pressable onPress={dec} disabled={qty <= 1} 
-                    // style={[desktopStyles.stepperButton, qty <= 1 && desktopStyles.stepperButtonDisabled]}
+                    <Pressable
+                      onPress={dec}
+                      disabled={qty <= 1}
+                      // style={[desktopStyles.stepperButton, qty <= 1 && desktopStyles.stepperButtonDisabled]}
                     >
-                     <MinusCircle color={qty <= 1 ? "#AEAEB2" : "#330065"} size={25}/>
+                      <MinusCircle color={qty <= 1 ? "#AEAEB2" : "#330065"} size={25} />
                     </Pressable>
                     <Text style={desktopStyles.stepperValue}>{String(qty).padStart(2, "0")}</Text>
-                    <Pressable onPress={inc} disabled={qty >= maxQuantity} 
-                    // style={[desktopStyles.stepperButton, qty >= maxQuantity && desktopStyles.stepperButtonDisabled]}
+                    <Pressable
+                      onPress={inc}
+                      disabled={qty >= maxQuantity}
+                      // style={[desktopStyles.stepperButton, qty >= maxQuantity && desktopStyles.stepperButtonDisabled]}
                     >
-                      <PlusCircle color={qty >= maxQuantity ? "#AEAEB2" : "#330065"} size={25}/>
+                      <PlusCircle color={qty >= maxQuantity ? "#AEAEB2" : "#330065"} size={25} />
                       {/* <Text style={desktopStyles.stepperButtonText}>+</Text> */}
                     </Pressable>
                   </View>
@@ -903,10 +907,10 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({ item, price, listTitle, b
                 </View>
 
                 <View style={desktopStyles.fieldBlock}>
-                  <Text style={[desktopStyles.fieldLabel, {fontSize: 20, color:'#1C1C1C', fontFamily:'Nunito_700Bold' }]}>Where did you buy this?</Text>
+                  <Text style={[desktopStyles.fieldLabel, { fontSize: 20, color: "#1C1C1C", fontFamily: "Nunito_700Bold" }]}>Where did you buy this?</Text>
                   <View style={desktopStyles.storeRow}>
                     <Pressable onPress={() => setStoreOption("suggested")} disabled={!buyUrl} style={[desktopStyles.storeOption, storeOption === "suggested" && desktopStyles.storeOptionActive, !buyUrl && desktopStyles.storeOptionDisabled]}>
-                      <View style={[{...desktopStyles.radioOuter, position:'absolute', top: 8, right: 8, width: 20, height: 20}, storeOption === "suggested" && desktopStyles.radioOuterActive]}>{storeOption === "suggested" && <View style={desktopStyles.radioInner} />}</View>
+                      <View style={[{ ...desktopStyles.radioOuter, position: "absolute", top: 8, right: 8, width: 20, height: 20 }, storeOption === "suggested" && desktopStyles.radioOuterActive]}>{storeOption === "suggested" && <View style={desktopStyles.radioInner} />}</View>
                       <Text style={[desktopStyles.storeOptionText, storeOption === "suggested" && desktopStyles.storeOptionTextActive]}>{storeDisplayName.toUpperCase()}</Text>
                     </Pressable>
                     <Pressable
@@ -918,7 +922,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({ item, price, listTitle, b
                       }}
                       style={[desktopStyles.storeOption, storeOption === "custom" && desktopStyles.storeOptionActive]}
                     >
-                      <View style={[{...desktopStyles.radioOuter, position:'absolute', top: 8, right: 8, width: 20, height: 20}, storeOption === "custom" && desktopStyles.radioOuterActive]}>{storeOption === "custom" && <View style={desktopStyles.radioInner} />}</View>
+                      <View style={[{ ...desktopStyles.radioOuter, position: "absolute", top: 8, right: 8, width: 20, height: 20 }, storeOption === "custom" && desktopStyles.radioOuterActive]}>{storeOption === "custom" && <View style={desktopStyles.radioInner} />}</View>
                       <Text style={[desktopStyles.storeOptionText, storeOption === "custom" && desktopStyles.storeOptionTextActive]}>Another store</Text>
                     </Pressable>
                   </View>
@@ -1001,28 +1005,41 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({ item, price, listTitle, b
           </View>
 
           {moreItems.length > 0 && (
-            <View style={desktopStyles.moreSection}>
-              <View style={desktopStyles.moreHeader}>
-                <Text style={desktopStyles.moreTitle}>More items in this list</Text>
-                <Pressable onPress={onSeeAll}>
-                  <Text style={desktopStyles.moreSeeAll}>See all</Text>
+            <>
+              <View style={{ width: "100%", height: 2, backgroundColor: "#E5E5E5", marginVertical: 60 }} />
+              <View style={desktopStyles.moreSection}>
+                <View style={desktopStyles.moreHeader}>
+                  <Text style={desktopStyles.moreTitle}>More items from {storeDisplayName} in this list</Text>
+                </View>
+                <View style={desktopStyles.moreGrid}>
+                  {moreItems.map((entry, index) => (
+                    <>
+                      <Pressable key={String(entry._id)} onPress={() => onSelectItem(String(entry._id))} style={desktopStyles.moreCard}>
+                        <View style={desktopStyles.moreImageContainer}>
+                          <Image source={entry.image_url ? { uri: entry.image_url } : FALLBACK_IMAGE} style={desktopStyles.moreImage} resizeMode="cover" />
+                        </View>
+                        <View style={desktopStyles.moreBody}>
+                          <Text numberOfLines={2} style={desktopStyles.moreName}>{entry.name}</Text>
+                          <Text style={desktopStyles.morePrice}> {entry.price != null ? formatPrice(entry.price, "AED") : 'Price: N/A'} </Text>
+                          <Text style={desktopStyles.moreMeta}>
+                            {Number(entry.claimed ?? 0)} of {Number(entry.quantity ?? 1)} claimed
+                          </Text>
+                        </View>
+                        <View style={desktopStyles.moreActions}>
+                          <Pressable style={desktopStyles.moreBuyNowButton} onPress={() => onSelectItem(String(entry._id))}>
+                            <Text style={desktopStyles.moreBuyNowButtonText}>Buy Now</Text>
+                          </Pressable>
+                        </View>
+                      </Pressable>
+                       <View style={{ width: "100%", height: 1, backgroundColor: "#E5E5E5" }} />
+                    </>
+                  ))}
+                </View>
+                <Pressable onPress={onSeeAll} style={desktopStyles.moreSeeAllButton}>
+                    <Text style={desktopStyles.moreSeeAll}>See all</Text>
                 </Pressable>
               </View>
-              <View style={desktopStyles.moreGrid}>
-                {moreItems.map((entry) => (
-                  <Pressable key={String(entry._id)} onPress={() => onSelectItem(String(entry._id))} style={desktopStyles.moreCard}>
-                    <Image source={entry.image_url ? { uri: entry.image_url } : FALLBACK_IMAGE} style={desktopStyles.moreImage} resizeMode="cover" />
-                    <View style={desktopStyles.moreBody}>
-                      <Text style={desktopStyles.moreName}>{entry.name}</Text>
-                      {entry.price != null && <Text style={desktopStyles.morePrice}>{formatPrice(entry.price, "AED") ?? ""}</Text>}
-                      <Text style={desktopStyles.moreMeta}>
-                        {Number(entry.claimed ?? 0)} of {Number(entry.quantity ?? 1)} claimed
-                      </Text>
-                    </View>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
+            </>
           )}
         </View>
       </ScrollView>
@@ -1725,7 +1742,7 @@ const desktopStyles = StyleSheet.create({
     maxWidth: 450,
     alignSelf: "stretch",
     borderWidth: 0.09,
-    borderColor:'#f2e7e7b1'
+    borderColor: "#f2e7e7b1",
   },
   productImage: {
     width: "100%",
@@ -1870,7 +1887,7 @@ const desktopStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     height: 60,
-    width: 160
+    width: 160,
   },
   stepperButton: {
     width: 46,
@@ -1921,8 +1938,7 @@ const desktopStyles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 5,
-    backgroundColor: '#FFFFFF',
-  
+    backgroundColor: "#FFFFFF",
   },
   radioLabel: {
     color: "#1A0034",
@@ -1931,7 +1947,7 @@ const desktopStyles = StyleSheet.create({
   },
   noteField: {
     borderWidth: 1,
-    borderColor: '#AEAEB2',
+    borderColor: "#AEAEB2",
     borderRadius: 8,
     padding: 16,
     minHeight: 140,
@@ -1941,7 +1957,7 @@ const desktopStyles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontFamily: "Nunito_500Medium",
     minHeight: 80,
-    outlineColor:'transparent',
+    outlineColor: "transparent",
   },
   charCounter: {
     color: "#B1A6C4",
@@ -1965,7 +1981,7 @@ const desktopStyles = StyleSheet.create({
     position: "relative",
   },
   storeOptionActive: {
-    borderColor: '#330065',
+    borderColor: "#330065",
   },
   storeOptionDisabled: {
     opacity: 0.4,
@@ -1981,13 +1997,13 @@ const desktopStyles = StyleSheet.create({
     marginTop: 14,
   },
   inputLabel: {
-    color: '#AEAEB2',
+    color: "#AEAEB2",
     marginBottom: 6,
     fontFamily: "Nunito_700Bold",
   },
   inputWrapper: {
     borderWidth: 1,
-    borderColor: '#AEAEB2',
+    borderColor: "#AEAEB2",
     borderRadius: 8,
     paddingHorizontal: 12,
     height: 52,
@@ -1997,7 +2013,7 @@ const desktopStyles = StyleSheet.create({
   textInput: {
     color: COLORS.textPrimary,
     fontFamily: "Nunito_500Medium",
-    outlineColor:'transparent',
+    outlineColor: "transparent",
   },
   submitButton: {
     height: 48,
@@ -2031,54 +2047,79 @@ const desktopStyles = StyleSheet.create({
     justifyContent: "space-between",
   },
   moreTitle: {
-    color: COLORS.textPrimary,
+    color: "#1C0335",
     fontFamily: "Nunito_700Bold",
-    fontSize: 22,
+    fontSize: 28,
   },
   moreSeeAll: {
     color: COLORS.purple,
     fontFamily: "Nunito_700Bold",
   },
-  moreGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 20,
-  },
+  moreGrid: {},
   moreCard: {
-    flexBasis: "48%",
-    maxWidth: "48%",
-    backgroundColor: COLORS.background,
-    borderRadius: 20,
-    padding: 16,
-    shadowColor: "#15072C",
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 8 },
+    flexDirection: "row",
+    paddingVertical: 30,
+  },
+  moreImageContainer: {
+    width: 213,
+    height: 186,
+    borderRadius: 12,
+    overflow: "hidden",
+    borderWidth: 0.09,
+    borderColor: "#f2e7e7b1",
   },
   moreImage: {
     width: "100%",
-    height: 160,
-    borderRadius: 16,
-    backgroundColor: COLORS.surface,
+    height: "100%",
   },
   moreBody: {
-    marginTop: 12,
-    gap: 6,
+    flex: 1,
+    paddingHorizontal: 24,
+    justifyContent: "space-between",
   },
   moreName: {
-    color: COLORS.textPrimary,
-    fontFamily: "Nunito_700Bold",
-    fontSize: 16,
+    color: '#1C0335',
+    fontFamily: "Nunito_600SemiBold",
+    lineHeight: 24,
+    fontSize: 20,
   },
   morePrice: {
     color: COLORS.accent,
     fontFamily: "Nunito_700Bold",
+    fontSize: 24,
   },
   moreMeta: {
     color: COLORS.textSecondary,
     fontFamily: "Nunito_500Medium",
     fontSize: 13,
   },
+  moreActions:{
+    width: 213,
+    height: '100%',
+    justifyContent: 'flex-end',
+  },
+  moreBuyNowButton:{
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#03FFEE',
+    borderRadius: 8,
+  },
+  moreBuyNowButtonText:{
+    color:'#330065',
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
+  },
+  moreSeeAllButton:{
+    height: 48,
+    width: 102,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#330065',
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin:'auto',
+  }
 }) as Record<string, any>;
 
 const modalStyles = StyleSheet.create({
