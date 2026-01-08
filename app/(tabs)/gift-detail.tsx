@@ -1724,6 +1724,8 @@ const desktopStyles = StyleSheet.create({
     minWidth: 300,
     maxWidth: 450,
     alignSelf: "stretch",
+    borderWidth: 0.09,
+    borderColor:'#f2e7e7b1'
   },
   productImage: {
     width: "100%",
