@@ -1,5 +1,4 @@
 import { useUser } from "@clerk/clerk-expo";
-import { Ionicons } from "@expo/vector-icons";
 
 import { useIsFocused } from '@react-navigation/native';
 import { router, useLocalSearchParams } from "expo-router";
@@ -67,22 +66,23 @@ export default function PurchaseSuccess() {
               </View>
 
               <Text style={desktopStyles.heading}>Thank You {buyerName}!</Text>
-              <Text style={desktopStyles.subtext}>Your gift is on its way - and it's going to make someone's day!</Text>
+              <Text style={desktopStyles.subtext}>Your gift is on its way - and it's going to make{"\n"}someone's day!</Text>
 
               <View style={desktopStyles.buttonContainer}>
                 <Pressable onPress={onSendAnnouncement} style={desktopStyles.primaryButton}>
-                  <Ionicons name="megaphone" size={20} color="#FFFFFF" />
+                  {/* <Ionicons name="megaphone" size={20} color="#FFFFFF" /> */}
+                  <Image resizeMode="contain" source={require("@/assets/images/Megaphone.svg")} />
                   <Text style={desktopStyles.primaryButtonText}>Send a gift announcement</Text>
                 </Pressable>
                 <Pressable onPress={onPurchaseAnother} style={desktopStyles.secondaryButton}>
-                  <Ionicons name="gift" size={20} color={COLORS.purple} />
+                  <Image resizeMode="contain" source={require("@/assets/images/ShoppingBagOpen.svg")} />
                   <Text style={desktopStyles.secondaryButtonText}>Purchase another gift</Text>
                 </Pressable>
               </View>
 
               <View style={desktopStyles.bottomSection}>
                 <View style={desktopStyles.bottomTextContainer}>
-                  <Text style={desktopStyles.bottomText}>Wasn't that easy?</Text>
+                  <Text style={desktopStyles.bottomText}>Wasn’t that easy?</Text>
                   <Text style={desktopStyles.bottomTextBold}>Make Gifting Fun & Easy for Your Friends & Family</Text>
                 </View>
                 <Pressable onPress={onCreateList} style={desktopStyles.createButton}>
@@ -178,17 +178,17 @@ const mobileStyles = StyleSheet.create({
     fontSize: 16,
   },
   bottomHeading: {
-    color: "rgba(255,255,255,0.9)",
+    color: "#330065",
     fontFamily: "Nunito_600SemiBold",
-    fontSize: 24,
+    fontSize: 28,
     textAlign: "center",
   },
   bottomText: {
-    color: "#FFFFFF",
-    fontFamily: "Nunito_900Black",
-    fontSize: 25,
+    color: "#220044",
+    fontFamily: "Nunito_400Regular",
+    fontSize: 18,
     textAlign: "center",
-    marginTop: 20,
+    marginTop: 12,
   },
   createButton: {
     width: "100%",
@@ -239,7 +239,6 @@ const desktopStyles = StyleSheet.create({
   illustrationContainer: {
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 32,
     position: "relative",
   },
   illustration: {
@@ -254,29 +253,28 @@ const desktopStyles = StyleSheet.create({
     marginBottom: 16,
   },
   subtext: {
-    color: COLORS.textSecondary,
+    color: '#220044',
     fontFamily: "Nunito_600SemiBold",
-    fontSize: 18,
+    fontSize: 16,
     textAlign: "center",
-    marginBottom: 40,
+    marginBottom: 16,
     lineHeight: 26,
   },
   buttonContainer: {
     width: "100%",
-    gap: 16,
+    gap: 12,
     marginBottom: 48,
     alignItems: "center",
   },
   primaryButton: {
-    height: 56,
-    borderRadius: 14,
+    height: 48,
+    borderRadius: 8,
     backgroundColor: COLORS.purple,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
-    gap: 12,
-    maxWidth: 273,
-    width: "100%",
+    gap: 10,
+    width: 273,
   },
   primaryButtonText: {
     color: "#FFFFFF",
@@ -284,17 +282,16 @@ const desktopStyles = StyleSheet.create({
     fontSize: 16,
   },
   secondaryButton: {
-    height: 56,
-    borderRadius: 14,
+    height: 48,
+    borderRadius: 8,
     borderWidth: 2,
     borderColor: COLORS.purple,
     backgroundColor: COLORS.background,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
-    gap: 12,
-    maxWidth: 273,
-    width: "100%",
+    gap: 10,
+    width: 273,
   },
   secondaryButtonText: {
     color: COLORS.purple,
@@ -302,10 +299,10 @@ const desktopStyles = StyleSheet.create({
     fontSize: 16,
   },
   bottomSection: {
-    width: 730,
-    backgroundColor: COLORS.lightPurple,
+    width: 736,
+    backgroundColor:'#3300651A',
     borderRadius: 20,
-    padding: 32,
+    padding: 28,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -314,7 +311,7 @@ const desktopStyles = StyleSheet.create({
   bottomTextContainer: {
     flex: 1,
     flexDirection: "column",
-    gap: 4,
+    gap: 8,
   },
   bottomText: {
     color: COLORS.textPrimary,
@@ -323,23 +320,24 @@ const desktopStyles = StyleSheet.create({
     lineHeight: 24,
   },
   bottomTextBold: {
-    color: COLORS.textPrimary,
+    color: '#330065',
     fontFamily: "Nunito_700Bold",
     fontSize: 16,
     lineHeight: 24,
   },
   createButton: {
-    height: 56,
-    borderRadius: 14,
-    backgroundColor: COLORS.purple,
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: '#330065',
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 32,
-    minWidth: 200,
+    minWidth: 172,
+    
   },
   createButtonText: {
     color: "#FFFFFF",
     fontFamily: "Nunito_700Bold",
-    fontSize: 18,
+    fontSize: 16,
   },
 });
