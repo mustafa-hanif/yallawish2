@@ -7,20 +7,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import { Redirect, router, useLocalSearchParams, usePathname } from "expo-router";
+import { MinusCircle, PlusCircle } from "lucide-react-native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Image, Linking,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  TextInput,
-  View,
-  useWindowDimensions
-} from "react-native";
+import { Image, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const occasionObj = {
@@ -134,9 +123,7 @@ function storeLabelFromHost(host: string | null): string {
   if (!host) return "Seller";
   const segment = host.split(".")[0] ?? host;
   if (!segment) return host;
-  return segment
-    .replace(/[-_]/g, " ")
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+  return segment.replace(/[-_]/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function ownerNameFromTitle(title?: string | null): string {
@@ -160,23 +147,14 @@ export default function GiftDetail() {
     itemId?: string;
     listId?: string;
     action?: string;
-    eventTitle?: string
+    eventTitle?: string;
   }>();
   const { width } = useWindowDimensions();
   const isDesktop = Platform.OS === "web" && width >= DESKTOP_BREAKPOINT;
 
-  const item = useQuery(
-    api.products.getListItemById,
-    itemId ? ({ itemId: itemId as any } as any) : "skip"
-  ) as GiftItemType | undefined | null;
-  const list = useQuery(
-    api.products.getListById,
-    listId ? ({ listId: listId as any } as any) : "skip"
-  ) as any;
-  const listItems = useQuery(
-    api.products.getListItems as any,
-    listId ? ({ list_id: listId } as any) : "skip"
-  ) as GiftItemType[] | undefined;
+  const item = useQuery(api.products.getListItemById, itemId ? ({ itemId: itemId as any } as any) : "skip") as GiftItemType | undefined | null;
+  const list = useQuery(api.products.getListById, listId ? ({ listId: listId as any } as any) : "skip") as any;
+  const listItems = useQuery(api.products.getListItems as any, listId ? ({ list_id: listId } as any) : "skip") as GiftItemType[] | undefined;
 
   const purchase = useMutation(api.products.purchaseListItem as any);
   const createItem = useMutation(api.products.createListItem as any);
@@ -213,10 +191,7 @@ export default function GiftDetail() {
   const storeDisplayName = useMemo(() => storeLabelFromHost(host), [host]);
   const priceLabel = useMemo(() => formatPrice(item?.price, "AED"), [item?.price]);
   const listTitle = list?.title ?? "Gift List";
-  const ownerName = useMemo(
-    () => ownerNameFromTitle(list?.title as string | null),
-    [list?.title]
-  );
+  const ownerName = useMemo(() => ownerNameFromTitle(list?.title as string | null), [list?.title]);
 
   const totalQuantity = Math.max(1, Number(item?.quantity ?? 1));
   const claimed = Math.max(0, Number(item?.claimed ?? 0));
@@ -239,20 +214,13 @@ export default function GiftDetail() {
     }
   }, [available]);
 
-  const inc = useCallback(
-    () => setQty((current) => Math.min(current + 1, maxQuantity)),
-    [maxQuantity]
-  );
+  const inc = useCallback(() => setQty((current) => Math.min(current + 1, maxQuantity)), [maxQuantity]);
   const dec = useCallback(() => setQty((current) => Math.max(1, current - 1)), []);
 
   const [deliveredTo, setDeliveredTo] = useState<"recipient" | "me">("recipient");
   const [note, setNote] = useState("");
-  const [storeOption, setStoreOption] = useState<StoreOption>(() =>
-    buyUrl ? "suggested" : "custom"
-  );
-  const [storeName, setStoreName] = useState<string>(() =>
-    buyUrl ? storeDisplayName : ""
-  );
+  const [storeOption, setStoreOption] = useState<StoreOption>(() => (buyUrl ? "suggested" : "custom"));
+  const [storeName, setStoreName] = useState<string>(() => (buyUrl ? storeDisplayName : ""));
   useEffect(() => {
     if (storeOption === "suggested") {
       setStoreName(storeDisplayName);
@@ -286,7 +254,7 @@ export default function GiftDetail() {
     if (countdown <= 0) {
       if (buyUrl) {
         Linking.openURL(buyUrl);
-        setCountdown(5)
+        setCountdown(5);
       }
       setShowLeaving(false);
       return;
@@ -332,18 +300,9 @@ export default function GiftDetail() {
     setShowCopySheet(true);
   }, [isSignedIn, goToSignIn]);
 
-  const hasStoreName =
-    storeOption === "suggested" || storeName.trim().length > 0;
+  const hasStoreName = storeOption === "suggested" || storeName.trim().length > 0;
 
-  const canSubmit =
-    marked &&
-    !submitting &&
-    Boolean(listId) &&
-    Boolean(itemId) &&
-    available > 0 &&
-    qty > 0 &&
-    qty <= maxQuantity &&
-    hasStoreName;
+  const canSubmit = marked && !submitting && Boolean(listId) && Boolean(itemId) && available > 0 && qty > 0 && qty <= maxQuantity && hasStoreName;
 
   const onSubmit = useCallback(async () => {
     if (!listId || !itemId) return;
@@ -363,10 +322,7 @@ export default function GiftDetail() {
         quantity: qty,
         deliveredTo,
         note: note.trim() ? note.trim() : null,
-        storeName:
-          storeOption === "suggested"
-            ? storeDisplayName
-            : storeName.trim() || null,
+        storeName: storeOption === "suggested" ? storeDisplayName : storeName.trim() || null,
         orderNumber: orderNumber.trim() || null,
         buyer_user_id: userId ?? null,
         buyer_name: user?.fullName ?? user?.firstName ?? null,
@@ -384,33 +340,12 @@ export default function GiftDetail() {
     } finally {
       setSubmitting(false);
     }
-  }, [
-    listId,
-    itemId,
-    marked,
-    isSignedIn,
-    goToSignIn,
-    available,
-    storeOption,
-    storeName,
-    storeDisplayName,
-    purchase,
-    qty,
-    deliveredTo,
-    note,
-    orderNumber,
-    userId,
-    user,
-    router,
-    isDesktop,
-  ]);
+  }, [listId, itemId, marked, isSignedIn, goToSignIn, available, storeOption, storeName, storeDisplayName, purchase, qty, deliveredTo, note, orderNumber, userId, user, router, isDesktop]);
 
   const currentItemId = item ? String((item as any)._id) : itemId ? String(itemId) : "";
   const moreItems = useMemo<GiftItemType[]>(() => {
     if (!Array.isArray(listItems)) return [];
-    return (listItems as any[])
-      .filter((entry) => String(entry._id) !== currentItemId)
-      .slice(0, isDesktop ? 4 : 3) as GiftItemType[];
+    return (listItems as any[]).filter((entry) => String(entry._id) !== currentItemId).slice(0, isDesktop ? 4 : 3) as GiftItemType[];
   }, [listItems, currentItemId, isDesktop]);
 
   const onSelectItem = useCallback(
@@ -554,8 +489,7 @@ export default function GiftDetail() {
   const shouldShowCopySheet = Boolean(showCopySheet && isSignedIn);
 
   if (list && list.privacy === "private") {
-    const isOwner =
-      userId && list.user_id && String(list.user_id) === String(userId);
+    const isOwner = userId && list.user_id && String(list.user_id) === String(userId);
     if (!isSignedIn) {
       return (
         <Redirect
@@ -571,9 +505,7 @@ export default function GiftDetail() {
         <View style={listStyles.container}>
           <View style={sharedStyles.loadingContainer}>
             <Text style={sharedStyles.privateTitle}>Private List</Text>
-            <Text style={sharedStyles.privateBody}>
-              Only the list owner can view these gift details.
-            </Text>
+            <Text style={sharedStyles.privateBody}>Only the list owner can view these gift details.</Text>
           </View>
         </View>
       );
@@ -584,27 +516,22 @@ export default function GiftDetail() {
     <View style={isDesktop ? desktopStyles.root : mobileStyles.root}>
       {layout}
 
-      <Modal
-        visible={showLeaving}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowLeaving(false)}
-      >
-        <Pressable onPress={() => setShowLeaving(false)} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' }}>
-          <Pressable onPress={(e) => e.stopPropagation()} style={{ position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 20 }}>
+      <Modal visible={showLeaving} transparent animationType="fade" onRequestClose={() => setShowLeaving(false)}>
+        <Pressable onPress={() => setShowLeaving(false)} style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.35)" }}>
+          <Pressable onPress={(e) => e.stopPropagation()} style={{ position: "absolute", left: 0, right: 0, bottom: 0, backgroundColor: "#FFFFFF", borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 20 }}>
             <Pressable onPress={() => setShowLeaving(false)}>
-              <View style={{ alignSelf: 'center', width: 44, height: 5, borderRadius: 3, backgroundColor: '#E2DAF0', marginBottom: 12 }} />
+              <View style={{ alignSelf: "center", width: 44, height: 5, borderRadius: 3, backgroundColor: "#E2DAF0", marginBottom: 12 }} />
             </Pressable>
-            <Text style={{ color: '#1C0335', fontSize: 38, fontFamily: 'Nunito_900Black', textAlign: 'center' }}>Leaving Yallawish</Text>
-            <Text style={{ color: '#1C0335', textAlign: 'center', marginTop: 8 , fontFamily:'Nunito_700Bold'}}>
-              You’re about to visit the seller’s site. After buying, come back and <Text style={{textDecorationLine:'underline'}}>mark this gift as purchased.</Text>
+            <Text style={{ color: "#1C0335", fontSize: 38, fontFamily: "Nunito_900Black", textAlign: "center" }}>Leaving Yallawish</Text>
+            <Text style={{ color: "#1C0335", textAlign: "center", marginTop: 8, fontFamily: "Nunito_700Bold" }}>
+              You’re about to visit the seller’s site. After buying, come back and <Text style={{ textDecorationLine: "underline" }}>mark this gift as purchased.</Text>
             </Text>
             <View style={modalStyles.redirectContainer}>
               <Text style={modalStyles.redirectLabel}>Redirecting to</Text>
               <Text style={modalStyles.redirectHost}>{host ?? "the seller"}</Text>
-              <View style={{flexDirection:'row' , alignItems:'center', justifyContent:'center', gap:8}}>
+              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}>
                 <Text style={modalStyles.redirectLabel}>You’ll be redirected in </Text>
-                <Image source={require("@/assets/images/redirected.png")}/>
+                <Image source={require("@/assets/images/redirected.png")} />
               </View>
               <Text style={modalStyles.countdown}>{countdown}s</Text>
             </View>
@@ -619,10 +546,7 @@ export default function GiftDetail() {
               >
                 <Text style={modalStyles.primaryButtonText}>Proceed Now</Text>
               </Pressable>
-              <Pressable
-                onPress={() => setShowLeaving(false)}
-                style={modalStyles.secondaryButton}
-              >
+              <Pressable onPress={() => setShowLeaving(false)} style={modalStyles.secondaryButton}>
                 <Text style={modalStyles.secondaryButtonText}>Stay Here</Text>
               </Pressable>
             </View>
@@ -679,250 +603,182 @@ type MobileLayoutProps = {
   onSeeAll: () => void;
   available: number;
   submitting: boolean;
-  eventTitle?: string
+  eventTitle?: string;
 };
 
-const MobileLayout: React.FC<MobileLayoutProps> = ({
-  item,
-  price,
-  buyUrl,
-  marked,
-  onToggleMarked,
-  qty,
-  inc,
-  dec,
-  maxQuantity,
-  deliveredTo,
-  setDeliveredTo,
-  note,
-  setNote,
-  storeOption,
-  setStoreOption,
-  storeDisplayName,
-  storeName,
-  setStoreName,
-  orderNumber,
-  setOrderNumber,
-  canSubmit,
-  onSubmit,
-  onBack,
-  onBuyNow,
-  onIWantThisToo,
-  ownerName,
-  moreItems,
-  onSelectItem,
-  onSeeAll,
-  available,
-  submitting,
-  eventTitle
-}) => {
+const MobileLayout: React.FC<MobileLayoutProps> = ({ item, price, buyUrl, marked, onToggleMarked, qty, inc, dec, maxQuantity, deliveredTo, setDeliveredTo, note, setNote, storeOption, setStoreOption, storeDisplayName, storeName, setStoreName, orderNumber, setOrderNumber, canSubmit, onSubmit, onBack, onBuyNow, onIWantThisToo, ownerName, moreItems, onSelectItem, onSeeAll, available, submitting, eventTitle }) => {
   const remainingChars = Math.max(0, NOTE_LIMIT - note.length);
 
   return (
     <View style={mobileStyles.container}>
-        <LinearGradient
-          colors={["#330065", "#45018ad7"]}
-          locations={[0, 0.7]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 2 }}
-          style={mobileStyles.header}
-        >
-          <SafeAreaView edges={["top"]}>
-            <View style={mobileStyles.headerContent}>
-              <View style={mobileStyles.navigation}>
-                <Pressable onPress={onBack} style={mobileStyles.backButton}>
-                  <Image source={require("@/assets/images/backArrow.png")} />
-                </Pressable>
-                <Text style={mobileStyles.headerTitle} numberOfLines={1}>{eventTitle || item.name}</Text>
-              </View>
-            </View>
-          </SafeAreaView>
-        </LinearGradient>
-
-        <ParallaxScrollView 
-          headerHeight={211}
-          contentPadding={0}
-          gap={0}
-          scrollContainerStyle={mobileStyles.scrollContent}
-          contentStyle={mobileStyles.scrollBackgroundColor}
-          headerImage={<Image source={item.image_url ? { uri: item.image_url } : FALLBACK_IMAGE} style={mobileStyles.productImage} resizeMode="cover" />
-          
-        }>
-          <View style={mobileStyles.productCard}>
-            <Text style={mobileStyles.productTitle}>{item.name}</Text>
-            {price && <Text style={mobileStyles.productPrice}>{price}</Text>}
-
-            <Text style={mobileStyles.productMeta}>
-              Quantity: <Text>{String(item.quantity ?? 1).padStart(2, "0")}</Text>
-            </Text>
-            {item.description && (
-              <Text numberOfLines={2} style={mobileStyles.productDescription}>
-                Description: {item.description}
+      <LinearGradient colors={["#330065", "#45018ad7"]} locations={[0, 0.7]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 2 }} style={mobileStyles.header}>
+        <SafeAreaView edges={["top"]}>
+          <View style={mobileStyles.headerContent}>
+            <View style={mobileStyles.navigation}>
+              <Pressable onPress={onBack} style={mobileStyles.backButton}>
+                <Image source={require("@/assets/images/backArrow.png")} />
+              </Pressable>
+              <Text style={mobileStyles.headerTitle} numberOfLines={1}>
+                {eventTitle || item.name}
               </Text>
-            )}
-
-            <View style={mobileStyles.actionRow}>
-              <Pressable style={mobileStyles.secondaryButton} onPress={onIWantThisToo}>
-                <Text style={mobileStyles.secondaryButtonText}>I want this too</Text>
-              </Pressable>
-              <Pressable style={[mobileStyles.primaryButton, !buyUrl && mobileStyles.primaryButtonDisabled]} onPress={onBuyNow} disabled={!buyUrl}>
-                <Text style={mobileStyles.primaryButtonText}>Buy now</Text>
-              </Pressable>
             </View>
-            {available <= 0 && <Text style={mobileStyles.notice}>This gift has already been fully claimed.</Text>}
           </View>
-          <View style={mobileStyles.section}>
-            <View style={{...mobileStyles.sectionCard, ...(!marked && { paddingBottom : 0 })}}>
-              <View style={mobileStyles.didYouBuyThisGiftContainer}>
-                <Text style={mobileStyles.didYouBuyThisGiftText}>Did you buy this gift?</Text>
-              </View>
-              {!marked && <View style={mobileStyles.didYouBuyThisGiftSeparator} />}
-              
-              <View style={mobileStyles.switchRow}>
-                <Text style={mobileStyles.sectionTitle}>Mark as purchased</Text>
-                <Switch value={marked} onValueChange={onToggleMarked} trackColor={{ false: "#D7CEE9", true: "#7C3AED" }} thumbColor="#FFFFFF" />
-              </View>
-              {marked && <View style={mobileStyles.didYouBuyThisGiftSeparator} />}
-              {marked && (
-                <View style={mobileStyles.markAsPurchasedSection}>
-                  <Text style={mobileStyles.sectionLabel}>I bought</Text>
-                  <View style={mobileStyles.stepper}>
-                    <Pressable onPress={dec} disabled={qty <= 1} style={[mobileStyles.stepperButton, qty <= 1 && mobileStyles.stepperButtonDisabled]}>
-                      <Text style={mobileStyles.stepperButtonText}>−</Text>
-                    </Pressable>
-                    <Text style={mobileStyles.stepperValue}>{String(qty).padStart(2, "0")}</Text>
-                    <Pressable onPress={inc} disabled={qty >= maxQuantity} style={[mobileStyles.stepperButton, qty >= maxQuantity && mobileStyles.stepperButtonDisabled]}>
-                      <Text style={mobileStyles.stepperButtonText}>+</Text>
-                    </Pressable>
-                  </View>
+        </SafeAreaView>
+      </LinearGradient>
 
-                  <Text style={mobileStyles.sectionLabel}>Delivered to</Text>
-                  <View style={mobileStyles.radioGroup}>
-                    <Pressable onPress={() => setDeliveredTo("recipient")} style={mobileStyles.radioRow}>
-                      <Text style={mobileStyles.radioLabel}>{ownerName}</Text>
-                      <View style={[mobileStyles.radioOuter, deliveredTo === "recipient" && mobileStyles.radioOuterActive]}>
-                        {deliveredTo === "recipient" && <View style={mobileStyles.radioInnerActive} />}
-                        </View>
-                    </Pressable>
-                    <Pressable onPress={() => setDeliveredTo("me")} style={mobileStyles.radioRow}>
-                      <Text style={mobileStyles.radioLabel}>My home</Text>
-                      <View style={[mobileStyles.radioOuter, deliveredTo === "me" && mobileStyles.radioOuterActive]}>{deliveredTo === "me" && <View style={mobileStyles.radioInnerActive} />}</View>
-                    </Pressable>
-                  </View>
+      <ParallaxScrollView headerHeight={211} contentPadding={0} gap={0} scrollContainerStyle={mobileStyles.scrollContent} contentStyle={mobileStyles.scrollBackgroundColor} headerImage={<Image source={item.image_url ? { uri: item.image_url } : FALLBACK_IMAGE} style={mobileStyles.productImage} resizeMode="cover" />}>
+        <View style={mobileStyles.productCard}>
+          <Text style={mobileStyles.productTitle}>{item.name}</Text>
+          {price && <Text style={mobileStyles.productPrice}>{price}</Text>}
 
-                  <Text style={mobileStyles.sectionLabel}>Add a note</Text>
-                  <View style={mobileStyles.noteField}>
-                    <TextInput value={note} onChangeText={setNote} placeholder="Here’s a little gift to make your day better! 🎉" placeholderTextColor="#B1A6C4" multiline style={[mobileStyles.noteInput, {verticalAlign:"top", paddingTop:0}]} />
-                    <Text style={mobileStyles.charCounter}>
-                      {remainingChars}/{NOTE_LIMIT}
-                    </Text>
-                  </View>
-
-                  <Text style={{...mobileStyles.sectionLabel, ...mobileStyles.didYouBuyThisGiftText}}>Where did you buy this?</Text>
-                  <View style={mobileStyles.storeRow}>
-                    <Pressable onPress={() => setStoreOption("suggested")} disabled={!buyUrl} style={[mobileStyles.storeOption, !buyUrl && mobileStyles.storeOptionDisabled]}>
-                      <View style={[mobileStyles.radioOuter,storeOption === "suggested" && mobileStyles.radioOuterActive]}>{storeOption === "suggested" && <View style={mobileStyles.radioInnerActive} />}</View>
-                      <Text style={[mobileStyles.storeOptionText, storeOption === "suggested" && mobileStyles.storeOptionTextActive]}>{storeDisplayName.toUpperCase()}</Text>
-                    </Pressable>
-                    <Pressable
-                      onPress={() => {
-                        setStoreOption("custom");
-                        if (!storeName || storeName === storeDisplayName) {
-                          setStoreName("");
-                        }
-                      }}
-                      style={[mobileStyles.storeOption, storeOption === "custom"]}
-                    >
-                      <View style={[mobileStyles.radioOuter, storeOption === "custom" && mobileStyles.radioOuterActive]}>{storeOption === "custom" && <View style={mobileStyles.radioInnerActive} />}</View>
-                      <Text style={[mobileStyles.storeOptionText, storeOption === "custom" && mobileStyles.storeOptionTextActive]}>Another store</Text>
-                    </Pressable>
-                  </View>
-
-
-                </View>
-              )}
-            </View>
-            {
-              marked && (
-                <>
-                  {storeOption === "custom" && (
-                    <View style={mobileStyles.inputField}>
-                      <Text style={mobileStyles.inputLabel}>Store Name</Text>
-                      <View style={mobileStyles.inputWrapper}>
-                        <TextInput
-                          value={storeName}
-                          onChangeText={setStoreName}
-                          placeholder="Macy’s"
-                          placeholderTextColor="#1C03351A"
-                          style={mobileStyles.textInput}
-                        />
-                      </View>
-                    </View>
-                  )}
-
-                  <View style={mobileStyles.inputField}>
-                    <Text style={mobileStyles.inputLabel}>Order Number (if known)</Text>
-                    <View style={mobileStyles.inputWrapper}>
-                      <TextInput
-                        value={orderNumber}
-                        onChangeText={setOrderNumber}
-                        placeholder="#123456789"
-                        placeholderTextColor="#1C03351A"
-                        style={mobileStyles.textInput}
-                      />
-                    </View>
-                  </View>
-                </>
-              )
-            }
-          </View>
-          {moreItems.length > 0 ? <View style={{height:4, backgroundColor:'#EFECF266'}} />  : null}
-          
-          {moreItems.length > 0 && (
-            <View>
-              <View style={{paddingHorizontal:16, paddingVertical: 24}}>
-                <Text style={mobileStyles.moreTitle}>More items in this list</Text>
-              </View>
-              <ScrollView horizontal style={{paddingLeft:16, paddingVertical: 20}} contentContainerStyle={{gap:10}} >
-                {moreItems?.map((entry) => (
-                  <View key={String(entry._id)} style={mobileStyles.moreCard}>
-                    <Image source={entry.image_url ? { uri: entry.image_url } : FALLBACK_IMAGE} style={mobileStyles.moreImage} resizeMode="cover" />
-                    <View  style={mobileStyles.moreContent}>
-                      <Text numberOfLines={2} style={mobileStyles.moreName}>{entry.name}</Text>
-                      <View style={{flexDirection:'row' , justifyContent:'space-between'}}>
-                        {entry.price != null && <Text style={mobileStyles.morePrice}>{formatPrice(entry.price, "") ?? ""}</Text>}
-                        <Text style={mobileStyles.moreMeta}> {Number(entry.claimed ?? 0)} of {Number(entry.quantity ?? 1)} claimed </Text>
-                      </View>
-                    </View>
-                     <Pressable style={[mobileStyles.moreItemsCardBuyNowButton]} onPress={() => onSelectItem(String(entry._id))}>
-                      <Text style={mobileStyles.moreItemsCardBuyNowButtonText}>Buy Now</Text>
-                    </Pressable>
-                  </View>
-                ))}
-              </ScrollView>
-
-              <Pressable style={mobileStyles.seeAll} onPress={onSeeAll}>
-                <Text style={mobileStyles.seeAllText}>See all</Text>
-              </Pressable>
-            </View>
+          <Text style={mobileStyles.productMeta}>
+            Quantity: <Text>{String(item.quantity ?? 1).padStart(2, "0")}</Text>
+          </Text>
+          {item.description && (
+            <Text numberOfLines={2} style={mobileStyles.productDescription}>
+              Description: {item.description}
+            </Text>
           )}
 
-          <View style={{ height: 16 }} />
-        </ParallaxScrollView>
+          <View style={mobileStyles.actionRow}>
+            <Pressable style={mobileStyles.secondaryButton} onPress={onIWantThisToo}>
+              <Text style={mobileStyles.secondaryButtonText}>I want this too</Text>
+            </Pressable>
+            <Pressable style={[mobileStyles.primaryButton, !buyUrl && mobileStyles.primaryButtonDisabled]} onPress={onBuyNow} disabled={!buyUrl}>
+              <Text style={mobileStyles.primaryButtonText}>Buy now</Text>
+            </Pressable>
+          </View>
+          {available <= 0 && <Text style={mobileStyles.notice}>This gift has already been fully claimed.</Text>}
+        </View>
+        <View style={mobileStyles.section}>
+          <View style={{ ...mobileStyles.sectionCard, ...(!marked && { paddingBottom: 0 }) }}>
+            <View style={mobileStyles.didYouBuyThisGiftContainer}>
+              <Text style={mobileStyles.didYouBuyThisGiftText}>Did you buy this gift?</Text>
+            </View>
+            {!marked && <View style={mobileStyles.didYouBuyThisGiftSeparator} />}
 
+            <View style={mobileStyles.switchRow}>
+              <Text style={mobileStyles.sectionTitle}>Mark as purchased</Text>
+              <Switch value={marked} onValueChange={onToggleMarked} trackColor={{ false: "#D7CEE9", true: "#7C3AED" }} thumbColor="#FFFFFF" />
+            </View>
+            {marked && <View style={mobileStyles.didYouBuyThisGiftSeparator} />}
+            {marked && (
+              <View style={mobileStyles.markAsPurchasedSection}>
+                <Text style={mobileStyles.sectionLabel}>I bought</Text>
+                <View style={mobileStyles.stepper}>
+                  <Pressable onPress={dec} disabled={qty <= 1} style={[mobileStyles.stepperButton, qty <= 1 && mobileStyles.stepperButtonDisabled]}>
+                    <Text style={mobileStyles.stepperButtonText}>−</Text>
+                  </Pressable>
+                  <Text style={mobileStyles.stepperValue}>{String(qty).padStart(2, "0")}</Text>
+                  <Pressable onPress={inc} disabled={qty >= maxQuantity} style={[mobileStyles.stepperButton, qty >= maxQuantity && mobileStyles.stepperButtonDisabled]}>
+                    <Text style={mobileStyles.stepperButtonText}>+</Text>
+                  </Pressable>
+                </View>
+
+                <Text style={mobileStyles.sectionLabel}>Delivered to</Text>
+                <View style={mobileStyles.radioGroup}>
+                  <Pressable onPress={() => setDeliveredTo("recipient")} style={mobileStyles.radioRow}>
+                    <Text style={mobileStyles.radioLabel}>{ownerName}</Text>
+                    <View style={[mobileStyles.radioOuter, deliveredTo === "recipient" && mobileStyles.radioOuterActive]}>{deliveredTo === "recipient" && <View style={mobileStyles.radioInnerActive} />}</View>
+                  </Pressable>
+                  <Pressable onPress={() => setDeliveredTo("me")} style={mobileStyles.radioRow}>
+                    <Text style={mobileStyles.radioLabel}>My home</Text>
+                    <View style={[mobileStyles.radioOuter, deliveredTo === "me" && mobileStyles.radioOuterActive]}>{deliveredTo === "me" && <View style={mobileStyles.radioInnerActive} />}</View>
+                  </Pressable>
+                </View>
+
+                <Text style={mobileStyles.sectionLabel}>Add a note</Text>
+                <View style={mobileStyles.noteField}>
+                  <TextInput value={note} onChangeText={setNote} placeholder="Here’s a little gift to make your day better! 🎉" placeholderTextColor="#B1A6C4" multiline style={[mobileStyles.noteInput, { verticalAlign: "top", paddingTop: 0 }]} />
+                  <Text style={mobileStyles.charCounter}>
+                    {remainingChars}/{NOTE_LIMIT}
+                  </Text>
+                </View>
+
+                <Text style={{ ...mobileStyles.sectionLabel, ...mobileStyles.didYouBuyThisGiftText }}>Where did you buy this?</Text>
+                <View style={mobileStyles.storeRow}>
+                  <Pressable onPress={() => setStoreOption("suggested")} disabled={!buyUrl} style={[mobileStyles.storeOption, !buyUrl && mobileStyles.storeOptionDisabled]}>
+                    <View style={[mobileStyles.radioOuter, storeOption === "suggested" && mobileStyles.radioOuterActive]}>{storeOption === "suggested" && <View style={mobileStyles.radioInnerActive} />}</View>
+                    <Text style={[mobileStyles.storeOptionText, storeOption === "suggested" && mobileStyles.storeOptionTextActive]}>{storeDisplayName.toUpperCase()}</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => {
+                      setStoreOption("custom");
+                      if (!storeName || storeName === storeDisplayName) {
+                        setStoreName("");
+                      }
+                    }}
+                    style={[mobileStyles.storeOption, storeOption === "custom"]}
+                  >
+                    <View style={[mobileStyles.radioOuter, storeOption === "custom" && mobileStyles.radioOuterActive]}>{storeOption === "custom" && <View style={mobileStyles.radioInnerActive} />}</View>
+                    <Text style={[mobileStyles.storeOptionText, storeOption === "custom" && mobileStyles.storeOptionTextActive]}>Another store</Text>
+                  </Pressable>
+                </View>
+              </View>
+            )}
+          </View>
+          {marked && (
+            <>
+              {storeOption === "custom" && (
+                <View style={mobileStyles.inputField}>
+                  <Text style={mobileStyles.inputLabel}>Store Name</Text>
+                  <View style={mobileStyles.inputWrapper}>
+                    <TextInput value={storeName} onChangeText={setStoreName} placeholder="Macy’s" placeholderTextColor="#1C03351A" style={mobileStyles.textInput} />
+                  </View>
+                </View>
+              )}
+
+              <View style={mobileStyles.inputField}>
+                <Text style={mobileStyles.inputLabel}>Order Number (if known)</Text>
+                <View style={mobileStyles.inputWrapper}>
+                  <TextInput value={orderNumber} onChangeText={setOrderNumber} placeholder="#123456789" placeholderTextColor="#1C03351A" style={mobileStyles.textInput} />
+                </View>
+              </View>
+            </>
+          )}
+        </View>
+        {moreItems.length > 0 ? <View style={{ height: 4, backgroundColor: "#EFECF266" }} /> : null}
+
+        {moreItems.length > 0 && (
+          <View>
+            <View style={{ paddingHorizontal: 16, paddingVertical: 24 }}>
+              <Text style={mobileStyles.moreTitle}>More items in this list</Text>
+            </View>
+            <ScrollView horizontal style={{ paddingLeft: 16, paddingVertical: 20 }} contentContainerStyle={{ gap: 10 }}>
+              {moreItems?.map((entry) => (
+                <View key={String(entry._id)} style={mobileStyles.moreCard}>
+                  <Image source={entry.image_url ? { uri: entry.image_url } : FALLBACK_IMAGE} style={mobileStyles.moreImage} resizeMode="cover" />
+                  <View style={mobileStyles.moreContent}>
+                    <Text numberOfLines={2} style={mobileStyles.moreName}>
+                      {entry.name}
+                    </Text>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                      {entry.price != null && <Text style={mobileStyles.morePrice}>{formatPrice(entry.price, "") ?? ""}</Text>}
+                      <Text style={mobileStyles.moreMeta}>
+                        {" "}
+                        {Number(entry.claimed ?? 0)} of {Number(entry.quantity ?? 1)} claimed{" "}
+                      </Text>
+                    </View>
+                  </View>
+                  <Pressable style={[mobileStyles.moreItemsCardBuyNowButton]} onPress={() => onSelectItem(String(entry._id))}>
+                    <Text style={mobileStyles.moreItemsCardBuyNowButtonText}>Buy Now</Text>
+                  </Pressable>
+                </View>
+              ))}
+            </ScrollView>
+
+            <Pressable style={mobileStyles.seeAll} onPress={onSeeAll}>
+              <Text style={mobileStyles.seeAllText}>See all</Text>
+            </Pressable>
+          </View>
+        )}
+
+        <View style={{ height: 16 }} />
+      </ParallaxScrollView>
 
       <View style={mobileStyles.submitBar}>
-        <Pressable
-          onPress={onSubmit}
-          disabled={!canSubmit}
-          style={[
-            mobileStyles.submitButton,
-            (!canSubmit || submitting) && mobileStyles.submitButtonDisabled,
-          ]}
-        >
-          <Text style={mobileStyles.submitButtonText}>
-            {submitting ? "Submitting…" : "Submit"}
-          </Text>
+        <Pressable onPress={onSubmit} disabled={!canSubmit} style={[mobileStyles.submitButton, (!canSubmit || submitting) && mobileStyles.submitButtonDisabled]}>
+          <Text style={mobileStyles.submitButtonText}>{submitting ? "Submitting…" : "Submit"}</Text>
         </Pressable>
       </View>
     </View>
@@ -967,43 +823,7 @@ type DesktopLayoutProps = {
   onCloseBuyNowForm: () => void;
 };
 
-const DesktopLayout: React.FC<DesktopLayoutProps> = ({
-  item,
-  price,
-  listTitle,
-  buyUrl,
-  marked,
-  onToggleMarked,
-  qty,
-  inc,
-  dec,
-  maxQuantity,
-  deliveredTo,
-  setDeliveredTo,
-  note,
-  setNote,
-  storeOption,
-  setStoreOption,
-  storeDisplayName,
-  storeName,
-  setStoreName,
-  orderNumber,
-  setOrderNumber,
-  canSubmit,
-  onSubmit,
-  onBack,
-  onBuyNow,
-  onIWantThisToo,
-  ownerName,
-  host,
-  moreItems,
-  onSelectItem,
-  onSeeAll,
-  available,
-  submitting,
-  showBuyNowForm,
-  onCloseBuyNowForm,
-}) => {
+const DesktopLayout: React.FC<DesktopLayoutProps> = ({ item, price, listTitle, buyUrl, marked, onToggleMarked, qty, inc, dec, maxQuantity, deliveredTo, setDeliveredTo, note, setNote, storeOption, setStoreOption, storeDisplayName, storeName, setStoreName, orderNumber, setOrderNumber, canSubmit, onSubmit, onBack, onBuyNow, onIWantThisToo, ownerName, host, moreItems, onSelectItem, onSeeAll, available, submitting, showBuyNowForm, onCloseBuyNowForm }) => {
   const remainingChars = Math.max(0, NOTE_LIMIT - note.length);
 
   if (showBuyNowForm) {
@@ -1016,30 +836,23 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
                 <Ionicons name="chevron-back" size={18} color={COLORS.purple} />
                 <Text style={desktopStyles.backPillText}>Back</Text>
               </Pressable>
-              <Text style={desktopStyles.breadcrumbText}>
-                Home / {listTitle} / Buy Now
-              </Text>
+              <Text style={desktopStyles.breadcrumbText}>Home / {listTitle} / Buy Now</Text>
             </View>
 
             <View style={desktopStyles.buyNowColumns}>
               <View style={desktopStyles.productSectionColumn}>
                 <View style={desktopStyles.productImageContainer}>
-                  <Image
-                    source={item.image_url ? { uri: item.image_url } : FALLBACK_IMAGE}
-                    style={desktopStyles.productImage}
-                    resizeMode="contain"
-                  />
+                  <Image source={item.image_url ? { uri: item.image_url } : FALLBACK_IMAGE} style={desktopStyles.productImage} resizeMode="cover" />
                 </View>
                 <View style={desktopStyles.productBody}>
-                  <View style={desktopStyles.productInfo}>
+                  <View style={[desktopStyles.productInfo, { rowGap: 16 }]}>
                     <Text style={desktopStyles.productTitle}>{item.name}</Text>
-                    {price && <Text style={desktopStyles.productPrice}>{price}</Text>}
-                    <Text style={desktopStyles.productMeta}>
-                      Quantity: {String(item.quantity ?? 1).padStart(2, "0")}
-                    </Text>
-                    {item.description && (
-                      <Text style={desktopStyles.productDescription}>{item.description}</Text>
-                    )}
+                    <Text style={desktopStyles.productPrice}>{price ? price : "Price : N/A"}</Text>
+                    <Text style={desktopStyles.productMeta}>Quantity: {String(item.quantity ?? 1).padStart(2, "0")}</Text>
+                    <View style={{ rowGap: 12 }}>
+                      <Text style={desktopStyles.productDescriptionTitle}>Description</Text>
+                      <Text style={desktopStyles.productDescription}>{item.description ? item.description : "No description available"}</Text>
+                    </View>
                   </View>
                 </View>
               </View>
@@ -1050,62 +863,31 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
                 <View style={desktopStyles.fieldBlock}>
                   <Text style={desktopStyles.fieldLabel}>I bought</Text>
                   <View style={desktopStyles.stepper}>
-                    <Pressable
-                      onPress={dec}
-                      disabled={qty <= 1}
-                      style={[
-                        desktopStyles.stepperButton,
-                        qty <= 1 && desktopStyles.stepperButtonDisabled,
-                      ]}
+                    <Pressable onPress={dec} disabled={qty <= 1} 
+                    // style={[desktopStyles.stepperButton, qty <= 1 && desktopStyles.stepperButtonDisabled]}
                     >
-                      <Text style={desktopStyles.stepperButtonText}>−</Text>
+                     <MinusCircle color={qty <= 1 ? "#AEAEB2" : "#330065"} size={25}/>
                     </Pressable>
-                    <Text style={desktopStyles.stepperValue}>
-                      {String(qty).padStart(2, "0")}
-                    </Text>
-                    <Pressable
-                      onPress={inc}
-                      disabled={qty >= maxQuantity}
-                      style={[
-                        desktopStyles.stepperButton,
-                        qty >= maxQuantity && desktopStyles.stepperButtonDisabled,
-                      ]}
+                    <Text style={desktopStyles.stepperValue}>{String(qty).padStart(2, "0")}</Text>
+                    <Pressable onPress={inc} disabled={qty >= maxQuantity} 
+                    // style={[desktopStyles.stepperButton, qty >= maxQuantity && desktopStyles.stepperButtonDisabled]}
                     >
-                      <Text style={desktopStyles.stepperButtonText}>+</Text>
+                      <PlusCircle color={qty >= maxQuantity ? "#AEAEB2" : "#330065"} size={25}/>
+                      {/* <Text style={desktopStyles.stepperButtonText}>+</Text> */}
                     </Pressable>
                   </View>
                 </View>
 
                 <View style={desktopStyles.fieldBlock}>
                   <Text style={desktopStyles.fieldLabel}>Delivered to</Text>
-                  <View style={desktopStyles.radioGroup}>
-                    <Pressable
-                      onPress={() => setDeliveredTo("recipient")}
-                      style={desktopStyles.radioOption}
-                    >
-                      <View
-                        style={[
-                          desktopStyles.radioOuter,
-                          deliveredTo === "recipient" && desktopStyles.radioOuterActive,
-                        ]}
-                      >
-                        {deliveredTo === "recipient" && <View style={desktopStyles.radioInner} />}
-                      </View>
+                  <View style={[desktopStyles.radioGroup, { flexDirection: "column" }]}>
+                    <Pressable onPress={() => setDeliveredTo("recipient")} style={[desktopStyles.radioOption, { justifyContent: "space-between" }]}>
                       <Text style={desktopStyles.radioLabel}>{ownerName}</Text>
+                      <View style={[desktopStyles.radioOuter, deliveredTo === "recipient" && desktopStyles.radioOuterActive]}>{deliveredTo === "recipient" && <View style={desktopStyles.radioInner} />}</View>
                     </Pressable>
-                    <Pressable
-                      onPress={() => setDeliveredTo("me")}
-                      style={desktopStyles.radioOption}
-                    >
-                      <View
-                        style={[
-                          desktopStyles.radioOuter,
-                          deliveredTo === "me" && desktopStyles.radioOuterActive,
-                        ]}
-                      >
-                        {deliveredTo === "me" && <View style={desktopStyles.radioInner} />}
-                      </View>
+                    <Pressable onPress={() => setDeliveredTo("me")} style={[desktopStyles.radioOption, { justifyContent: "space-between" }]}>
                       <Text style={desktopStyles.radioLabel}>My home</Text>
+                      <View style={[desktopStyles.radioOuter, deliveredTo === "me" && desktopStyles.radioOuterActive]}>{deliveredTo === "me" && <View style={desktopStyles.radioInner} />}</View>
                     </Pressable>
                   </View>
                 </View>
@@ -1113,14 +895,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
                 <View style={desktopStyles.fieldBlock}>
                   <Text style={desktopStyles.fieldLabel}>Add a note</Text>
                   <View style={desktopStyles.noteField}>
-                    <TextInput
-                      value={note}
-                      onChangeText={setNote}
-                      placeholder="Here's a little gift to make your day better! 🎉"
-                      placeholderTextColor="#B1A6C4"
-                      multiline
-                      style={desktopStyles.noteInput}
-                    />
+                    <TextInput value={note} onChangeText={setNote} placeholder="Here's a little gift to make your day better! 🎉" placeholderTextColor="#B1A6C4" multiline style={desktopStyles.noteInput} />
                     <Text style={desktopStyles.charCounter}>
                       {remainingChars}/{NOTE_LIMIT}
                     </Text>
@@ -1128,25 +903,11 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
                 </View>
 
                 <View style={desktopStyles.fieldBlock}>
-                  <Text style={desktopStyles.fieldLabel}>Where did you buy this?</Text>
+                  <Text style={[desktopStyles.fieldLabel, {fontSize: 20, color:'#1C1C1C', fontFamily:'Nunito_700Bold' }]}>Where did you buy this?</Text>
                   <View style={desktopStyles.storeRow}>
-                    <Pressable
-                      onPress={() => setStoreOption("suggested")}
-                      disabled={!buyUrl}
-                      style={[
-                        desktopStyles.storeOption,
-                        storeOption === "suggested" && desktopStyles.storeOptionActive,
-                        !buyUrl && desktopStyles.storeOptionDisabled,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          desktopStyles.storeOptionText,
-                          storeOption === "suggested" && desktopStyles.storeOptionTextActive,
-                        ]}
-                      >
-                        {storeDisplayName.toUpperCase()}
-                      </Text>
+                    <Pressable onPress={() => setStoreOption("suggested")} disabled={!buyUrl} style={[desktopStyles.storeOption, storeOption === "suggested" && desktopStyles.storeOptionActive, !buyUrl && desktopStyles.storeOptionDisabled]}>
+                      <View style={[{...desktopStyles.radioOuter, position:'absolute', top: 8, right: 8, width: 20, height: 20}, storeOption === "suggested" && desktopStyles.radioOuterActive]}>{storeOption === "suggested" && <View style={desktopStyles.radioInner} />}</View>
+                      <Text style={[desktopStyles.storeOptionText, storeOption === "suggested" && desktopStyles.storeOptionTextActive]}>{storeDisplayName.toUpperCase()}</Text>
                     </Pressable>
                     <Pressable
                       onPress={() => {
@@ -1155,32 +916,17 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
                           setStoreName("");
                         }
                       }}
-                      style={[
-                        desktopStyles.storeOption,
-                        storeOption === "custom" && desktopStyles.storeOptionActive,
-                      ]}
+                      style={[desktopStyles.storeOption, storeOption === "custom" && desktopStyles.storeOptionActive]}
                     >
-                      <Text
-                        style={[
-                          desktopStyles.storeOptionText,
-                          storeOption === "custom" && desktopStyles.storeOptionTextActive,
-                        ]}
-                      >
-                        Another store
-                      </Text>
+                      <View style={[{...desktopStyles.radioOuter, position:'absolute', top: 8, right: 8, width: 20, height: 20}, storeOption === "custom" && desktopStyles.radioOuterActive]}>{storeOption === "custom" && <View style={desktopStyles.radioInner} />}</View>
+                      <Text style={[desktopStyles.storeOptionText, storeOption === "custom" && desktopStyles.storeOptionTextActive]}>Another store</Text>
                     </Pressable>
                   </View>
                   {storeOption === "custom" && (
                     <View style={desktopStyles.inputField}>
                       <Text style={desktopStyles.inputLabel}>Store name</Text>
                       <View style={desktopStyles.inputWrapper}>
-                        <TextInput
-                          value={storeName}
-                          onChangeText={setStoreName}
-                          placeholder="Macy's"
-                          placeholderTextColor="#B1A6C4"
-                          style={desktopStyles.textInput}
-                        />
+                        <TextInput value={storeName} onChangeText={setStoreName} placeholder="Macy's" placeholderTextColor="#B1A6C4" style={desktopStyles.textInput} />
                       </View>
                     </View>
                   )}
@@ -1189,31 +935,16 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
                 <View style={desktopStyles.fieldBlock}>
                   <Text style={desktopStyles.inputLabel}>Order number (if known)</Text>
                   <View style={desktopStyles.inputWrapper}>
-                    <TextInput
-                      value={orderNumber}
-                      onChangeText={setOrderNumber}
-                      placeholder="#123456789"
-                      placeholderTextColor="#B1A6C4"
-                      style={desktopStyles.textInput}
-                    />
+                    <TextInput value={orderNumber} onChangeText={setOrderNumber} placeholder="#123456789" placeholderTextColor="#B1A6C4" style={desktopStyles.textInput} />
                   </View>
                 </View>
 
                 <View style={desktopStyles.formActions}>
-                  <Pressable style={desktopStyles.backButton} onPress={onCloseBuyNowForm}>
+                  <Pressable style={[desktopStyles.backButton, { flex: 1, height: 49.57, borderRadius: 8.26 }]} onPress={onCloseBuyNowForm}>
                     <Text style={desktopStyles.backButtonText}>Back</Text>
                   </Pressable>
-                  <Pressable
-                    onPress={onSubmit}
-                    disabled={!canSubmit}
-                    style={[
-                      desktopStyles.submitButton,
-                      (!canSubmit || submitting) && desktopStyles.submitButtonDisabled,
-                    ]}
-                  >
-                    <Text style={desktopStyles.submitButtonText}>
-                      {submitting ? "Submitting…" : "Submit"}
-                    </Text>
+                  <Pressable onPress={onSubmit} disabled={!canSubmit} style={[desktopStyles.submitButton, { flex: 1, height: 49.57, borderRadius: 8.26 }, (!canSubmit || submitting) && desktopStyles.submitButtonDisabled]}>
+                    <Text style={desktopStyles.submitButtonText}>{submitting ? "Submitting…" : "Submit"}</Text>
                   </Pressable>
                 </View>
               </View>
@@ -1233,51 +964,38 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
               <Ionicons name="chevron-back" size={18} color={COLORS.purple} />
               <Text style={desktopStyles.backPillText}>Back</Text>
             </Pressable>
-            <Text style={desktopStyles.breadcrumbText}>
-              Home / {listTitle} / Gift detail
-            </Text>
+            <Text style={desktopStyles.breadcrumbText}>Home / {listTitle} / Gift detail</Text>
           </View>
 
           <View style={desktopStyles.columns}>
             <View style={desktopStyles.productSection}>
-              <View style={desktopStyles.productImageContainer}>
-                <Image
-                  source={item.image_url ? { uri: item.image_url } : FALLBACK_IMAGE}
-                  style={desktopStyles.productImage}
-                  resizeMode="contain"
-                />
+              <View style={[desktopStyles.productImageContainer]}>
+                <Image source={item.image_url ? { uri: item.image_url } : FALLBACK_IMAGE} style={desktopStyles.productImage} resizeMode="cover" />
               </View>
               <View style={desktopStyles.productBody}>
                 <View style={desktopStyles.productInfo}>
-                  <Text style={desktopStyles.productTitle}>{item.name}</Text>
-                  {price && <Text style={desktopStyles.productPrice}>{price}</Text>}
-                  <Text style={desktopStyles.productMeta}>
-                    Quantity: {String(item.quantity ?? 1).padStart(2, "0")}
+                  <Text numberOfLines={4} style={desktopStyles.productTitle}>
+                    {item.name}
                   </Text>
-                  {item.description && (
+                  <Text style={desktopStyles.productPrice}>{price ? price : "Price : N/A"}</Text>
+                  <Text style={desktopStyles.productMeta}>Quantity: {String(item.quantity ?? 1).padStart(2, "0")}</Text>
+                  <View style={{ rowGap: 12 }}>
+                    <Text style={desktopStyles.productDescriptionTitle}>Description</Text>
+                    <Text style={desktopStyles.productDescription}>{item.description ? item.description : "No description available"}</Text>
+                  </View>
+                  {/* {item.description && (
                     <Text style={desktopStyles.productDescription}>{item.description}</Text>
-                  )}
+                  )} */}
                 </View>
                 <View style={desktopStyles.productActions}>
-                  <Pressable
-                    onPress={onBuyNow}
-                    disabled={!buyUrl}
-                    style={[
-                      desktopStyles.primaryButton,
-                      !buyUrl && desktopStyles.primaryButtonDisabled,
-                    ]}
-                  >
+                  <Pressable onPress={onBuyNow} disabled={!buyUrl} style={[desktopStyles.primaryButton, !buyUrl && desktopStyles.primaryButtonDisabled]}>
                     <Text style={desktopStyles.primaryButtonText}>Buy now</Text>
                   </Pressable>
                   <Pressable style={desktopStyles.secondaryButton} onPress={onIWantThisToo}>
                     <Text style={desktopStyles.secondaryButtonText}>I want this too</Text>
                   </Pressable>
                 </View>
-                {available <= 0 && (
-                  <Text style={desktopStyles.notice}>
-                    This gift has already been fully claimed.
-                  </Text>
-                )}
+                {available <= 0 && <Text style={desktopStyles.notice}>This gift has already been fully claimed.</Text>}
               </View>
             </View>
           </View>
@@ -1292,23 +1010,11 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
               </View>
               <View style={desktopStyles.moreGrid}>
                 {moreItems.map((entry) => (
-                  <Pressable
-                    key={String(entry._id)}
-                    onPress={() => onSelectItem(String(entry._id))}
-                    style={desktopStyles.moreCard}
-                  >
-                    <Image
-                      source={entry.image_url ? { uri: entry.image_url } : FALLBACK_IMAGE}
-                      style={desktopStyles.moreImage}
-                      resizeMode="cover"
-                    />
+                  <Pressable key={String(entry._id)} onPress={() => onSelectItem(String(entry._id))} style={desktopStyles.moreCard}>
+                    <Image source={entry.image_url ? { uri: entry.image_url } : FALLBACK_IMAGE} style={desktopStyles.moreImage} resizeMode="cover" />
                     <View style={desktopStyles.moreBody}>
                       <Text style={desktopStyles.moreName}>{entry.name}</Text>
-                      {entry.price != null && (
-                        <Text style={desktopStyles.morePrice}>
-                          {formatPrice(entry.price, "AED") ?? ""}
-                        </Text>
-                      )}
+                      {entry.price != null && <Text style={desktopStyles.morePrice}>{formatPrice(entry.price, "AED") ?? ""}</Text>}
                       <Text style={desktopStyles.moreMeta}>
                         {Number(entry.claimed ?? 0)} of {Number(entry.quantity ?? 1)} claimed
                       </Text>
@@ -1333,18 +1039,8 @@ type CopyToMyListSheetProps = {
   onCreateNewList: () => void;
 };
 
-const CopyToMyListSheet: React.FC<CopyToMyListSheetProps> = ({
-  visible,
-  onClose,
-  userId,
-  item,
-  onAdd,
-  onCreateNewList,
-}) => {
-  const myLists = useQuery(
-    api.products.getMyLists,
-    userId ? ({ user_id: userId } as any) : "skip"
-  ) as any[] | undefined;
+const CopyToMyListSheet: React.FC<CopyToMyListSheetProps> = ({ visible, onClose, userId, item, onAdd, onCreateNewList }) => {
+  const myLists = useQuery(api.products.getMyLists, userId ? ({ user_id: userId } as any) : "skip") as any[] | undefined;
   const [selected, setSelected] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const { width } = useWindowDimensions();
@@ -1360,9 +1056,7 @@ const CopyToMyListSheet: React.FC<CopyToMyListSheetProps> = ({
   if (!visible || !item) return null;
 
   const toggle = (id: string) => {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((value) => value !== id) : [...prev, id]
-    );
+    setSelected((prev) => (prev.includes(id) ? prev.filter((value) => value !== id) : [...prev, id]));
   };
 
   const handleAdd = async () => {
@@ -1388,8 +1082,8 @@ const CopyToMyListSheet: React.FC<CopyToMyListSheetProps> = ({
         onPress={onClose}
         style={{
           flex: 1,
-          backgroundColor: 'rgba(0,0,0,0.35)',
-          ...(isDesktop ? { justifyContent: 'center', alignItems: 'center', padding: 24 } : {}),
+          backgroundColor: "rgba(0,0,0,0.35)",
+          ...(isDesktop ? { justifyContent: "center", alignItems: "center", padding: 24 } : {}),
         }}
       >
         <Pressable
@@ -1397,32 +1091,32 @@ const CopyToMyListSheet: React.FC<CopyToMyListSheetProps> = ({
           style={
             isDesktop
               ? {
-                  backgroundColor: '#FFFFFF',
+                  backgroundColor: "#FFFFFF",
                   borderRadius: 24,
                   paddingHorizontal: 24,
                   paddingTop: 18,
                   paddingBottom: 24,
-                  width: '92%',
+                  width: "92%",
                   maxWidth: 640,
-                  maxHeight: '80%',
-                  shadowColor: '#15072C',
+                  maxHeight: "80%",
+                  shadowColor: "#15072C",
                   shadowOpacity: 0.08,
                   shadowRadius: 24,
                   shadowOffset: { width: 0, height: 8 },
                   elevation: 8,
                 }
               : {
-                  position: 'absolute',
+                  position: "absolute",
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  backgroundColor: '#FFFFFF',
+                  backgroundColor: "#FFFFFF",
                   borderTopLeftRadius: 24,
                   borderTopRightRadius: 24,
                   paddingHorizontal: 20,
                   paddingTop: 14,
                   paddingBottom: 20,
-                  maxHeight: '80%',
+                  maxHeight: "80%",
                 }
           }
         >
@@ -1430,20 +1124,20 @@ const CopyToMyListSheet: React.FC<CopyToMyListSheetProps> = ({
             <Pressable onPress={onClose}>
               <View
                 style={{
-                  alignSelf: 'center',
+                  alignSelf: "center",
                   width: 44,
                   height: 5,
                   borderRadius: 3,
-                  backgroundColor: '#E2DAF0',
+                  backgroundColor: "#E2DAF0",
                   marginBottom: 12,
                 }}
               />
             </Pressable>
           )}
-          <Text style={{ color: '#1C0335', fontSize: 24, fontFamily: 'Nunito_700Bold' }}>Copy Item to your list</Text>
-          <Text style={{ color: '#1C0335', marginTop: 6 , fontFamily: 'Nunito_400Regular'}}>Choose a list to add this item to</Text>
+          <Text style={{ color: "#1C0335", fontSize: 24, fontFamily: "Nunito_700Bold" }}>Copy Item to your list</Text>
+          <Text style={{ color: "#1C0335", marginTop: 6, fontFamily: "Nunito_400Regular" }}>Choose a list to add this item to</Text>
 
-          <ScrollView  showsVerticalScrollIndicator={false}  style={sheetStyles.list} contentContainerStyle={{ paddingBottom: 16 }}>
+          <ScrollView showsVerticalScrollIndicator={false} style={sheetStyles.list} contentContainerStyle={{ paddingBottom: 16 }}>
             {loading ? (
               <View style={sheetStyles.emptyState}>
                 <Text style={sheetStyles.emptyStateText}>Loading your lists…</Text>
@@ -1454,31 +1148,22 @@ const CopyToMyListSheet: React.FC<CopyToMyListSheetProps> = ({
               </View>
             ) : (
               lists.map((entry) => {
-                const occasion =  entry?.occasion ? (occasionObj as any)[String(entry?.occasion)] : occasionObj["birthday"]
+                const occasion = entry?.occasion ? (occasionObj as any)[String(entry?.occasion)] : occasionObj["birthday"];
                 const id = String(entry._id);
                 const checked = selected.includes(id);
                 return (
-                  <Pressable
-                    key={id}
-                    onPress={() => toggle(id)}
-                    style={{...sheetStyles.listItem, borderLeftWidth:4, borderColor: occasion?.borderColor}}
-                  >
+                  <Pressable key={id} onPress={() => toggle(id)} style={{ ...sheetStyles.listItem, borderLeftWidth: 4, borderColor: occasion?.borderColor }}>
                     <View style={sheetStyles.listLeft}>
                       <View style={sharedStyles.occasionIconContainer}>
-                        <Image source={occasion.mobileIcon}/>
+                        <Image source={occasion.mobileIcon} />
                       </View>
-                      <View style={{width:'70%'}}>
-                        <Text numberOfLines={1} style={sheetStyles.listTitle}>{entry.title || "Untitled list"}</Text>
+                      <View style={{ width: "70%" }}>
+                        <Text numberOfLines={1} style={sheetStyles.listTitle}>
+                          {entry.title || "Untitled list"}
+                        </Text>
                       </View>
                     </View>
-                    <View
-                      style={[
-                        sheetStyles.checkbox,
-                        checked && sheetStyles.checkboxChecked,
-                      ]}
-                    >
-                      {checked && <Ionicons name="checkmark" size={16} color="#FFFFFF" />}
-                    </View>
+                    <View style={[sheetStyles.checkbox, checked && sheetStyles.checkboxChecked]}>{checked && <Ionicons name="checkmark" size={16} color="#FFFFFF" />}</View>
                   </Pressable>
                 );
               })
@@ -1486,17 +1171,8 @@ const CopyToMyListSheet: React.FC<CopyToMyListSheetProps> = ({
           </ScrollView>
 
           <View style={sheetStyles.actions}>
-            <Pressable
-              onPress={handleAdd}
-              disabled={selected.length === 0 || saving}
-              style={[
-                sheetStyles.primary,
-                (selected.length === 0 || saving) && sheetStyles.primaryDisabled,
-              ]}
-            >
-              <Text style={sheetStyles.primaryText}>
-                {saving ? "Adding…" : "Add to selected lists"}
-              </Text>
+            <Pressable onPress={handleAdd} disabled={selected.length === 0 || saving} style={[sheetStyles.primary, (selected.length === 0 || saving) && sheetStyles.primaryDisabled]}>
+              <Text style={sheetStyles.primaryText}>{saving ? "Adding…" : "Add to selected lists"}</Text>
             </Pressable>
             <Pressable onPress={onCreateNewList} style={sheetStyles.secondary}>
               <Text style={sheetStyles.secondaryText}>Create a new list</Text>
@@ -1549,10 +1225,10 @@ const mobileStyles = StyleSheet.create({
   },
   header: {
     minHeight: 108,
-    justifyContent:'flex-end'
+    justifyContent: "flex-end",
     // paddingBottom: 16,
   },
-   headerContent: {
+  headerContent: {
     paddingHorizontal: 16,
   },
   navigation: {
@@ -1561,9 +1237,8 @@ const mobileStyles = StyleSheet.create({
     gap: 16,
     paddingVertical: 16,
   },
-  
-  backButton: {
-  },
+
+  backButton: {},
   headerTitle: {
     flex: 1,
     color: "#FFFFFF",
@@ -1574,7 +1249,7 @@ const mobileStyles = StyleSheet.create({
     paddingBottom: 32,
     backgroundColor: "#FFFFFF",
   },
-  scrollBackgroundColor : {
+  scrollBackgroundColor: {
     backgroundColor: "#FFFFFF",
   },
   productCard: {
@@ -1590,28 +1265,28 @@ const mobileStyles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontFamily: "Nunito_700Bold",
     fontSize: 23,
-    letterSpacing: 0
+    letterSpacing: 0,
   },
   productPrice: {
-    color: '#1C0335',
+    color: "#1C0335",
     fontFamily: "Nunito_900Black",
     fontSize: 16,
     marginTop: 23,
   },
   productMeta: {
-    color: '#007AFF',
+    color: "#007AFF",
     fontFamily: "Nunito_700Bold",
     marginTop: 16,
-    fontSize: 14
+    fontSize: 14,
   },
 
   productDescription: {
-    color: '#8E8E93',
+    color: "#8E8E93",
     marginTop: 16,
     lineHeight: 22,
     fontFamily: "Nunito_500Medium",
     letterSpacing: -0.1,
-    fontSize: 13
+    fontSize: 13,
   },
   actionRow: {
     flexDirection: "row",
@@ -1665,21 +1340,21 @@ const mobileStyles = StyleSheet.create({
   },
   didYouBuyThisGiftContainer: {
     // backgroundColor:'red'
-    paddingVertical: 16
+    paddingVertical: 16,
   },
   didYouBuyThisGiftText: {
-    textAlign:'center',
-    color: '#1C1C1C',
+    textAlign: "center",
+    color: "#1C1C1C",
     fontFamily: "Nunito_700Bold",
     fontSize: 20,
   },
-  didYouBuyThisGiftSeparator: {backgroundColor:'#FFFFFF' , height:3 },
+  didYouBuyThisGiftSeparator: { backgroundColor: "#FFFFFF", height: 3 },
 
   switchRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: 12
+    padding: 12,
   },
   sectionTitle: {
     color: COLORS.textPrimary,
@@ -1697,7 +1372,7 @@ const mobileStyles = StyleSheet.create({
     marginBottom: 8,
   },
   stepper: {
-    backgroundColor:'#F2F2F7',
+    backgroundColor: "#F2F2F7",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -1734,7 +1409,7 @@ const mobileStyles = StyleSheet.create({
   radioRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent:'space-between',
+    justifyContent: "space-between",
     gap: 12,
   },
   radioOuter: {
@@ -1742,8 +1417,8 @@ const mobileStyles = StyleSheet.create({
     height: 24,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#D1D1D6',
-    backgroundColor:"#ffff",
+    borderColor: "#D1D1D6",
+    backgroundColor: "#ffff",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1761,12 +1436,12 @@ const mobileStyles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 6,
-    backgroundColor: '#ffff',
+    backgroundColor: "#ffff",
   },
   radioLabel: {
     color: COLORS.textPrimary,
     fontFamily: "Nunito_700Bold",
-    fontSize: 16
+    fontSize: 16,
   },
   noteField: {
     borderWidth: 1,
@@ -1774,7 +1449,6 @@ const mobileStyles = StyleSheet.create({
     borderRadius: 8,
     padding: 14,
     minHeight: 110,
-    
   },
   noteInput: {
     color: COLORS.textPrimary,
@@ -1800,7 +1474,7 @@ const mobileStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 10,
-    rowGap: 10
+    rowGap: 10,
   },
   storeOptionActive: {
     borderColor: COLORS.purple,
@@ -1811,7 +1485,7 @@ const mobileStyles = StyleSheet.create({
   },
   storeOptionText: {
     fontSize: 16,
-    color: '#1C1C1C',
+    color: "#1C1C1C",
     fontFamily: "Nunito_700Bold",
     textAlign: "center",
   },
@@ -1822,10 +1496,10 @@ const mobileStyles = StyleSheet.create({
     marginTop: 16,
   },
   inputLabel: {
-    color:  '#AEAEB2',
+    color: "#AEAEB2",
     fontFamily: "Nunito_500Medium",
     marginBottom: 6,
-    fontSize: 16
+    fontSize: 16,
   },
   inputWrapper: {
     borderWidth: 1,
@@ -1847,24 +1521,23 @@ const mobileStyles = StyleSheet.create({
     fontSize: 17.49,
   },
   moreCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 8.16,
+    padding: 8,
+    alignItems: "center",
+    gap: 14,
+    // iOS shadow
+    shadowColor: "#000000",
+    shadowOpacity: 0.1,
+    shadowRadius: 19.73,
+    shadowOffset: { width: 0, height: 0 },
 
-     backgroundColor: "#ffffff",
-      borderRadius: 8.16,
-      padding: 8,
-      alignItems: "center",
-      gap: 14,
-      // iOS shadow
-      shadowColor: "#000000",
-      shadowOpacity: 0.1,  
-      shadowRadius: 19.73,
-      shadowOffset: { width: 0, height: 0 },
-
-      // Android shadow
-      elevation: 8,       
-      width: 175,
+    // Android shadow
+    elevation: 8,
+    width: 175,
   },
   moreImage: {
-    width: '100%',
+    width: "100%",
     height: 88.07,
     borderRadius: 8.16,
     backgroundColor: COLORS.surface,
@@ -1879,22 +1552,22 @@ const mobileStyles = StyleSheet.create({
     fontSize: 14.08,
   },
   morePrice: {
-    color: '#1C0335',
+    color: "#1C0335",
     fontFamily: "Nunito_700Bold",
     fontSize: 11.37,
   },
   moreItemsCardBuyNowButton: {
-    width:'100%',
-    backgroundColor:'#007AFF',
+    width: "100%",
+    backgroundColor: "#007AFF",
     borderRadius: 5.1,
     height: 43,
-    justifyContent:'center',
-    alignItems:'center'
+    justifyContent: "center",
+    alignItems: "center",
   },
-  moreItemsCardBuyNowButtonText:{
+  moreItemsCardBuyNowButtonText: {
     fontFamily: "Nunito_700Bold",
     fontSize: 16.32,
-    color:'#ffff'
+    color: "#ffff",
   },
   moreMeta: {
     color: COLORS.textSecondary,
@@ -1933,7 +1606,7 @@ const mobileStyles = StyleSheet.create({
   submitButtonText: {
     color: "#FFFFFF",
     fontFamily: "Nunito_700Bold",
-    fontSize: 18,
+    fontSize: 16.52,
   },
 }) as Record<string, any>;
 
@@ -2001,11 +1674,11 @@ const desktopStyles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontFamily: "Nunito_700Bold",
     fontSize: 24,
-    marginBottom: 24,
+    marginBottom: 32,
   },
   formActions: {
     flexDirection: "row",
-    gap: 12,
+    gap: 100,
     marginTop: 32,
     justifyContent: "space-between",
   },
@@ -2023,7 +1696,7 @@ const desktopStyles = StyleSheet.create({
   backButtonText: {
     color: COLORS.purple,
     fontFamily: "Nunito_700Bold",
-    fontSize: 16,
+    fontSize: 16.52,
   },
   productSection: {
     flexDirection: "row",
@@ -2040,16 +1713,16 @@ const desktopStyles = StyleSheet.create({
     minWidth: 0,
   },
   productImageContainer: {
-    width: 400,
+    width: 450,
     height: 400,
     flexShrink: 1,
-    borderRadius: 20,
+    borderRadius: 12,
     backgroundColor: COLORS.background,
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
     minWidth: 300,
-    maxWidth: 400,
+    maxWidth: 450,
     alignSelf: "stretch",
   },
   productImage: {
@@ -2058,56 +1731,57 @@ const desktopStyles = StyleSheet.create({
   },
   productBody: {
     flex: 1,
-    gap: 24,
-    justifyContent: "flex-start",
-    minWidth: 200,
+    justifyContent: "space-around",
+    height: 400,
     paddingLeft: 0,
     flexShrink: 1,
   },
   productInfo: {
     gap: 0,
     flex: 1,
+    justifyContent: "space-around",
   },
   productTitle: {
-    color: COLORS.textPrimary,
-    fontFamily: "Nunito_700Bold",
-    fontSize: 28,
-    lineHeight: 36,
-    marginTop: 82,
-    marginBottom: 4,
-  },
-  productPrice: {
-    color: COLORS.accent,
+    color: "#1C0335",
     fontFamily: "Nunito_700Bold",
     fontSize: 24,
-    marginBottom: 8,
+    lineHeight: 28,
+  },
+  productPrice: {
+    color: "#DB9C28",
+    fontFamily: "Nunito_700Bold",
+    fontSize: 28,
   },
   productMeta: {
-    color: COLORS.textSecondary,
+    color: "#1C0335",
     fontFamily: "Nunito_600SemiBold",
-    fontSize: 16,
-    marginBottom: 12,
+    fontSize: 22,
+  },
+  productDescriptionTitle: {
+    color: "#000000",
+    lineHeight: 24,
+    fontFamily: "Nunito_700Bold",
+    fontSize: 20,
   },
   productDescription: {
-    color: COLORS.textSecondary,
+    color: "#000000",
     lineHeight: 24,
-    fontFamily: "Nunito_500Medium",
+    fontFamily: "Nunito_400Regular",
     fontSize: 16,
-    marginBottom: 4,
+    marginBottom: 39,
   },
   productActions: {
     flexDirection: "row",
-    gap: 12,
-    marginTop: 24,
+    gap: 24,
     width: "100%",
   },
   primaryButton: {
     height: 48,
-    borderRadius: 12,
+    borderRadius: 8,
     backgroundColor: COLORS.purple,
     alignItems: "center",
     justifyContent: "center",
-    maxWidth: 214,
+    minWidth: 214,
     flex: 1,
   },
   primaryButtonDisabled: {
@@ -2120,13 +1794,13 @@ const desktopStyles = StyleSheet.create({
   },
   secondaryButton: {
     height: 48,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 2,
     borderColor: COLORS.purple,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: COLORS.background,
-    maxWidth: 214,
+    minWidth: 214,
     flex: 1,
   },
   secondaryButtonText: {
@@ -2184,19 +1858,17 @@ const desktopStyles = StyleSheet.create({
     marginTop: 20,
   },
   fieldLabel: {
-    color: COLORS.textPrimary,
-    fontFamily: "Nunito_600SemiBold",
+    color: "#AEAEB2",
+    fontSize: 16,
+    fontFamily: "Nunito_700Bold",
     marginBottom: 10,
   },
   stepper: {
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 14,
-    paddingHorizontal: 14,
+    justifyContent: "space-between",
     height: 60,
-    gap: 16,
+    width: 160
   },
   stepperButton: {
     width: 46,
@@ -2231,31 +1903,34 @@ const desktopStyles = StyleSheet.create({
     gap: 10,
   },
   radioOuter: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    width: 24,
+    height: 24,
+    borderRadius: 100,
     borderWidth: 2,
-    borderColor: COLORS.border,
     alignItems: "center",
     justifyContent: "center",
+    borderColor: "#AEAEB2",
   },
   radioOuterActive: {
-    borderColor: COLORS.purple,
+    backgroundColor: "#330065",
+    borderColor: "#330065",
   },
   radioInner: {
-    width: 10,
-    height: 10,
+    width: 12,
+    height: 12,
     borderRadius: 5,
-    backgroundColor: COLORS.purple,
+    backgroundColor: '#FFFFFF',
+  
   },
   radioLabel: {
-    color: COLORS.textPrimary,
-    fontFamily: "Nunito_600SemiBold",
+    color: "#1A0034",
+    fontSize: 16,
+    fontFamily: "Nunito_700Bold",
   },
   noteField: {
     borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 16,
+    borderColor: '#AEAEB2',
+    borderRadius: 8,
     padding: 16,
     minHeight: 140,
     backgroundColor: COLORS.background,
@@ -2264,6 +1939,7 @@ const desktopStyles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontFamily: "Nunito_500Medium",
     minHeight: 80,
+    outlineColor:'transparent',
   },
   charCounter: {
     color: "#B1A6C4",
@@ -2272,21 +1948,22 @@ const desktopStyles = StyleSheet.create({
   },
   storeRow: {
     flexDirection: "row",
-    gap: 12,
+    gap: 22,
     marginTop: 12,
   },
   storeOption: {
     flex: 1,
-    borderRadius: 14,
-    borderWidth: 1,
+    borderRadius: 12,
+    borderWidth: 2,
     borderColor: COLORS.border,
     paddingVertical: 16,
     alignItems: "center",
-    backgroundColor: COLORS.background,
+    justifyContent: "center",
+    height: 100,
+    position: "relative",
   },
   storeOptionActive: {
-    borderColor: COLORS.purple,
-    backgroundColor: "#ECE4FF",
+    borderColor: '#330065',
   },
   storeOptionDisabled: {
     opacity: 0.4,
@@ -2302,14 +1979,14 @@ const desktopStyles = StyleSheet.create({
     marginTop: 14,
   },
   inputLabel: {
-    color: COLORS.textSecondary,
+    color: '#AEAEB2',
     marginBottom: 6,
-    fontFamily: "Nunito_500Medium",
+    fontFamily: "Nunito_700Bold",
   },
   inputWrapper: {
     borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 12,
+    borderColor: '#AEAEB2',
+    borderRadius: 8,
     paddingHorizontal: 12,
     height: 52,
     justifyContent: "center",
@@ -2318,6 +1995,7 @@ const desktopStyles = StyleSheet.create({
   textInput: {
     color: COLORS.textPrimary,
     fontFamily: "Nunito_500Medium",
+    outlineColor:'transparent',
   },
   submitButton: {
     height: 48,
@@ -2442,9 +2120,9 @@ const modalStyles = StyleSheet.create({
     gap: 6,
   },
   redirectLabel: {
-    color: '#1C0335',
+    color: "#1C0335",
     fontFamily: "Nunito_700Bold",
-    fontSize: 19.6
+    fontSize: 19.6,
   },
   redirectHost: {
     color: COLORS.textPrimary,
@@ -2452,7 +2130,7 @@ const modalStyles = StyleSheet.create({
     fontSize: 24,
   },
   countdown: {
-    color: '#1C0335',
+    color: "#1C0335",
     fontFamily: "Nunito_700Bold",
     fontSize: 39.2,
   },
@@ -2531,7 +2209,7 @@ const sheetStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    height: 56
+    height: 56,
   },
   listLeft: {
     flexDirection: "row",
@@ -2572,7 +2250,7 @@ const sheetStyles = StyleSheet.create({
   },
   actions: {
     gap: 12,
-    paddingTop: 16
+    paddingTop: 16,
   },
   primary: {
     height: 56,
