@@ -1347,6 +1347,8 @@ const CopyToMyListSheet: React.FC<CopyToMyListSheetProps> = ({
   ) as any[] | undefined;
   const [selected, setSelected] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const { width } = useWindowDimensions();
+  const isDesktop = Platform.OS === "web" && width >= DESKTOP_BREAKPOINT;
 
   useEffect(() => {
     if (!visible) {
@@ -1382,11 +1384,62 @@ const CopyToMyListSheet: React.FC<CopyToMyListSheetProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable onPress={onClose} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' }}>
-        <Pressable onPress={(e) => e.stopPropagation()} style={{ position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 20, maxHeight: '80%' }}>
-          <Pressable onPress={onClose}>
-            <View style={{ alignSelf: 'center', width: 44, height: 5, borderRadius: 3, backgroundColor: '#E2DAF0', marginBottom: 12 }} />
-          </Pressable>
+      <Pressable
+        onPress={onClose}
+        style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.35)',
+          ...(isDesktop ? { justifyContent: 'center', alignItems: 'center', padding: 24 } : {}),
+        }}
+      >
+        <Pressable
+          onPress={(e) => e.stopPropagation()}
+          style={
+            isDesktop
+              ? {
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: 24,
+                  paddingHorizontal: 24,
+                  paddingTop: 18,
+                  paddingBottom: 24,
+                  width: '92%',
+                  maxWidth: 640,
+                  maxHeight: '80%',
+                  shadowColor: '#15072C',
+                  shadowOpacity: 0.08,
+                  shadowRadius: 24,
+                  shadowOffset: { width: 0, height: 8 },
+                  elevation: 8,
+                }
+              : {
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: '#FFFFFF',
+                  borderTopLeftRadius: 24,
+                  borderTopRightRadius: 24,
+                  paddingHorizontal: 20,
+                  paddingTop: 14,
+                  paddingBottom: 20,
+                  maxHeight: '80%',
+                }
+          }
+        >
+          {!isDesktop && (
+            <Pressable onPress={onClose}>
+              <View
+                style={{
+                  alignSelf: 'center',
+                  width: 44,
+                  height: 5,
+                  borderRadius: 3,
+                  backgroundColor: '#E2DAF0',
+                  marginBottom: 12,
+                }}
+              />
+            </Pressable>
+          )}
           <Text style={{ color: '#1C0335', fontSize: 24, fontFamily: 'Nunito_700Bold' }}>Copy Item to your list</Text>
           <Text style={{ color: '#1C0335', marginTop: 6 , fontFamily: 'Nunito_400Regular'}}>Choose a list to add this item to</Text>
 
@@ -1401,7 +1454,7 @@ const CopyToMyListSheet: React.FC<CopyToMyListSheetProps> = ({
               </View>
             ) : (
               lists.map((entry) => {
-                const occasion =  entry?.occasion ? occasionObj[String(entry?.occasion)] : occasionObj["birthday"]
+                const occasion =  entry?.occasion ? (occasionObj as any)[String(entry?.occasion)] : occasionObj["birthday"]
                 const id = String(entry._id);
                 const checked = selected.includes(id);
                 return (
