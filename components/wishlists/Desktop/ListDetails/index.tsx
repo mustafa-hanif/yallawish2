@@ -33,7 +33,7 @@ interface ListDetailsProps {
   currentTab?: string;
 }
 
-export default function ListDetails({  list, items, onRemoveItem, onUpdateQuantity, currentTab }: ListDetailsProps) {
+export default function ListDetails({ list, items, onRemoveItem, onUpdateQuantity, currentTab }: ListDetailsProps) {
   type SortOption = "default" | "priceAsc" | "priceDesc" | "newest" | "oldest";
 
   const loading = false;
@@ -124,8 +124,15 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
   };
 
   const handlePressEditDetails = () => {
-     router.push({ pathname: "/create-list-step2", params: { listId: String(list._id) } })
-  }
+    router.push({ pathname: "/create-list-step2", params: { listId: String(list._id) } });
+  };
+
+  const handleClickSettings = () => {
+    router.push({
+      pathname: "/create-list-step3",
+      params: { listId: String(list._id), isEdit: String(true) },
+    });
+  };
   return (
     <View style={styles.container}>
       <ImageBackground source={image_url ? { uri: image_url } : require("@/assets/images/nursery.png")} resizeMode="cover" style={styles.header}>
@@ -138,7 +145,7 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
                 <Text style={styles.privacyDesc}>{desc}</Text>
               </View>
               {currentTab === "my-events" && (
-                <Pressable style={{ alignSelf: "flex-end" }}>
+                <Pressable style={{ alignSelf: "flex-end" }} onPress={handleClickSettings}>
                   <Ionicons name="settings-sharp" size={18} color="#007AFF" />
                 </Pressable>
               )}
@@ -150,7 +157,7 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
               <View>
                 <Image resizeMode="contain" style={{ width: 56, height: 65 }} source={require("@/assets/images/baloons.png")} />
               </View>
-              <View style={{  maxWidth: 550, }}>
+              <View style={{ maxWidth: 550 }}>
                 <Text numberOfLines={1} style={styles.listTitle}>
                   {list.title}
                 </Text>
@@ -199,30 +206,26 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
               <Text style={styles.itemCountText}>{totalItems}</Text>
             </View>
           </View>
-            <View style={{flexDirection:'row', alignItems:'center', gap:12}}>
-              {currentTab === "my-events" && (
-              <Pressable
-                style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}
-                onPress={() => setShowAddGift(true)}
-              >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+            {currentTab === "my-events" && (
+              <Pressable style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }} onPress={() => setShowAddGift(true)}>
                 <PlusCircle size={20} color="#36006C" />
-                <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 16, color: "#421A95" }}>
-                  Add more items
-                </Text>
+                <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 16, color: "#421A95" }}>Add more items</Text>
               </Pressable>
-              )}
-              <Pressable style={styles.sortAndFilterButton}  
-                onPress={() => {
+            )}
+            <Pressable
+              style={styles.sortAndFilterButton}
+              onPress={() => {
                 setTempSortBy(sortBy);
                 setTempFilterClaimed(filterClaimed);
                 setTempFilterUnclaimed(filterUnclaimed);
                 setShowSortSheet(true);
-              }}>
-                <Image style={styles.filterIcon} source={require("@/assets/images/filterIcon.png")} />
-                <Text style={styles.sortAndFilterText}>Sort & Filter</Text>
-              </Pressable>
-            </View>
-
+              }}
+            >
+              <Image style={styles.filterIcon} source={require("@/assets/images/filterIcon.png")} />
+              <Text style={styles.sortAndFilterText}>Sort & Filter</Text>
+            </Pressable>
+          </View>
         </View>
       </View>
       {/* Items Section */}
@@ -272,12 +275,7 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
         />
       </View>
       {/* Sort & Filter Modal */}
-      <Modal
-        visible={showSortSheet}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowSortSheet(false)}
-      >
+      <Modal visible={showSortSheet} transparent animationType="fade" onRequestClose={() => setShowSortSheet(false)}>
         <Pressable style={styles.backdrop} onPress={() => setShowSortSheet(false)} />
         <View style={styles.sortSheetContainer}>
           <Pressable onPress={() => setShowSortSheet(false)}>
@@ -300,9 +298,7 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
                 { key: "oldest", label: "Oldest to Most Recent" },
               ].map((o) => (
                 <Pressable key={o.key} style={styles.radioRow} onPress={() => setTempSortBy(o.key as SortOption)}>
-                  <View style={[styles.radioOuter, tempSortBy === o.key && styles.radioOuterActive]}>
-                    {tempSortBy === o.key && <View style={styles.radioInner} />}
-                  </View>
+                  <View style={[styles.radioOuter, tempSortBy === o.key && styles.radioOuterActive]}>{tempSortBy === o.key && <View style={styles.radioInner} />}</View>
                   <Text style={styles.radioLabel}>{o.label}</Text>
                 </Pressable>
               ))}
@@ -315,16 +311,12 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
               </View>
 
               <Pressable style={styles.radioRow} onPress={() => setTempFilterClaimed((v) => !v)}>
-                <View style={[styles.checkboxBox, tempFilterClaimed && styles.checkboxBoxActive]}>
-                  {tempFilterClaimed && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}
-                </View>
+                <View style={[styles.checkboxBox, tempFilterClaimed && styles.checkboxBoxActive]}>{tempFilterClaimed && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}</View>
                 <Text style={styles.radioLabel}>Claimed</Text>
               </Pressable>
 
               <Pressable style={styles.radioRow} onPress={() => setTempFilterUnclaimed((v) => !v)}>
-                <View style={[styles.checkboxBox, tempFilterUnclaimed && styles.checkboxBoxActive]}>
-                  {tempFilterUnclaimed && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}
-                </View>
+                <View style={[styles.checkboxBox, tempFilterUnclaimed && styles.checkboxBoxActive]}>{tempFilterUnclaimed && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}</View>
                 <Text style={styles.radioLabel}>Unclaimed</Text>
               </Pressable>
             </View>
@@ -348,37 +340,18 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
         </View>
       </Modal>
       {/* Add Gift Modal */}
-      <AddGiftModal
-        visible={showAddGift}
-        onClose={() => setShowAddGift(false)}
-        listId={String(list._id)}
-        onSaved={() => setShowAddGift(false)}
-      />
+      <AddGiftModal visible={showAddGift} onClose={() => setShowAddGift(false)} listId={String(list._id)} onSaved={() => setShowAddGift(false)} />
 
       {/* Item Quick View Modal */}
-      <Modal
-        visible={showItemModal}
-        transparent
-        animationType="fade"
-        onRequestClose={closeItemModal}
-      >
+      <Modal visible={showItemModal} transparent animationType="fade" onRequestClose={closeItemModal}>
         {/* Backdrop that receives outside clicks */}
-        <Pressable
-          onPress={closeItemModal}
-          style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0, backgroundColor: "#00000055" }}
-        />
+        <Pressable onPress={closeItemModal} style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0, backgroundColor: "#00000055" }} />
         {/* Content container ignores outside clicks so backdrop handles them */}
         <View pointerEvents="box-none" style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0, justifyContent: "center", alignItems: "center", padding: 16 }}>
-          <View style={{ width: '90%', maxWidth: "95%", borderRadius: 16, backgroundColor: "#FFFFFF", shadowColor: "#000", shadowOpacity: 0.15, shadowRadius: 10, elevation: 4 }}>
+          <View style={{ width: "90%", maxWidth: "95%", borderRadius: 16, backgroundColor: "#FFFFFF", shadowColor: "#000", shadowOpacity: 0.15, shadowRadius: 10, elevation: 4 }}>
             <View style={{ padding: 24, flexDirection: "row", gap: 20 }}>
-              <View style={{ borderWidth: 0.01, borderColor:'#cebfbfff', width: 269, height: 262, borderRadius: 12, overflow: "hidden", backgroundColor: "#F6F6F6" }}>
-                {selectedItem?.image_url ? (
-                  <Image source={{ uri: selectedItem.image_url }} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
-                ) : (
-                  <View style={{ flex: 1 }} />
-                )}
-              </View>
-              <View style={{ flex: 1 , justifyContent:'center'}}>
+              <View style={{ borderWidth: 0.01, borderColor: "#cebfbfff", width: 269, height: 262, borderRadius: 12, overflow: "hidden", backgroundColor: "#F6F6F6" }}>{selectedItem?.image_url ? <Image source={{ uri: selectedItem.image_url }} style={{ width: "100%", height: "100%" }} resizeMode="cover" /> : <View style={{ flex: 1 }} />}</View>
+              <View style={{ flex: 1, justifyContent: "center" }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                   {(() => {
                     let host: string | null = null;
@@ -388,22 +361,18 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
                     return host ? <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 11, color: "#7A7A7A", textTransform: "lowercase" }}>{host}</Text> : null;
                   })()}
                 </View>
-                <Text numberOfLines={1} style={{ fontFamily: "Nunito_700Bold", fontSize: 24, color: "#1A0034", marginTop: 4 }}>{selectedItem?.name}</Text>
+                <Text numberOfLines={1} style={{ fontFamily: "Nunito_700Bold", fontSize: 24, color: "#1A0034", marginTop: 4 }}>
+                  {selectedItem?.name}
+                </Text>
                 <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 32, color: "#00A0FF", marginTop: 6 }}>AED {Number(selectedItem?.price || 0).toFixed(2)}</Text>
                 <View style={{ flexDirection: "row", gap: 16, marginTop: 8 }}>
-                  {selectedItem?.color ? (
-                    <Text style={{ fontFamily: "Nunito_400Regular", fontSize: 18, color: "#1C0335" }}>Color: {selectedItem.color}</Text>
-                  ) : null}
+                  {selectedItem?.color ? <Text style={{ fontFamily: "Nunito_400Regular", fontSize: 18, color: "#1C0335" }}>Color: {selectedItem.color}</Text> : null}
                   <Text style={{ fontFamily: "Nunito_400Regular", fontSize: 18, color: "#1C0335" }}>Desired: {selectedItem?.quantity ?? 0}</Text>
                   <Text style={{ fontFamily: "Nunito_400Regular", fontSize: 18, color: "#1C0335" }}>Purchased: {selectedItem?.claimed ?? 0}</Text>
                 </View>
 
                 <View style={{ marginTop: 18 }}>
-                  <Pressable
-                    disabled={!selectedItem?.buy_url}
-                    onPress={viewAtStore}
-                    style={{ opacity: selectedItem?.buy_url ? 1 : 0.6, alignSelf: "flex-start", paddingVertical: 10, paddingHorizontal: 28, borderRadius: 100, backgroundColor: "#36006C" }}
-                  >
+                  <Pressable disabled={!selectedItem?.buy_url} onPress={viewAtStore} style={{ opacity: selectedItem?.buy_url ? 1 : 0.6, alignSelf: "flex-start", paddingVertical: 10, paddingHorizontal: 28, borderRadius: 100, backgroundColor: "#36006C" }}>
                     <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 16, color: "#FFFFFF" }}>View at store</Text>
                   </Pressable>
                 </View>
@@ -412,7 +381,6 @@ export default function ListDetails({  list, items, onRemoveItem, onUpdateQuanti
           </View>
         </View>
       </Modal>
-     
     </View>
   );
 }
