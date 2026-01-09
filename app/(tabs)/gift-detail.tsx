@@ -1186,14 +1186,26 @@ const CopyToMyListSheet: React.FC<CopyToMyListSheetProps> = ({ visible, onClose,
               })
             )}
           </ScrollView>
-
-          <View style={sheetStyles.actions}>
+          
+          <View style={[sheetStyles.actions,isDesktop? { flexDirection: 'row', justifyContent:'space-between' } : {} ]}>
+            {isDesktop ? 
+            <>
+            <Pressable onPress={onClose} style={[sheetStyles.secondary, {width: 98, height: 48, justifyContent:'center', alignItems:'center', borderWidth: 1.5, borderColor:'#330065', borderRadius:8}]}>
+              <Text style={[sheetStyles.secondaryText, {fontFamily: "Nunito_700Bold"}]}>Cancel</Text>
+            </Pressable>
+            <Pressable onPress={handleAdd} disabled={selected.length === 0 || saving} style={[sheetStyles.primary, { minWidth:201, height: 48, justifyContent:'center', alignItems:'center', borderRadius:8 }, (selected.length === 0 || saving) && sheetStyles.primaryDisabled]}>
+              <Text style={sheetStyles.primaryText}>{saving ? "Adding…" : "Add to selected lists"}</Text>
+            </Pressable>
+            </> : 
+            <>
             <Pressable onPress={handleAdd} disabled={selected.length === 0 || saving} style={[sheetStyles.primary, (selected.length === 0 || saving) && sheetStyles.primaryDisabled]}>
               <Text style={sheetStyles.primaryText}>{saving ? "Adding…" : "Add to selected lists"}</Text>
             </Pressable>
             <Pressable onPress={onCreateNewList} style={sheetStyles.secondary}>
               <Text style={sheetStyles.secondaryText}>Create a new list</Text>
             </Pressable>
+            
+            </>}
           </View>
         </Pressable>
       </Pressable>
