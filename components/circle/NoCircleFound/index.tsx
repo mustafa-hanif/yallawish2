@@ -9,7 +9,7 @@ export default function NoCircleFound() {
         <Image source={require("@/assets/images/noCircleFound.png")} />
       </View>
       <View>
-        <Image source={require("@/assets/images/noListFoundUsersDesktop.png")} />
+        <Image source={require("@/assets/images/noCircletFound.png")} />
       </View>
       <View>
         <Text style={styles.title}>Your Circle Lives Here</Text>
