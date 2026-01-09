@@ -109,7 +109,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="global"
+        name="circle"
         options={{
           title: "",
           tabBarIcon: ({ color }) => <Image source={require("@/assets/images/global.svg")} style={{ width: 24, height: 24, tintColor: color }} contentFit="contain" />,
