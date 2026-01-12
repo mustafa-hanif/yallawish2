@@ -126,7 +126,7 @@ export default function TabLayout() {
       <Tabs.Screen name="(create-list)" options={{ href: null }} />
       <Tabs.Screen name="create-circle-step1" options={{ href: null }} />
       <Tabs.Screen name="create-circle-step2" options={{ href: null }} />
-
+      <Tabs.Screen name="create-circle-step3" options={{ href: null }} />
       {/* Gift and List journey screens - hidden from tab bar but included in this navigator */}
       {/* <Tabs.Screen
         name="create-list-step1"
