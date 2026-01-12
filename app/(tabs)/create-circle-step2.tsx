@@ -11,7 +11,6 @@ interface FormData {}
 
 const CreateCircleStep2 = () => {
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
-  const [isExpand, setIsExpand] = useState<boolean>(false);
   const [formData, setFormData] = useState<FormData>({});
 
   const encodedReturnTo = returnTo ? String(returnTo) : undefined;
@@ -45,7 +44,7 @@ const CreateCircleStep2 = () => {
       </LinearGradient>
       <ProgressIndicator activeSteps={2} />
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <Pressable style={[styles.expandableButton, isExpand && styles.expandableButtonActive]} onPress={() => setIsExpand(!isExpand)}>
+        <Pressable style={[styles.expandableButton, true && styles.expandableButtonActive]}>
           <View style={styles.expandableContent}>
             <Image source={require("@/assets/images/users.png")} />
             <Text style={styles.expandableText}>Add Existing Friends</Text>
@@ -54,46 +53,82 @@ const CreateCircleStep2 = () => {
             <Entypo name="chevron-down" size={24} color="#1C0335" />
           </View>
         </Pressable>
-        {isExpand && (
-          <View style={styles.expandableSection}>
-            <View style={styles.expandableSearchSection}>
-              <TextInputField label="Search by name or email" icon={<Image source={require("@/assets/images/search.png")} />} />
-              <View style={styles.selectedAndClearContainer}>
-                <Text style={styles.selectedText}>0 friends selected</Text>
-                <Text style={styles.clearText}>Clear All</Text>
-              </View>
-            </View>
-            <View>
-              {friendsArray.map((_, index) => (
-                <View style={[styles.friendItem, index === friendsArray.length - 1 && { borderBottomWidth: 0 }]} key={index}>
-                  <View style={styles.infoContainer}>
-                    <View style={styles.friendProfileAndInitial}>
-                      <Text style={styles.nameInitials}>WS</Text>
-                    </View>
-                    <View>
-                      <Text style={styles.friendName}>Will Smith</Text>
-                      <Text style={styles.friendEmail}>will.smith@gmail.com</Text>
-                    </View>
-                  </View>
-                  <View style={styles.checkButton}>{/* <Feather name="check" size={15} color="#3B0076" /> */}</View>
-                </View>
-              ))}
-              <View style={styles.addSelectedFriendsContainer}>
-                <Pressable
-                  style={[
-                    styles.addSelectedFriendsButton,
-                    // !isFormValid && styles.continueButtonDisabled,
-                  ]}
-                  onPress={handleContinue}
-                  // disabled={!isFormValid}
-                >
-                  <Feather name="check" size={24} color="#3B0076" />
-                  <Text style={styles.addSelectedFriendsButtonText}>Add selected friends</Text>
-                </Pressable>
-              </View>
+        <View style={styles.expandableSection}>
+          <View style={styles.expandableSearchSection}>
+            <TextInputField label="Search by name or email" icon={<Image source={require("@/assets/images/search.png")} />} />
+            <View style={styles.selectedAndClearContainer}>
+              <Text style={styles.selectedText}>0 friends selected</Text>
+              <Text style={styles.clearText}>Clear All</Text>
             </View>
           </View>
-        )}
+          <View>
+            {friendsArray.map((_, index) => (
+              <View style={[styles.friendItem, index === friendsArray.length - 1 && { borderBottomWidth: 0 }]} key={index}>
+                <View style={styles.infoContainer}>
+                  <View style={styles.friendProfileAndInitial}>
+                    <Text style={styles.nameInitials}>WS</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.friendName}>Will Smith</Text>
+                    <Text style={styles.friendEmail}>will.smith@gmail.com</Text>
+                  </View>
+                </View>
+                <View style={styles.checkButton}>{/* <Feather name="check" size={15} color="#3B0076" /> */}</View>
+              </View>
+            ))}
+            <View style={styles.addSelectedFriendsContainer}>
+              <Pressable
+                style={[
+                  styles.addSelectedFriendsButton,
+                  // !isFormValid && styles.continueButtonDisabled,
+                ]}
+                // disabled={!isFormValid}
+              >
+                <Feather name="check" size={24} color="#3B0076" />
+                <Text style={styles.addSelectedFriendsButtonText}>Add selected friends</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+        <Pressable style={[styles.expandableButton, true && { borderRadius: 0, borderTopWidth: 0, borderBottomWidth: 0 }]}>
+          <View style={styles.expandableContent}>
+            <Image source={require("@/assets/images/users.png")} />
+            <Text style={styles.expandableText}>Invite New Friends</Text>
+          </View>
+          <View>
+            <Entypo name="chevron-down" size={24} color="#1C0335" />
+          </View>
+        </Pressable>
+        <View style={styles.expandableSection}>
+          <View style={styles.expandableSearchSection}>
+            <TextInputField label="Email Address or Phone Number" icon={<Image source={require("@/assets/images/search.png")} />} />
+          </View>
+          <View>
+            <View style={styles.addSelectedFriendsContainer}>
+              <Pressable style={styles.primaryButton}>
+                <Text style={styles.primaryButtonText}>Send invite and add to circle</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+        <Pressable style={[styles.expandableButton, true && { borderRadius: 0, borderTopWidth: 0, borderBottomWidth: 0 }]}>
+          <View style={styles.expandableContent}>
+            <Image source={require("@/assets/images/users.png")} />
+            <Text style={styles.expandableText}>Share invite link</Text>
+          </View>
+          <View>
+            <Entypo name="chevron-down" size={24} color="#1C0335" />
+          </View>
+        </Pressable>
+        <View style={[styles.expandableSection, { borderBottomEndRadius: 8, borderBottomStartRadius: 8 }]}>
+          <View>
+            <View style={styles.addSelectedFriendsContainer}>
+              <Pressable style={styles.primaryButton}>
+                <Text style={styles.primaryButtonText}>Copy link to clipboard</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
       </ScrollView>
       <View style={styles.bottomButtons}>
         <Pressable
@@ -180,8 +215,8 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     borderWidth: 1,
     borderTopWidth: 0,
-    borderBottomRightRadius: 8,
-    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 0,
+    borderBottomLeftRadius: 0,
     borderColor: "#AEAEB2",
   },
   expandableSearchSection: {
@@ -291,6 +326,21 @@ const styles = StyleSheet.create({
   },
   addSelectedFriendsButtonText: {
     color: "#3B0076",
+    fontSize: 16,
+    fontFamily: "Nunito_700Bold",
+  },
+  primaryButton: {
+    height: 56,
+    backgroundColor: "#3B0076",
+    borderRadius: 8,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 8,
+  },
+  primaryButtonText: {
+    color: "#ffff",
     fontSize: 16,
     fontFamily: "Nunito_700Bold",
   },
