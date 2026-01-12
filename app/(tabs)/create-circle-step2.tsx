@@ -1,0 +1,297 @@
+import { ProgressIndicator } from "@/components/ProgressIndicator";
+import { TextInputField } from "@/components/TextInputField";
+import { Entypo, Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useState } from "react";
+import { Image, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+interface FormData {}
+
+const CreateCircleStep2 = () => {
+  const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
+  const [isExpand, setIsExpand] = useState<boolean>(false);
+  const [formData, setFormData] = useState<FormData>({});
+
+  const encodedReturnTo = returnTo ? String(returnTo) : undefined;
+  const decodedReturnTo = encodedReturnTo ? decodeURIComponent(encodedReturnTo) : undefined;
+  const friendsArray = Array.from({ length: 10 });
+  const handleBack = () => {
+    if (decodedReturnTo) {
+      router.replace(decodedReturnTo as any);
+      return;
+    }
+    router.back();
+  };
+
+  const handleContinue = () => {
+    router.push({ pathname: "/create-circle-step3" });
+  };
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" />
+      <LinearGradient colors={["#330065", "#45018ad7"]} style={styles.header} locations={[0, 0.7]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 2 }}>
+        <SafeAreaView edges={["top"]}>
+          <View style={styles.headerContent}>
+            <View style={styles.navigation}>
+              <Pressable onPress={handleBack} style={styles.backButton}>
+                <Image source={require("@/assets/images/backArrow.png")} />
+              </Pressable>
+              <Text style={styles.headerTitle}>Add Members</Text>
+            </View>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
+      <ProgressIndicator activeSteps={2} />
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <Pressable style={[styles.expandableButton, isExpand && styles.expandableButtonActive]} onPress={() => setIsExpand(!isExpand)}>
+          <View style={styles.expandableContent}>
+            <Image source={require("@/assets/images/users.png")} />
+            <Text style={styles.expandableText}>Add Existing Friends</Text>
+          </View>
+          <View>
+            <Entypo name="chevron-down" size={24} color="#1C0335" />
+          </View>
+        </Pressable>
+        {isExpand && (
+          <View style={styles.expandableSection}>
+            <View style={styles.expandableSearchSection}>
+              <TextInputField label="Search by name or email" icon={<Image source={require("@/assets/images/search.png")} />} />
+              <View style={styles.selectedAndClearContainer}>
+                <Text style={styles.selectedText}>0 friends selected</Text>
+                <Text style={styles.clearText}>Clear All</Text>
+              </View>
+            </View>
+            <View>
+              {friendsArray.map((_, index) => (
+                <View style={[styles.friendItem, index === friendsArray.length - 1 && { borderBottomWidth: 0 }]} key={index}>
+                  <View style={styles.infoContainer}>
+                    <View style={styles.friendProfileAndInitial}>
+                      <Text style={styles.nameInitials}>WS</Text>
+                    </View>
+                    <View>
+                      <Text style={styles.friendName}>Will Smith</Text>
+                      <Text style={styles.friendEmail}>will.smith@gmail.com</Text>
+                    </View>
+                  </View>
+                  <View style={styles.checkButton}>{/* <Feather name="check" size={15} color="#3B0076" /> */}</View>
+                </View>
+              ))}
+              <View style={styles.addSelectedFriendsContainer}>
+                <Pressable
+                  style={[
+                    styles.addSelectedFriendsButton,
+                    // !isFormValid && styles.continueButtonDisabled,
+                  ]}
+                  onPress={handleContinue}
+                  // disabled={!isFormValid}
+                >
+                  <Feather name="check" size={24} color="#3B0076" />
+                  <Text style={styles.addSelectedFriendsButtonText}>Add selected friends</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        )}
+      </ScrollView>
+      <View style={styles.bottomButtons}>
+        <Pressable
+          style={[
+            styles.continueButton,
+            // !isFormValid && styles.continueButtonDisabled,
+          ]}
+          onPress={handleContinue}
+          // disabled={!isFormValid}
+        >
+          <Text style={styles.continueButtonText}>Done</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+};
+
+export default CreateCircleStep2;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+  header: {
+    minHeight: 108,
+    justifyContent: "flex-end",
+  },
+  headerContent: {
+    paddingHorizontal: 16,
+  },
+
+  navigation: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    paddingVertical: 16,
+  },
+  backButton: {},
+  headerTitle: {
+    color: "#FFFFFF",
+    fontSize: 24,
+    fontFamily: "Nunito_700Bold",
+    lineHeight: 28,
+    letterSpacing: -1,
+  },
+  title: {
+    fontSize: 28,
+    fontFamily: "Nunito_700Bold",
+    color: "#0F0059",
+  },
+
+  scrollView: {
+    flex: 1,
+    paddingHorizontal: 8,
+  },
+  expandableButton: {
+    height: 60,
+    padding: 15.32,
+    gap: 9.57,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#AEAEB2",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  expandableContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  expandableText: {
+    color: "#1C0335",
+    fontSize: 16,
+    fontFamily: "Nunito_700Bold",
+  },
+  expandableButtonActive: {
+    borderBottomColor: "transparent",
+    borderBottomRightRadius: 0,
+    borderBottomLeftRadius: 0,
+  },
+  expandableSection: {
+    paddingTop: 24,
+    borderWidth: 1,
+    borderTopWidth: 0,
+    borderBottomRightRadius: 8,
+    borderBottomLeftRadius: 8,
+    borderColor: "#AEAEB2",
+  },
+  expandableSearchSection: {
+    paddingHorizontal: 15.32,
+  },
+  selectedAndClearContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 15.32,
+  },
+  selectedText: {
+    color: "#1C0335",
+    fontSize: 15.23,
+    fontFamily: "Nunito_700Bold",
+  },
+  clearText: {
+    color: "#AEAEB2",
+    fontSize: 15.23,
+    fontFamily: "Nunito_700Bold",
+  },
+  friendItem: {
+    padding: 15.32,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottomWidth: 0.96,
+    borderColor: "#AEAEB2",
+  },
+  infoContainer: {
+    flexDirection: "row",
+    gap: 7.66,
+    alignItems: "center",
+  },
+  friendProfileAndInitial: {
+    backgroundColor: "#A2845E",
+    width: 45.95,
+    height: 45.95,
+    borderRadius: 7.66,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  nameInitials: {
+    color: "#ffff",
+    fontSize: 15.32,
+    fontFamily: "Nunito_900Black",
+  },
+  friendName: {
+    fontSize: 15.32,
+    fontFamily: "Nunito_700Bold",
+    color: "#1C0335",
+  },
+  friendEmail: {
+    fontSize: 11.49,
+    fontFamily: "Nunito_300Light",
+    color: "#1C0335",
+  },
+  checkButton: {
+    width: 24,
+    height: 24,
+    borderRadius: 4,
+    borderColor: "#AEAEB2",
+    borderWidth: 1,
+    backgroundColor: "#ffff",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  checkButtonActive: {
+    backgroundColor: "#3B0076",
+    borderColor: "#3B0076",
+  },
+  bottomButtons: {
+    paddingHorizontal: 16,
+    gap: 16,
+    paddingVertical: 16,
+  },
+  continueButton: {
+    height: 56,
+    backgroundColor: "#34C759",
+    borderRadius: 8,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  continueButtonDisabled: {
+    backgroundColor: "#D1D1D6",
+  },
+  continueButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontFamily: "Nunito_700Bold",
+    lineHeight: 16,
+  },
+  addSelectedFriendsContainer: {
+    paddingHorizontal: 8,
+    paddingVertical: 24,
+  },
+  addSelectedFriendsButton: {
+    height: 56,
+    backgroundColor: "#6FFFF6",
+    borderRadius: 8,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 8,
+  },
+  addSelectedFriendsButtonText: {
+    color: "#3B0076",
+    fontSize: 16,
+    fontFamily: "Nunito_700Bold",
+  },
+});
