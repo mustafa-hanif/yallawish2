@@ -1,8 +1,10 @@
+import { router } from "expo-router";
 import React from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import { styles } from "./style";
 
 export default function NoCircleFound() {
+  const handleCreateCircle = () => router.push("/create-circle-step1");
   return (
     <View style={styles.container}>
       <View>
@@ -18,7 +20,7 @@ export default function NoCircleFound() {
         <Text style={styles.description}>{"Start your first circle and make gifting\neasier for every occasions"}</Text>
       </View>
       <View>
-        <Pressable style={styles.button}>
+        <Pressable style={styles.button} onPress={handleCreateCircle}>
           <Text style={styles.buttonText}>Create your first circle</Text>
         </Pressable>
       </View>
