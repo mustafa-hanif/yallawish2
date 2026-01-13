@@ -1,0 +1,140 @@
+import { StyleSheet } from "react-native";
+
+export const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+    backgroundColor: "#FDF9FF",
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  header: {
+    height: 121,
+    position: "relative",
+  },
+  headerImage: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+  },
+  headerContent: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#3b0076ab",
+    paddingHorizontal: 8,
+    justifyContent: "space-between",
+  },
+  headerContentTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 8,
+  },
+  circleOccasions: {
+    height: 24,
+    width: 80,
+    borderRadius: 34.81,
+    borderColor: "#FFFFFF",
+    borderWidth: 0.45,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  circleOccasionsText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontFamily: "Nunito_700Bold",
+  },
+  circleStatus: {
+    height: 24,
+    width: 60,
+    borderRadius: 100,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#49CC7A",
+  },
+  circleStatusText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontFamily: "Nunito_700Bold",
+  },
+  headerContentBottom: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingBottom: 8,
+    gap: 8,
+  },
+  circleAdminInitials: {
+    width: 40,
+    height: 40,
+    borderRadius: 100,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#3B0076",
+    borderWidth: 1,
+    borderColor: "#FFFFFF",
+  },
+  circleAdminInitialsText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontFamily: "Nunito_700Bold",
+  },
+  circleTitle: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontFamily: "Nunito_900Black",
+  },
+  circleDescription: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontFamily: "Nunito_400Regular",
+  },
+  divider: {
+    height: 2,
+    backgroundColor: "#F6EFFF",
+    marginHorizontal: 16,
+  },
+  body: {
+    height: 34,
+    marginVertical: 8,
+    paddingHorizontal: 16,
+    justifyContent: "space-between",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  bodyItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
+  bodyItemImage: {
+    width: 12,
+    height: 12,
+    tintColor: "#330065",
+  },
+  bodyItemText: {
+    fontSize: 12,
+    fontFamily: "Nunito_700Bold",
+    color: "#330065",
+  },
+  members: {
+    width: 75,
+    height: 33.3,
+  },
+  footer: {
+    paddingTop: 8,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+  },
+  primaryButton: {
+    backgroundColor: "#3B0076",
+    borderRadius: 8,
+    height: 56,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  primaryButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontFamily: "Nunito_700Bold",
+  },
+});

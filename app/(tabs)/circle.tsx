@@ -1,11 +1,18 @@
+import CircleCard from "@/components/circle/circleCard";
 import NoCircleFound from "@/components/circle/NoCircleFound";
-import { FontAwesome5 } from "@expo/vector-icons";
+import { TextInputField } from "@/components/TextInputField";
+import { Entypo, FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
-import { Image, Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { FlatList, Image, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Circle = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isCirclesIamMemberOfExpanded, setIsCirclesIamMemberOfExpanded] = useState(false);
+  const [isCirclesIamAdminOfExpanded, setIsCirclesIamAdminOfExpanded] = useState(false);
+
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
 
   const encodedReturnTo = returnTo ? String(returnTo) : undefined;
@@ -18,8 +25,8 @@ const Circle = () => {
     router.back();
   };
 
-  const circlesIamMemberOf = [];
-  const circlesIamAdminOf = [];
+  const circlesIamAdminOf = Array.from({ length: 10 });
+  const circlesIamMemberOf = Array.from({ length: 10 });
 
   return (
     <View style={styles.container}>
@@ -36,7 +43,7 @@ const Circle = () => {
           </View>
         </SafeAreaView>
       </LinearGradient>
-      <View style={styles.headContainer}>
+      <LinearGradient colors={["#F6F0FF", "#FFFFFF"]} style={styles.headContainer}>
         <View>
           <Text style={styles.title}>Circle Management</Text>
           <Text style={styles.description}>Manage all your gifting circles</Text>
@@ -46,8 +53,39 @@ const Circle = () => {
             <FontAwesome5 name="user-friends" size={12} color="black" />
           </View>
         </View>
-      </View>
-      {circlesIamMemberOf.length === 0 && circlesIamAdminOf.length === 0 ? <NoCircleFound /> : <></>}
+      </LinearGradient>
+
+      {circlesIamMemberOf.length === 0 && circlesIamAdminOf.length === 0 ? (
+        <NoCircleFound />
+      ) : (
+        <View style={styles.circleContainer}>
+          <TextInputField placeholder="Search" icon={<Image source={require("@/assets/images/search.png")} />} />
+          <View style={{ gap: 16 }}>
+            <View>
+              <Pressable style={[styles.circleExpandableButton, isCirclesIamAdminOfExpanded && { borderBottomEndRadius: 0, borderBottomStartRadius: 0 }]} onPress={() => setIsCirclesIamAdminOfExpanded(!isCirclesIamAdminOfExpanded)}>
+                <Text style={styles.circleExpandableButtonText}>Circles you’re Admin of</Text>
+                <Entypo name="chevron-down" size={24} color="#1C0335" />
+              </Pressable>
+              {isCirclesIamAdminOfExpanded && (
+                <ScrollView style={{ maxHeight: 624, backgroundColor: "#ECE3F7", paddingHorizontal: 8, paddingBottom: 16, borderBottomEndRadius: 8, borderBottomStartRadius: 8 }}>
+                  <FlatList contentContainerStyle={{ gap: 16 }} data={circlesIamAdminOf} keyExtractor={(item, index) => index.toString()} renderItem={({ item }) => <CircleCard />} />
+                </ScrollView>
+              )}
+            </View>
+            <View>
+              <Pressable style={[styles.circleExpandableButton, isCirclesIamMemberOfExpanded && { borderBottomEndRadius: 0, borderBottomStartRadius: 0 }]} onPress={() => setIsCirclesIamMemberOfExpanded(!isCirclesIamMemberOfExpanded)}>
+                <Text style={styles.circleExpandableButtonText}>Member Circles</Text>
+                <Entypo name="chevron-down" size={24} color="#1C0335" />
+              </Pressable>
+              {isCirclesIamMemberOfExpanded && (
+                <ScrollView style={{ maxHeight: 624, backgroundColor: "#ECE3F7", paddingHorizontal: 8, paddingBottom: 16, borderBottomEndRadius: 8, borderBottomStartRadius: 8 }}>
+                  <FlatList contentContainerStyle={{ gap: 16 }} data={circlesIamMemberOf} keyExtractor={(item, index) => index.toString()} renderItem={({ item }) => <CircleCard />} />
+                </ScrollView>
+              )}
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   );
 };
@@ -107,5 +145,24 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     justifyContent: "center",
     alignItems: "center",
+  },
+  circleContainer: {
+    paddingHorizontal: 8,
+    flex: 1,
+    gap: 22.34,
+  },
+  circleExpandableButton: {
+    paddingHorizontal: 8,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: "#ECE3F7",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  circleExpandableButtonText: {
+    fontSize: 16,
+    fontFamily: "Nunito_700Bold",
+    color: "#3B0076",
   },
 });
