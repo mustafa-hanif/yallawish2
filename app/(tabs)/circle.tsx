@@ -1,7 +1,7 @@
 import CircleCard from "@/components/circle/CircleCard";
 import NoCircleFound from "@/components/circle/NoCircleFound";
 import { TextInputField } from "@/components/TextInputField";
-import { Entypo, FontAwesome5 } from "@expo/vector-icons";
+import { AntDesign, Entypo, FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -27,6 +27,9 @@ const Circle = () => {
   const circlesIamAdminOf = Array.from({ length: 10 });
   const circlesIamMemberOf = Array.from({ length: 10 });
 
+  const handlePressAddCircle = () => {
+    router.push("/(tabs)/create-circle-step1");
+  };
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" />
@@ -82,6 +85,12 @@ const Circle = () => {
                 </ScrollView>
               )}
             </View>
+          </View>
+          <View style={styles.createCircleButtonContainer}>
+            <Pressable style={styles.createCircleButton} onPress={handlePressAddCircle}>
+              <AntDesign name="plus" size={16} color="#1C1C1C" />
+              <Text style={styles.createCircleButtonText}>Add New Circle</Text>
+            </Pressable>
           </View>
         </View>
       )}
@@ -149,6 +158,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     flex: 1,
     gap: 22.34,
+    position: "relative",
   },
   circleExpandableButton: {
     paddingHorizontal: 8,
@@ -163,5 +173,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Nunito_700Bold",
     color: "#3B0076",
+  },
+  createCircleButtonContainer: {
+    position: "absolute",
+    bottom: 10,
+    width: "100%",
+    alignItems: "flex-end",
+  },
+  createCircleButton: {
+    backgroundColor: "#6FFFF6",
+    height: 56,
+    width: 219,
+    borderRadius: 52,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 8,
+  },
+  createCircleButtonText: {
+    fontSize: 16,
+    fontFamily: "Nunito_700Bold",
+    color: "#1C1C1C",
   },
 });
