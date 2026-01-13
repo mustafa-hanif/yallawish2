@@ -37,9 +37,11 @@ export function TextInputField({ icon, label, autoCorrect, autoCapitalize, varia
   return (
     <View style={{ ...styles.container, ...containerStyle }}>
       <View style={styles.inputWrapper}>
-        <View style={{ ...styles.labelContainer, ...inputLabelContainerStyle }}>
-          <Text style={styles.label}>{label}</Text>
-        </View>
+        {label && (
+          <View style={{ ...styles.labelContainer, ...inputLabelContainerStyle }}>
+            <Text style={styles.label}>{label}</Text>
+          </View>
+        )}
         <TextInput secureTextEntry={isSecureEntry} autoCorrect={autoCorrect} keyboardType={keyboardType} autoCapitalize={autoCapitalize} style={[styles.input, icon ? { paddingRight: 50 } : undefined]} value={value} onChangeText={onChangeText} placeholder={placeholder} placeholderTextColor={placeholderTextColor} editable={editable} maxLength={maxLength} />
         {variant === "password" && (
           <Pressable onPress={() => setIsSecureEntry(!isSecureEntry)} style={styles.rightIconContainer}>
