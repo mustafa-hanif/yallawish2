@@ -18,6 +18,9 @@ const Circle = () => {
     router.back();
   };
 
+  const circlesIamMemberOf = [];
+  const circlesIamAdminOf = [];
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" />
@@ -44,7 +47,7 @@ const Circle = () => {
           </View>
         </View>
       </View>
-      <NoCircleFound />
+      {circlesIamMemberOf.length === 0 && circlesIamAdminOf.length === 0 ? <NoCircleFound /> : <></>}
     </View>
   );
 };
