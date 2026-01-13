@@ -4,7 +4,7 @@ import { Image, Pressable, Text, View } from "react-native";
 import { styles } from "./style";
 
 export default function CircleCard() {
-  const handleViewCircle = () => router.push("/create-circle-step1");
+  const handleViewCircle = () => router.push("/view-circle");
   const numberOfMembers = 10;
   const numberOfList = 25;
   const nextEvent = "15 Aug";
@@ -44,7 +44,7 @@ export default function CircleCard() {
         </View>
         <View style={styles.bodyItem}>
           <Image style={styles.bodyItemImage} resizeMode="contain" source={require("@/assets/images/calendar.png")} />
-          <Text style={styles.bodyItemText}>{nextEvent}</Text>
+          <Text style={styles.bodyItemText}>Next: {nextEvent}</Text>
         </View>
         <View>
           <Image resizeMode="contain" source={require("@/assets/images/noListFoundUsers.png")} style={styles.members} />

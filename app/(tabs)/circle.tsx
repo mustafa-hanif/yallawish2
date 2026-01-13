@@ -1,4 +1,4 @@
-import CircleCard from "@/components/circle/circleCard";
+import CircleCard from "@/components/circle/CircleCard";
 import NoCircleFound from "@/components/circle/NoCircleFound";
 import { TextInputField } from "@/components/TextInputField";
 import { Entypo, FontAwesome5 } from "@expo/vector-icons";
@@ -9,7 +9,6 @@ import { FlatList, Image, Pressable, ScrollView, StatusBar, StyleSheet, Text, Vi
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Circle = () => {
-  const [searchQuery, setSearchQuery] = useState("");
   const [isCirclesIamMemberOfExpanded, setIsCirclesIamMemberOfExpanded] = useState(false);
   const [isCirclesIamAdminOfExpanded, setIsCirclesIamAdminOfExpanded] = useState(false);
 
