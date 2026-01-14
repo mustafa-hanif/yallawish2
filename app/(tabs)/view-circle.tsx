@@ -1,13 +1,12 @@
 import CircleBanner from "@/components/circle/CircleBanner";
 import SectionHeader from "@/components/circle/SectionHeader";
 import ViewCircleGroupInfo from "@/components/circle/ViewCircleGroupInfo";
+import Header from "@/components/Header";
 import WishListCard from "@/components/wishlists/WishListCard";
 import { Entypo } from "@expo/vector-icons";
 
-import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
-import { FlatList, Image, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const ViewCircle = () => {
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
@@ -26,19 +25,7 @@ const ViewCircle = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="transparent" />
-      <LinearGradient colors={["#330065", "#45018ad7"]} style={styles.header} locations={[0, 0.7]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 2 }}>
-        <SafeAreaView edges={["top"]}>
-          <View style={styles.headerContent}>
-            <View style={styles.navigation}>
-              <Pressable onPress={handleBack} style={styles.backButton}>
-                <Image source={require("@/assets/images/backArrow.png")} />
-              </Pressable>
-              <Text style={styles.headerTitle}>View Circle</Text>
-            </View>
-          </View>
-        </SafeAreaView>
-      </LinearGradient>
+      <Header title="View Circle" handleBack={handleBack} />
       <ScrollView>
         <CircleBanner />
         <ViewCircleGroupInfo />
@@ -110,37 +97,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-  },
-  header: {
-    minHeight: 108,
-    justifyContent: "flex-end",
-  },
-  headerContent: {
-    paddingHorizontal: 16,
-  },
-  headContainer: {
-    backgroundColor: "#F6F0FF",
-    paddingHorizontal: 16,
-    paddingTop: 9,
-    paddingBottom: 23,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-
-  navigation: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-    paddingVertical: 16,
-  },
-  backButton: {},
-  headerTitle: {
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontFamily: "Nunito_700Bold",
-    lineHeight: 28,
-    letterSpacing: -1,
   },
   listContentContainerStyle: {
     gap: 8,
