@@ -1,16 +1,21 @@
+import { FontAwesome5 } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import { Image, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { styles } from "./style";
 
-export default function CircleBanner() {
-  const title = "The Celebration Crew";
-
+export default function CircleManagement() {
   return (
-    <View style={styles.container}>
-      <Image source={{ uri: "https://festive-deer-706.convex.cloud/api/storage/fee43c85-a348-45b6-a135-db9b6d34e9e9" }} style={styles.headerImage} />
-      <View style={styles.content}>
-        <Text style={styles.title}>{title}</Text>
+    <LinearGradient colors={["#F6F0FF", "#FFFFFF"]} style={styles.container}>
+      <View>
+        <Text style={styles.title}>Circle Management</Text>
+        <Text style={styles.description}>Manage all your gifting circles</Text>
       </View>
-    </View>
+      <View>
+        <View style={styles.iconContainer}>
+          <FontAwesome5 name="user-friends" size={12} color="black" />
+        </View>
+      </View>
+    </LinearGradient>
   );
 }

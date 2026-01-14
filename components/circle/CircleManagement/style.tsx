@@ -2,30 +2,31 @@ import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   container: {
-    width: "100%",
-    backgroundColor: "#FDF9FF",
-    overflow: "hidden",
-    height: 120,
+    backgroundColor: "#F6F0FF",
+    paddingHorizontal: 16,
+    paddingTop: 9,
+    paddingBottom: 23,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
 
-  headerImage: {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
+  title: {
+    fontSize: 28,
+    fontFamily: "Nunito_700Bold",
+    color: "#0F0059",
   },
-  content: {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-    backgroundColor: "#3b0076ab",
+  description: {
+    fontSize: 12,
+    fontFamily: "Nunito_600SemiBold",
+    color: "#794CA1",
+  },
+  iconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 20,
+    backgroundColor: "#FFFFFF",
     justifyContent: "center",
     alignItems: "center",
-  },
-  title: {
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontFamily: "Nunito_900Black",
-    lineHeight: 28,
-    letterSpacing: -1,
   },
 });
