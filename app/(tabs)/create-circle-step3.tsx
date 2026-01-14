@@ -1,11 +1,10 @@
+import Header from "@/components/Header";
 import { ProgressIndicator } from "@/components/ProgressIndicator";
 import { TextInputField } from "@/components/TextInputField";
 import { Fontisto } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import { Image, Pressable, ScrollView, StatusBar, StyleSheet, Switch, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Image, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
 
 interface FormData {}
 
@@ -30,19 +29,7 @@ const CreateCircleStep2 = () => {
   };
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="transparent" />
-      <LinearGradient colors={["#330065", "#45018ad7"]} style={styles.header} locations={[0, 0.7]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 2 }}>
-        <SafeAreaView edges={["top"]}>
-          <View style={styles.headerContent}>
-            <View style={styles.navigation}>
-              <Pressable onPress={handleBack} style={styles.backButton}>
-                <Image source={require("@/assets/images/backArrow.png")} />
-              </Pressable>
-              <Text style={styles.headerTitle}>Assign Admins</Text>
-            </View>
-          </View>
-        </SafeAreaView>
-      </LinearGradient>
+      <Header title="Assign Admins" handleBack={handleBack} />
       <ProgressIndicator activeSteps={3} />
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
@@ -115,34 +102,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFFFF",
   },
-  header: {
-    minHeight: 108,
-    justifyContent: "flex-end",
-  },
-  headerContent: {
-    paddingHorizontal: 16,
-  },
-
-  navigation: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-    paddingVertical: 16,
-  },
-  backButton: {},
-  headerTitle: {
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontFamily: "Nunito_700Bold",
-    lineHeight: 28,
-    letterSpacing: -1,
-  },
-  title: {
-    fontSize: 28,
-    fontFamily: "Nunito_700Bold",
-    color: "#0F0059",
-  },
-
   scrollView: {
     flex: 1,
     paddingHorizontal: 8,
