@@ -1,14 +1,12 @@
-import CircleManagement from "@/components/circle/CircleBanner";
 import CircleCard from "@/components/circle/CircleCard";
+import CircleManagement from "@/components/circle/CircleManagement";
 import NoCircleFound from "@/components/circle/NoCircleFound";
+import Header from "@/components/Header";
 import { TextInputField } from "@/components/TextInputField";
 import { AntDesign, Entypo } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { FlatList, Image, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-
+import { FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 const Circle = () => {
   const [isCirclesIamMemberOfExpanded, setIsCirclesIamMemberOfExpanded] = useState(false);
   const [isCirclesIamAdminOfExpanded, setIsCirclesIamAdminOfExpanded] = useState(false);
@@ -33,19 +31,7 @@ const Circle = () => {
   };
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="transparent" />
-      <LinearGradient colors={["#330065", "#45018ad7"]} style={styles.header} locations={[0, 0.7]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 2 }}>
-        <SafeAreaView edges={["top"]}>
-          <View style={styles.headerContent}>
-            <View style={styles.navigation}>
-              <Pressable onPress={handleBack} style={styles.backButton}>
-                <Image source={require("@/assets/images/backArrow.png")} />
-              </Pressable>
-              <Text style={styles.headerTitle}>My Circles</Text>
-            </View>
-          </View>
-        </SafeAreaView>
-      </LinearGradient>
+      <Header title="My Circles" handleBack={handleBack} />
       <CircleManagement />
 
       {circlesIamMemberOf.length === 0 && circlesIamAdminOf.length === 0 ? (
@@ -95,28 +81,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-  },
-  header: {
-    minHeight: 108,
-    justifyContent: "flex-end",
-  },
-  headerContent: {
-    paddingHorizontal: 16,
-  },
-
-  navigation: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-    paddingVertical: 16,
-  },
-  backButton: {},
-  headerTitle: {
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontFamily: "Nunito_700Bold",
-    lineHeight: 28,
-    letterSpacing: -1,
   },
 
   circleContainer: {
