@@ -137,4 +137,36 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Nunito_700Bold",
   },
+  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.3)" },
+  sheetContainer: { position: "absolute", left: 0, right: 0, bottom: 0, backgroundColor: "#FFFFFF", borderTopLeftRadius: 32, borderTopRightRadius: 32, maxHeight: "80%" },
+  sheetHandle: { width: 64, height: 6, borderRadius: 3, backgroundColor: "#C7C7CC", alignSelf: "center", marginTop: 12 },
+  sheetContent: { paddingBottom: 32, paddingHorizontal: 30, paddingTop: 8, gap: 24 },
+  sheetTitle: { fontSize: 24, fontFamily: "Nunito_700Bold", color: "#1C0335", textAlign: "center", marginTop: 24 },
+  actionsContainer: {
+    gap: 16,
+  },
+  actionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 12,
+  },
+  actionLabel: {
+    fontSize: 18,
+    fontFamily: "Nunito_700Bold",
+    color: "#3B0076",
+  },
+  actionIconContainer: {
+    backgroundColor: "#F6F0FF",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  icon: {
+    width: 20,
+    height: 20,
+    tintColor: "#3B0076",
+  },
 });
