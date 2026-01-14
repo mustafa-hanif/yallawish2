@@ -1,7 +1,8 @@
+import CircleManagement from "@/components/circle/CircleBanner";
 import CircleCard from "@/components/circle/CircleCard";
 import NoCircleFound from "@/components/circle/NoCircleFound";
 import { TextInputField } from "@/components/TextInputField";
-import { AntDesign, Entypo, FontAwesome5 } from "@expo/vector-icons";
+import { AntDesign, Entypo } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -45,17 +46,7 @@ const Circle = () => {
           </View>
         </SafeAreaView>
       </LinearGradient>
-      <LinearGradient colors={["#F6F0FF", "#FFFFFF"]} style={styles.headContainer}>
-        <View>
-          <Text style={styles.title}>Circle Management</Text>
-          <Text style={styles.description}>Manage all your gifting circles</Text>
-        </View>
-        <View>
-          <View style={styles.iconContainer}>
-            <FontAwesome5 name="user-friends" size={12} color="black" />
-          </View>
-        </View>
-      </LinearGradient>
+      <CircleManagement />
 
       {circlesIamMemberOf.length === 0 && circlesIamAdminOf.length === 0 ? (
         <NoCircleFound />
@@ -112,15 +103,6 @@ const styles = StyleSheet.create({
   headerContent: {
     paddingHorizontal: 16,
   },
-  headContainer: {
-    backgroundColor: "#F6F0FF",
-    paddingHorizontal: 16,
-    paddingTop: 9,
-    paddingBottom: 23,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
 
   navigation: {
     flexDirection: "row",
@@ -136,24 +118,7 @@ const styles = StyleSheet.create({
     lineHeight: 28,
     letterSpacing: -1,
   },
-  title: {
-    fontSize: 28,
-    fontFamily: "Nunito_700Bold",
-    color: "#0F0059",
-  },
-  description: {
-    fontSize: 12,
-    fontFamily: "Nunito_600SemiBold",
-    color: "#794CA1",
-  },
-  iconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 20,
-    backgroundColor: "#FFFFFF",
-    justifyContent: "center",
-    alignItems: "center",
-  },
+
   circleContainer: {
     paddingHorizontal: 8,
     flex: 1,
