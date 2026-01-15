@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import React from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
@@ -36,9 +37,13 @@ export default function FriendsItem() {
       </Pressable>
     </View>
   );
+  const onPress = () => {
+    router.push("/(tabs)/friend-profile");
+  };
+
   return (
     <Swipeable ref={swipeableRef} overshootRight={false} renderRightActions={renderRightActions}>
-      <View style={styles.container}>
+      <Pressable style={styles.container} onPress={onPress}>
         <View>
           <Image source={{ uri: "https://htmlstream.com/preview/unify-v2.6.1/assets/img-temp/400x450/img5.jpg" }} style={styles.image} />
         </View>
@@ -46,7 +51,7 @@ export default function FriendsItem() {
           <Text style={styles.name}>Adam Sandlers</Text>
           <Text style={styles.commonCircles}>3 circles in common</Text>
         </View>
-      </View>
+      </Pressable>
     </Swipeable>
   );
 }

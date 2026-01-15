@@ -2,14 +2,7 @@ import DeleteConfirmation from "@/components/DeleteConfirmationModal";
 import { RibbonHeader } from "@/components/RibbonHeader";
 import { TextInputAreaField } from "@/components/TextInputAreaField";
 import { TextInputField } from "@/components/TextInputField";
-import {
-  ActionsBar,
-  FooterBar,
-  GiftItemCard,
-  HeaderBar,
-  InfoBox,
-  ListCover,
-} from "@/components/list";
+import { ActionsBar, FooterBar, GiftItemCard, HeaderBar, InfoBox, ListCover } from "@/components/list";
 import type { GiftItem as GiftItemType } from "@/components/list/GiftItemCard";
 import { api } from "@/convex/_generated/api";
 import { desktopStyles, styles } from "@/styles/addGiftStyles";
@@ -22,31 +15,8 @@ import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Linking from "expo-linking";
 import { router, useLocalSearchParams } from "expo-router";
-import React, {
-  Fragment,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Animated,
-  Easing,
-  Image,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  Share,
-  StatusBar,
-  Text,
-  TextInput,
-  useWindowDimensions,
-  View,
-} from "react-native";
+import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ActivityIndicator, Alert, Animated, Easing, Image, Modal, Platform, Pressable, ScrollView, Share, StatusBar, Text, TextInput, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 
@@ -63,11 +33,7 @@ const SORT_OPTIONS: { key: SortOption; label: string }[] = [
 const DESKTOP_BREAKPOINT = 1024;
 const FALLBACK_COVER = require("@/assets/images/nursery.png");
 
-const getPrivacyDisplay = (
-  privacy: string,
-  loading: boolean,
-  shareCount?: number
-) => {
+const getPrivacyDisplay = (privacy: string, loading: boolean, shareCount?: number) => {
   if (loading) {
     return {
       label: "Loading...",
@@ -94,7 +60,7 @@ const getPrivacyDisplay = (
 export default function AddGift() {
   const { listId } = useLocalSearchParams<{ listId?: string }>();
   const { user } = useUser();
-  
+
   const list = useQuery(api.products.getListById, {
     listId: listId as any,
   });
@@ -102,16 +68,10 @@ export default function AddGift() {
   const deleteList = useMutation(api.products.deleteList);
   const archiveList = useMutation(api.products.setListArchived);
 
-  const items = useQuery(
-    api.products.getListItems as any,
-    listId ? ({ list_id: listId } as any) : "skip"
-  );
+  const items = useQuery(api.products.getListItems as any, listId ? ({ list_id: listId } as any) : "skip");
 
   // All list items
-  const giftItems: GiftItemType[] = useMemo(
-    () => (Array.isArray(items) ? [...items] : []),
-    [items]
-  );
+  const giftItems: GiftItemType[] = useMemo(() => (Array.isArray(items) ? [...items] : []), [items]);
 
   // Sort & Filter state
   const [sortBy, setSortBy] = useState<SortOption>("default");
@@ -121,13 +81,9 @@ export default function AddGift() {
   // Derived displayed items
   let displayedItems: GiftItemType[] = giftItems;
   if (filterClaimed && !filterUnclaimed) {
-    displayedItems = displayedItems.filter(
-      (i) => (i.claimed ?? 0) >= (i.quantity ?? 1)
-    );
+    displayedItems = displayedItems.filter((i) => (i.claimed ?? 0) >= (i.quantity ?? 1));
   } else if (filterUnclaimed && !filterClaimed) {
-    displayedItems = displayedItems.filter(
-      (i) => (i.claimed ?? 0) < (i.quantity ?? 1)
-    );
+    displayedItems = displayedItems.filter((i) => (i.claimed ?? 0) < (i.quantity ?? 1));
   }
   try {
     displayedItems = [...displayedItems].sort((a, b) => {
@@ -156,8 +112,7 @@ export default function AddGift() {
   const formatEventDate = (dateStr?: string) => {
     if (!dateStr) return "";
     const parts = dateStr.split("-").map((p) => parseInt(p, 10));
-    if (parts.length !== 3 || parts.some((n) => Number.isNaN(n)))
-      return dateStr;
+    if (parts.length !== 3 || parts.some((n) => Number.isNaN(n))) return dateStr;
     const [y, m, d] = parts;
     const date = new Date(y, (m ?? 1) - 1, d ?? 1); // local time to avoid TZ shift
     try {
@@ -168,20 +123,7 @@ export default function AddGift() {
         year: "numeric",
       }).format(date);
     } catch {
-      const months = [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-      ];
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
     }
   };
@@ -299,9 +241,7 @@ export default function AddGift() {
   // In-sheet browser state
   const [showBrowser, setShowBrowser] = useState(false);
   const [browserUrl, setBrowserUrl] = useState<string | null>(null); // initial search url
-  const [currentBrowserUrl, setCurrentBrowserUrl] = useState<string | null>(
-    null
-  ); // updated as user navigates
+  const [currentBrowserUrl, setCurrentBrowserUrl] = useState<string | null>(null); // updated as user navigates
   // Sort & Filter sheet visibility
   const [showSortSheet, setShowSortSheet] = useState(false);
   // Temp draft selections while sheet open
@@ -310,7 +250,7 @@ export default function AddGift() {
   const [tempFilterUnclaimed, setTempFilterUnclaimed] = useState(false);
   const [isUrlValid, setIsUrlValid] = useState(true);
   const [deleteListId, setDeleteListId] = useState<string | null>(null);
-  
+
   // Cover photo upload state
   const [showCoverUploadModal, setShowCoverUploadModal] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
@@ -320,7 +260,6 @@ export default function AddGift() {
   const generateCoverUploadUrl = useMutation(api.products.generateListCoverUploadUrl);
   const getCoverUrl = useMutation(api.products.getListCoverUrl);
   const updateListDetails = useMutation(api.products.updateListDetails);
-  
 
   const openSortSheet = useCallback(() => {
     setTempSortBy(sortBy);
@@ -345,10 +284,7 @@ export default function AddGift() {
     // Only validate if it looks like a URL (starts with http:// or https://)
     // Keywords without http/https prefix are considered valid
     const trimmedLink = link.trim();
-    if (
-      trimmedLink.startsWith("http://") ||
-      trimmedLink.startsWith("https://")
-    ) {
+    if (trimmedLink.startsWith("http://") || trimmedLink.startsWith("https://")) {
       setIsUrlValid(validateUrl(link));
     } else {
       // It's a keyword, not a URL, so it's valid
@@ -357,12 +293,7 @@ export default function AddGift() {
   }, [link]);
 
   const DESCRIPTION_LIMIT = 400;
-  const canSave =
-    !!listId &&
-    (link.trim().length > 0 || name.trim().length > 0) &&
-    quantity > 0 &&
-    !saving &&
-    (link.trim().length === 0 || isUrlValid);
+  const canSave = !!listId && (link.trim().length > 0 || name.trim().length > 0) && quantity > 0 && !saving && (link.trim().length === 0 || isUrlValid);
 
   const validateUrl = (value: string) => {
     const urlPattern = /^(https?:\/\/[^\s$.?#].[^\s]*)$/i;
@@ -492,12 +423,7 @@ export default function AddGift() {
       console.log("[CoverUpload] URI:", uri, "MIME:", mime, "EXT:", ext);
 
       // Validate file type using MIME type and extension
-      const isValidType =
-        mime.startsWith("image/jpeg") ||
-        mime.startsWith("image/png") ||
-        ext === "jpg" ||
-        ext === "jpeg" ||
-        ext === "png";
+      const isValidType = mime.startsWith("image/jpeg") || mime.startsWith("image/png") || ext === "jpg" || ext === "jpeg" || ext === "png";
 
       if (!isValidType) {
         console.error("[CoverUpload] Invalid file type");
@@ -641,7 +567,6 @@ export default function AddGift() {
       setShowCoverUploadModal(false);
       setIsUploadingCover(false);
       setCoverUploadError(null);
-
     } catch (error) {
       console.error("[CoverUpload] Error:", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
@@ -731,9 +656,7 @@ export default function AddGift() {
   };
 
   // Delete mutation for list items
-  const deleteListItemMutation = useMutation(
-    api.products.deleteListItem as any
-  );
+  const deleteListItemMutation = useMutation(api.products.deleteListItem as any);
   // Replace Alert with DeleteConfirmation modal flow
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
 
@@ -749,10 +672,7 @@ export default function AddGift() {
       await deleteListItemMutation({ itemId: itemId as any });
     } catch (e) {
       console.warn("Failed to delete item", e);
-      Alert.alert(
-        "Delete failed",
-        "Could not delete the item. Please try again."
-      );
+      Alert.alert("Delete failed", "Could not delete the item. Please try again.");
     } finally {
       setDeleteItemId(null);
     }
@@ -764,39 +684,36 @@ export default function AddGift() {
   const subtitle = list?.note ?? "";
   const coverUri = list?.coverPhotoUri as string | undefined;
   const privacy = list?.privacy ?? "private";
-  const shares = useQuery(
-    api.products.getListShares as any,
-    listId ? ({ list_id: listId } as any) : "skip"
-  );
+  const shares = useQuery(api.products.getListShares as any, listId ? ({ list_id: listId } as any) : "skip");
   const shareCount = Array.isArray(shares) ? shares.length : undefined;
   const address = (list?.shippingAddress as string | undefined) ?? null;
   const ribbonSubtitle = subtitle || formattedEventDate || "";
   const occasion = list?.occasion || "";
 
-    const handleArchiveList = async (listId: string | null, isArchived: boolean) => {
+  const handleArchiveList = async (listId: string | null, isArchived: boolean) => {
     await archiveList({ listId: listId as any, isArchived: isArchived });
   };
 
-   const handleDuplicateList = async (listDetails: any) => {
-      const newListId = await createList({
-        title: listDetails.title,
-        note: listDetails.note || null,
-        eventDate: listDetails.eventDate || null,
-        shippingAddress: listDetails.shippingAddress || null,
-        occasion: listDetails.occasion || null,
-        coverPhotoUri: listDetails.coverPhotoUri || null,
-        coverPhotoStorageId: listDetails.coverPhotoStorageId || null,
-        privacy: listDetails?.privacy || "private",
-        user_id: listDetails?.user_id || user?.id || null,
-      });
-  
-      router.push({
-        pathname: "/add-gift",
-        params: { listId: String(newListId) },
-      });
-    };
+  const handleDuplicateList = async (listDetails: any) => {
+    const newListId = await createList({
+      title: listDetails.title,
+      note: listDetails.note || null,
+      eventDate: listDetails.eventDate || null,
+      shippingAddress: listDetails.shippingAddress || null,
+      occasion: listDetails.occasion || null,
+      coverPhotoUri: listDetails.coverPhotoUri || null,
+      coverPhotoStorageId: listDetails.coverPhotoStorageId || null,
+      privacy: listDetails?.privacy || "private",
+      user_id: listDetails?.user_id || user?.id || null,
+    });
 
-    const handleSelectDelete = (listId: string) => setDeleteListId(listId);
+    router.push({
+      pathname: "/add-gift",
+      params: { listId: String(newListId) },
+    });
+  };
+
+  const handleSelectDelete = (listId: string) => setDeleteListId(listId);
 
   const handleDeleteList = async (listId: string | null) => {
     await deleteList({ listId: listId as any });
@@ -805,19 +722,19 @@ export default function AddGift() {
   };
 
   const onSelectManageListDropdown = (action: string) => {
-    if(action === "archive"){
+    if (action === "archive") {
       handleArchiveList(listId ? String(listId) : null, !(list?.isArchived || false));
-    }  if(action === "unArchive"){
+    }
+    if (action === "unArchive") {
       handleArchiveList(listId ? String(listId) : null, !(list?.isArchived || false));
-    } else if(action === "duplicateList"){
+    } else if (action === "duplicateList") {
       handleDuplicateList(list);
-    } else if(action === "editList"){
+    } else if (action === "editList") {
       router.push({ pathname: "/create-list-step2", params: { listId: String(listId) } });
-    } else if(action === "delete"){
+    } else if (action === "delete") {
       handleSelectDelete(listId ? String(listId) : "");
     }
-
-  }
+  };
   // const creator = list?.creator || null;
   const layout = isDesktop ? (
     <DesktopLayout
@@ -881,12 +798,7 @@ export default function AddGift() {
     <View style={isDesktop ? desktopStyles.container : styles.container}>
       {layout}
       {/** Bottom Sheet / Modal **/}
-      <Modal
-        visible={showSheet}
-        transparent
-        animationType={isDesktop ? "fade" : "none"}
-        onRequestClose={closeSheet}
-      >
+      <Modal visible={showSheet} transparent animationType={isDesktop ? "fade" : "none"} onRequestClose={closeSheet}>
         <Pressable style={styles.backdrop} onPress={closeSheet} />
         {isDesktop ? (
           <View style={desktopStyles.modalContainer}>
@@ -894,59 +806,27 @@ export default function AddGift() {
               {/* Header */}
               <View style={desktopStyles.modalHeader}>
                 <Text style={desktopStyles.modalTitle}>Add a Gift</Text>
-                <Pressable
-                  onPress={closeSheet}
-                  style={desktopStyles.modalCloseButton}
-                >
+                <Pressable onPress={closeSheet} style={desktopStyles.modalCloseButton}>
                   <Ionicons name="close" size={24} color="#8E8EA9" />
                 </Pressable>
               </View>
 
-              <ScrollView
-                contentContainerStyle={desktopStyles.modalScrollContent}
-                showsVerticalScrollIndicator={false}
-              >
+              <ScrollView contentContainerStyle={desktopStyles.modalScrollContent} showsVerticalScrollIndicator={false}>
                 {/* Web Link Section */}
                 <View style={desktopStyles.modalFieldGroup}>
                   <Text style={desktopStyles.modalFieldLabel}>Web Link</Text>
                   <View style={desktopStyles.modalInputRow}>
-                    <TextInput
-                      value={link}
-                      onChangeText={setLink}
-                      style={desktopStyles.modalInput}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      keyboardType="url"
-                      placeholder="Type, paste or search"
-                      placeholderTextColor="#8E8EA9"
-                    />
-                    <Pressable
-                      onPress={openSearchBrowser}
-                      style={desktopStyles.modalSearchButton}
-                    >
-                      <Text style={desktopStyles.modalSearchButtonText}>
-                        Search via
-                      </Text>
+                    <TextInput value={link} onChangeText={setLink} style={desktopStyles.modalInput} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="Type, paste or search" placeholderTextColor="#8E8EA9" />
+                    <Pressable onPress={openSearchBrowser} style={desktopStyles.modalSearchButton}>
+                      <Text style={desktopStyles.modalSearchButtonText}>Search via</Text>
                       <View style={desktopStyles.googleLogo}>
                         <Text style={desktopStyles.googleG}>G</Text>
                       </View>
                     </Pressable>
                   </View>
-                  {!isUrlValid && link.trim().length > 0 && (
-                    <Text style={desktopStyles.modalErrorText}>
-                      Invalid URL
-                    </Text>
-                  )}
-                  {scrapeError && (
-                    <Text style={desktopStyles.modalErrorText}>
-                      {scrapeError}
-                    </Text>
-                  )}
-                  {scraping && (
-                    <Text style={desktopStyles.modalScrapingText}>
-                      Loading...
-                    </Text>
-                  )}
+                  {!isUrlValid && link.trim().length > 0 && <Text style={desktopStyles.modalErrorText}>Invalid URL</Text>}
+                  {scrapeError && <Text style={desktopStyles.modalErrorText}>{scrapeError}</Text>}
+                  {scraping && <Text style={desktopStyles.modalScrapingText}>Loading...</Text>}
                 </View>
 
                 {/* Product Image and Details Row */}
@@ -955,26 +835,14 @@ export default function AddGift() {
                   <View style={desktopStyles.modalImageContainer}>
                     {imageUrl ? (
                       <View style={desktopStyles.modalImageWrapper}>
-                        <Image
-                          source={{ uri: imageUrl }}
-                          style={desktopStyles.modalProductImage}
-                          resizeMode="contain"
-                        />
+                        <Image source={{ uri: imageUrl }} style={desktopStyles.modalProductImage} resizeMode="contain" />
                         <Pressable style={desktopStyles.modalImageEditButton}>
-                          <Ionicons
-                            name="image-outline"
-                            size={20}
-                            color="#3B0076"
-                          />
+                          <Ionicons name="image-outline" size={20} color="#3B0076" />
                         </Pressable>
                       </View>
                     ) : (
                       <View style={desktopStyles.modalImagePlaceholder}>
-                        <Ionicons
-                          name="image-outline"
-                          size={48}
-                          color="#D1D1D6"
-                        />
+                        <Ionicons name="image-outline" size={48} color="#D1D1D6" />
                       </View>
                     )}
                   </View>
@@ -982,41 +850,18 @@ export default function AddGift() {
                   {/* Price and Quantity Section */}
                   <View style={desktopStyles.modalPriceQtyColumn}>
                     <View style={desktopStyles.modalFieldGroup}>
-                      <Text style={desktopStyles.modalFieldLabel}>
-                        Price of gift
-                      </Text>
-                      <TextInput
-                        value={price}
-                        onChangeText={setPrice}
-                        style={desktopStyles.modalPriceInput}
-                        keyboardType="decimal-pad"
-                        placeholder="AED 0.00"
-                        placeholderTextColor="#8E8EA9"
-                      />
+                      <Text style={desktopStyles.modalFieldLabel}>Price of gift</Text>
+                      <TextInput value={price} onChangeText={setPrice} style={desktopStyles.modalPriceInput} keyboardType="decimal-pad" placeholder="AED 0.00" placeholderTextColor="#8E8EA9" />
                     </View>
                     <View style={desktopStyles.modalFieldGroup}>
-                      <Text style={desktopStyles.modalFieldLabel}>
-                        Quantity
-                      </Text>
+                      <Text style={desktopStyles.modalFieldLabel}>Quantity</Text>
                       <View style={desktopStyles.modalQtyRow}>
-                        <Pressable
-                          onPress={decQty}
-                          style={desktopStyles.modalQtyButton}
-                        >
-                          <Text style={desktopStyles.modalQtyButtonText}>
-                            –
-                          </Text>
+                        <Pressable onPress={decQty} style={desktopStyles.modalQtyButton}>
+                          <Text style={desktopStyles.modalQtyButtonText}>–</Text>
                         </Pressable>
-                        <Text style={desktopStyles.modalQtyValue}>
-                          {String(quantity).padStart(2, "0")}
-                        </Text>
-                        <Pressable
-                          onPress={incQty}
-                          style={desktopStyles.modalQtyButton}
-                        >
-                          <Text style={desktopStyles.modalQtyButtonText}>
-                            +
-                          </Text>
+                        <Text style={desktopStyles.modalQtyValue}>{String(quantity).padStart(2, "0")}</Text>
+                        <Pressable onPress={incQty} style={desktopStyles.modalQtyButton}>
+                          <Text style={desktopStyles.modalQtyButtonText}>+</Text>
                         </Pressable>
                       </View>
                     </View>
@@ -1025,17 +870,9 @@ export default function AddGift() {
 
                 {/* Name of Gift */}
                 <View style={desktopStyles.modalFieldGroup}>
-                  <Text style={desktopStyles.modalFieldLabel}>
-                    Name of Gift
-                  </Text>
+                  <Text style={desktopStyles.modalFieldLabel}>Name of Gift</Text>
                   <View style={desktopStyles.modalInputRow}>
-                    <TextInput
-                      value={name}
-                      onChangeText={setName}
-                      style={desktopStyles.modalInput}
-                      placeholder="Enter gift name"
-                      placeholderTextColor="#8E8EA9"
-                    />
+                    <TextInput value={name} onChangeText={setName} style={desktopStyles.modalInput} placeholder="Enter gift name" placeholderTextColor="#8E8EA9" />
                     <Ionicons name="pencil-outline" size={20} color="#AEAEB2" />
                   </View>
                 </View>
@@ -1044,61 +881,26 @@ export default function AddGift() {
                 <View style={desktopStyles.modalFieldGroup}>
                   <Text style={desktopStyles.modalFieldLabel}>Description</Text>
                   <View style={desktopStyles.modalTextareaWrapper}>
-                    <TextInput
-                      placeholder="Prefer color white, size medium etc"
-                      value={description}
-                      onChangeText={(t) =>
-                        t.length <= DESCRIPTION_LIMIT && setDescription(t)
-                      }
-                      style={desktopStyles.modalTextarea}
-                      multiline
-                      placeholderTextColor="#8E8EA9"
-                    />
-                    <Text style={desktopStyles.modalCharCount}>
-                      {description.length}/100
-                    </Text>
+                    <TextInput placeholder="Prefer color white, size medium etc" value={description} onChangeText={(t) => t.length <= DESCRIPTION_LIMIT && setDescription(t)} style={desktopStyles.modalTextarea} multiline placeholderTextColor="#8E8EA9" />
+                    <Text style={desktopStyles.modalCharCount}>{description.length}/100</Text>
                   </View>
                 </View>
               </ScrollView>
 
               {/* Footer Buttons */}
               <View style={desktopStyles.modalFooter}>
-                <Pressable
-                  style={desktopStyles.modalCancelButton}
-                  onPress={handleCancel}
-                >
-                  <Text style={desktopStyles.modalCancelButtonText}>
-                    Cancel
-                  </Text>
+                <Pressable style={desktopStyles.modalCancelButton} onPress={handleCancel}>
+                  <Text style={desktopStyles.modalCancelButtonText}>Cancel</Text>
                 </Pressable>
-                <Pressable
-                  style={[
-                    desktopStyles.modalSaveButton,
-                    !canSave && desktopStyles.modalSaveButtonDisabled,
-                  ]}
-                  onPress={handleSave}
-                  disabled={!canSave}
-                >
-                  <Text
-                    style={[
-                      desktopStyles.modalSaveButtonText,
-                      !canSave && desktopStyles.modalSaveButtonTextDisabled,
-                    ]}
-                  >
-                    {saving ? "Saving..." : "Save"}
-                  </Text>
+                <Pressable style={[desktopStyles.modalSaveButton, !canSave && desktopStyles.modalSaveButtonDisabled]} onPress={handleSave} disabled={!canSave}>
+                  <Text style={[desktopStyles.modalSaveButtonText, !canSave && desktopStyles.modalSaveButtonTextDisabled]}>{saving ? "Saving..." : "Save"}</Text>
                 </Pressable>
               </View>
             </View>
           </View>
         ) : (
-          <Animated.View
-            style={[styles.sheetContainer, { transform: [{ translateY }] }]}
-          >
-            <Pressable
-              style={{ backgroundColor: "#FFFF", borderWidth: 0 }}
-              onPress={closeSheet}
-            >
+          <Animated.View style={[styles.sheetContainer, { transform: [{ translateY }] }]}>
+            <Pressable style={{ backgroundColor: "#FFFF", borderWidth: 0 }} onPress={closeSheet}>
               <View style={styles.sheetHandle} />
             </Pressable>
             <ScrollView
@@ -1112,26 +914,7 @@ export default function AddGift() {
               <View style={{ padding: 16, gap: 20, backgroundColor: "#ffff" }}>
                 <Text style={styles.sheetTitle}> Add a gift item</Text>
 
-                <TextInputField
-                  label="Add a web link"
-                  value={link}
-                  onChangeText={setLink}
-                  icon={
-                    <Image
-                      source={require("@/assets/images/externalLink.png")}
-                    />
-                  }
-                  keyboardType="url"
-                  placeholder="https://"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  error={[
-                    ...(!isUrlValid && link.trim().length > 0
-                      ? ["Invalid URL"]
-                      : []),
-                    ...(scrapeError ? [String(scrapeError)] : []),
-                  ]}
-                />
+                <TextInputField label="Add a web link" value={link} onChangeText={setLink} icon={<Image source={require("@/assets/images/externalLink.png")} />} keyboardType="url" placeholder="https://" autoCapitalize="none" autoCorrect={false} error={[...(!isUrlValid && link.trim().length > 0 ? ["Invalid URL"] : []), ...(scrapeError ? [String(scrapeError)] : [])]} />
                 <View style={styles.orDivider}>
                   <View style={styles.orLine} />
                   <Text style={styles.orText}>OR</Text>
@@ -1157,53 +940,19 @@ export default function AddGift() {
                     <Pressable onPress={decQty} style={styles.qtyBtn}>
                       <Text style={styles.qtyBtnText}>–</Text>
                     </Pressable>
-                    <Text style={styles.qtyValue}>
-                      {String(quantity).padStart(2, "0")}
-                    </Text>
+                    <Text style={styles.qtyValue}>{String(quantity).padStart(2, "0")}</Text>
                     <Pressable onPress={incQty} style={styles.qtyBtn}>
                       <Text style={styles.qtyBtnText}>+</Text>
                     </Pressable>
                   </View>
                 </View>
-                <TextInputField
-                  label="Price of gift"
-                  value={price}
-                  onChangeText={setPrice}
-                  keyboardType="decimal-pad"
-                  inputLabelContainerStyle={{ backgroundColor: "#F2F2F7" }}
-                />
+                <TextInputField label="Price of gift" value={price} onChangeText={setPrice} keyboardType="decimal-pad" inputLabelContainerStyle={{ backgroundColor: "#F2F2F7" }} />
 
-                <TextInputField
-                  label="Name of gift"
-                  value={name}
-                  onChangeText={setName}
-                  inputLabelContainerStyle={{ backgroundColor: "#F2F2F7" }}
-                  icon={<Image source={require("@/assets/images/Edit.png")} />}
-                />
+                <TextInputField label="Name of gift" value={name} onChangeText={setName} inputLabelContainerStyle={{ backgroundColor: "#F2F2F7" }} icon={<Image source={require("@/assets/images/Edit.png")} />} />
 
-                <TextInputAreaField
-                  label="Description (optional)"
-                  placeholder="Prefer white, size M."
-                  value={description}
-                  onChangeText={(t) =>
-                    t.length <= DESCRIPTION_LIMIT && setDescription(t)
-                  }
-                  inputLabelContainerStyle={{ backgroundColor: "#F2F2F7" }}
-                  descriptionLimit={DESCRIPTION_LIMIT}
-                />
-                <Pressable
-                  style={[styles.saveBtn, !canSave && styles.saveBtnDisabled]}
-                  onPress={handleSave}
-                  disabled={!canSave}
-                >
-                  <Text
-                    style={[
-                      styles.saveBtnText,
-                      !canSave && styles.saveBtnTextDisabled,
-                    ]}
-                  >
-                    {saving ? "Saving..." : "Save"}
-                  </Text>
+                <TextInputAreaField label="Description (optional)" placeholder="Prefer white, size M." value={description} onChangeText={(t) => t.length <= DESCRIPTION_LIMIT && setDescription(t)} inputLabelContainerStyle={{ backgroundColor: "#F2F2F7" }} descriptionLimit={DESCRIPTION_LIMIT} />
+                <Pressable style={[styles.saveBtn, !canSave && styles.saveBtnDisabled]} onPress={handleSave} disabled={!canSave}>
+                  <Text style={[styles.saveBtnText, !canSave && styles.saveBtnTextDisabled]}>{saving ? "Saving..." : "Save"}</Text>
                 </Pressable>
                 <Pressable style={styles.cancelBtn} onPress={handleCancel}>
                   <Text style={styles.cancelBtnText}>Cancel</Text>
@@ -1214,36 +963,16 @@ export default function AddGift() {
         )}
       </Modal>
       {/* Delete confirmation modal for item deletion */}
-      <DeleteConfirmation
-        visible={!!deleteItemId}
-        onCancel={() => setDeleteItemId(null)}
-        onDelete={() => handleDeleteItem(deleteItemId)}
-      />
-      
+      <DeleteConfirmation visible={!!deleteItemId} onCancel={() => setDeleteItemId(null)} onDelete={() => handleDeleteItem(deleteItemId)} />
+
       {/* Cover Photo Upload Modal */}
       {isDesktop && (
-        <Modal
-          visible={showCoverUploadModal}
-          transparent
-          animationType="fade"
-          onRequestClose={() => !isUploadingCover && setShowCoverUploadModal(false)}
-        >
-          <Pressable 
-            style={desktopStyles.uploadBackdrop} 
-            onPress={() => !isUploadingCover && setShowCoverUploadModal(false)}
-          >
-            <Pressable 
-              style={desktopStyles.uploadModalCard}
-              onPress={(e) => e.stopPropagation()}
-            >
+        <Modal visible={showCoverUploadModal} transparent animationType="fade" onRequestClose={() => !isUploadingCover && setShowCoverUploadModal(false)}>
+          <Pressable style={desktopStyles.uploadBackdrop} onPress={() => !isUploadingCover && setShowCoverUploadModal(false)}>
+            <Pressable style={desktopStyles.uploadModalCard} onPress={(e) => e.stopPropagation()}>
               <View style={desktopStyles.uploadModalHeader}>
-                <Text style={desktopStyles.uploadModalTitle}>
-                  {coverUri ? "Change Cover Photo" : "Upload Cover Photo"}
-                </Text>
-                <Pressable
-                  onPress={() => !isUploadingCover && setShowCoverUploadModal(false)}
-                  disabled={isUploadingCover}
-                >
+                <Text style={desktopStyles.uploadModalTitle}>{coverUri ? "Change Cover Photo" : "Upload Cover Photo"}</Text>
+                <Pressable onPress={() => !isUploadingCover && setShowCoverUploadModal(false)} disabled={isUploadingCover}>
                   <Ionicons name="close" size={24} color="#8E8E93" />
                 </Pressable>
               </View>
@@ -1252,32 +981,17 @@ export default function AddGift() {
               <View style={desktopStyles.uploadContent}>
                 {coverUri ? (
                   <View style={desktopStyles.uploadPreviewContainer}>
-                    <Image
-                      source={{ uri: coverUri }}
-                      style={desktopStyles.uploadPreviewImage}
-                      resizeMode="cover"
-                    />
+                    <Image source={{ uri: coverUri }} style={desktopStyles.uploadPreviewImage} resizeMode="cover" />
                   </View>
                 ) : (
-                  <Pressable
-                    style={[
-                      desktopStyles.uploadZone,
-                      isUploadingCover && desktopStyles.uploadZoneDisabled,
-                    ]}
-                    onPress={handleCoverPhotoUpload}
-                    disabled={isUploadingCover}
-                  >
+                  <Pressable style={[desktopStyles.uploadZone, isUploadingCover && desktopStyles.uploadZoneDisabled]} onPress={handleCoverPhotoUpload} disabled={isUploadingCover}>
                     {isUploadingCover ? (
                       <ActivityIndicator size="large" color="#3B0076" />
                     ) : (
                       <>
                         <Ionicons name="cloud-upload-outline" size={48} color="#3B0076" />
-                        <Text style={desktopStyles.uploadZoneTitle}>
-                          Drag and drop your files here
-                        </Text>
-                        <Text style={desktopStyles.uploadZoneSubtitle}>
-                          Maximum file size: 4MB. Only JPG, JPEG and PNG with a ratio of 16:9
-                        </Text>
+                        <Text style={desktopStyles.uploadZoneTitle}>Drag and drop your files here</Text>
+                        <Text style={desktopStyles.uploadZoneSubtitle}>Maximum file size: 4MB. Only JPG, JPEG and PNG with a ratio of 16:9</Text>
                         {/* <Pressable style={desktopStyles.browseButton}>
                           <Text style={desktopStyles.browseButtonText}>
                             Browse Files
@@ -1289,16 +1003,10 @@ export default function AddGift() {
                 )}
 
                 {/* Error Message */}
-                {coverUploadError && (
-                  <Text style={desktopStyles.uploadErrorText}>
-                    {coverUploadError}
-                  </Text>
-                )}
+                {coverUploadError && <Text style={desktopStyles.uploadErrorText}>{coverUploadError}</Text>}
 
                 {/* Supported Formats */}
-                <Text style={desktopStyles.uploadSupportedFormats}>
-                  Supported file formats: JPEG, PNG. Max size: 4MB. Only JPG, JPEG and PNG with a ratio of 16:9
-                </Text>
+                <Text style={desktopStyles.uploadSupportedFormats}>Supported file formats: JPEG, PNG. Max size: 4MB. Only JPG, JPEG and PNG with a ratio of 16:9</Text>
               </View>
 
               {/* Action Buttons */}
@@ -1312,43 +1020,19 @@ export default function AddGift() {
                     Cancel
                   </Text>
                 </Pressable> */}
-                <Pressable
-                  style={[
-                    desktopStyles.uploadSubmitButton,
-                    isUploadingCover && desktopStyles.uploadSubmitButtonDisabled,
-                  ]}
-                  onPress={handleCoverPhotoUpload}
-                  disabled={isUploadingCover}
-                >
-                  <Text style={desktopStyles.uploadSubmitButtonText}>
-                    {isUploadingCover ? "Uploading..." : coverUri ? "Change Photo" : "Upload"}
-                  </Text>
+                <Pressable style={[desktopStyles.uploadSubmitButton, isUploadingCover && desktopStyles.uploadSubmitButtonDisabled]} onPress={handleCoverPhotoUpload} disabled={isUploadingCover}>
+                  <Text style={desktopStyles.uploadSubmitButtonText}>{isUploadingCover ? "Uploading..." : coverUri ? "Change Photo" : "Upload"}</Text>
                 </Pressable>
               </View>
             </Pressable>
           </Pressable>
         </Modal>
       )}
-      
+
       {/* Product search browser modal */}
-      <Modal
-        visible={showBrowser}
-        animationType="slide"
-        presentationStyle="fullScreen"
-        onRequestClose={() => setShowBrowser(false)}
-      >
-        <LinearGradient
-          colors={["#330065", "#45018ad7"]}
-          locations={[0, 0.7]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 2 }}
-        >
-          <View
-            style={[
-              styles.browserHeader,
-              { backgroundColor: "transparent", height: 80 },
-            ]}
-          >
+      <Modal visible={showBrowser} animationType="slide" presentationStyle="fullScreen" onRequestClose={() => setShowBrowser(false)}>
+        <LinearGradient colors={["#330065", "#45018ad7"]} locations={[0, 0.7]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 2 }}>
+          <View style={[styles.browserHeader, { backgroundColor: "transparent", height: 80 }]}>
             <View style={[styles.navigation, { paddingBottom: 16 }]}>
               <Pressable
                 onPress={() => {
@@ -1364,22 +1048,9 @@ export default function AddGift() {
           </View>
         </LinearGradient>
         <View style={styles.browserModalContainer}>
-          {browserUrl && (
-            <WebView
-              source={{ uri: browserUrl }}
-              onNavigationStateChange={(nav) => setCurrentBrowserUrl(nav.url)}
-              startInLoadingState
-              style={styles.webview}
-            />
-          )}
-          <SafeAreaView
-            edges={["bottom"]}
-            style={styles.browserActionBarWrapper}
-          >
-            <Pressable
-              style={styles.browserActionBar}
-              onPress={handleBrowserAdd}
-            >
+          {browserUrl && <WebView source={{ uri: browserUrl }} onNavigationStateChange={(nav) => setCurrentBrowserUrl(nav.url)} startInLoadingState style={styles.webview} />}
+          <SafeAreaView edges={["bottom"]} style={styles.browserActionBarWrapper}>
+            <Pressable style={styles.browserActionBar} onPress={handleBrowserAdd}>
               <Ionicons name="add" size={20} color="#FFFFFF" />
               <Text style={styles.browserActionBarText}>Add Product</Text>
             </Pressable>
@@ -1387,24 +1058,13 @@ export default function AddGift() {
         </View>
       </Modal>
       {/* Sort & Filter Bottom Sheet (designed) */}
-      <Modal
-        visible={showSortSheet}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowSortSheet(false)}
-      >
-        <Pressable
-          style={styles.backdrop}
-          onPress={() => setShowSortSheet(false)}
-        />
+      <Modal visible={showSortSheet} transparent animationType="fade" onRequestClose={() => setShowSortSheet(false)}>
+        <Pressable style={styles.backdrop} onPress={() => setShowSortSheet(false)} />
         <View style={styles.sortSheetContainer}>
           <Pressable onPress={() => setShowSortSheet(false)}>
             <View style={styles.sortSheetHandle} />
           </Pressable>
-          <ScrollView
-            contentContainerStyle={styles.sortSheetContent}
-            showsVerticalScrollIndicator={false}
-          >
+          <ScrollView contentContainerStyle={styles.sortSheetContent} showsVerticalScrollIndicator={false}>
             <Text style={styles.sortSheetTitle}>Sort & Filter</Text>
             <View style={styles.sortDivider} />
             <View style={styles.sortSection}>
@@ -1419,60 +1079,23 @@ export default function AddGift() {
                 { key: "newest", label: "Most Recent to Oldest" },
                 { key: "oldest", label: "Oldest to Most Recent" },
               ].map((o) => (
-                <Pressable
-                  key={o.key}
-                  style={styles.radioRow}
-                  onPress={() => setTempSortBy(o.key as SortOption)}
-                >
-                  <View
-                    style={[
-                      styles.radioOuter,
-                      tempSortBy === o.key && styles.radioOuterActive,
-                    ]}
-                  >
-                    {tempSortBy === o.key && <View style={styles.radioInner} />}
-                  </View>
+                <Pressable key={o.key} style={styles.radioRow} onPress={() => setTempSortBy(o.key as SortOption)}>
+                  <View style={[styles.radioOuter, tempSortBy === o.key && styles.radioOuterActive]}>{tempSortBy === o.key && <View style={styles.radioInner} />}</View>
                   <Text style={styles.radioLabel}>{o.label}</Text>
                 </Pressable>
               ))}
             </View>
             <View style={styles.sortSection}>
               <View style={styles.sortSectionHeader}>
-                <Text style={styles.sortSectionTitle}>
-                  Filter by Availability
-                </Text>
+                <Text style={styles.sortSectionTitle}>Filter by Availability</Text>
                 <Ionicons name="chevron-down" size={20} color="#1C0335" />
               </View>
-              <Pressable
-                style={styles.radioRow}
-                onPress={() => setTempFilterClaimed((v) => !v)}
-              >
-                <View
-                  style={[
-                    styles.checkboxBox,
-                    tempFilterClaimed && styles.checkboxBoxActive,
-                  ]}
-                >
-                  {tempFilterClaimed && (
-                    <Ionicons name="checkmark" size={10} color="#FFFFFF" />
-                  )}
-                </View>
+              <Pressable style={styles.radioRow} onPress={() => setTempFilterClaimed((v) => !v)}>
+                <View style={[styles.checkboxBox, tempFilterClaimed && styles.checkboxBoxActive]}>{tempFilterClaimed && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}</View>
                 <Text style={styles.radioLabel}>Claimed</Text>
               </Pressable>
-              <Pressable
-                style={styles.radioRow}
-                onPress={() => setTempFilterUnclaimed((v) => !v)}
-              >
-                <View
-                  style={[
-                    styles.checkboxBox,
-                    tempFilterUnclaimed && styles.checkboxBoxActive,
-                  ]}
-                >
-                  {tempFilterUnclaimed && (
-                    <Ionicons name="checkmark" size={10} color="#FFFFFF" />
-                  )}
-                </View>
+              <Pressable style={styles.radioRow} onPress={() => setTempFilterUnclaimed((v) => !v)}>
+                <View style={[styles.checkboxBox, tempFilterUnclaimed && styles.checkboxBoxActive]}>{tempFilterUnclaimed && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}</View>
                 <Text style={styles.radioLabel}>Unclaimed</Text>
               </Pressable>
             </View>
@@ -1493,11 +1116,7 @@ export default function AddGift() {
           </View>
         </View>
       </Modal>
-      <DeleteConfirmation
-        visible={!!deleteListId}
-        onCancel={() => setDeleteListId(null)}
-        onDelete={() => handleDeleteList(deleteListId)}
-      />
+      <DeleteConfirmation visible={!!deleteListId} onCancel={() => setDeleteListId(null)} onDelete={() => handleDeleteList(deleteListId)} />
     </View>
   );
 }
@@ -1542,41 +1161,12 @@ type MobileLayoutProps = {
   onDelete: (itemId: string) => void;
 };
 
-function MobileLayout({
-  title,
-  subtitle,
-  coverUri,
-  overlayText,
-  displayedItems,
-  onAddGift,
-  onOpenSortSheet,
-  listId,
-  onShare,
-  onManage,
-  handleBack,
-  privacy,
-  loading,
-  shareCount,
-  address,
-  lastUpdated,
-  occasion,
-  tempSortBy,
-  tempFilterClaimed,
-  tempFilterUnclaimed,
-  daysToGo,
-  creator,
-  onDelete,
-}: MobileLayoutProps) {
+function MobileLayout({ title, subtitle, coverUri, overlayText, displayedItems, onAddGift, onOpenSortSheet, listId, onShare, onManage, handleBack, privacy, loading, shareCount, address, lastUpdated, occasion, tempSortBy, tempFilterClaimed, tempFilterUnclaimed, daysToGo, creator, onDelete }: MobileLayoutProps) {
   return (
     <>
       <HeaderBar title={title} onBack={handleBack} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <ListCover
-          imageUri={coverUri}
-          overlayText={String(daysToGo || "")}
-          occasion={occasion}
-          creator={creator}
-        />
+        <ListCover imageUri={coverUri} overlayText={String(daysToGo || "")} occasion={occasion} creator={creator} />
 
         <View style={styles.listInfoContainer}>
           <RibbonHeader occasion={occasion} title={title} subtitle={subtitle} />
@@ -1596,13 +1186,7 @@ function MobileLayout({
             })
           }
         />
-        {displayedItems.length > 0 ? (
-          <SelectedFilter
-            tempSortBy={String(tempSortBy)}
-            tempFilterClaimed={Boolean(tempFilterClaimed)}
-            tempFilterUnclaimed={Boolean(tempFilterUnclaimed)}
-          />
-        ) : null}
+        {displayedItems.length > 0 ? <SelectedFilter tempSortBy={String(tempSortBy)} tempFilterClaimed={Boolean(tempFilterClaimed)} tempFilterUnclaimed={Boolean(tempFilterUnclaimed)} /> : null}
 
         <View style={styles.addGiftSection}>
           {displayedItems.length > 0 ? (
@@ -1630,16 +1214,11 @@ function MobileLayout({
         </View>
 
         <InfoBox>
-          To learn more on how to add gifts from web browser,{" "}
-          <Text style={styles.linkText}>click here</Text>
+          To learn more on how to add gifts from web browser, <Text style={styles.linkText}>click here</Text>
         </InfoBox>
       </ScrollView>
 
-      <FooterBar
-        lastUpdated={lastUpdated}
-        onShare={onShare}
-        onManage={onManage}
-      />
+      <FooterBar lastUpdated={lastUpdated} onShare={onShare} onManage={onManage} />
     </>
   );
 }
@@ -1674,35 +1253,7 @@ type DesktopLayoutProps = {
   isArchived?: boolean;
 };
 
-function DesktopLayout({
-  title,
-  subtitle,
-  ribbonSubtitle,
-  coverUri,
-  formattedEventDate,
-  daysToGo,
-  totals,
-  totalItemsCount,
-  availability,
-  onAvailabilityChange,
-  sortBy,
-  onSelectSort,
-  displayedItems,
-  onAddGift,
-  onShare,
-  onManage,
-  onChangeCover,
-  onOpenGift,
-  privacy,
-  shareCount,
-  loading,
-  address,
-  lastUpdated,
-  occasion,
-  onDelete,
-  onSelectManageListDropdown,
-  isArchived
-}: DesktopLayoutProps) {
+function DesktopLayout({ title, subtitle, ribbonSubtitle, coverUri, formattedEventDate, daysToGo, totals, totalItemsCount, availability, onAvailabilityChange, sortBy, onSelectSort, displayedItems, onAddGift, onShare, onManage, onChangeCover, onOpenGift, privacy, shareCount, loading, address, lastUpdated, occasion, onDelete, onSelectManageListDropdown, isArchived }: DesktopLayoutProps) {
   const privacyDisplay = getPrivacyDisplay(privacy, loading, shareCount);
   const availabilityOptions: {
     value: "all" | "claimed" | "unclaimed";
@@ -1713,17 +1264,12 @@ function DesktopLayout({
     { value: "unclaimed", label: "Unclaimed" },
   ];
   const [isShowDropDownMenu, setIsShowDropDownMenu] = React.useState(false);
-  const availabilityLabel =
-    availabilityOptions.find((opt) => opt.value === availability)?.label ??
-    "All";
-  const sortLabel =
-    SORT_OPTIONS.find((opt) => opt.key === sortBy)?.label ?? "Default";
+  const availabilityLabel = availabilityOptions.find((opt) => opt.value === availability)?.label ?? "All";
+  const sortLabel = SORT_OPTIONS.find((opt) => opt.key === sortBy)?.label ?? "Default";
   const visibilityText = React.useMemo(() => {
     if (loading) return "Loading privacy";
     if (privacy === "shared") {
-      return (shareCount ?? 0) === 0
-        ? "Visible to Everyone"
-        : "Visible to My People";
+      return (shareCount ?? 0) === 0 ? "Visible to Everyone" : "Visible to My People";
     }
     if (privacy === "public") return "Visible to Everyone";
     return "Only Me";
@@ -1732,51 +1278,51 @@ function DesktopLayout({
   const [showSortMenu, setShowSortMenu] = React.useState(false);
 
   const dropdownOptions = [
-    ...[(isArchived ? { id:"11", icon: require("@/assets/images/unarchiveList.png"), title:"Unarchive", action: "unArchive"}: { id:"1", icon: require("@/assets/images/archiveList.png"), title:"Archive", action: "archive"})],
-    { id:"2", icon: require("@/assets/images/duplicateList.png"), title:"Duplicate List", action: "duplicateList"},
-    { id: "3", icon: require("@/assets/images/Edit.png"), title:"Edit List", action: "editList"},
-    { id:"4", icon: require("@/assets/images/deleteList.png"), title:"Delete", action: "delete" },
-  ]
+    ...[isArchived ? { id: "11", icon: require("@/assets/images/unarchiveList.png"), title: "Unarchive", action: "unArchive" } : { id: "1", icon: require("@/assets/images/archiveList.png"), title: "Archive", action: "archive" }],
+    { id: "2", icon: require("@/assets/images/duplicateList.png"), title: "Duplicate List", action: "duplicateList" },
+    { id: "3", icon: require("@/assets/images/Edit.png"), title: "Edit List", action: "editList" },
+    { id: "4", icon: require("@/assets/images/deleteList.png"), title: "Delete", action: "delete" },
+  ];
   return (
-    <SafeAreaView
-      style={desktopStyles.safeArea}
-      edges={Platform.OS === "web" ? [] : ["top"]}
-    >
+    <SafeAreaView style={desktopStyles.safeArea} edges={Platform.OS === "web" ? [] : ["top"]}>
       <StatusBar barStyle="dark-content" />
       <ScrollView contentContainerStyle={desktopStyles.scrollContent}>
         <View style={desktopStyles.maxWidth}>
           <View style={desktopStyles.topBar}>
             <Text style={desktopStyles.breadcrumbText}>
-              Home / My List /{" "}
-              <Text style={desktopStyles.breadcrumbCurrent}>{title}</Text>
+              Home / My List / <Text style={desktopStyles.breadcrumbCurrent}>{title}</Text>
             </Text>
             <View style={desktopStyles.topActions}>
-              <View style={{ position:'relative', zIndex: 100}}>
-                <Pressable style={[desktopStyles.manageButton, { shadowOffset:{width: 0, height: 0},gap:10,  borderWidth:2, borderColor:'#330065', borderRadius:8, paddingHorizontal: 24, paddingVertical:8, height: 48}]} onPress={() => setIsShowDropDownMenu((prev) => !prev)}>
+              <View style={{ position: "relative", zIndex: 100 }}>
+                <Pressable style={[desktopStyles.manageButton, { shadowOffset: { width: 0, height: 0 }, gap: 10, borderWidth: 2, borderColor: "#330065", borderRadius: 8, paddingHorizontal: 24, paddingVertical: 8, height: 48 }]} onPress={() => setIsShowDropDownMenu((prev) => !prev)}>
                   <Text style={desktopStyles.manageButtonText}>Manage List</Text>
                   <Ionicons name="caret-down" size={18} color="#3B0076" />
                 </Pressable>
                 {isShowDropDownMenu && (
-                  <View style={{ padding:16, shadowColor: "#000", shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.2, shadowRadius: 12, borderRadius:8, top: '100%', left: 0, marginTop: 8, zIndex: 9999, position:'absolute', width: 287, minHeight:200, backgroundColor:'#ffff'}}>
-                    <Text style={{fontSize:16, fontFamily:'Nunito_700Bold'}}>Manage List</Text>
-                    <View style={{rowGap: 12, marginTop: 8}}>
+                  <View style={{ padding: 16, shadowColor: "#000", shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.2, shadowRadius: 12, borderRadius: 8, top: "100%", left: 0, marginTop: 8, zIndex: 9999, position: "absolute", width: 287, minHeight: 200, backgroundColor: "#ffff" }}>
+                    <Text style={{ fontSize: 16, fontFamily: "Nunito_700Bold" }}>Manage List</Text>
+                    <View style={{ rowGap: 12, marginTop: 8 }}>
                       {dropdownOptions.map((option) => (
-                        <Pressable 
-                          key={option.id} 
-                          style={({hovered}:  { hovered?: boolean }) => ({
-                            backgroundColor: hovered ? '#EFEFEF' : 'transparent',
-                            borderRadius: 8, flexDirection:'row', alignItems:'center', columnGap:13, padding: 4
+                        <Pressable
+                          key={option.id}
+                          style={({ hovered }: { hovered?: boolean }) => ({
+                            backgroundColor: hovered ? "#EFEFEF" : "transparent",
+                            borderRadius: 8,
+                            flexDirection: "row",
+                            alignItems: "center",
+                            columnGap: 13,
+                            padding: 4,
                           })}
                           onPress={() => {
                             setIsShowDropDownMenu(false);
                             onSelectManageListDropdown(option.action);
                           }}
                         >
-                          <View style={{width:40, height: 40, justifyContent:'center', alignItems:'center', borderRadius: 8, backgroundColor:'#EFEFEF'}}>
-                            <Image source={option.icon} resizeMode="contain" style={{width: 16, height: 16}} />
+                          <View style={{ width: 40, height: 40, justifyContent: "center", alignItems: "center", borderRadius: 8, backgroundColor: "#EFEFEF" }}>
+                            <Image source={option.icon} resizeMode="contain" style={{ width: 16, height: 16 }} />
                           </View>
                           <View>
-                            <Text style={{fontSize:16, fontFamily:'Nunito_600SemiBold', color: option?.title === 'Delete' ? '#FF3B30' : '#000000'}}>{option.title}</Text>
+                            <Text style={{ fontSize: 16, fontFamily: "Nunito_600SemiBold", color: option?.title === "Delete" ? "#FF3B30" : "#000000" }}>{option.title}</Text>
                           </View>
                         </Pressable>
                       ))}
@@ -1784,106 +1330,54 @@ function DesktopLayout({
                   </View>
                 )}
               </View>
-              <Pressable style={[desktopStyles.addButton, { shadowOffset:{width: 0, height: 0},gap:10,  backgroundColor:'#330065', borderRadius:8, paddingHorizontal: 24, paddingVertical:8, height: 48}]} onPress={onAddGift}>
+              <Pressable style={[desktopStyles.addButton, { shadowOffset: { width: 0, height: 0 }, gap: 10, backgroundColor: "#330065", borderRadius: 8, paddingHorizontal: 24, paddingVertical: 8, height: 48 }]} onPress={onAddGift}>
                 <Ionicons name="add" size={20} color="#FFFFFF" />
-                <Text style={[{...desktopStyles.addButtonText}, {color: '#FFFFFF'}]}>Add a Gift</Text>
+                <Text style={[{ ...desktopStyles.addButtonText }, { color: "#FFFFFF" }]}>Add a Gift</Text>
               </Pressable>
-               <Pressable style={[desktopStyles.addButton, { shadowOffset:{width: 0, height: 0},gap:10,  backgroundColor:'#330065', borderRadius:8, paddingHorizontal: 24, paddingVertical:8, height: 48}]} onPress={onShare}>
+              <Pressable style={[desktopStyles.addButton, { shadowOffset: { width: 0, height: 0 }, gap: 10, backgroundColor: "#330065", borderRadius: 8, paddingHorizontal: 24, paddingVertical: 8, height: 48 }]} onPress={onShare}>
                 <Ionicons name="share-social-outline" size={20} color="#FFFFFF" />
-                <Text style={[{...desktopStyles.addButtonText}, {color: '#FFFFFF'}]}>Share list</Text>
+                <Text style={[{ ...desktopStyles.addButtonText }, { color: "#FFFFFF" }]}>Share list</Text>
               </Pressable>
             </View>
           </View>
 
           <View style={desktopStyles.heroCardWrapper}>
-            <View style={[desktopStyles.heroCard, {height: 260, borderRadius: 8, overflow:'hidden'}]}>
-              <Image
-                source={coverUri ? { uri: coverUri } : FALLBACK_COVER}
-                style={[desktopStyles.heroImage, {height: '100%', borderRadius: 0}]}
-                resizeMode="cover"
-              />
+            <View style={[desktopStyles.heroCard, { height: 260, borderRadius: 8, overflow: "hidden" }]}>
+              <Image source={coverUri ? { uri: coverUri } : FALLBACK_COVER} style={[desktopStyles.heroImage, { height: "100%", borderRadius: 0 }]} resizeMode="cover" />
               <View style={desktopStyles.heroOverlay}>
-                <Pressable
-                  style={desktopStyles.changeCoverButton}
-                  onPress={onChangeCover}
-                >
-                  <Text style={desktopStyles.changeCoverText}>
-                    Change cover photo
-                  </Text>
+                <Pressable style={desktopStyles.changeCoverButton} onPress={onChangeCover}>
+                  <Text style={desktopStyles.changeCoverText}>Change cover photo</Text>
                 </Pressable>
               </View>
             </View>
             <View style={desktopStyles.ribbonContainer}>
-              <RibbonHeader
-                occasion={occasion}
-                title={title}
-                subtitle={[ribbonSubtitle, daysToGo]
-                  .filter(Boolean)
-                  .join(" - ")}
-              />
+              <RibbonHeader occasion={occasion} title={title} subtitle={[ribbonSubtitle, daysToGo].filter(Boolean).join(" - ")} />
             </View>
           </View>
 
           {/* Gift Stats Cards */}
           <View style={desktopStyles.statsRow}>
-            <LinearGradient
-              colors={["#3B0076", "#5A00B8"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={desktopStyles.statCard}
-            >
+            <LinearGradient colors={["#3B0076", "#5A00B8"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={desktopStyles.statCard}>
               <Text style={desktopStyles.statCardLabel}>Total Items</Text>
               <Text style={desktopStyles.statCardValue}>{totalItemsCount}</Text>
             </LinearGradient>
-            <LinearGradient
-              colors={["#1F6F4A", "#2A8F5F"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={desktopStyles.statCard}
-            >
+            <LinearGradient colors={["#1F6F4A", "#2A8F5F"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={desktopStyles.statCard}>
               <Text style={desktopStyles.statCardLabel}>All Claimed</Text>
-              <Text style={desktopStyles.statCardValue}>
-                {totals.fullyClaimed}
-              </Text>
+              <Text style={desktopStyles.statCardValue}>{totals.fullyClaimed}</Text>
             </LinearGradient>
-            <LinearGradient
-              colors={["#F2994A", "#FFB366"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={desktopStyles.statCard}
-            >
+            <LinearGradient colors={["#F2994A", "#FFB366"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={desktopStyles.statCard}>
               <Text style={desktopStyles.statCardLabel}>Items Claimed</Text>
-              <Text style={desktopStyles.statCardValue}>
-                {totals.claimedCount}
-              </Text>
+              <Text style={desktopStyles.statCardValue}>{totals.claimedCount}</Text>
             </LinearGradient>
-            <LinearGradient
-              colors={["#4D4D4D", "#666666"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={desktopStyles.statCard}
-            >
+            <LinearGradient colors={["#4D4D4D", "#666666"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={desktopStyles.statCard}>
               <Text style={desktopStyles.statCardLabel}>Items Unclaimed</Text>
-              <Text style={desktopStyles.statCardValue}>
-                {totals.unclaimedCount}
-              </Text>
+              <Text style={desktopStyles.statCardValue}>{totals.unclaimedCount}</Text>
             </LinearGradient>
           </View>
 
           <View style={desktopStyles.controlsRow}>
-            <Pressable
-              style={desktopStyles.visibilityTrigger}
-              onPress={onManage}
-            >
-              <Ionicons
-                name={
-                  privacyDisplay.icon === "globe-outline"
-                    ? "eye-outline"
-                    : privacyDisplay.icon
-                }
-                size={18}
-                color="#3B0076"
-              />
+            <Pressable style={desktopStyles.visibilityTrigger} onPress={onManage}>
+              <Ionicons name={privacyDisplay.icon === "globe-outline" ? "eye-outline" : privacyDisplay.icon} size={18} color="#3B0076" />
               <Text style={desktopStyles.visibilityText}>{visibilityText}</Text>
               <Ionicons name="chevron-down" size={16} color="#3B0076" />
             </Pressable>
@@ -1891,25 +1385,15 @@ function DesktopLayout({
             <View style={desktopStyles.filterCluster}>
               <View style={desktopStyles.filterGroup}>
                 <Text style={desktopStyles.filterLabel}>Availability:</Text>
-                <Pressable
-                  style={desktopStyles.filterButton}
-                  onPress={() => setShowAvailabilityMenu(true)}
-                >
-                  <Text style={desktopStyles.filterButtonText}>
-                    {availabilityLabel}
-                  </Text>
+                <Pressable style={desktopStyles.filterButton} onPress={() => setShowAvailabilityMenu(true)}>
+                  <Text style={desktopStyles.filterButtonText}>{availabilityLabel}</Text>
                   <Ionicons name="chevron-down" size={14} color="#3B0076" />
                 </Pressable>
               </View>
               <View style={desktopStyles.filterGroup}>
                 <Text style={desktopStyles.filterLabel}>Sort</Text>
-                <Pressable
-                  style={desktopStyles.filterButton}
-                  onPress={() => setShowSortMenu(true)}
-                >
-                  <Text style={desktopStyles.filterButtonText}>
-                    {sortLabel}
-                  </Text>
+                <Pressable style={desktopStyles.filterButton} onPress={() => setShowSortMenu(true)}>
+                  <Text style={desktopStyles.filterButtonText}>{sortLabel}</Text>
                   <Ionicons name="chevron-down" size={14} color="#3B0076" />
                 </Pressable>
               </View>
@@ -1934,13 +1418,9 @@ function DesktopLayout({
 
           <View style={desktopStyles.listSummaryRow}>
             <View style={desktopStyles.listSummaryLeft}>
-              <Text style={desktopStyles.listSummaryLabel}>
-                Total items in list:
-              </Text>
+              <Text style={desktopStyles.listSummaryLabel}>Total items in list:</Text>
               <View style={desktopStyles.listSummaryBadge}>
-                <Text style={desktopStyles.listSummaryBadgeText}>
-                  {totalItemsCount}
-                </Text>
+                <Text style={desktopStyles.listSummaryBadgeText}>{totalItemsCount}</Text>
               </View>
             </View>
             {/* <Pressable style={desktopStyles.summaryShare} onPress={onShare}>
@@ -1953,29 +1433,14 @@ function DesktopLayout({
 
           <View style={desktopStyles.itemsColumn}>
             {displayedItems.length > 0 ? (
-              displayedItems.map((item, index) => (
-                <DesktopGiftItemRow
-                  key={item._id}
-                  item={item}
-                  onPress={onOpenGift}
-                  onDelete={onDelete}
-                  index={index}
-                />
-              ))
+              displayedItems.map((item, index) => <DesktopGiftItemRow key={item._id} item={item} onPress={onOpenGift} onDelete={onDelete} index={index} />)
             ) : (
               <View style={desktopStyles.emptyState}>
                 <Text style={desktopStyles.emptyTitle}>No gifts yet</Text>
-                <Text style={desktopStyles.emptySubtitle}>
-                  Start adding items to make this list shine.
-                </Text>
-                <Pressable
-                  style={desktopStyles.addButtonSecondary}
-                  onPress={onAddGift}
-                >
+                <Text style={desktopStyles.emptySubtitle}>Start adding items to make this list shine.</Text>
+                <Pressable style={desktopStyles.addButtonSecondary} onPress={onAddGift}>
                   <Ionicons name="add" size={18} color="#3B0076" />
-                  <Text style={desktopStyles.addButtonSecondaryText}>
-                    Add a gift
-                  </Text>
+                  <Text style={desktopStyles.addButtonSecondaryText}>Add a gift</Text>
                 </Pressable>
               </View>
             )}
@@ -1999,24 +1464,14 @@ function DesktopLayout({
               onPress={onAddGift}
             >
               <Ionicons name="add" size={18} color="#ffff" />
-              <Text style={{ ...desktopStyles.shareLinkText, color: "#ffff" }}>
-                Add more gifts
-              </Text>
+              <Text style={{ ...desktopStyles.shareLinkText, color: "#ffff" }}>Add more gifts</Text>
             </Pressable>
           )}
         </View>
       </ScrollView>
 
-      <Modal
-        visible={showAvailabilityMenu}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowAvailabilityMenu(false)}
-      >
-        <Pressable
-          style={desktopStyles.menuBackdrop}
-          onPress={() => setShowAvailabilityMenu(false)}
-        >
+      <Modal visible={showAvailabilityMenu} transparent animationType="fade" onRequestClose={() => setShowAvailabilityMenu(false)}>
+        <Pressable style={desktopStyles.menuBackdrop} onPress={() => setShowAvailabilityMenu(false)}>
           <View style={desktopStyles.menuCard}>
             {availabilityOptions.map((option) => (
               <Pressable
@@ -2028,25 +1483,15 @@ function DesktopLayout({
                 }}
               >
                 <Text style={desktopStyles.menuLabel}>{option.label}</Text>
-                {availability === option.value && (
-                  <Ionicons name="checkmark" size={18} color="#3B0076" />
-                )}
+                {availability === option.value && <Ionicons name="checkmark" size={18} color="#3B0076" />}
               </Pressable>
             ))}
           </View>
         </Pressable>
       </Modal>
 
-      <Modal
-        visible={showSortMenu}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowSortMenu(false)}
-      >
-        <Pressable
-          style={desktopStyles.menuBackdrop}
-          onPress={() => setShowSortMenu(false)}
-        >
+      <Modal visible={showSortMenu} transparent animationType="fade" onRequestClose={() => setShowSortMenu(false)}>
+        <Pressable style={desktopStyles.menuBackdrop} onPress={() => setShowSortMenu(false)}>
           <View style={desktopStyles.menuCard}>
             {SORT_OPTIONS.map((option) => (
               <Pressable
@@ -2058,9 +1503,7 @@ function DesktopLayout({
                 }}
               >
                 <Text style={desktopStyles.menuLabel}>{option.label}</Text>
-                {sortBy === option.key && (
-                  <Ionicons name="checkmark" size={18} color="#3B0076" />
-                )}
+                {sortBy === option.key && <Ionicons name="checkmark" size={18} color="#3B0076" />}
               </Pressable>
             ))}
           </View>
@@ -2077,32 +1520,15 @@ type DesktopGiftItemRowProps = {
   index: number;
 };
 
-function DesktopGiftItemRow({
-  item,
-  onPress,
-  onDelete,
-  index,
-}: DesktopGiftItemRowProps) {
+function DesktopGiftItemRow({ item, onPress, onDelete, index }: DesktopGiftItemRowProps) {
   const quantity = Math.max(1, Number(item.quantity ?? 1));
   const claimed = Math.max(0, Number(item.claimed ?? 0));
   const claimedPct = Math.min(100, Math.round((claimed / quantity) * 100));
   const isSoldOut = claimed >= quantity;
   const hasClaims = claimed > 0 && !isSoldOut;
-  const statusLabel = isSoldOut
-    ? "All Claimed"
-    : hasClaims
-      ? `${claimed} Claimed`
-      : "Unclaimed";
-  const badgeStyle = isSoldOut
-    ? desktopStyles.statusBadgeSuccess
-    : hasClaims
-      ? desktopStyles.statusBadgeWarning
-      : desktopStyles.statusBadgeNeutral;
-  const badgeTextStyle = isSoldOut
-    ? desktopStyles.statusBadgeSuccessText
-    : hasClaims
-      ? desktopStyles.statusBadgeWarningText
-      : desktopStyles.statusBadgeNeutralText;
+  const statusLabel = isSoldOut ? "All Claimed" : hasClaims ? `${claimed} Claimed` : "Unclaimed";
+  const badgeStyle = isSoldOut ? desktopStyles.statusBadgeSuccess : hasClaims ? desktopStyles.statusBadgeWarning : desktopStyles.statusBadgeNeutral;
+  const badgeTextStyle = isSoldOut ? desktopStyles.statusBadgeSuccessText : hasClaims ? desktopStyles.statusBadgeWarningText : desktopStyles.statusBadgeNeutralText;
   const quantityLabel = String(quantity).padStart(2, "0");
   let currencyLabel = "AED";
 
@@ -2129,9 +1555,7 @@ function DesktopGiftItemRow({
     if (typeof item.price === "number" && Number.isFinite(item.price)) {
       formattedPrice = formatPriceNumber(item.price);
     } else if (typeof item.price === "string") {
-      const numericPart = item.price
-        .replace(/[^0-9.,-]/g, "")
-        .replace(/,/g, "");
+      const numericPart = item.price.replace(/[^0-9.,-]/g, "").replace(/,/g, "");
       const parsed = Number(numericPart);
       if (!Number.isNaN(parsed) && numericPart.length > 0) {
         formattedPrice = formatPriceNumber(parsed);
@@ -2144,20 +1568,9 @@ function DesktopGiftItemRow({
   return (
     <View style={desktopStyles.itemRow}>
       <View style={desktopStyles.itemIndexBubble}>
-        <Text style={desktopStyles.itemIndexText}>
-          {String(index + 1).padStart(2, "0")}
-        </Text>
+        <Text style={desktopStyles.itemIndexText}>{String(index + 1).padStart(2, "0")}</Text>
       </View>
-      <View style={desktopStyles.itemImageWrapper}>
-        {item.image_url ? (
-          <Image
-            source={{ uri: item.image_url }}
-            style={desktopStyles.itemImage}
-          />
-        ) : (
-          <View style={desktopStyles.itemImagePlaceholder} />
-        )}
-      </View>
+      <View style={desktopStyles.itemImageWrapper}>{item.image_url ? <Image source={{ uri: item.image_url }} style={desktopStyles.itemImage} /> : <View style={desktopStyles.itemImagePlaceholder} />}</View>
       <View style={desktopStyles.itemDetails}>
         <View style={desktopStyles.itemHeaderRow}>
           <View style={desktopStyles.itemTitleBlock}>
@@ -2171,27 +1584,10 @@ function DesktopGiftItemRow({
             )}
           </View>
           <View style={desktopStyles.itemActionsColumn}>
-            <Pressable
-              style={[
-                desktopStyles.buyButton,
-                isSoldOut && desktopStyles.buyButtonDisabled,
-              ]}
-              onPress={() => onPress(item)}
-              disabled={isSoldOut}
-            >
-              <Text
-                style={[
-                  desktopStyles.buyButtonText,
-                  isSoldOut && desktopStyles.buyButtonTextDisabled,
-                ]}
-              >
-                View on store
-              </Text>
+            <Pressable style={[desktopStyles.buyButton, isSoldOut && desktopStyles.buyButtonDisabled]} onPress={() => onPress(item)} disabled={isSoldOut}>
+              <Text style={[desktopStyles.buyButtonText, isSoldOut && desktopStyles.buyButtonTextDisabled]}>View on store</Text>
             </Pressable>
-            <Pressable
-              style={desktopStyles.deleteButton}
-              onPress={() => onDelete && onDelete(String(item._id))}
-            >
+            <Pressable style={desktopStyles.deleteButton} onPress={() => onDelete && onDelete(String(item._id))}>
               <Ionicons name="trash-outline" size={20} color="#E54848" />
             </Pressable>
           </View>
@@ -2204,35 +1600,21 @@ function DesktopGiftItemRow({
               <Text style={desktopStyles.priceText}>{formattedPrice}</Text>
             </View>
           )}
-          <Text style={desktopStyles.quantityText}>
-            Quantity: {quantityLabel}
-          </Text>
+          <Text style={desktopStyles.quantityText}>Quantity: {quantityLabel}</Text>
           <View style={[desktopStyles.statusBadge, badgeStyle]}>
-            <Text style={[desktopStyles.statusBadgeText, badgeTextStyle]}>
-              {statusLabel}
-            </Text>
+            <Text style={[desktopStyles.statusBadgeText, badgeTextStyle]}>{statusLabel}</Text>
           </View>
         </View>
 
         <View style={desktopStyles.progressTrack}>
-          <View
-            style={[desktopStyles.progressFill, { width: `${claimedPct}%` }]}
-          />
+          <View style={[desktopStyles.progressFill, { width: `${claimedPct}%` }]} />
         </View>
       </View>
     </View>
   );
 }
 
-function SelectedFilter({
-  tempSortBy,
-  tempFilterClaimed,
-  tempFilterUnclaimed,
-}: {
-  tempSortBy: string;
-  tempFilterClaimed: boolean;
-  tempFilterUnclaimed: boolean;
-}) {
+function SelectedFilter({ tempSortBy, tempFilterClaimed, tempFilterUnclaimed }: { tempSortBy: string; tempFilterClaimed: boolean; tempFilterUnclaimed: boolean }) {
   let availabilityValue = "All";
   if (tempFilterClaimed === false && tempFilterUnclaimed === false) {
     availabilityValue = "All";
