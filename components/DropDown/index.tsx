@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { Modal, Pressable, ScrollView, Text, View, ViewStyle } from "react-native";
+import { Pressable, Text, View, ViewStyle } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
+import BottomSheet from "../ui/BottomSheet";
 import { styles } from "./style";
 
 type DropDownFieldVariant = "default" | "primary";
@@ -33,12 +35,8 @@ export function DropDownField({ label, icon, placeholder = "Select", value, opti
         <Text style={[styles.input, { color: value ? "#1C0335" : placeholderTextColor }]}>{value || placeholder}</Text>
         {icon && <View style={styles.rightIconContainer}>{icon}</View>}
         {activeDropdown && (
-          <Modal transparent animationType="fade">
-            <Pressable style={styles.backdrop} onPress={toggleDropdown} />
+          <BottomSheet isVisible={activeDropdown} onClose={() => setActiveDropdown(false)}>
             <View style={[styles.sheetContainer]}>
-              <Pressable onPress={toggleDropdown}>
-                <View style={styles.sheetHandle} />
-              </Pressable>
               <Text style={styles.sortSheetTitle}>{label}</Text>
               <ScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
                 {options?.map((option, index) => (
@@ -58,7 +56,7 @@ export function DropDownField({ label, icon, placeholder = "Select", value, opti
                 ))}
               </ScrollView>
             </View>
-          </Modal>
+          </BottomSheet>
         )}
       </View>
       {error ? <>{Array.isArray(error) ? <>{error?.map((errorItem) => <Text style={styles.errorText}>{errorItem || ""}</Text>)}</> : <Text style={styles.errorText}>{error || ""}</Text>}</> : <></>}
