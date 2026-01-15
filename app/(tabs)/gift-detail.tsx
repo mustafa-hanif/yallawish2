@@ -1127,124 +1127,110 @@ const CopyToMyListSheet: React.FC<CopyToMyListSheetProps> = ({ visible, onClose,
   const lists = myLists ?? [];
   const loading = myLists === undefined;
 
-  return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable
-        onPress={onClose}
-        style={{
-          flex: 1,
-          backgroundColor: "rgba(0,0,0,0.35)",
-          ...(isDesktop ? { justifyContent: "center", alignItems: "center", padding: 24 } : {}),
-        }}
-      >
-        <Pressable
-          onPress={(e) => e.stopPropagation()}
-          style={
-            isDesktop
-              ? {
-                  backgroundColor: "#FFFFFF",
-                  borderRadius: 24,
-                  paddingHorizontal: 24,
-                  paddingTop: 18,
-                  paddingBottom: 24,
-                  width: "92%",
-                  maxWidth: 640,
-                  maxHeight: "80%",
-                  shadowColor: "#15072C",
-                  shadowOpacity: 0.08,
-                  shadowRadius: 24,
-                  shadowOffset: { width: 0, height: 8 },
-                  elevation: 8,
-                }
-              : {
-                  position: "absolute",
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: "#FFFFFF",
-                  borderTopLeftRadius: 24,
-                  borderTopRightRadius: 24,
-                  paddingHorizontal: 20,
-                  paddingTop: 14,
-                  paddingBottom: 20,
-                  maxHeight: "80%",
-                }
-          }
-        >
-          {!isDesktop && (
-            <Pressable onPress={onClose}>
-              <View
-                style={{
-                  alignSelf: "center",
-                  width: 44,
-                  height: 5,
-                  borderRadius: 3,
-                  backgroundColor: "#E2DAF0",
-                  marginBottom: 12,
-                }}
-              />
-            </Pressable>
-          )}
-          <Text style={{ color: "#1C0335", fontSize: 24, fontFamily: "Nunito_700Bold" }}>Copy Item to your list</Text>
-          <Text style={{ color: "#1C0335", marginTop: 6, fontFamily: "Nunito_400Regular" }}>Choose a list to add this item to</Text>
+  const renderContent = () => (
+    <>
+      <Text style={{ color: "#1C0335", fontSize: 24, fontFamily: "Nunito_700Bold" }}>Copy Item to your list</Text>
+      <Text style={{ color: "#1C0335", marginTop: 6, fontFamily: "Nunito_400Regular" }}>Choose a list to add this item to</Text>
 
-          <ScrollView showsVerticalScrollIndicator={false} style={sheetStyles.list} contentContainerStyle={{ paddingBottom: 16 }}>
-            {loading ? (
-              <View style={sheetStyles.emptyState}>
-                <Text style={sheetStyles.emptyStateText}>Loading your lists…</Text>
-              </View>
-            ) : lists.length === 0 ? (
-              <View style={sheetStyles.emptyState}>
-                <Text style={sheetStyles.emptyStateText}>You don’t have any lists yet.</Text>
-              </View>
-            ) : (
-              lists.map((entry) => {
-                const occasion = entry?.occasion ? (occasionObj as any)[String(entry?.occasion)] : occasionObj["birthday"];
-                const id = String(entry._id);
-                const checked = selected.includes(id);
-                return (
-                  <Pressable key={id} onPress={() => toggle(id)} style={{ ...sheetStyles.listItem, borderLeftWidth: 4, borderColor: occasion?.borderColor }}>
-                    <View style={sheetStyles.listLeft}>
-                      <View style={sharedStyles.occasionIconContainer}>
-                        <Image source={occasion.mobileIcon} />
-                      </View>
-                      <View style={{ width: "70%" }}>
-                        <Text numberOfLines={1} style={sheetStyles.listTitle}>
-                          {entry.title || "Untitled list"}
-                        </Text>
-                      </View>
-                    </View>
-                    <View style={[sheetStyles.checkbox, checked && sheetStyles.checkboxChecked]}>{checked && <Ionicons name="checkmark" size={16} color="#FFFFFF" />}</View>
-                  </Pressable>
-                );
-              })
-            )}
-          </ScrollView>
-
-          <View style={[sheetStyles.actions, isDesktop ? { flexDirection: "row", justifyContent: "space-between" } : {}]}>
-            {isDesktop ? (
-              <>
-                <Pressable onPress={onClose} style={[sheetStyles.secondary, { width: 98, height: 48, justifyContent: "center", alignItems: "center", borderWidth: 1.5, borderColor: "#330065", borderRadius: 8 }]}>
-                  <Text style={[sheetStyles.secondaryText, { fontFamily: "Nunito_700Bold" }]}>Cancel</Text>
-                </Pressable>
-                <Pressable onPress={handleAdd} disabled={selected.length === 0 || saving} style={[sheetStyles.primary, { minWidth: 201, height: 48, justifyContent: "center", alignItems: "center", borderRadius: 8 }, (selected.length === 0 || saving) && sheetStyles.primaryDisabled]}>
-                  <Text style={sheetStyles.primaryText}>{saving ? "Adding…" : "Add to selected lists"}</Text>
-                </Pressable>
-              </>
-            ) : (
-              <>
-                <Pressable onPress={handleAdd} disabled={selected.length === 0 || saving} style={[sheetStyles.primary, (selected.length === 0 || saving) && sheetStyles.primaryDisabled]}>
-                  <Text style={sheetStyles.primaryText}>{saving ? "Adding…" : "Add to selected lists"}</Text>
-                </Pressable>
-                <Pressable onPress={onCreateNewList} style={sheetStyles.secondary}>
-                  <Text style={sheetStyles.secondaryText}>Create a new list</Text>
-                </Pressable>
-              </>
-            )}
+      <ScrollView showsVerticalScrollIndicator={false} style={[sheetStyles.list, isDesktop ? { flex: 1 } : { flex: 0, maxHeight: 300 }]} contentContainerStyle={{ paddingBottom: 16 }}>
+        {loading ? (
+          <View style={sheetStyles.emptyState}>
+            <Text style={sheetStyles.emptyStateText}>Loading your lists…</Text>
           </View>
+        ) : lists.length === 0 ? (
+          <View style={sheetStyles.emptyState}>
+            <Text style={sheetStyles.emptyStateText}>You don’t have any lists yet.</Text>
+          </View>
+        ) : (
+          lists.map((entry) => {
+            const occasion = entry?.occasion ? (occasionObj as any)[String(entry?.occasion)] : occasionObj["birthday"];
+            const id = String(entry._id);
+            const checked = selected.includes(id);
+            return (
+              <Pressable key={id} onPress={() => toggle(id)} style={{ ...sheetStyles.listItem, borderLeftWidth: 4, borderColor: occasion?.borderColor }}>
+                <View style={sheetStyles.listLeft}>
+                  <View style={sharedStyles.occasionIconContainer}>
+                    <Image source={occasion.mobileIcon} />
+                  </View>
+                  <View style={{ width: "70%" }}>
+                    <Text numberOfLines={1} style={sheetStyles.listTitle}>
+                      {entry.title || "Untitled list"}
+                    </Text>
+                  </View>
+                </View>
+                <View style={[sheetStyles.checkbox, checked && sheetStyles.checkboxChecked]}>{checked && <Ionicons name="checkmark" size={16} color="#FFFFFF" />}</View>
+              </Pressable>
+            );
+          })
+        )}
+      </ScrollView>
+
+      <View style={[sheetStyles.actions, isDesktop ? { flexDirection: "row", justifyContent: "space-between" } : { marginTop: 16 }]}>
+        {isDesktop ? (
+          <>
+            <Pressable onPress={onClose} style={[sheetStyles.secondary, { width: 98, height: 48, justifyContent: "center", alignItems: "center", borderWidth: 1.5, borderColor: "#330065", borderRadius: 8 }]}>
+              <Text style={[sheetStyles.secondaryText, { fontFamily: "Nunito_700Bold" }]}>Cancel</Text>
+            </Pressable>
+            <Pressable onPress={handleAdd} disabled={selected.length === 0 || saving} style={[sheetStyles.primary, { minWidth: 201, height: 48, justifyContent: "center", alignItems: "center", borderRadius: 8 }, (selected.length === 0 || saving) && sheetStyles.primaryDisabled]}>
+              <Text style={sheetStyles.primaryText}>{saving ? "Adding…" : "Add to selected lists"}</Text>
+            </Pressable>
+          </>
+        ) : (
+          <>
+            <Pressable onPress={handleAdd} disabled={selected.length === 0 || saving} style={[sheetStyles.primary, (selected.length === 0 || saving) && sheetStyles.primaryDisabled]}>
+              <Text style={sheetStyles.primaryText}>{saving ? "Adding…" : "Add to selected lists"}</Text>
+            </Pressable>
+            <Pressable onPress={onCreateNewList} style={sheetStyles.secondary}>
+              <Text style={sheetStyles.secondaryText}>Create a new list</Text>
+            </Pressable>
+          </>
+        )}
+      </View>
+    </>
+  );
+
+  if (isDesktop) {
+    return (
+      <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+        <Pressable
+          onPress={onClose}
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.35)",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 24,
+          }}
+        >
+          <Pressable
+            onPress={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderRadius: 24,
+              paddingHorizontal: 24,
+              paddingTop: 18,
+              paddingBottom: 24,
+              width: "92%",
+              maxWidth: 640,
+              maxHeight: "80%",
+              shadowColor: "#15072C",
+              shadowOpacity: 0.08,
+              shadowRadius: 24,
+              shadowOffset: { width: 0, height: 8 },
+              elevation: 8,
+            }}
+          >
+            {renderContent()}
+          </Pressable>
         </Pressable>
-      </Pressable>
-    </Modal>
+      </Modal>
+    );
+  }
+
+  return (
+    <BottomSheet isVisible={visible} onClose={onClose}>
+      <View style={{ paddingHorizontal: 20, paddingBottom: 20 }}>{renderContent()}</View>
+    </BottomSheet>
   );
 };
 
