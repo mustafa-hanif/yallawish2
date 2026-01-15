@@ -5,10 +5,12 @@ import { useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { Dimensions, FlatList, Modal, Platform, Pressable, ScrollView, StatusBar, Switch, Text, TextInput, View, useWindowDimensions } from "react-native";
+import { Dimensions, FlatList, Modal, Platform, Pressable, StatusBar, Switch, Text, TextInput, View, useWindowDimensions } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { TextInputField } from "@/components/TextInputField";
+import BottomSheet from "@/components/ui/BottomSheet";
 import { Image } from "react-native";
 import { desktopStyles, styles } from "./step3styles";
 
@@ -24,6 +26,7 @@ type StepItem = {
 type GroupOption = {
   id: string;
   name: string;
+  cover?: string;
 };
 
 type FriendOption = {
@@ -387,12 +390,8 @@ function MobileLayout({ headerTitle, selectedOption, setSelectedOption, requireP
         </Pressable>
       </SafeAreaView> */}
 
-      <Modal visible={shareVisible} transparent animationType="slide" onRequestClose={closeShareModal}>
-        <Pressable style={styles.sheetBackdrop} onPress={closeShareModal} />
+      <BottomSheet isVisible={shareVisible} onClose={closeShareModal}>
         <View style={styles.sheet}>
-          <Pressable onPress={closeShareModal}>
-            <View style={styles.sheetHandle} />
-          </Pressable>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
             <Text style={styles.sheetTitle}>Share with groups</Text>
 
@@ -459,7 +458,7 @@ function MobileLayout({ headerTitle, selectedOption, setSelectedOption, requireP
             </Pressable>
           </ScrollView>
         </View>
-      </Modal>
+      </BottomSheet>
     </View>
   );
 }
