@@ -1,5 +1,6 @@
 import type { GiftItem as GiftItemType } from "@/components/list/GiftItemCard";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
+import BottomSheet from "@/components/ui/BottomSheet";
 import { api } from "@/convex/_generated/api";
 import { styles as listStyles } from "@/styles/addGiftStyles";
 import { useAuth, useUser } from "@clerk/clerk-expo";
@@ -515,8 +516,39 @@ export default function GiftDetail() {
   return (
     <View style={isDesktop ? desktopStyles.root : mobileStyles.root}>
       {layout}
-
-      <Modal visible={showLeaving} transparent animationType="fade" onRequestClose={() => setShowLeaving(false)}>
+      <BottomSheet isVisible={showLeaving} onClose={() => setShowLeaving(false)}>
+        <View style={{ paddingHorizontal: 20, paddingTop: 14, paddingBottom: 20 }}>
+          <Text style={{ color: "#1C0335", fontSize: 38, fontFamily: "Nunito_900Black", textAlign: "center" }}>Leaving Yallawish</Text>
+          <Text style={{ color: "#1C0335", textAlign: "center", marginTop: 8, fontFamily: "Nunito_700Bold" }}>
+            You’re about to visit the seller’s site. After buying, come back and <Text style={{ textDecorationLine: "underline" }}>mark this gift as purchased.</Text>
+          </Text>
+          <View style={modalStyles.redirectContainer}>
+            <Text style={modalStyles.redirectLabel}>Redirecting to</Text>
+            <Text style={modalStyles.redirectHost}>{host ?? "the seller"}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}>
+              <Text style={modalStyles.redirectLabel}>You’ll be redirected in </Text>
+              <Image source={require("@/assets/images/redirected.png")} />
+            </View>
+            <Text style={modalStyles.countdown}>{countdown}s</Text>
+          </View>
+          <View style={modalStyles.buttonStack}>
+            <Pressable
+              onPress={() => {
+                if (buyUrl) Linking.openURL(buyUrl);
+                setShowLeaving(false);
+              }}
+              style={[modalStyles.primaryButton, !buyUrl && modalStyles.disabledButton]}
+              disabled={!buyUrl}
+            >
+              <Text style={modalStyles.primaryButtonText}>Proceed Now</Text>
+            </Pressable>
+            <Pressable onPress={() => setShowLeaving(false)} style={modalStyles.secondaryButton}>
+              <Text style={modalStyles.secondaryButtonText}>Stay Here</Text>
+            </Pressable>
+          </View>
+        </View>
+      </BottomSheet>
+      {/* <Modal visible={showLeaving} transparent animationType="fade" onRequestClose={() => setShowLeaving(false)}>
         <Pressable onPress={() => setShowLeaving(false)} style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.35)" }}>
           <Pressable onPress={(e) => e.stopPropagation()} style={{ position: "absolute", left: 0, right: 0, bottom: 0, backgroundColor: "#FFFFFF", borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 20 }}>
             <Pressable onPress={() => setShowLeaving(false)}>
@@ -552,7 +584,7 @@ export default function GiftDetail() {
             </View>
           </Pressable>
         </Pressable>
-      </Modal>
+      </Modal> */}
 
       <CopyToMyListSheet
         visible={shouldShowCopySheet}
@@ -1019,8 +1051,10 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({ item, price, listTitle, b
                           <Image source={entry.image_url ? { uri: entry.image_url } : FALLBACK_IMAGE} style={desktopStyles.moreImage} resizeMode="cover" />
                         </View>
                         <View style={desktopStyles.moreBody}>
-                          <Text numberOfLines={2} style={desktopStyles.moreName}>{entry.name}</Text>
-                          <Text style={desktopStyles.morePrice}> {entry.price != null ? formatPrice(entry.price, "AED") : 'Price: N/A'} </Text>
+                          <Text numberOfLines={2} style={desktopStyles.moreName}>
+                            {entry.name}
+                          </Text>
+                          <Text style={desktopStyles.morePrice}> {entry.price != null ? formatPrice(entry.price, "AED") : "Price: N/A"} </Text>
                           <Text style={desktopStyles.moreMeta}>
                             {Number(entry.claimed ?? 0)} of {Number(entry.quantity ?? 1)} claimed
                           </Text>
@@ -1031,12 +1065,12 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({ item, price, listTitle, b
                           </Pressable>
                         </View>
                       </Pressable>
-                       <View style={{ width: "100%", height: 1, backgroundColor: "#E5E5E5" }} />
+                      <View style={{ width: "100%", height: 1, backgroundColor: "#E5E5E5" }} />
                     </>
                   ))}
                 </View>
                 <Pressable onPress={onSeeAll} style={desktopStyles.moreSeeAllButton}>
-                    <Text style={desktopStyles.moreSeeAll}>See all</Text>
+                  <Text style={desktopStyles.moreSeeAll}>See all</Text>
                 </Pressable>
               </View>
             </>
@@ -1186,26 +1220,27 @@ const CopyToMyListSheet: React.FC<CopyToMyListSheetProps> = ({ visible, onClose,
               })
             )}
           </ScrollView>
-          
-          <View style={[sheetStyles.actions,isDesktop? { flexDirection: 'row', justifyContent:'space-between' } : {} ]}>
-            {isDesktop ? 
-            <>
-            <Pressable onPress={onClose} style={[sheetStyles.secondary, {width: 98, height: 48, justifyContent:'center', alignItems:'center', borderWidth: 1.5, borderColor:'#330065', borderRadius:8}]}>
-              <Text style={[sheetStyles.secondaryText, {fontFamily: "Nunito_700Bold"}]}>Cancel</Text>
-            </Pressable>
-            <Pressable onPress={handleAdd} disabled={selected.length === 0 || saving} style={[sheetStyles.primary, { minWidth:201, height: 48, justifyContent:'center', alignItems:'center', borderRadius:8 }, (selected.length === 0 || saving) && sheetStyles.primaryDisabled]}>
-              <Text style={sheetStyles.primaryText}>{saving ? "Adding…" : "Add to selected lists"}</Text>
-            </Pressable>
-            </> : 
-            <>
-            <Pressable onPress={handleAdd} disabled={selected.length === 0 || saving} style={[sheetStyles.primary, (selected.length === 0 || saving) && sheetStyles.primaryDisabled]}>
-              <Text style={sheetStyles.primaryText}>{saving ? "Adding…" : "Add to selected lists"}</Text>
-            </Pressable>
-            <Pressable onPress={onCreateNewList} style={sheetStyles.secondary}>
-              <Text style={sheetStyles.secondaryText}>Create a new list</Text>
-            </Pressable>
-            
-            </>}
+
+          <View style={[sheetStyles.actions, isDesktop ? { flexDirection: "row", justifyContent: "space-between" } : {}]}>
+            {isDesktop ? (
+              <>
+                <Pressable onPress={onClose} style={[sheetStyles.secondary, { width: 98, height: 48, justifyContent: "center", alignItems: "center", borderWidth: 1.5, borderColor: "#330065", borderRadius: 8 }]}>
+                  <Text style={[sheetStyles.secondaryText, { fontFamily: "Nunito_700Bold" }]}>Cancel</Text>
+                </Pressable>
+                <Pressable onPress={handleAdd} disabled={selected.length === 0 || saving} style={[sheetStyles.primary, { minWidth: 201, height: 48, justifyContent: "center", alignItems: "center", borderRadius: 8 }, (selected.length === 0 || saving) && sheetStyles.primaryDisabled]}>
+                  <Text style={sheetStyles.primaryText}>{saving ? "Adding…" : "Add to selected lists"}</Text>
+                </Pressable>
+              </>
+            ) : (
+              <>
+                <Pressable onPress={handleAdd} disabled={selected.length === 0 || saving} style={[sheetStyles.primary, (selected.length === 0 || saving) && sheetStyles.primaryDisabled]}>
+                  <Text style={sheetStyles.primaryText}>{saving ? "Adding…" : "Add to selected lists"}</Text>
+                </Pressable>
+                <Pressable onPress={onCreateNewList} style={sheetStyles.secondary}>
+                  <Text style={sheetStyles.secondaryText}>Create a new list</Text>
+                </Pressable>
+              </>
+            )}
           </View>
         </Pressable>
       </Pressable>
@@ -2090,7 +2125,7 @@ const desktopStyles = StyleSheet.create({
     justifyContent: "space-between",
   },
   moreName: {
-    color: '#1C0335',
+    color: "#1C0335",
     fontFamily: "Nunito_600SemiBold",
     lineHeight: 24,
     fontSize: 20,
@@ -2105,33 +2140,33 @@ const desktopStyles = StyleSheet.create({
     fontFamily: "Nunito_500Medium",
     fontSize: 13,
   },
-  moreActions:{
+  moreActions: {
     width: 213,
-    height: '100%',
-    justifyContent: 'flex-end',
+    height: "100%",
+    justifyContent: "flex-end",
   },
-  moreBuyNowButton:{
+  moreBuyNowButton: {
     height: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#03FFEE',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#03FFEE",
     borderRadius: 8,
   },
-  moreBuyNowButtonText:{
-    color:'#330065',
+  moreBuyNowButtonText: {
+    color: "#330065",
     fontFamily: "Nunito_700Bold",
     fontSize: 16,
   },
-  moreSeeAllButton:{
+  moreSeeAllButton: {
     height: 48,
     width: 102,
     borderRadius: 8,
     borderWidth: 1.5,
-    borderColor: '#330065',
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin:'auto',
-  }
+    borderColor: "#330065",
+    justifyContent: "center",
+    alignItems: "center",
+    margin: "auto",
+  },
 }) as Record<string, any>;
 
 const modalStyles = StyleSheet.create({
