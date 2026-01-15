@@ -1,4 +1,3 @@
-
 import { Dimensions, StyleSheet } from "react-native";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -9,8 +8,8 @@ export const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   header: {
-     minHeight: 108,
-     justifyContent:'flex-end'
+    minHeight: 108,
+    justifyContent: "flex-end",
   },
   headerContent: {
     paddingHorizontal: 16,
@@ -21,8 +20,7 @@ export const styles = StyleSheet.create({
     gap: 16,
     paddingVertical: 16,
   },
-  backButton: {
-  },
+  backButton: {},
   headerTitle: {
     color: "#FFFFFF",
     fontSize: 24,
@@ -165,7 +163,7 @@ export const styles = StyleSheet.create({
   },
   button: {
     height: 56,
-    justifyContent:'center',
+    justifyContent: "center",
     borderRadius: 8,
     paddingVertical: 16,
     alignItems: "center",
@@ -242,7 +240,7 @@ export const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 12,
     justifyContent: "space-between",
-    marginTop:16
+    marginTop: 16,
   },
   groupCard: {
     width: (Dimensions.get("window").width - 16 * 2 - 12) / 2,
@@ -270,7 +268,7 @@ export const styles = StyleSheet.create({
   },
   groupOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(28,3,53,0.35)",
+    backgroundColor: "rgba(28, 3, 53, 0.65)",
   },
   groupCheck: {
     position: "absolute",
@@ -605,10 +603,10 @@ export const desktopStyles = StyleSheet.create({
     color: "#1C0335",
     backgroundColor: "#FBF8FF",
   },
-  desktopPasswordToggle:{
+  desktopPasswordToggle: {
     position: "absolute",
     right: 16,
-    top: '20%',
+    top: "20%",
   },
   desktopPasswordHint: {
     fontSize: 13,
@@ -625,7 +623,7 @@ export const desktopStyles = StyleSheet.create({
     paddingHorizontal: 28,
     justifyContent: "center",
     alignItems: "center",
-    height:48,
+    height: 48,
     minWidth: 98,
     borderRadius: 8,
     borderWidth: 1.5,
@@ -640,7 +638,7 @@ export const desktopStyles = StyleSheet.create({
   desktopPrimaryButton: {
     justifyContent: "center",
     alignItems: "center",
-    height:48,
+    height: 48,
     minWidth: 88,
     paddingHorizontal: 32,
     borderRadius: 8,
@@ -709,7 +707,7 @@ export const desktopStyles = StyleSheet.create({
     paddingVertical: 12,
     marginBottom: 20,
     backgroundColor: "#ffff",
-    outline:"none"
+    outline: "none",
   },
   shareModalSearchInput: {
     flex: 1,
@@ -718,41 +716,40 @@ export const desktopStyles = StyleSheet.create({
     color: "#1C0335",
     borderWidth: 0,
     outlineColor: "transparent",
-
   },
   shareModalGroupGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 16,
   },
-  headingSection:{
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16
+  headingSection: {
+    justifyContent: "space-between",
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
   },
   headingItem: {
-    flexDirection: 'row',
-    gap: 8
+    flexDirection: "row",
+    gap: 8,
   },
-  heading:{
+  heading: {
     fontFamily: "Nunito_700Bold",
-    fontSize: 16
+    fontSize: 16,
   },
   headingCountWrap: {
     width: 24,
     height: 24,
     padding: 6,
-    borderRadius: '100%',
+    borderRadius: "100%",
     backgroundColor: "#220044",
-    alignItems: 'center',
-    justifyContent: 'center'
+    alignItems: "center",
+    justifyContent: "center",
   },
-  headingCount:{
+  headingCount: {
     color: "#FFFFFF",
     fontFamily: "Nunito_700Bold",
     fontSize: 14,
-    textAlign: 'center'
+    textAlign: "center",
   },
   selectedText: {
     fontSize: 16,
@@ -787,7 +784,7 @@ export const desktopStyles = StyleSheet.create({
     width: 15,
     height: 15,
     borderRadius: 2,
-    borderColor:'#FFFFFF',
+    borderColor: "#FFFFFF",
     borderWidth: 1.5,
     backgroundColor: "transparent",
     alignItems: "center",
@@ -811,7 +808,7 @@ export const desktopStyles = StyleSheet.create({
     fontFamily: "Nunito_400Regular",
     color: "#FFFFFF",
   },
-  shareModalGroupByHighlight:{
+  shareModalGroupByHighlight: {
     fontFamily: "Nunito_700Bold",
   },
   shareModalSeparator: {
@@ -832,7 +829,7 @@ export const desktopStyles = StyleSheet.create({
     // paddingHorizontal: 20,
     borderBottomWidth: 1,
     borderBottomColor: "#AEAEB2",
-    flex:1
+    flex: 1,
   },
   shareModalFriendAvatar: {
     width: 48,
