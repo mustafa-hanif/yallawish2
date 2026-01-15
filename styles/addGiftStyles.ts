@@ -330,7 +330,7 @@ export const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 16,
   },
-  sheetContent: { paddingHorizontal: 16, paddingBottom: 60, gap: 20 },
+  sheetContent: { paddingHorizontal: 16, paddingBottom: 60, gap: 20, backgroundColor: "#F2F2F7" },
   sheetTitle: {
     fontSize: 24,
     fontFamily: "Nunito_700Bold",

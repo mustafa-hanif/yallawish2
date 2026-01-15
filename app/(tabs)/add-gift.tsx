@@ -4,6 +4,7 @@ import { TextInputAreaField } from "@/components/TextInputAreaField";
 import { TextInputField } from "@/components/TextInputField";
 import { ActionsBar, FooterBar, GiftItemCard, HeaderBar, InfoBox, ListCover } from "@/components/list";
 import type { GiftItem as GiftItemType } from "@/components/list/GiftItemCard";
+import BottomSheet from "@/components/ui/BottomSheet";
 import { api } from "@/convex/_generated/api";
 import { desktopStyles, styles } from "@/styles/addGiftStyles";
 import { formatLastUpdated, getDaysToGoText } from "@/utils";
@@ -16,7 +17,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Linking from "expo-linking";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Animated, Easing, Image, Modal, Platform, Pressable, ScrollView, Share, StatusBar, Text, TextInput, useWindowDimensions, View } from "react-native";
+import { ActivityIndicator, Alert, Animated, Easing, Image, Modal, Platform, Pressable, ScrollView as RNScrollView, Share, StatusBar, Text, TextInput, useWindowDimensions, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 
@@ -798,111 +800,114 @@ export default function AddGift() {
     <View style={isDesktop ? desktopStyles.container : styles.container}>
       {layout}
       {/** Bottom Sheet / Modal **/}
-      <Modal visible={showSheet} transparent animationType={isDesktop ? "fade" : "none"} onRequestClose={closeSheet}>
-        <Pressable style={styles.backdrop} onPress={closeSheet} />
-        {isDesktop ? (
-          <View style={desktopStyles.modalContainer}>
-            <View style={desktopStyles.modalContent}>
-              {/* Header */}
-              <View style={desktopStyles.modalHeader}>
-                <Text style={desktopStyles.modalTitle}>Add a Gift</Text>
-                <Pressable onPress={closeSheet} style={desktopStyles.modalCloseButton}>
-                  <Ionicons name="close" size={24} color="#8E8EA9" />
-                </Pressable>
-              </View>
-
-              <ScrollView contentContainerStyle={desktopStyles.modalScrollContent} showsVerticalScrollIndicator={false}>
-                {/* Web Link Section */}
-                <View style={desktopStyles.modalFieldGroup}>
-                  <Text style={desktopStyles.modalFieldLabel}>Web Link</Text>
-                  <View style={desktopStyles.modalInputRow}>
-                    <TextInput value={link} onChangeText={setLink} style={desktopStyles.modalInput} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="Type, paste or search" placeholderTextColor="#8E8EA9" />
-                    <Pressable onPress={openSearchBrowser} style={desktopStyles.modalSearchButton}>
-                      <Text style={desktopStyles.modalSearchButtonText}>Search via</Text>
-                      <View style={desktopStyles.googleLogo}>
-                        <Text style={desktopStyles.googleG}>G</Text>
-                      </View>
-                    </Pressable>
-                  </View>
-                  {!isUrlValid && link.trim().length > 0 && <Text style={desktopStyles.modalErrorText}>Invalid URL</Text>}
-                  {scrapeError && <Text style={desktopStyles.modalErrorText}>{scrapeError}</Text>}
-                  {scraping && <Text style={desktopStyles.modalScrapingText}>Loading...</Text>}
+      {isDesktop ? (
+        <>
+          <Modal visible={showSheet} transparent animationType={isDesktop ? "fade" : "none"} onRequestClose={closeSheet}>
+            <Pressable style={styles.backdrop} onPress={closeSheet} />
+            <View style={desktopStyles.modalContainer}>
+              <View style={desktopStyles.modalContent}>
+                {/* Header */}
+                <View style={desktopStyles.modalHeader}>
+                  <Text style={desktopStyles.modalTitle}>Add a Gift</Text>
+                  <Pressable onPress={closeSheet} style={desktopStyles.modalCloseButton}>
+                    <Ionicons name="close" size={24} color="#8E8EA9" />
+                  </Pressable>
                 </View>
 
-                {/* Product Image and Details Row */}
-                <View style={desktopStyles.modalProductRow}>
-                  {/* Image Section */}
-                  <View style={desktopStyles.modalImageContainer}>
-                    {imageUrl ? (
-                      <View style={desktopStyles.modalImageWrapper}>
-                        <Image source={{ uri: imageUrl }} style={desktopStyles.modalProductImage} resizeMode="contain" />
-                        <Pressable style={desktopStyles.modalImageEditButton}>
-                          <Ionicons name="image-outline" size={20} color="#3B0076" />
-                        </Pressable>
-                      </View>
-                    ) : (
-                      <View style={desktopStyles.modalImagePlaceholder}>
-                        <Ionicons name="image-outline" size={48} color="#D1D1D6" />
-                      </View>
-                    )}
-                  </View>
-
-                  {/* Price and Quantity Section */}
-                  <View style={desktopStyles.modalPriceQtyColumn}>
-                    <View style={desktopStyles.modalFieldGroup}>
-                      <Text style={desktopStyles.modalFieldLabel}>Price of gift</Text>
-                      <TextInput value={price} onChangeText={setPrice} style={desktopStyles.modalPriceInput} keyboardType="decimal-pad" placeholder="AED 0.00" placeholderTextColor="#8E8EA9" />
+                <RNScrollView contentContainerStyle={desktopStyles.modalScrollContent} showsVerticalScrollIndicator={false}>
+                  {/* Web Link Section */}
+                  <View style={desktopStyles.modalFieldGroup}>
+                    <Text style={desktopStyles.modalFieldLabel}>Web Link</Text>
+                    <View style={desktopStyles.modalInputRow}>
+                      <TextInput value={link} onChangeText={setLink} style={desktopStyles.modalInput} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="Type, paste or search" placeholderTextColor="#8E8EA9" />
+                      <Pressable onPress={openSearchBrowser} style={desktopStyles.modalSearchButton}>
+                        <Text style={desktopStyles.modalSearchButtonText}>Search via</Text>
+                        <View style={desktopStyles.googleLogo}>
+                          <Text style={desktopStyles.googleG}>G</Text>
+                        </View>
+                      </Pressable>
                     </View>
-                    <View style={desktopStyles.modalFieldGroup}>
-                      <Text style={desktopStyles.modalFieldLabel}>Quantity</Text>
-                      <View style={desktopStyles.modalQtyRow}>
-                        <Pressable onPress={decQty} style={desktopStyles.modalQtyButton}>
-                          <Text style={desktopStyles.modalQtyButtonText}>–</Text>
-                        </Pressable>
-                        <Text style={desktopStyles.modalQtyValue}>{String(quantity).padStart(2, "0")}</Text>
-                        <Pressable onPress={incQty} style={desktopStyles.modalQtyButton}>
-                          <Text style={desktopStyles.modalQtyButtonText}>+</Text>
-                        </Pressable>
+                    {!isUrlValid && link.trim().length > 0 && <Text style={desktopStyles.modalErrorText}>Invalid URL</Text>}
+                    {scrapeError && <Text style={desktopStyles.modalErrorText}>{scrapeError}</Text>}
+                    {scraping && <Text style={desktopStyles.modalScrapingText}>Loading...</Text>}
+                  </View>
+
+                  {/* Product Image and Details Row */}
+                  <View style={desktopStyles.modalProductRow}>
+                    {/* Image Section */}
+                    <View style={desktopStyles.modalImageContainer}>
+                      {imageUrl ? (
+                        <View style={desktopStyles.modalImageWrapper}>
+                          <Image source={{ uri: imageUrl }} style={desktopStyles.modalProductImage} resizeMode="contain" />
+                          <Pressable style={desktopStyles.modalImageEditButton}>
+                            <Ionicons name="image-outline" size={20} color="#3B0076" />
+                          </Pressable>
+                        </View>
+                      ) : (
+                        <View style={desktopStyles.modalImagePlaceholder}>
+                          <Ionicons name="image-outline" size={48} color="#D1D1D6" />
+                        </View>
+                      )}
+                    </View>
+
+                    {/* Price and Quantity Section */}
+                    <View style={desktopStyles.modalPriceQtyColumn}>
+                      <View style={desktopStyles.modalFieldGroup}>
+                        <Text style={desktopStyles.modalFieldLabel}>Price of gift</Text>
+                        <TextInput value={price} onChangeText={setPrice} style={desktopStyles.modalPriceInput} keyboardType="decimal-pad" placeholder="AED 0.00" placeholderTextColor="#8E8EA9" />
+                      </View>
+                      <View style={desktopStyles.modalFieldGroup}>
+                        <Text style={desktopStyles.modalFieldLabel}>Quantity</Text>
+                        <View style={desktopStyles.modalQtyRow}>
+                          <Pressable onPress={decQty} style={desktopStyles.modalQtyButton}>
+                            <Text style={desktopStyles.modalQtyButtonText}>–</Text>
+                          </Pressable>
+                          <Text style={desktopStyles.modalQtyValue}>{String(quantity).padStart(2, "0")}</Text>
+                          <Pressable onPress={incQty} style={desktopStyles.modalQtyButton}>
+                            <Text style={desktopStyles.modalQtyButtonText}>+</Text>
+                          </Pressable>
+                        </View>
                       </View>
                     </View>
                   </View>
-                </View>
 
-                {/* Name of Gift */}
-                <View style={desktopStyles.modalFieldGroup}>
-                  <Text style={desktopStyles.modalFieldLabel}>Name of Gift</Text>
-                  <View style={desktopStyles.modalInputRow}>
-                    <TextInput value={name} onChangeText={setName} style={desktopStyles.modalInput} placeholder="Enter gift name" placeholderTextColor="#8E8EA9" />
-                    <Ionicons name="pencil-outline" size={20} color="#AEAEB2" />
+                  {/* Name of Gift */}
+                  <View style={desktopStyles.modalFieldGroup}>
+                    <Text style={desktopStyles.modalFieldLabel}>Name of Gift</Text>
+                    <View style={desktopStyles.modalInputRow}>
+                      <TextInput value={name} onChangeText={setName} style={desktopStyles.modalInput} placeholder="Enter gift name" placeholderTextColor="#8E8EA9" />
+                      <Ionicons name="pencil-outline" size={20} color="#AEAEB2" />
+                    </View>
                   </View>
-                </View>
 
-                {/* Description */}
-                <View style={desktopStyles.modalFieldGroup}>
-                  <Text style={desktopStyles.modalFieldLabel}>Description</Text>
-                  <View style={desktopStyles.modalTextareaWrapper}>
-                    <TextInput placeholder="Prefer color white, size medium etc" value={description} onChangeText={(t) => t.length <= DESCRIPTION_LIMIT && setDescription(t)} style={desktopStyles.modalTextarea} multiline placeholderTextColor="#8E8EA9" />
-                    <Text style={desktopStyles.modalCharCount}>{description.length}/100</Text>
+                  {/* Description */}
+                  <View style={desktopStyles.modalFieldGroup}>
+                    <Text style={desktopStyles.modalFieldLabel}>Description</Text>
+                    <View style={desktopStyles.modalTextareaWrapper}>
+                      <TextInput placeholder="Prefer color white, size medium etc" value={description} onChangeText={(t) => t.length <= DESCRIPTION_LIMIT && setDescription(t)} style={desktopStyles.modalTextarea} multiline placeholderTextColor="#8E8EA9" />
+                      <Text style={desktopStyles.modalCharCount}>{description.length}/100</Text>
+                    </View>
                   </View>
-                </View>
-              </ScrollView>
+                </RNScrollView>
 
-              {/* Footer Buttons */}
-              <View style={desktopStyles.modalFooter}>
-                <Pressable style={desktopStyles.modalCancelButton} onPress={handleCancel}>
-                  <Text style={desktopStyles.modalCancelButtonText}>Cancel</Text>
-                </Pressable>
-                <Pressable style={[desktopStyles.modalSaveButton, !canSave && desktopStyles.modalSaveButtonDisabled]} onPress={handleSave} disabled={!canSave}>
-                  <Text style={[desktopStyles.modalSaveButtonText, !canSave && desktopStyles.modalSaveButtonTextDisabled]}>{saving ? "Saving..." : "Save"}</Text>
-                </Pressable>
+                {/* Footer Buttons */}
+                <View style={desktopStyles.modalFooter}>
+                  <Pressable style={desktopStyles.modalCancelButton} onPress={handleCancel}>
+                    <Text style={desktopStyles.modalCancelButtonText}>Cancel</Text>
+                  </Pressable>
+                  <Pressable style={[desktopStyles.modalSaveButton, !canSave && desktopStyles.modalSaveButtonDisabled]} onPress={handleSave} disabled={!canSave}>
+                    <Text style={[desktopStyles.modalSaveButtonText, !canSave && desktopStyles.modalSaveButtonTextDisabled]}>{saving ? "Saving..." : "Save"}</Text>
+                  </Pressable>
+                </View>
               </View>
             </View>
-          </View>
-        ) : (
-          <Animated.View style={[styles.sheetContainer, { transform: [{ translateY }] }]}>
-            <Pressable style={{ backgroundColor: "#FFFF", borderWidth: 0 }} onPress={closeSheet}>
-              <View style={styles.sheetHandle} />
-            </Pressable>
+          </Modal>
+        </>
+      ) : null}
+
+      {!isDesktop ? (
+        <>
+          <BottomSheet isVisible={showSheet} onClose={closeSheet}>
             <ScrollView
               contentContainerStyle={{
                 ...styles.sheetContent,
@@ -959,9 +964,10 @@ export default function AddGift() {
                 </Pressable>
               </View>
             </ScrollView>
-          </Animated.View>
-        )}
-      </Modal>
+          </BottomSheet>
+        </>
+      ) : null}
+
       {/* Delete confirmation modal for item deletion */}
       <DeleteConfirmation visible={!!deleteItemId} onCancel={() => setDeleteItemId(null)} onDelete={() => handleDeleteItem(deleteItemId)} />
 
@@ -1058,64 +1064,59 @@ export default function AddGift() {
         </View>
       </Modal>
       {/* Sort & Filter Bottom Sheet (designed) */}
-      <Modal visible={showSortSheet} transparent animationType="fade" onRequestClose={() => setShowSortSheet(false)}>
-        <Pressable style={styles.backdrop} onPress={() => setShowSortSheet(false)} />
-        <View style={styles.sortSheetContainer}>
-          <Pressable onPress={() => setShowSortSheet(false)}>
-            <View style={styles.sortSheetHandle} />
-          </Pressable>
-          <ScrollView contentContainerStyle={styles.sortSheetContent} showsVerticalScrollIndicator={false}>
-            <Text style={styles.sortSheetTitle}>Sort & Filter</Text>
-            <View style={styles.sortDivider} />
-            <View style={styles.sortSection}>
-              <View style={styles.sortSectionHeader}>
-                <Text style={styles.sortSectionTitle}>Sort by</Text>
-                <Ionicons name="chevron-down" size={20} color="#1C0335" />
-              </View>
-              {[
-                { key: "default", label: "Default" },
-                { key: "priceAsc", label: "Price Lowest - Highest" },
-                { key: "priceDesc", label: "Price Highest - Lowest" },
-                { key: "newest", label: "Most Recent to Oldest" },
-                { key: "oldest", label: "Oldest to Most Recent" },
-              ].map((o) => (
-                <Pressable key={o.key} style={styles.radioRow} onPress={() => setTempSortBy(o.key as SortOption)}>
-                  <View style={[styles.radioOuter, tempSortBy === o.key && styles.radioOuterActive]}>{tempSortBy === o.key && <View style={styles.radioInner} />}</View>
-                  <Text style={styles.radioLabel}>{o.label}</Text>
-                </Pressable>
-              ))}
+      <BottomSheet isVisible={showSortSheet} onClose={() => setShowSortSheet(false)}>
+        <ScrollView contentContainerStyle={styles.sortSheetContent} showsVerticalScrollIndicator={false}>
+          <Text style={styles.sortSheetTitle}>Sort & Filter</Text>
+          <View style={styles.sortDivider} />
+          <View style={styles.sortSection}>
+            <View style={styles.sortSectionHeader}>
+              <Text style={styles.sortSectionTitle}>Sort by</Text>
+              <Ionicons name="chevron-down" size={20} color="#1C0335" />
             </View>
-            <View style={styles.sortSection}>
-              <View style={styles.sortSectionHeader}>
-                <Text style={styles.sortSectionTitle}>Filter by Availability</Text>
-                <Ionicons name="chevron-down" size={20} color="#1C0335" />
-              </View>
-              <Pressable style={styles.radioRow} onPress={() => setTempFilterClaimed((v) => !v)}>
-                <View style={[styles.checkboxBox, tempFilterClaimed && styles.checkboxBoxActive]}>{tempFilterClaimed && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}</View>
-                <Text style={styles.radioLabel}>Claimed</Text>
+            {[
+              { key: "default", label: "Default" },
+              { key: "priceAsc", label: "Price Lowest - Highest" },
+              { key: "priceDesc", label: "Price Highest - Lowest" },
+              { key: "newest", label: "Most Recent to Oldest" },
+              { key: "oldest", label: "Oldest to Most Recent" },
+            ].map((o) => (
+              <Pressable key={o.key} style={styles.radioRow} onPress={() => setTempSortBy(o.key as SortOption)}>
+                <View style={[styles.radioOuter, tempSortBy === o.key && styles.radioOuterActive]}>{tempSortBy === o.key && <View style={styles.radioInner} />}</View>
+                <Text style={styles.radioLabel}>{o.label}</Text>
               </Pressable>
-              <Pressable style={styles.radioRow} onPress={() => setTempFilterUnclaimed((v) => !v)}>
-                <View style={[styles.checkboxBox, tempFilterUnclaimed && styles.checkboxBoxActive]}>{tempFilterUnclaimed && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}</View>
-                <Text style={styles.radioLabel}>Unclaimed</Text>
-              </Pressable>
+            ))}
+          </View>
+          <View style={styles.sortSection}>
+            <View style={styles.sortSectionHeader}>
+              <Text style={styles.sortSectionTitle}>Filter by Availability</Text>
+              <Ionicons name="chevron-down" size={20} color="#1C0335" />
             </View>
-            <View style={styles.sortScrollSpacer} />
-          </ScrollView>
-          <View style={styles.applyBarWrapper}>
-            <Pressable
-              style={styles.applyBtnFull}
-              onPress={() => {
-                setSortBy(tempSortBy);
-                setFilterClaimed(tempFilterClaimed);
-                setFilterUnclaimed(tempFilterUnclaimed);
-                setShowSortSheet(false);
-              }}
-            >
-              <Text style={styles.applyBtnText}>Apply</Text>
+            <Pressable style={styles.radioRow} onPress={() => setTempFilterClaimed((v) => !v)}>
+              <View style={[styles.checkboxBox, tempFilterClaimed && styles.checkboxBoxActive]}>{tempFilterClaimed && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}</View>
+              <Text style={styles.radioLabel}>Claimed</Text>
+            </Pressable>
+            <Pressable style={styles.radioRow} onPress={() => setTempFilterUnclaimed((v) => !v)}>
+              <View style={[styles.checkboxBox, tempFilterUnclaimed && styles.checkboxBoxActive]}>{tempFilterUnclaimed && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}</View>
+              <Text style={styles.radioLabel}>Unclaimed</Text>
             </Pressable>
           </View>
+          <View style={styles.sortScrollSpacer} />
+        </ScrollView>
+        <View style={styles.applyBarWrapper}>
+          <Pressable
+            style={styles.applyBtnFull}
+            onPress={() => {
+              setSortBy(tempSortBy);
+              setFilterClaimed(tempFilterClaimed);
+              setFilterUnclaimed(tempFilterUnclaimed);
+              setShowSortSheet(false);
+            }}
+          >
+            <Text style={styles.applyBtnText}>Apply</Text>
+          </Pressable>
         </View>
-      </Modal>
+      </BottomSheet>
+
       <DeleteConfirmation visible={!!deleteListId} onCancel={() => setDeleteListId(null)} onDelete={() => handleDeleteList(deleteListId)} />
     </View>
   );
@@ -1165,7 +1166,7 @@ function MobileLayout({ title, subtitle, coverUri, overlayText, displayedItems, 
   return (
     <>
       <HeaderBar title={title} onBack={handleBack} />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <RNScrollView contentContainerStyle={styles.scrollContent}>
         <ListCover imageUri={coverUri} overlayText={String(daysToGo || "")} occasion={occasion} creator={creator} />
 
         <View style={styles.listInfoContainer}>
@@ -1216,7 +1217,7 @@ function MobileLayout({ title, subtitle, coverUri, overlayText, displayedItems, 
         <InfoBox>
           To learn more on how to add gifts from web browser, <Text style={styles.linkText}>click here</Text>
         </InfoBox>
-      </ScrollView>
+      </RNScrollView>
 
       <FooterBar lastUpdated={lastUpdated} onShare={onShare} onManage={onManage} />
     </>
@@ -1286,7 +1287,7 @@ function DesktopLayout({ title, subtitle, ribbonSubtitle, coverUri, formattedEve
   return (
     <SafeAreaView style={desktopStyles.safeArea} edges={Platform.OS === "web" ? [] : ["top"]}>
       <StatusBar barStyle="dark-content" />
-      <ScrollView contentContainerStyle={desktopStyles.scrollContent}>
+      <RNScrollView contentContainerStyle={desktopStyles.scrollContent}>
         <View style={desktopStyles.maxWidth}>
           <View style={desktopStyles.topBar}>
             <Text style={desktopStyles.breadcrumbText}>
@@ -1468,7 +1469,7 @@ function DesktopLayout({ title, subtitle, ribbonSubtitle, coverUri, formattedEve
             </Pressable>
           )}
         </View>
-      </ScrollView>
+      </RNScrollView>
 
       <Modal visible={showAvailabilityMenu} transparent animationType="fade" onRequestClose={() => setShowAvailabilityMenu(false)}>
         <Pressable style={desktopStyles.menuBackdrop} onPress={() => setShowAvailabilityMenu(false)}>
