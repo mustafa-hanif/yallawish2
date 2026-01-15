@@ -86,7 +86,7 @@ export default function BottomSheet({ isVisible, onClose, children }: BottomShee
           <GestureDetector gesture={gesture}>
             <Animated.View style={[styles.sheet, rSheetStyle]}>
               <View style={styles.handleContainer}>
-                <View style={styles.handle} />
+                <Pressable style={styles.handle} onPress={onClose} />
               </View>
               {children}
             </Animated.View>
