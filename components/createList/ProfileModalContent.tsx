@@ -1,16 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useMemo } from "react";
-import {
-  ActivityIndicator,
-  Dimensions,
-  Platform,
-  Pressable,
-  ScrollView,
-  Switch,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { ActivityIndicator, Dimensions, Platform, Pressable, Switch, Text, TextInput, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 
 import styles from "@/styles/selectProfileStyles";
 import { Image } from "react-native";
@@ -20,7 +11,7 @@ import { PhoneInputField } from "../PhoneInputField";
 import { TextInputField } from "../TextInputField";
 
 export type DropdownKey = "gender" | "relation";
-  const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 type ProfileModalContentProps = {
   isDesktop: boolean;
@@ -121,17 +112,11 @@ export function ProfileModalContent({
   onSelectDate,
   onCloseWebDatePicker,
   onClearDate,
-  setBirthDate
+  setBirthDate,
 }: ProfileModalContentProps) {
   const isWeb = Platform.OS === "web";
-  const webTodayIso = useMemo(
-    () => new Date().toISOString().split("T")[0] ?? "",
-    [],
-  );
-  const webDateValue = useMemo(
-    () => (birthDate ? birthDate.toISOString().split("T")[0] : ""),
-    [birthDate],
-  );
+  const webTodayIso = useMemo(() => new Date().toISOString().split("T")[0] ?? "", []);
+  const webDateValue = useMemo(() => (birthDate ? birthDate.toISOString().split("T")[0] : ""), [birthDate]);
   const webDateInputStyle = useMemo<React.CSSProperties>(
     () => ({
       width: "100%",
@@ -145,7 +130,7 @@ export function ProfileModalContent({
       boxSizing: "border-box",
       backgroundColor: "#FFFFFF",
     }),
-    [],
+    []
   );
 
   const handleWebDateChange = (event: WebDateChangeEvent) => {
@@ -167,15 +152,9 @@ export function ProfileModalContent({
     onCloseWebDatePicker();
   };
 
-  const genderSelectStyle = useMemo(
-    () => getWebSelectStyle(Boolean(gender)),
-    [gender],
-  );
+  const genderSelectStyle = useMemo(() => getWebSelectStyle(Boolean(gender)), [gender]);
 
-  const relationSelectStyle = useMemo(
-    () => getWebSelectStyle(Boolean(relation)),
-    [relation],
-  );
+  const relationSelectStyle = useMemo(() => getWebSelectStyle(Boolean(relation)), [relation]);
 
   const handleWebGenderChange = (event: WebSelectChangeEvent) => {
     onSelectGender(event.target?.value ?? "");
@@ -185,20 +164,11 @@ export function ProfileModalContent({
     onSelectRelation(event.target?.value ?? "");
   };
 
-  const updateFormDate = () => {
-    
-  }
-  const renderDropdown = (
-    options: string[],
-    onSelect: (value: string) => void,
-  ) => (
+  const updateFormDate = () => {};
+  const renderDropdown = (options: string[], onSelect: (value: string) => void) => (
     <View style={styles.dropdown}>
       {options.map((option) => (
-        <Pressable
-          key={option}
-          onPress={() => onSelect(option)}
-          style={styles.dropdownItem}
-        >
+        <Pressable key={option} onPress={() => onSelect(option)} style={styles.dropdownItem}>
           <Text style={styles.dropdownItemText}>{option}</Text>
         </Pressable>
       ))}
@@ -208,146 +178,82 @@ export function ProfileModalContent({
   return (
     <ScrollView
       style={[
-        !isDesktop ? { height: SCREEN_HEIGHT * 0.7 } : {}, 
-      // isDesktop
-      //   ? styles.desktopModalScrollContainer
-      //   : styles.mobileModalScrollContainer
-    
-    ]
-      }
-      contentContainerStyle={
-        isDesktop ? styles.desktopModalScroll : styles.mobileModalScroll
-      }
+        !isDesktop ? { height: SCREEN_HEIGHT * 0.7 } : {},
+        // isDesktop
+        //   ? styles.desktopModalScrollContainer
+        //   : styles.mobileModalScrollContainer
+      ]}
+      contentContainerStyle={isDesktop ? styles.desktopModalScroll : styles.mobileModalScroll}
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     >
-      <Text style={isDesktop ? styles.modalTitleDesktop : styles.modalTitle}>
-        {isDesktop ? "Create a profile for someone else" : `Create a profile for\nsomeone else`}
-        
-      </Text>
-      <Text
-        style={
-          isDesktop ? styles.modalSubtitleDesktop : styles.modalSubtitle
-        }
-      >
-        {isDesktop ? "Add a child, parent, partner, or even a pet — and build their gift list on their behalf." : `Add a child, parent, partner, or even a pet —\nand build their gift list on their behalf.`}
-        
-      </Text>
+      <Text style={isDesktop ? styles.modalTitleDesktop : styles.modalTitle}>{isDesktop ? "Create a profile for someone else" : `Create a profile for\nsomeone else`}</Text>
+      <Text style={isDesktop ? styles.modalSubtitleDesktop : styles.modalSubtitle}>{isDesktop ? "Add a child, parent, partner, or even a pet — and build their gift list on their behalf." : `Add a child, parent, partner, or even a pet —\nand build their gift list on their behalf.`}</Text>
 
-      <View
-        style={[
-          styles.fieldRow,
-          isDesktop && styles.fieldRowDesktop,
-          !isWeb && activeDropdown === "gender" && styles.dropdownRowRaised,
-        ]}
-      >
-        {isDesktop ? 
-        <>
-        <View style={[styles.field, isDesktop && styles.fieldHalf]}>
-          <Text style={styles.fieldLabel}>First name</Text>
-          <TextInput
-            value={firstName}
-            onChangeText={onChangeFirstName}
-            placeholder="John"
-            placeholderTextColor="#B1A6C4"
-            style={[styles.input, isDesktop && styles.inputDesktop]}
-          />
-        </View>
-        <View style={[styles.field, isDesktop && styles.fieldHalf]}>
-          <Text style={styles.fieldLabel}>Last name</Text>
-          <TextInput
-            value={lastName}
-            onChangeText={onChangeLastName}
-            placeholder="Doe"
-            placeholderTextColor="#B1A6C4"
-            style={[styles.input, isDesktop && styles.inputDesktop]}
-          />
-        </View>
-        </> : 
-        <View style={{ rowGap: 40 }}>
-          <TextInputField 
-            label="First name"
-            value={firstName}
-            onChangeText={onChangeFirstName}
-          />
-           <TextInputField 
-            label="Last name"
-            value={lastName}
-            onChangeText={onChangeLastName}
-          />
-        </View>}
+      <View style={[styles.fieldRow, isDesktop && styles.fieldRowDesktop, !isWeb && activeDropdown === "gender" && styles.dropdownRowRaised]}>
+        {isDesktop ? (
+          <>
+            <View style={[styles.field, isDesktop && styles.fieldHalf]}>
+              <Text style={styles.fieldLabel}>First name</Text>
+              <TextInput value={firstName} onChangeText={onChangeFirstName} placeholder="John" placeholderTextColor="#B1A6C4" style={[styles.input, isDesktop && styles.inputDesktop]} />
+            </View>
+            <View style={[styles.field, isDesktop && styles.fieldHalf]}>
+              <Text style={styles.fieldLabel}>Last name</Text>
+              <TextInput value={lastName} onChangeText={onChangeLastName} placeholder="Doe" placeholderTextColor="#B1A6C4" style={[styles.input, isDesktop && styles.inputDesktop]} />
+            </View>
+          </>
+        ) : (
+          <View style={{ rowGap: 40 }}>
+            <TextInputField label="First name" value={firstName} onChangeText={onChangeFirstName} />
+            <TextInputField label="Last name" value={lastName} onChangeText={onChangeLastName} />
+          </View>
+        )}
       </View>
 
       <View style={[styles.fieldRow, isDesktop && styles.fieldRowDesktop]}>
-        {isDesktop ? <>
-          <View
-          style={[
-            styles.field,
-            isDesktop && styles.fieldHalf,
-            isWeb && isWebDatePickerOpen && styles.fieldDropdownActive,
-            isDesktop && isWeb && isWebDatePickerOpen && styles.dropdownRowRaised,
-          ]}
-        >
-          <Text style={styles.fieldLabel}>Date of birth</Text>
-          <Pressable
-            onPress={onOpenDatePicker}
-            style={[styles.input, styles.inputPressable, isDesktop && styles.inputDesktop]}
-          >
-            <Text style={formattedBirthDate ? styles.inputValue : styles.inputPlaceholder}>
-              {formattedBirthDate || "Select date"}
-            </Text>
-            <Ionicons name="calendar-outline" size={18} color="#6F5F8F" />
-          </Pressable>
-          {isWeb && isWebDatePickerOpen ? (
-            <View style={styles.webDatePicker}>
-              <input
-                type="date"
-                value={webDateValue}
-                onChange={handleWebDateChange}
-                max={webTodayIso}
-                style={webDateInputStyle}
-              />
-              <View style={styles.webDateActions}>
-                <Pressable style={styles.webDateAction} onPress={handleWebClear}>
-                  <Text style={styles.webDateActionText}>Clear</Text>
-                </Pressable>
-                <Pressable style={styles.webDateAction} onPress={onCloseWebDatePicker}>
-                  <Text style={styles.webDateActionText}>Done</Text>
-                </Pressable>
-              </View>
+        {isDesktop ? (
+          <>
+            <View style={[styles.field, isDesktop && styles.fieldHalf, isWeb && isWebDatePickerOpen && styles.fieldDropdownActive, isDesktop && isWeb && isWebDatePickerOpen && styles.dropdownRowRaised]}>
+              <Text style={styles.fieldLabel}>Date of birth</Text>
+              <Pressable onPress={onOpenDatePicker} style={[styles.input, styles.inputPressable, isDesktop && styles.inputDesktop]}>
+                <Text style={formattedBirthDate ? styles.inputValue : styles.inputPlaceholder}>{formattedBirthDate || "Select date"}</Text>
+                <Ionicons name="calendar-outline" size={18} color="#6F5F8F" />
+              </Pressable>
+              {isWeb && isWebDatePickerOpen ? (
+                <View style={styles.webDatePicker}>
+                  <input type="date" value={webDateValue} onChange={handleWebDateChange} max={webTodayIso} style={webDateInputStyle} />
+                  <View style={styles.webDateActions}>
+                    <Pressable style={styles.webDateAction} onPress={handleWebClear}>
+                      <Text style={styles.webDateActionText}>Clear</Text>
+                    </Pressable>
+                    <Pressable style={styles.webDateAction} onPress={onCloseWebDatePicker}>
+                      <Text style={styles.webDateActionText}>Done</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              ) : null}
             </View>
-          ) : null}
-        </View>
-        </> : 
-        <>
-        <View style={{marginTop: 25 }}>
-          <DateInputField 
-            value={birthDate ? birthDate.toISOString().split("T")[0] : ""}
-            onChange={(dateString) => {
-              setBirthDate(dateString ? new Date(dateString) : null);
-            }} 
-            label="Date of birth" 
-            placeholder=""
-          
-          />
-        </View>
-        
-        </>}
-        
+          </>
+        ) : (
+          <>
+            <View style={{ marginTop: 25 }}>
+              <DateInputField
+                value={birthDate ? birthDate.toISOString().split("T")[0] : ""}
+                onChange={(dateString) => {
+                  setBirthDate(dateString ? new Date(dateString) : null);
+                }}
+                label="Date of birth"
+                placeholder=""
+              />
+            </View>
+          </>
+        )}
+
         {isWeb ? (
           <View style={[styles.field, isDesktop && styles.fieldHalf]}>
             <Text style={styles.fieldLabel}>Gender</Text>
-            <View
-              style={[
-                styles.webSelectWrapper,
-                isDesktop && styles.webSelectWrapperDesktop,
-              ]}
-            >
-              <select
-                value={gender || ""}
-                onChange={handleWebGenderChange}
-                style={genderSelectStyle}
-              >
+            <View style={[styles.webSelectWrapper, isDesktop && styles.webSelectWrapperDesktop]}>
+              <select value={gender || ""} onChange={handleWebGenderChange} style={genderSelectStyle}>
                 <option value="">Select</option>
                 {genderOptions.map((option) => (
                   <option key={option} value={option}>
@@ -358,14 +264,8 @@ export function ProfileModalContent({
             </View>
           </View>
         ) : (
-          <View style={{ marginTop:25 }}>
-            <DropDownField 
-              value={gender} 
-              label="Gender" 
-              options={genderOptions} 
-              onSelectOption={onSelectGender}
-              icon={<Image source={require("@/assets/images/chevrondown.png")}/>}
-            />
+          <View style={{ marginTop: 25 }}>
+            <DropDownField value={gender} label="Gender" options={genderOptions} onSelectOption={onSelectGender} icon={<Image source={require("@/assets/images/chevrondown.png")} />} />
           </View>
           // <View
           //   style={[
@@ -392,59 +292,25 @@ export function ProfileModalContent({
       </View>
 
       <View style={[styles.fieldRow, isDesktop && styles.fieldRowDesktop]}>
-        {isDesktop ? 
-        <>
-        <View style={[styles.field, isDesktop && styles.fieldHalf]}>
-          <Text style={styles.fieldLabel}>Email address</Text>
-          <TextInput
-            value={email}
-            onChangeText={onChangeEmail}
-            placeholder="john.doe@mail.com"
-            placeholderTextColor="#B1A6C4"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            style={[styles.input, isDesktop && styles.inputDesktop]}
-          />
-        </View>
-        <View style={[styles.field, isDesktop && styles.fieldHalf]}>
-          <Text style={styles.fieldLabel}>Mobile number (optional)</Text>
-          <View style={styles.phoneRow}>
-            <TextInput
-              value={countryCode}
-              onChangeText={onChangeCountryCode}
-              placeholder="+971"
-              placeholderTextColor="#B1A6C4"
-              style={[styles.input, styles.countryInput, isDesktop && styles.inputDesktop]}
-            />
-            <TextInput
-              value={phoneNumber}
-              onChangeText={onChangePhoneNumber}
-              placeholder="521 123 456"
-              placeholderTextColor="#B1A6C4"
-              keyboardType="phone-pad"
-              style={[styles.input, styles.phoneInput, isDesktop && styles.inputDesktop]}
-            />
-          </View>
-        </View>
-      
-        </> : 
-        <View style={{rowGap:40, marginTop: 25}}>
-         <TextInputField 
-            keyboardType="email-address"
-            label="Email address"
-            value={email}
-            onChangeText={onChangeEmail}
-          />
-          <PhoneInputField 
-            countryCodeValue={countryCode} 
-            onChangeCountryCode={onChangeCountryCode}
-            countryCodePlaceholder={"+971"}
-            phoneNumberValue={phoneNumber}
-            onChangePhoneNumber={onChangePhoneNumber}
-            phoneNumberPlaceholder="521 123 456"
-            label="Mobile number (optional)" 
-          />
-          {/* <View style={[styles.field, isDesktop && styles.fieldHalf]}>
+        {isDesktop ? (
+          <>
+            <View style={[styles.field, isDesktop && styles.fieldHalf]}>
+              <Text style={styles.fieldLabel}>Email address</Text>
+              <TextInput value={email} onChangeText={onChangeEmail} placeholder="john.doe@mail.com" placeholderTextColor="#B1A6C4" keyboardType="email-address" autoCapitalize="none" style={[styles.input, isDesktop && styles.inputDesktop]} />
+            </View>
+            <View style={[styles.field, isDesktop && styles.fieldHalf]}>
+              <Text style={styles.fieldLabel}>Mobile number (optional)</Text>
+              <View style={styles.phoneRow}>
+                <TextInput value={countryCode} onChangeText={onChangeCountryCode} placeholder="+971" placeholderTextColor="#B1A6C4" style={[styles.input, styles.countryInput, isDesktop && styles.inputDesktop]} />
+                <TextInput value={phoneNumber} onChangeText={onChangePhoneNumber} placeholder="521 123 456" placeholderTextColor="#B1A6C4" keyboardType="phone-pad" style={[styles.input, styles.phoneInput, isDesktop && styles.inputDesktop]} />
+              </View>
+            </View>
+          </>
+        ) : (
+          <View style={{ rowGap: 40, marginTop: 25 }}>
+            <TextInputField keyboardType="email-address" label="Email address" value={email} onChangeText={onChangeEmail} />
+            <PhoneInputField countryCodeValue={countryCode} onChangeCountryCode={onChangeCountryCode} countryCodePlaceholder={"+971"} phoneNumberValue={phoneNumber} onChangePhoneNumber={onChangePhoneNumber} phoneNumberPlaceholder="521 123 456" label="Mobile number (optional)" />
+            {/* <View style={[styles.field, isDesktop && styles.fieldHalf]}>
           <Text style={styles.fieldLabel}>Mobile number (optional)</Text>
           <View style={styles.phoneRow}>
             <TextInput
@@ -464,24 +330,15 @@ export function ProfileModalContent({
             />
           </View>
         </View> */}
-      </View>
-      }
+          </View>
+        )}
       </View>
 
       {isWeb ? (
         <View style={styles.field}>
           <Text style={styles.fieldLabel}>Relation with this person (optional)</Text>
-          <View
-            style={[
-              styles.webSelectWrapper,
-              isDesktop && styles.webSelectWrapperDesktop,
-            ]}
-          >
-            <select
-              value={relation || ""}
-              onChange={handleWebRelationChange}
-              style={relationSelectStyle}
-            >
+          <View style={[styles.webSelectWrapper, isDesktop && styles.webSelectWrapperDesktop]}>
+            <select value={relation || ""} onChange={handleWebRelationChange} style={relationSelectStyle}>
               <option value="">Select</option>
               {relationOptions.map((option) => (
                 <option key={option} value={option}>
@@ -493,73 +350,36 @@ export function ProfileModalContent({
         </View>
       ) : (
         <View style={{ marginTop: 25 }}>
-          <DropDownField  icon={<Image source={require("@/assets/images/chevrondown.png")}/>} value={relation} label="Relation with this person (optional)" options={relationOptions} onSelectOption={onSelectRelation}/>
+          <DropDownField icon={<Image source={require("@/assets/images/chevrondown.png")} />} value={relation} label="Relation with this person (optional)" options={relationOptions} onSelectOption={onSelectRelation} />
         </View>
-   
       )}
 
       <View style={styles.toggleRow}>
         <View style={styles.toggleTexts}>
           <Text style={isDesktop ? styles.toggleTitle : styles.toggleTitleMobile}>Allow them to edit</Text>
-          {isDesktop ? 
-          <Text style={styles.toggleSubtitle}>
-            They can add or update items on this list.
-          </Text> : null}
-          
+          {isDesktop ? <Text style={styles.toggleSubtitle}>They can add or update items on this list.</Text> : null}
         </View>
-        <Switch
-          value={allowEdit}
-          onValueChange={onToggleAllowEdit}
-          trackColor={{ false: "#D9D3E5", true: "#22C55E" }}
-          thumbColor="#FFFFFF"
-        />
+        <Switch value={allowEdit} onValueChange={onToggleAllowEdit} trackColor={{ false: "#D9D3E5", true: "#22C55E" }} thumbColor="#FFFFFF" />
       </View>
 
       {submitError ? <Text style={styles.errorText}>{submitError}</Text> : null}
       {formMessage ? <Text style={styles.successText}>{formMessage}</Text> : null}
 
-      <View
-        style={[
-          styles.modalButtonRow,
-          isDesktop && styles.modalButtonRowDesktop,
-        ]}
-      >
-        <Pressable
-          style={[isDesktop?  styles.secondaryButton : styles.secondaryButtonMobile, isSaving && styles.buttonDisabled]}
-          onPress={onCancel}
-          disabled={isSaving}
-        >
-          <Text style={isDesktop?  styles.secondaryButtonText: styles.secondaryButtonTextMobile}>Cancel</Text>
+      <View style={[styles.modalButtonRow, isDesktop && styles.modalButtonRowDesktop]}>
+        <Pressable style={[isDesktop ? styles.secondaryButton : styles.secondaryButtonMobile, isSaving && styles.buttonDisabled]} onPress={onCancel} disabled={isSaving}>
+          <Text style={isDesktop ? styles.secondaryButtonText : styles.secondaryButtonTextMobile}>Cancel</Text>
         </Pressable>
-        <Pressable
-          style={[isDesktop? styles.primaryButton : styles.primaryButtonMobile, isSaving && styles.buttonDisabled]}
-          onPress={() => onSave(true)}
-          disabled={isSaving}
-        >
-          {isSaving ? (
-            <ActivityIndicator color="#FFFFFF" size="small" />
-          ) : (
-            <Text style={styles.primaryButtonText}>
-              {isDesktop? "Save & Continue" : "Save profile"}
-              
-            </Text>
-          )}
+        <Pressable style={[isDesktop ? styles.primaryButton : styles.primaryButtonMobile, isSaving && styles.buttonDisabled]} onPress={() => onSave(true)} disabled={isSaving}>
+          {isSaving ? <ActivityIndicator color="#FFFFFF" size="small" /> : <Text style={styles.primaryButtonText}>{isDesktop ? "Save & Continue" : "Save profile"}</Text>}
         </Pressable>
 
-       <Pressable
-          style={[isDesktop?  styles.secondaryButton : styles.secondaryButtonMobile, isSaving && styles.buttonDisabled]}
-           onPress={() => onSave(false)}
-          disabled={isSaving}
-        >
-          <View style={{flexDirection:'row', gap:13, justifyContent:'center'}}>
+        <Pressable style={[isDesktop ? styles.secondaryButton : styles.secondaryButtonMobile, isSaving && styles.buttonDisabled]} onPress={() => onSave(false)} disabled={isSaving}>
+          <View style={{ flexDirection: "row", gap: 13, justifyContent: "center" }}>
             <Ionicons name="add" size={22} color="#3B0076" />
-            <Text style={isDesktop?  styles.secondaryButtonText: styles.secondaryButtonTextMobile}>
-              {isDesktop ? "Save & add another" : "Add another profile"}
-            </Text>
+            <Text style={isDesktop ? styles.secondaryButtonText : styles.secondaryButtonTextMobile}>{isDesktop ? "Save & add another" : "Add another profile"}</Text>
           </View>
         </Pressable>
       </View>
-      
     </ScrollView>
   );
 }

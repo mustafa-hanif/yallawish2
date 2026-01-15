@@ -249,8 +249,8 @@ const selectProfileStyles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   mobileHeaderGradient: {
-      minHeight: 108,
-     justifyContent:'flex-end'
+    minHeight: 108,
+    justifyContent: "flex-end",
   },
   mobileHeaderContent: {
     paddingHorizontal: 16,
@@ -433,6 +433,7 @@ const selectProfileStyles = StyleSheet.create({
   mobileModalScroll: {
     gap: 20,
     paddingBottom: 24,
+    paddingHorizontal: 24,
     overflow: "visible",
   },
   desktopModalScrollContainer: {
@@ -446,12 +447,12 @@ const selectProfileStyles = StyleSheet.create({
     fontSize: 26,
     color: "#1C0335",
   },
- 
+
   modalTitle: {
     fontFamily: "Nunito_700Bold",
     fontSize: 24,
     color: "#1C0335",
-    lineHeight:28
+    lineHeight: 28,
   },
   modalSubtitleDesktop: {
     fontFamily: "Nunito_400Regular",
@@ -642,7 +643,7 @@ const selectProfileStyles = StyleSheet.create({
     justifyContent: "flex-end",
     gap: 16,
   },
-  
+
   secondaryButton: {
     height: 52,
     borderRadius: 12,
@@ -669,7 +670,7 @@ const selectProfileStyles = StyleSheet.create({
     fontSize: 15,
     color: "#4B0082",
   },
-  secondaryButtonTextMobile:{
+  secondaryButtonTextMobile: {
     fontFamily: "Nunito_700Bold",
     fontSize: 16,
     color: "#3B0076",
@@ -709,7 +710,7 @@ const selectProfileStyles = StyleSheet.create({
     fontSize: 15,
     color: "#4B0082",
   },
-  ghostButtonMobile : {
+  ghostButtonMobile: {
     height: 56,
     borderRadius: 8,
     borderWidth: 1,

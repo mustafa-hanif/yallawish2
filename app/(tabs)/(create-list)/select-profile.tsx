@@ -1,4 +1,5 @@
 import { DropdownKey, ProfileModalContent } from "@/components/createList/ProfileModalContent";
+import BottomSheet from "@/components/ui/BottomSheet";
 import { api } from "@/convex/_generated/api";
 import { Doc } from "@/convex/_generated/dataModel";
 import { useAuth } from "@clerk/clerk-expo";
@@ -6,17 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { Fragment, ReactNode, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-  useWindowDimensions
-} from "react-native";
+import { ActivityIndicator, Alert, Modal, Platform, Pressable, ScrollView, Text, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import styles from "@/styles/selectProfileStyles";
@@ -24,29 +15,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Image, StatusBar } from "react-native";
 const DESKTOP_BREAKPOINT = 1024;
 const DEFAULT_COUNTRY_CODE = "+971";
-const GENDER_OPTIONS = [
-  "Female",
-  "Male",
-  "Non-binary",
-  "Prefer not to say",
-];
-const RELATION_OPTIONS = [
-  "Spouse",
-  "Partner",
-  "Son",
-  "Daughter",
-  "Parent",
-  "Sibling",
-  "Friend",
-  "Colleague",
-  "Pet",
-  "Other",
-];
-const STEP_ITEMS = [
-  "Who is this list for?",
-  "Giftlist Details",
-  "Who can see this list?",
-];
+const GENDER_OPTIONS = ["Female", "Male", "Non-binary", "Prefer not to say"];
+const RELATION_OPTIONS = ["Spouse", "Partner", "Son", "Daughter", "Parent", "Sibling", "Friend", "Colleague", "Pet", "Other"];
+const STEP_ITEMS = ["Who is this list for?", "Giftlist Details", "Who can see this list?"];
 
 type ContactDoc = Doc<"contacts">;
 
@@ -82,13 +53,8 @@ export default function SelectProfileScreen() {
   const initialProfileId = getParamValue(params.profileId);
   const encodedReturnTo = getParamValue(params.returnTo);
 
-  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(
-    initialProfileId ?? null,
-  );
-  const contacts = useQuery(
-    api.products.getContacts as any,
-    userId ? ({ owner_id: userId } as any) : "skip",
-  );
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(initialProfileId ?? null);
+  const contacts = useQuery(api.products.getContacts as any, userId ? ({ owner_id: userId } as any) : "skip");
   const createContact = useMutation(api.products.createContact as any);
 
   const { width } = useWindowDimensions();
@@ -110,9 +76,7 @@ export default function SelectProfileScreen() {
   const [countryCode, setCountryCode] = useState(DEFAULT_COUNTRY_CODE);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [allowEdit, setAllowEdit] = useState(true);
-  const [activeDropdown, setActiveDropdown] = useState<DropdownKey | null>(
-    null,
-  );
+  const [activeDropdown, setActiveDropdown] = useState<DropdownKey | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [formMessage, setFormMessage] = useState<string | null>(null);
@@ -188,10 +152,7 @@ export default function SelectProfileScreen() {
 
   const handleContinue = () => {
     if (!selectedProfileId) {
-      Alert.alert(
-        "Select a profile",
-        "Choose an existing profile or create a new one to continue.",
-      );
+      Alert.alert("Select a profile", "Choose an existing profile or create a new one to continue.");
       return;
     }
     const nextParams: Record<string, string> = {
@@ -280,7 +241,7 @@ export default function SelectProfileScreen() {
   };
 
   const renderProfilesDesktop = () => (
-    <SafeAreaView style={styles.desktopSafeArea} edges={['top']}>
+    <SafeAreaView style={styles.desktopSafeArea} edges={["top"]}>
       <View style={styles.desktopWrapper}>
         <View style={styles.desktopSidebar}>
           <Pressable onPress={() => router.back()} style={styles.desktopBackRow}>
@@ -288,48 +249,19 @@ export default function SelectProfileScreen() {
             <Text style={styles.desktopBackText}>Back</Text>
           </Pressable>
           <Text style={styles.desktopSidebarTitle}>Create Gift List</Text>
-          <Text style={styles.desktopSidebarSubtitle}>
-            Choose who this wishlist is for, then add the details and sharing preferences.
-          </Text>
+          <Text style={styles.desktopSidebarSubtitle}>Choose who this wishlist is for, then add the details and sharing preferences.</Text>
           <View style={styles.desktopStepList}>
             {STEP_ITEMS.map((label, index) => {
               const isActive = index === 0;
               return (
                 <View key={label} style={styles.desktopStepItem}>
                   <View style={styles.desktopStepIndicator}>
-                    <View
-                      style={[
-                        styles.desktopStepCircle,
-                        isActive
-                          ? styles.desktopStepCircleActive
-                          : styles.desktopStepCircleInactive,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.desktopStepNumber,
-                          isActive
-                            ? styles.desktopStepNumberActive
-                            : styles.desktopStepNumberInactive,
-                        ]}
-                      >
-                        {index + 1}
-                      </Text>
+                    <View style={[styles.desktopStepCircle, isActive ? styles.desktopStepCircleActive : styles.desktopStepCircleInactive]}>
+                      <Text style={[styles.desktopStepNumber, isActive ? styles.desktopStepNumberActive : styles.desktopStepNumberInactive]}>{index + 1}</Text>
                     </View>
-                    {index < STEP_ITEMS.length - 1 ? (
-                      <View style={styles.desktopStepConnector} />
-                    ) : null}
+                    {index < STEP_ITEMS.length - 1 ? <View style={styles.desktopStepConnector} /> : null}
                   </View>
-                  <Text
-                    style={[
-                      styles.desktopStepLabel,
-                      isActive
-                        ? styles.desktopStepLabelActive
-                        : styles.desktopStepLabelInactive,
-                    ]}
-                  >
-                    {label}
-                  </Text>
+                  <Text style={[styles.desktopStepLabel, isActive ? styles.desktopStepLabelActive : styles.desktopStepLabelInactive]}>{label}</Text>
                 </View>
               );
             })}
@@ -337,14 +269,9 @@ export default function SelectProfileScreen() {
         </View>
 
         <View style={styles.desktopContent}>
-          <ScrollView
-            contentContainerStyle={styles.desktopScrollContent}
-            showsVerticalScrollIndicator={false}
-          >
+          <ScrollView contentContainerStyle={styles.desktopScrollContent} showsVerticalScrollIndicator={false}>
             <Text style={styles.desktopHeading}>Who is this list for?</Text>
-            <Text style={styles.desktopSubheading}>
-              Select an existing giftee or create a new profile to continue setup.
-            </Text>
+            <Text style={styles.desktopSubheading}>Select an existing giftee or create a new profile to continue setup.</Text>
 
             {isLoadingProfiles ? (
               <View style={styles.loadingWrapper}>
@@ -355,25 +282,14 @@ export default function SelectProfileScreen() {
                 {profiles.map((profile) => {
                   const isSelected = selectedProfileId === String(profile._id);
                   return (
-                    <Pressable
-                      key={String(profile._id)}
-                      onPress={() => handleSelectProfile(profile)}
-                      style={[
-                        styles.desktopCard,
-                        isSelected && styles.desktopCardSelected,
-                      ]}
-                    >
+                    <Pressable key={String(profile._id)} onPress={() => handleSelectProfile(profile)} style={[styles.desktopCard, isSelected && styles.desktopCardSelected]}>
                       <View style={styles.desktopAvatar}>
-                        <Text style={styles.desktopInitials}>
-                          {getInitials(profile.name)}
-                        </Text>
+                        <Text style={styles.desktopInitials}>{getInitials(profile.name)}</Text>
                       </View>
                       <Text style={styles.desktopName} numberOfLines={1}>
                         {profile.name}
                       </Text>
-                      {isSelected ? (
-                        <Text style={styles.desktopSelectedLabel}>Selected</Text>
-                      ) : null}
+                      {isSelected ? <Text style={styles.desktopSelectedLabel}>Selected</Text> : null}
                     </Pressable>
                   );
                 })}
@@ -390,9 +306,7 @@ export default function SelectProfileScreen() {
             {showEmptyState ? (
               <View style={styles.desktopEmpty}>
                 <Text style={styles.emptyHeading}>No profiles yet</Text>
-                <Text style={styles.emptyBody}>
-                  Create your first profile to start building wishlists for the people you love.
-                </Text>
+                <Text style={styles.emptyBody}>Create your first profile to start building wishlists for the people you love.</Text>
               </View>
             ) : null}
           </ScrollView>
@@ -401,14 +315,7 @@ export default function SelectProfileScreen() {
             <Pressable style={styles.desktopSecondaryButton} onPress={() => router.back()}>
               <Text style={styles.desktopSecondaryButtonText}>Back</Text>
             </Pressable>
-            <Pressable
-              style={[
-                styles.desktopPrimaryButton,
-                !selectedProfileId && styles.desktopPrimaryButtonDisabled,
-              ]}
-              onPress={handleContinue}
-              disabled={!selectedProfileId}
-            >
+            <Pressable style={[styles.desktopPrimaryButton, !selectedProfileId && styles.desktopPrimaryButtonDisabled]} onPress={handleContinue} disabled={!selectedProfileId}>
               <Text style={styles.desktopPrimaryButtonText}>Continue</Text>
             </Pressable>
           </View>
@@ -420,14 +327,8 @@ export default function SelectProfileScreen() {
   const renderProfilesMobile = () => (
     <View style={styles.mobileContainer}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" />
-      
-      <LinearGradient
-        colors={["#330065", "#45018ad7"]}
-        locations={[0, 0.7]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 2 }}
-        style={styles.mobileHeaderGradient}
-      >
+
+      <LinearGradient colors={["#330065", "#45018ad7"]} locations={[0, 0.7]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 2 }} style={styles.mobileHeaderGradient}>
         <SafeAreaView edges={["top"]}>
           <View style={styles.mobileHeaderContent}>
             <View style={styles.navigation}>
@@ -442,36 +343,22 @@ export default function SelectProfileScreen() {
 
       <View style={styles.mobileBody}>
         <Text style={styles.mobileHeading}>Select or Add Profile</Text>
-        <Text style={styles.mobileSubheading}>
-          Choose or add a new profile to create a{"\n"}wishlist for
-        </Text>
+        <Text style={styles.mobileSubheading}>Choose or add a new profile to create a{"\n"}wishlist for</Text>
 
         {isLoadingProfiles ? (
           <View style={styles.loadingWrapper}>
             <ActivityIndicator color="#4B0082" />
           </View>
         ) : (
-          <ScrollView
-            contentContainerStyle={styles.mobileScrollContent}
-            showsVerticalScrollIndicator={false}
-          >
+          <ScrollView contentContainerStyle={styles.mobileScrollContent} showsVerticalScrollIndicator={false}>
             {profiles.length > 0 ? (
               <View style={styles.mobileCardsWrap}>
                 {profiles.map((profile) => {
                   const isSelected = selectedProfileId === String(profile._id);
                   return (
-                    <Pressable
-                      key={String(profile._id)}
-                      onPress={() => handleSelectProfile(profile)}
-                      style={[
-                        styles.mobileCard,
-                        isSelected && styles.mobileCardSelected,
-                      ]}
-                    >
+                    <Pressable key={String(profile._id)} onPress={() => handleSelectProfile(profile)} style={[styles.mobileCard, isSelected && styles.mobileCardSelected]}>
                       <View style={styles.mobileAvatar}>
-                        <Text style={styles.mobileInitials}>
-                          {getInitials(profile.name)}
-                        </Text>
+                        <Text style={styles.mobileInitials}>{getInitials(profile.name)}</Text>
                       </View>
                       <Text style={styles.mobileName} numberOfLines={1}>
                         {profile.name}
@@ -483,9 +370,7 @@ export default function SelectProfileScreen() {
             ) : (
               <View style={styles.mobileEmpty}>
                 <Text style={styles.emptyHeading}>No profiles yet</Text>
-                <Text style={styles.emptyBody}>
-                  Tap “New Profile” to add someone before building their list.
-                </Text>
+                <Text style={styles.emptyBody}>Tap “New Profile” to add someone before building their list.</Text>
               </View>
             )}
 
@@ -501,16 +386,9 @@ export default function SelectProfileScreen() {
         )}
       </View>
 
-      <SafeAreaView edges={['bottom']} style={styles.mobileFooterSafeArea}>
+      <SafeAreaView edges={["bottom"]} style={styles.mobileFooterSafeArea}>
         <View style={styles.mobileFooter}>
-          <Pressable
-            style={[
-              styles.mobileContinueButton,
-              !selectedProfileId && styles.mobileContinueButtonDisabled,
-            ]}
-            onPress={handleContinue}
-            disabled={!selectedProfileId}
-          >
+          <Pressable style={[styles.mobileContinueButton, !selectedProfileId && styles.mobileContinueButtonDisabled]} onPress={handleContinue} disabled={!selectedProfileId}>
             <Text style={styles.mobileContinueText}>Continue</Text>
           </Pressable>
         </View>
@@ -521,14 +399,7 @@ export default function SelectProfileScreen() {
   return (
     <Fragment>
       {isDesktop ? renderProfilesDesktop() : renderProfilesMobile()}
-      <ProfileModal
-        visible={isModalVisible}
-        isDesktop={isDesktop}
-        onRequestClose={closeModal}
-      >
-          <Pressable onPress={closeModal}>
-            <View style={styles.sheetHandle} />
-          </Pressable>
+      <ProfileModal visible={isModalVisible} isDesktop={isDesktop} onRequestClose={closeModal}>
         <ProfileModalContent
           isDesktop={isDesktop}
           firstName={firstName}
@@ -590,25 +461,20 @@ type ProfileModalProps = {
 };
 
 function ProfileModal({ visible, isDesktop, onRequestClose, children }: ProfileModalProps) {
+  if (!isDesktop) {
+    return (
+      <BottomSheet isVisible={visible} onClose={onRequestClose}>
+        {children}
+      </BottomSheet>
+    );
+  }
+
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType={isDesktop ? "fade" : "slide"}
-      onRequestClose={onRequestClose}
-    >
-      {isDesktop ? (
-        <View style={styles.desktopModalOverlay}>
-          <Pressable style={styles.modalBackdrop} onPress={onRequestClose} />
-          <View style={styles.desktopModalCard}>{children}</View>
-        </View>
-      ) : (
-        <View style={styles.mobileModalOverlay}>
-          <Pressable style={styles.modalBackdrop} onPress={onRequestClose} />
-          <View style={styles.modalSheet}>{children}</View>
-        </View>
-      )}
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onRequestClose}>
+      <View style={styles.desktopModalOverlay}>
+        <Pressable style={styles.modalBackdrop} onPress={onRequestClose} />
+        <View style={styles.desktopModalCard}>{children}</View>
+      </View>
     </Modal>
   );
 }
-
