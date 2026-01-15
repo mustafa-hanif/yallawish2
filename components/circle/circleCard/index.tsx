@@ -1,6 +1,8 @@
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { Image, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
+import BottomSheet from "../../ui/BottomSheet";
 import { styles } from "./style";
 
 export default function CircleCard() {
@@ -73,29 +75,23 @@ export default function CircleCard() {
           </Pressable>
         </View>
       </Pressable>
-      <Modal visible={isBottomSheet} transparent animationType="slide" onRequestClose={() => setIsBottomSheet(false)}>
-        <Pressable style={styles.backdrop} onPress={() => setIsBottomSheet(false)} />
-        <View style={styles.sheetContainer}>
-          <Pressable onPress={() => setIsBottomSheet(false)}>
-            <View style={styles.sheetHandle} />
-          </Pressable>
-          <ScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
-            <Text style={styles.sheetTitle}>Manage Circle</Text>
-            <View style={styles.actionsContainer}>
-              {quickActions?.map((action) => (
-                <Pressable key={action.title} style={[styles.actionButton]}>
-                  <View style={[styles.actionIconContainer, action.title === "Delete Circle" ? { backgroundColor: "#FFF0F0" } : {}]}>
-                    <Image style={[styles.icon, action.title === "Delete Circle" ? { tintColor: "#FF3B30" } : {}]} source={action.icon} resizeMode="contain" />
-                  </View>
-                  <View>
-                    <Text style={[styles.actionLabel, action.title === "Delete Circle" ? { color: "#FF3B30" } : {}]}>{action.title}</Text>
-                  </View>
-                </Pressable>
-              ))}
-            </View>
-          </ScrollView>
-        </View>
-      </Modal>
+      <BottomSheet isVisible={isBottomSheet} onClose={() => setIsBottomSheet(false)}>
+        <ScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
+          <Text style={styles.sheetTitle}>Manage Circle</Text>
+          <View style={styles.actionsContainer}>
+            {quickActions?.map((action) => (
+              <Pressable key={action.title} style={[styles.actionButton]}>
+                <View style={[styles.actionIconContainer, action.title === "Delete Circle" ? { backgroundColor: "#FFF0F0" } : {}]}>
+                  <Image style={[styles.icon, action.title === "Delete Circle" ? { tintColor: "#FF3B30" } : {}]} source={action.icon} resizeMode="contain" />
+                </View>
+                <View>
+                  <Text style={[styles.actionLabel, action.title === "Delete Circle" ? { color: "#FF3B30" } : {}]}>{action.title}</Text>
+                </View>
+              </Pressable>
+            ))}
+          </View>
+        </ScrollView>
+      </BottomSheet>
     </>
   );
 }
