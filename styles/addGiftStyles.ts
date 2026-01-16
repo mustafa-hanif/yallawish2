@@ -1068,7 +1068,7 @@ export const desktopStyles = StyleSheet.create({
   buyButton: {
     paddingHorizontal: 28,
     paddingVertical: 12,
-    borderRadius: 999,
+    borderRadius: 8,
     backgroundColor: "#03FFEE",
     alignItems: "center",
     justifyContent: "center",
