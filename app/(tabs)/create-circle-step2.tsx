@@ -89,7 +89,7 @@ const CreateCircleStep2 = () => {
         </Pressable>
         <View style={styles.expandableSection}>
           <View style={styles.expandableSearchSection}>
-            <TextInputField label="Email Address or Phone Number" icon={<Image source={require("@/assets/images/search.png")} />} />
+            <TextInputField label="Email Address or Phone Number" hint="Invited users will be added as friends once they accepted" />
           </View>
           <View>
             <View style={styles.addSelectedFriendsContainer}>
