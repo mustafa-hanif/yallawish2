@@ -23,13 +23,16 @@ const ViewCircle = () => {
 
   const membersArray = Array.from({ length: 10 });
 
+  const handlePressAddNew = () => {
+    router.push("/create-circle-step1");
+  };
   return (
     <View style={styles.container}>
       <Header title="View Circle" handleBack={handleBack} />
       <ScrollView>
         <CircleBanner />
         <ViewCircleGroupInfo />
-        <SectionHeader title="Occasions" count={4} buttonTitle={"Add New"} />
+        <SectionHeader title="Occasions" count={4} buttonTitle={"Add New"} buttonAction={handlePressAddNew} />
         <View style={styles.section}>
           <FlatList
             columnWrapperStyle={styles.listColumnWrapperStyle}
