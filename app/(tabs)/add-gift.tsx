@@ -933,7 +933,7 @@ export default function AddGift() {
                   placeholder="Search products"
                   icon={
                     <Pressable onPress={openSearchBrowser}>
-                      <Image source={require("@/assets/images/search.png")} />
+                      <Image source={require("@/assets/images/googleIcon.png")} />
                     </Pressable>
                   }
                 />
