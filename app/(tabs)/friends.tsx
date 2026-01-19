@@ -2,13 +2,18 @@ import FriendsItem from "@/components/friends/FriendsItem";
 import FriendsSectionHeader from "@/components/friends/FriendsSectionHeader";
 import RequestItem from "@/components/friends/RequestItem";
 import FriendsTabs from "@/components/friends/Tabs";
+import UserProfileBottomSheetContent from "@/components/friends/UserProfileBottomSheetContent";
 import Header from "@/components/Header";
+import BottomSheet from "@/components/ui/BottomSheet";
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 
 const Friends = () => {
   const [currentTab, setCurrentTab] = useState("friends");
+  const [isAddFriendsSheetVisible, setIsAddFriendsSheetVisible] = useState(false);
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
   const encodedReturnTo = returnTo ? String(returnTo) : undefined;
   const decodedReturnTo = encodedReturnTo ? decodeURIComponent(encodedReturnTo) : undefined;
@@ -21,16 +26,24 @@ const Friends = () => {
     router.back();
   };
 
+  const handlePressAddFriends = () => {
+    setIsAddFriendsSheetVisible(true);
+  };
   const friends = Array.from({ length: 24 });
   const requests = Array.from({ length: 6 });
   const pendingInvites = Array.from({ length: 0 });
 
+  const userProfiles = useQuery(api.products.getUserProfiles);
+  console.log("\n userProfiles \n", userProfiles);
   return (
     <View style={styles.container}>
       <Header title="Friends" handleBack={handleBack} />
       <FriendsTabs currentTab={currentTab} setCurrentTab={setCurrentTab} />
-      <FriendsSectionHeader title={currentTab === "friends" ? "Friends" : currentTab === "requests" ? "Requests" : "Pending Invites"} currentTab={currentTab} count={currentTab === "friends" ? friends.length : currentTab === "requests" ? requests.length : pendingInvites.length} />
-      <FlatList showsVerticalScrollIndicator={false} contentContainerStyle={styles.listContainer} data={currentTab === "friends" ? friends : currentTab === "requests" ? requests : pendingInvites} renderItem={({ item }) => (currentTab === "friends" ? <FriendsItem /> : currentTab === "requests" ? <RequestItem /> : <RequestItem />)} keyExtractor={(item, index) => index.toString()} />
+      <FriendsSectionHeader title={currentTab === "friends" ? "Friends" : currentTab === "requests" ? "Requests" : "Pending Invites"} currentTab={currentTab} count={currentTab === "friends" ? friends.length : currentTab === "requests" ? requests.length : pendingInvites.length} handlePressAdd={handlePressAddFriends} />
+      <FlatList showsVerticalScrollIndicator={false} contentContainerStyle={styles.listContainer} data={currentTab === "friends" ? friends : currentTab === "requests" ? requests : pendingInvites} renderItem={({ item }) => (currentTab === "friends" ? <FriendsItem /> : currentTab === "requests" ? <RequestItem /> : <RequestItem />)} keyExtractor={(item, index) => index.toString()} />\{/* AddFriendsSheet component can be placed here when implemented */}
+      <BottomSheet isVisible={isAddFriendsSheetVisible} onClose={() => setIsAddFriendsSheetVisible(false)}>
+        <UserProfileBottomSheetContent userProfiles={userProfiles} />
+      </BottomSheet>
     </View>
   );
 };

@@ -193,13 +193,13 @@ export const updateListDetails = mutation({
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.listId, {
-      ...(args.title ? {title: args.title} : {}),
-      ...(args.note !== undefined ? {note: args.note} : {}),
-      ...(args.eventDate !== undefined ? {eventDate: args.eventDate} : {}),
-      ...(args.shippingAddress !== undefined ? {shippingAddress: args.shippingAddress} : {}),
-      ...(args.occasion !== undefined ? {occasion: args.occasion} : {}),
-      ...(args.coverPhotoUri !== undefined ? {coverPhotoUri: args.coverPhotoUri} : {}),
-      ...(args.coverPhotoStorageId !== undefined ? {coverPhotoStorageId: args.coverPhotoStorageId} : {}), 
+      ...(args.title ? { title: args.title } : {}),
+      ...(args.note !== undefined ? { note: args.note } : {}),
+      ...(args.eventDate !== undefined ? { eventDate: args.eventDate } : {}),
+      ...(args.shippingAddress !== undefined ? { shippingAddress: args.shippingAddress } : {}),
+      ...(args.occasion !== undefined ? { occasion: args.occasion } : {}),
+      ...(args.coverPhotoUri !== undefined ? { coverPhotoUri: args.coverPhotoUri } : {}),
+      ...(args.coverPhotoStorageId !== undefined ? { coverPhotoStorageId: args.coverPhotoStorageId } : {}),
       updated_at: new Date().toISOString(),
     });
     return true;
@@ -347,7 +347,7 @@ export const getMyLists = query({
             } as any;
           }
         }
-        
+
         return { ...list, coverPhotoUri, totalItems, totalClaimed, creator };
       })
     );
@@ -899,5 +899,13 @@ export const purchaseListItem = mutation({
       updated_at: now,
     });
     return true;
+  },
+});
+
+export const getUserProfiles = query({
+  args: {},
+  handler: async (ctx, args) => {
+    const users = await ctx.db.query("user_profiles").collect();
+    return users;
   },
 });

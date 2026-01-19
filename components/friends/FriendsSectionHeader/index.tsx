@@ -7,9 +7,10 @@ interface FriendsSectionHeaderProps {
   title: string;
   count: number;
   currentTab: string;
+  handlePressAdd?: () => void;
 }
 
-export default function FriendsSectionHeader({ title, count, currentTab }: FriendsSectionHeaderProps) {
+export default function FriendsSectionHeader({ title, count, currentTab, handlePressAdd }: FriendsSectionHeaderProps) {
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
@@ -20,7 +21,7 @@ export default function FriendsSectionHeader({ title, count, currentTab }: Frien
       </View>
       <View style={styles.buttonContainer}>
         {currentTab === "friends" && (
-          <Pressable style={styles.button}>
+          <Pressable style={styles.button} onPress={handlePressAdd}>
             <AntDesign name="plus" size={20} color="#1C1C1C" />
             <Text style={styles.buttonTitle}>Add</Text>
           </Pressable>

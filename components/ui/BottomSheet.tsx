@@ -89,7 +89,7 @@ export default function BottomSheet({ isVisible, onClose, children }: BottomShee
                 <Pressable style={styles.handle} onPress={onClose} />
               </View>
             </GestureDetector>
-            {children}
+            <View style={styles.content}>{children}</View>
           </Animated.View>
         </View>
       </GestureHandlerRootView>
@@ -109,11 +109,15 @@ const styles = StyleSheet.create({
   sheet: {
     backgroundColor: "white",
     width: "100%",
-    maxHeight: "80%",
+    height: SCREEN_HEIGHT * 0.8,
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     overflow: "hidden",
     paddingBottom: 20, // Bottom safe area buffer
+  },
+  content: {
+    flex: 1,
+    minHeight: 0,
   },
   handleContainer: {
     alignItems: "center",
