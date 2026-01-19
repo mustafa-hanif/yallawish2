@@ -104,6 +104,17 @@ export const upsertUserProfile = mutation({
   },
 });
 
+export const getUserProfileByUserId = query({
+  args: { user_id: v.string() },
+  handler: async (ctx, args) => {
+    const profile = await ctx.db
+      .query("user_profiles")
+      .withIndex("by_user", (q) => q.eq("user_id", args.user_id))
+      .first();
+    return profile ?? null;
+  },
+});
+
 type FeaturedProduct = Doc<"products">;
 export const storeProducts = internalMutation({
   args: { product: v.any() },
