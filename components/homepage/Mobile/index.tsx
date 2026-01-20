@@ -41,8 +41,20 @@ export function Mobile() {
 
   const upcomingEvents = useMemo(() => {
     if (!myLists) return [] as UpcomingEvent[];
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
     return myLists
-      .filter((l: any) => !!l.eventDate)
+      .filter((l: any) => {
+        if (!l?.eventDate) return false;
+        const [y, m, d] = String(l.eventDate)
+          .split("-")
+          .map((n) => parseInt(n, 10));
+        if (!y || !m || !d) return false;
+        const dateObj = new Date(y, (m ?? 1) - 1, d ?? 1);
+        if (Number.isNaN(dateObj.getTime())) return false;
+        return dateObj.getTime() >= todayStart.getTime();
+      })
       .map((l: any) => {
         const [y, m, d] = String(l.eventDate)
           .split("-")
@@ -67,7 +79,7 @@ export function Mobile() {
       <ScrollView showsVerticalScrollIndicator={false}>
         <Hero />
         <BrowseByCategories />
-        <UpcomingEvents upcomingEvents={upcomingEvents} />
+        {upcomingEvents?.length > 0 && <UpcomingEvents upcomingEvents={upcomingEvents} />}
         <TopPicksForYou />
         <InspirationBoards />
         <MeetGenie />
