@@ -101,16 +101,16 @@ export default function TabLayout() {
 
     Animated.timing(iconAnim, {
       toValue,
-      duration: 220,
+      duration: 420,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     }).start();
   }, [bottomSheetAnim, iconAnim, isBottomSheetOpen]);
 
   const bottomSheetOptions = [
-    { icon: require("@/assets/images/plus.png"), title: "Add to your List", route: "add-gift" },
-    { icon: require("@/assets/images/bottomSheetCreateList.png"), title: "Create New List", route: "create-list-step1" },
-    { icon: require("@/assets/images/bottomSheetUsers.png"), title: "Add New Circle", route: "create-circle-step1" },
+    { id: 1, icon: require("@/assets/images/plus.png"), title: "Add to your List", route: "create-list-step1" },
+    { id: 2, icon: require("@/assets/images/bottomSheetCreateList.png"), title: "Create New List", route: "create-list-step1" },
+    { id: 3, icon: require("@/assets/images/bottomSheetUsers.png"), title: "Add New Circle", route: "create-circle-step1" },
   ];
 
   const handleRoute = (route: string) => {
@@ -284,7 +284,7 @@ export default function TabLayout() {
             <Text style={styles.headingText}>Create or Add</Text>
           </View>
           {bottomSheetOptions.map((item) => (
-            <Pressable key={item.route} style={styles.bottomSheetOption} onPress={() => handleRoute(item.route)}>
+            <Pressable key={item.id} style={styles.bottomSheetOption} onPress={() => handleRoute(item.route)}>
               <View style={styles.bottomSheetIconContainer}>
                 <Image style={styles.bottomSheetIcon} source={item.icon} contentFit="contain" />
               </View>

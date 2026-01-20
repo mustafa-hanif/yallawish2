@@ -680,13 +680,12 @@ export const styles = StyleSheet.create({
   },
   bottomSheetContainer: {
     gap: 8,
-    paddingHorizontal: 16,
     backgroundColor: "#FFFFFF",
     position: "absolute",
-    bottom: 115,
+    bottom: 100,
     left: 0,
     right: 0,
-    paddingBottom: 32,
+    padding: 20,
     borderRadius: 24,
     marginHorizontal: 12,
     shadowColor: "#000",
@@ -699,7 +698,7 @@ export const styles = StyleSheet.create({
     elevation: 5,
   },
   headingContainer: {
-    paddingVertical: 12,
+    paddingBottom: 12,
   },
   headingText: {
     fontFamily: "Nunito_700Bold",
