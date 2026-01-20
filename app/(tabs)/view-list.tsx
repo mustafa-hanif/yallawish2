@@ -99,31 +99,6 @@ export default function ViewList() {
     }
   }
 
-  if (requiresPassword && !unlocked) {
-    return (
-      <PasswordGate
-        title={title}
-        listId={listId ?? null}
-        requiresPassword={requiresPassword}
-        passwordValue={(list as any)?.password ?? null}
-        onUnlocked={() => setUnlocked(true)}
-        onRequestPassword={async (data) => {
-          try {
-            if (!listId) return;
-            await requestPassword({
-              list_id: listId as any,
-              firstName: data.firstName,
-              lastName: data.lastName,
-              email: data.email,
-            } as any);
-          } catch (e) {
-            console.error("Failed to submit password request", e);
-          }
-        }}
-      />
-    );
-  }
-
   const formatEventDate = (dateStr?: string) => {
     if (!dateStr) return "";
     const parts = dateStr.split("-").map((p) => parseInt(p, 10));
@@ -195,6 +170,31 @@ export default function ViewList() {
 
     return arr;
   }, [items, sortBy, filterClaimed, filterUnclaimed]);
+
+  if (requiresPassword && !unlocked) {
+    return (
+      <PasswordGate
+        title={title}
+        listId={listId ?? null}
+        requiresPassword={requiresPassword}
+        passwordValue={(list as any)?.password ?? null}
+        onUnlocked={() => setUnlocked(true)}
+        onRequestPassword={async (data) => {
+          try {
+            if (!listId) return;
+            await requestPassword({
+              list_id: listId as any,
+              firstName: data.firstName,
+              lastName: data.lastName,
+              email: data.email,
+            } as any);
+          } catch (e) {
+            console.error("Failed to submit password request", e);
+          }
+        }}
+      />
+    );
+  }
 
   return (
     <View style={styles.container}>
