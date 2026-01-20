@@ -51,7 +51,7 @@ export default function TabLayout() {
     },
   });
   const tabBarHeight = typeof baseTabBarStyle?.height === "number" ? baseTabBarStyle.height : 97;
-  const bottomSheetBottom = tabBarHeight + bottom + 8;
+  const bottomSheetBottom = tabBarHeight + bottom - 25;
   const bottomSheetStartOffset = Math.max(height - bottomSheetBottom + 40, 0);
   const search = new URLSearchParams();
   Object.entries(params || {}).forEach(([k, v]) => {
