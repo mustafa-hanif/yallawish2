@@ -903,9 +903,9 @@ export const purchaseListItem = mutation({
 });
 
 export const getUserProfiles = query({
-  args: {},
+  args: { user_id: v.string() },
   handler: async (ctx, args) => {
     const users = await ctx.db.query("user_profiles").collect();
-    return users;
+    return users.filter((u) => u.user_id !== args.user_id);
   },
 });

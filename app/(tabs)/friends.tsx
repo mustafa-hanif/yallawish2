@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Tabs from "@/components/Tabs";
 import BottomSheet from "@/components/ui/BottomSheet";
 import { api } from "@/convex/_generated/api";
+import { useUser } from "@clerk/clerk-expo";
 import { useQuery } from "convex/react";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -26,6 +27,7 @@ const tabs = [
   },
 ];
 const Friends = () => {
+  const { user } = useUser();
   const [currentTab, setCurrentTab] = useState("friends");
   const [isAddFriendsSheetVisible, setIsAddFriendsSheetVisible] = useState(false);
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
@@ -47,8 +49,7 @@ const Friends = () => {
   const requests = Array.from({ length: 6 });
   const pendingInvites = Array.from({ length: 0 });
 
-  const userProfiles = useQuery(api.products.getUserProfiles);
-  console.log("\n userProfiles \n", userProfiles);
+  const userProfiles = useQuery(api.products.getUserProfiles, { user_id: user?.id ?? "" });
   return (
     <View style={styles.container}>
       <Header title="Friends" handleBack={handleBack} />
