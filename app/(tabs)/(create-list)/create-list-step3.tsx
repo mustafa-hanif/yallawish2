@@ -5,7 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { Dimensions, FlatList, Modal, Platform, Pressable, StatusBar, Switch, Text, TextInput, View, useWindowDimensions } from "react-native";
+import { Dimensions, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, StatusBar, Switch, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -339,7 +339,7 @@ function MobileLayout({ headerTitle, selectedOption, setSelectedOption, requireP
 
       {Boolean(isEdit) ? <View style={{ paddingVertical: 16 }} /> : <ProgressIndicator />}
 
-      <View style={styles.content}>
+      <KeyboardAvoidingView style={styles.content} behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <Text style={styles.sectionTitle}>Who can see this list?</Text>
         <ScrollView contentContainerStyle={styles.contentScroll} showsVerticalScrollIndicator={false}>
           <View style={styles.optionsContainer}>
@@ -372,7 +372,7 @@ function MobileLayout({ headerTitle, selectedOption, setSelectedOption, requireP
           <Text style={styles.buttonSecondaryText}>Back</Text>
         </Pressable> */}
         </View>
-      </View>
+      </KeyboardAvoidingView>
 
       {/* <SafeAreaView edges={["bottom"]} style={styles.footer}>
         <Pressable
