@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, Easing, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
+import BottomSheet from "./ui/BottomSheet";
 
 export interface RibbonHeaderProps {
   title: string;
@@ -26,7 +27,9 @@ export function RibbonHeader({ title, subtitle, occasion }: RibbonHeaderProps) {
     outputRange: [600, 0],
   });
 
-  const handleToggleSheet = () => subtitle?.length > 35 && setShowSheet((prev) => !prev);
+  const handleToggleSheet = () => {
+    setShowSheet((prev) => !prev);
+  };
 
   const occasionColor: Record<string, string> = {
     birthday: "#FC0",
@@ -62,27 +65,25 @@ export function RibbonHeader({ title, subtitle, occasion }: RibbonHeaderProps) {
             fill={bgColor}
           />
         </Svg>
-        <View style={styles.textContainer}>
+        <Pressable style={styles.textContainer} onPress={handleToggleSheet}>
           <Text style={[styles.title, { color: textColor }]} numberOfLines={1} ellipsizeMode="tail">
             {title}
           </Text>
-          <Text onPress={handleToggleSheet} ellipsizeMode="tail" numberOfLines={1} style={[styles.subtitle, { color: textColor }]}>
+          <Text ellipsizeMode="tail" numberOfLines={1} style={[styles.subtitle, { color: textColor }]}>
             {subtitle}
           </Text>
-        </View>
+        </Pressable>
       </View>
-      <Modal visible={showSheet} transparent animationType="none" onRequestClose={handleToggleSheet}>
-        <Pressable style={styles.backdrop} onPress={handleToggleSheet} />
-        <Animated.View style={[styles.sheetContainer, { transform: [{ translateY }] }]}>
-          <Pressable onPress={handleToggleSheet}>
-            <View style={styles.sheetHandle} />
-          </Pressable>
-          <ScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
-            <Text style={styles.sortSheetTitle}>Event Description</Text>
-            <Text style={styles.subTitleModal}>{subtitle}</Text>
+      <BottomSheet isVisible={showSheet} onClose={handleToggleSheet} height={332}>
+        <View style={styles.sheetContent}>
+          <Text style={styles.sortSheetTitle}>{title}</Text>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollViewContent}>
+            <Text style={styles.subTitleModal}>
+              {subtitle} {subtitle} {subtitle} {subtitle} {subtitle}
+            </Text>
           </ScrollView>
-        </Animated.View>
-      </Modal>
+        </View>
+      </BottomSheet>
     </>
   );
 }
@@ -125,36 +126,13 @@ const styles = StyleSheet.create({
     width: "100%",
   },
 
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.3)",
+  sheetContent: {
+    paddingHorizontal: 16,
+    gap: 10,
   },
-  sheetContainer: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    maxHeight: "92%",
-    backgroundColor: "#F5F4F8",
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingBottom: 40,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: -4 },
-    shadowRadius: 12,
-    elevation: 8,
+  scrollViewContent: {
+    paddingBottom: 50,
   },
-  sheetHandle: {
-    alignSelf: "center",
-    width: 60,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#C8C7CC",
-    marginTop: 8,
-    marginBottom: 16,
-  },
-  sheetContent: { paddingHorizontal: 16, paddingBottom: 60, gap: 20 },
   sortSheetTitle: {
     fontSize: 24,
     fontFamily: "Nunito_700Bold",
