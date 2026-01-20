@@ -9,9 +9,10 @@ interface BottomSheetProps {
   isVisible: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  height?: number | null;
 }
 
-export default function BottomSheet({ isVisible, onClose, children }: BottomSheetProps) {
+export default function BottomSheet({ isVisible, onClose, children, height }: BottomSheetProps) {
   const [showModal, setShowModal] = useState(isVisible);
   const translateY = useSharedValue(SCREEN_HEIGHT);
 
@@ -83,7 +84,7 @@ export default function BottomSheet({ isVisible, onClose, children }: BottomShee
           <Pressable style={StyleSheet.absoluteFill} onPress={onClose}>
             <Animated.View style={[styles.backdrop, rBackdropStyle]} />
           </Pressable>
-          <Animated.View style={[styles.sheet, rSheetStyle]}>
+          <Animated.View style={[styles.sheet, rSheetStyle, height ? {height: height} : {}]}>
             <GestureDetector gesture={gesture}>
               <View style={styles.handleContainer}>
                 <Pressable style={styles.handle} onPress={onClose} />

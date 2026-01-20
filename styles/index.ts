@@ -118,13 +118,12 @@ export const styles = StyleSheet.create({
     fontSize: 62,
     color: "#330065",
     marginTop: 8,
-    textAlign:'center',
+    textAlign: "center",
   },
   welcomeTitleMobile: {
     fontSize: 32,
-    textAlign:'left',
+    textAlign: "left",
   },
-
 
   welcomeSubtitle: {
     fontSize: 32,
@@ -132,9 +131,9 @@ export const styles = StyleSheet.create({
     color: "#514A6E",
     marginTop: 16,
     lineHeight: 26,
-    textAlign:'center'
+    textAlign: "center",
   },
-  welcomeSubtitleMobile : {
+  welcomeSubtitleMobile: {
     fontSize: 18,
     fontFamily: "Nunito_400Regular",
     color: "#514A6E",
@@ -256,14 +255,13 @@ export const styles = StyleSheet.create({
     fontSize: 50,
     color: "#330065",
     marginTop: 8,
-    textAlign:'center',
+    textAlign: "center",
     lineHeight: 23.33,
     marginBottom: 60,
   },
   lifeMomentsTitleMobile: {
     fontSize: 32,
-    textAlign:'left',
-
+    textAlign: "left",
   },
   sectionAction: {
     flexDirection: "row",
@@ -300,13 +298,13 @@ export const styles = StyleSheet.create({
     fontFamily: "Nunito_700Bold",
     fontSize: 50,
     marginTop: 8,
-    textAlign:'center',
+    textAlign: "center",
     lineHeight: 23.33,
     marginBottom: 60,
   },
-   lifeMomentsSecondaryTitleMobile: {
+  lifeMomentsSecondaryTitleMobile: {
     fontSize: 32,
-    textAlign:'left',
+    textAlign: "left",
   },
   lifeMomentsSecondarySubtitle: {
     fontFamily: "Nunito_400Regular",
@@ -322,7 +320,6 @@ export const styles = StyleSheet.create({
     borderColor: "transparent",
     // marginBottom: 20,
     overflow: "hidden",
-
   },
   lifeMomentCardSecondary: {
     borderColor: "rgba(255, 255, 255, 0.24)",
@@ -342,16 +339,16 @@ export const styles = StyleSheet.create({
     fontSize: 20,
   },
   renderLifeMomentCardIcon: {
-     width: 70,
-     height: 70,
-     objectFit:'contain',
-     marginBottom: 33
+    width: 70,
+    height: 70,
+    objectFit: "contain",
+    marginBottom: 33,
   },
   renderLifeMomentCardArrowIcon: {
-     width: 16.06,
-     height: 15.54 ,
-     objectFit:'contain',
-     marginTop: 16.58
+    width: 16.06,
+    height: 15.54,
+    objectFit: "contain",
+    marginTop: 16.58,
   },
   lifeMomentCaption: {
     fontFamily: "Nunito_400Regular",
@@ -360,7 +357,7 @@ export const styles = StyleSheet.create({
     marginTop: 8,
     lineHeight: 20,
   },
-   lifeMomentCaptionMobile: {
+  lifeMomentCaptionMobile: {
     fontSize: 18,
   },
   categoryCardsGrid: {
@@ -369,13 +366,13 @@ export const styles = StyleSheet.create({
   },
   categoriesRow: {
     flexDirection: "row",
-    width:'100%',
-    alignItems:'center',
-    justifyContent:'space-between',
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   categoriesRowMobile: {
-    justifyContent:'flex-start',
-    columnGap: 5
+    justifyContent: "flex-start",
+    columnGap: 5,
   },
   categoryCard: {
     backgroundColor: "rgba(255, 255, 255, 0.1)",
@@ -383,14 +380,14 @@ export const styles = StyleSheet.create({
     borderTopStartRadius: 20.81,
     fontFamily: "Nunito_400Regular",
     overflow: "hidden",
-    borderBottomWidth: 8.6
+    borderBottomWidth: 8.6,
   },
 
   categoryCardDesktop: {
-    width: '23%',
+    width: "23%",
     height: 220,
   },
-  categoryCardMobile : {
+  categoryCardMobile: {
     width: 140,
     height: 120,
     borderTopEndRadius: 8,
@@ -399,19 +396,19 @@ export const styles = StyleSheet.create({
   },
 
   categoryContent: {
-    justifyContent:'center',
-    alignItems:'center',
-    height:'100%',
-    gap: 30
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100%",
+    gap: 30,
   },
   categoryContentMobile: {
-    justifyContent:'center',
-    alignItems:'center',
-    height:'100%',
-    gap: 16
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100%",
+    gap: 16,
   },
 
- categoryIcon: {
+  categoryIcon: {
     width: 40,
     height: 40,
   },
@@ -435,15 +432,15 @@ export const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  arrowWhiteIconDesktop : {
+  arrowWhiteIconDesktop: {
     width: 16,
     height: 15,
-    objectFit: "contain"
+    objectFit: "contain",
   },
-   arrowWhiteIconMobile : {
+  arrowWhiteIconMobile: {
     width: 15,
     height: 14,
-    objectFit: "contain"
+    objectFit: "contain",
   },
   section: {
     paddingHorizontal: 20,
@@ -680,5 +677,56 @@ export const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 12,
     fontFamily: "Nunito_700Bold",
+  },
+  bottomSheetContainer: {
+    gap: 8,
+    paddingHorizontal: 16,
+    backgroundColor: "#FFFFFF",
+    position: "absolute",
+    bottom: 115,
+    left: 0,
+    right: 0,
+    paddingBottom: 32,
+    borderRadius: 24,
+    marginHorizontal: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  headingContainer: {
+    paddingVertical: 12,
+  },
+  headingText: {
+    fontFamily: "Nunito_700Bold",
+    fontSize: 16,
+    color: "#6C6C6C",
+  },
+  bottomSheetOption: {
+    gap: 13,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  bottomSheetIconContainer: {
+    width: 65,
+    height: 65,
+    backgroundColor: "#EFEFEF",
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  bottomSheetIcon: {
+    width: 40,
+    height: 40,
+    resizeMode: "contain",
+  },
+  bottomSheetOptionText: {
+    fontFamily: "Nunito_900Black",
+    fontSize: 16,
+    color: "#000000",
   },
 });

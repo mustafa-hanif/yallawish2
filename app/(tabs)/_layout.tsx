@@ -1,19 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { Redirect, Tabs, useGlobalSearchParams, usePathname } from "expo-router";
+import { Redirect, router, Tabs, useGlobalSearchParams, usePathname } from "expo-router";
 import React from "react";
-import { Platform, View, useWindowDimensions } from "react-native";
+import { Platform, Pressable, Text, useWindowDimensions, View } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { styles } from "@/styles";
 import { useAuth } from "@clerk/clerk-expo";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const DESKTOP_BREAKPOINT = 1024;
 
 export default function TabLayout() {
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = React.useState(false);
   const colorScheme = useColorScheme();
   const { bottom } = useSafeAreaInsets(); // Get the safe area bottom inset
   const { isSignedIn } = useAuth();
@@ -61,70 +63,84 @@ export default function TabLayout() {
     const encoded = encodeURIComponent(returnTo);
     return <Redirect href={{ pathname: "/sign-in", params: { returnTo: encoded } }} />;
   }
+  const handlePress = () => {
+    setIsBottomSheetOpen((prev) => !prev);
+  };
 
+  const bottomSheetOptions = [
+    { icon: require("@/assets/images/plus.png"), title: "Add to your List", route: "add-gift" },
+    { icon: require("@/assets/images/bottomSheetCreateList.png"), title: "Create New List", route: "create-list-step1" },
+    { icon: require("@/assets/images/bottomSheetUsers.png"), title: "Add New Circle", route: "create-circle-step1" },
+  ];
+
+  const handleRoute = (route: string) => {
+    setIsBottomSheetOpen(false);
+    router.push(route);
+  };
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: "#330065",
-        tabBarInactiveTintColor: "#9BADB4",
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: isDesktopWeb ? { display: "none" } : baseTabBarStyle, // Apply dynamic bottom padding here
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "",
-          tabBarIcon: ({ color }) => <Image source={require("@/assets/images/home.svg")} style={{ width: 24, height: 24, tintColor: color }} contentFit="contain" />,
+    <>
+      <Tabs
+        screenOptions={{
+          tabBarActiveTintColor: "#330065",
+          tabBarInactiveTintColor: "#9BADB4",
+          headerShown: false,
+          tabBarButton: HapticTab,
+          tabBarBackground: TabBarBackground,
+          tabBarStyle: isDesktopWeb ? { display: "none" } : baseTabBarStyle, // Apply dynamic bottom padding here
         }}
-      />
-      <Tabs.Screen
-        name="favorites"
-        options={{
-          title: "",
-          tabBarIcon: ({ color }) => <Image source={require("@/assets/images/favourite.svg")} style={{ width: 24, height: 24, tintColor: color }} contentFit="contain" />,
-        }}
-      />
-      <Tabs.Screen
-        name="add-product"
-        options={{
-          title: "",
-          tabBarButton: (props) => (
-            <View style={{ backgroundColor: "red", width: "100%", alignItems: "center", justifyContent: "center", top: 15 }}>
-              <View style={{ width: 60, height: 60, borderRadius: 36, backgroundColor: "#330065", alignItems: "center", justifyContent: "center", shadowRadius: 8 }}>
-                <Ionicons name="add" size={20} color="#FFFFFF" />
+      >
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: "",
+            tabBarIcon: ({ color }) => <Image source={require("@/assets/images/home.svg")} style={{ width: 24, height: 24, tintColor: color }} contentFit="contain" />,
+          }}
+        />
+        <Tabs.Screen
+          name="favorites"
+          options={{
+            title: "",
+            tabBarIcon: ({ color }) => <Image source={require("@/assets/images/favourite.svg")} style={{ width: 24, height: 24, tintColor: color }} contentFit="contain" />,
+          }}
+        />
+        <Tabs.Screen
+          name="add-product"
+          options={{
+            title: "",
+            tabBarButton: (props) => (
+              <View style={{ width: "100%", alignItems: "center", justifyContent: "center", top: 12 }}>
+                <Pressable onPress={handlePress} style={{ width: 60, height: 60, borderRadius: 36, backgroundColor: "#330065", alignItems: "center", justifyContent: "center", shadowRadius: 8 }}>
+                  <Ionicons name={isBottomSheetOpen ? "close" : "add"} size={20} color="#FFFFFF" />
+                </Pressable>
               </View>
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="circle"
-        options={{
-          title: "",
-          tabBarIcon: ({ color }) => <Image source={require("@/assets/images/global.svg")} style={{ width: 24, height: 24, tintColor: color }} contentFit="contain" />,
-        }}
-      />
-      <Tabs.Screen
-        name="wishlists"
-        options={{
-          title: "",
-          tabBarIcon: ({ color }) => <Image source={require("@/assets/images/filter-mail-circle.svg")} style={{ width: 24, height: 24, tintColor: color }} contentFit="contain" />,
-        }}
-      />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="circle"
+          options={{
+            title: "",
+            tabBarIcon: ({ color }) => <Image source={require("@/assets/images/global.svg")} style={{ width: 24, height: 24, tintColor: color }} contentFit="contain" />,
+          }}
+        />
+        <Tabs.Screen
+          name="wishlists"
+          options={{
+            title: "",
+            tabBarIcon: ({ color }) => <Image source={require("@/assets/images/filter-mail-circle.svg")} style={{ width: 24, height: 24, tintColor: color }} contentFit="contain" />,
+          }}
+        />
 
-      <Tabs.Screen name="(create-list)" options={{ href: null }} />
-      <Tabs.Screen name="create-circle-step1" options={{ href: null }} />
-      <Tabs.Screen name="create-circle-step2" options={{ href: null }} />
-      <Tabs.Screen name="create-circle-step3" options={{ href: null }} />
-      <Tabs.Screen name="create-circle-success" options={{ href: null }} />
-      <Tabs.Screen name="view-circle" options={{ href: null }} />
-      <Tabs.Screen name="friend-profile" options={{ href: null }} />
-      <Tabs.Screen name="friends" options={{ href: null }} />
-      {/* Gift and List journey screens - hidden from tab bar but included in this navigator */}
-      {/* <Tabs.Screen
+        <Tabs.Screen name="(create-list)" options={{ href: null }} />
+        <Tabs.Screen name="create-circle-step1" options={{ href: null }} />
+        <Tabs.Screen name="create-circle-step2" options={{ href: null }} />
+        <Tabs.Screen name="create-circle-step3" options={{ href: null }} />
+        <Tabs.Screen name="create-circle-success" options={{ href: null }} />
+        <Tabs.Screen name="view-circle" options={{ href: null }} />
+        <Tabs.Screen name="friend-profile" options={{ href: null }} />
+        <Tabs.Screen name="friends" options={{ href: null }} />
+        {/* Gift and List journey screens - hidden from tab bar but included in this navigator */}
+        {/* <Tabs.Screen
         name="create-list-step1"
         options={{
           href: null, // This hides it from the tab bar
@@ -143,7 +159,7 @@ export default function TabLayout() {
           tabBarStyle: { display: 'none' },
         }}
       /> */}
-      {/* <Tabs.Screen
+        {/* <Tabs.Screen
         name="profile-setup"
         options={{
           href: null,
@@ -151,41 +167,59 @@ export default function TabLayout() {
         }}
       /> */}
 
-      <Tabs.Screen
-        name="add-gift"
-        options={{
-          href: null, // This hides it from the tab bar
-          // Hide the TabBar entirely on this screen so fixed footers are not overlapped
-          tabBarStyle: { display: "none" },
-        }}
-      />
-      <Tabs.Screen
-        name="view-list"
-        options={{
-          href: null, // Hide from tab bar
-          tabBarStyle: { display: "none" },
-        }}
-      />
-      <Tabs.Screen
-        name="manage-list"
-        options={{
-          href: null, // Hide manage-list from tab bar
-        }}
-      />
-      <Tabs.Screen
-        name="gift-detail"
-        options={{
-          href: null,
-          tabBarStyle: { display: "none" },
-        }}
-      />
-      <Tabs.Screen
-        name="purchase-success"
-        options={{
-          href: null,
-          tabBarStyle: { display: "none" },
-        }}
-      />
-    </Tabs>
+        <Tabs.Screen
+          name="add-gift"
+          options={{
+            href: null, // This hides it from the tab bar
+            // Hide the TabBar entirely on this screen so fixed footers are not overlapped
+            tabBarStyle: { display: "none" },
+          }}
+        />
+        <Tabs.Screen
+          name="view-list"
+          options={{
+            href: null, // Hide from tab bar
+            tabBarStyle: { display: "none" },
+          }}
+        />
+        <Tabs.Screen
+          name="manage-list"
+          options={{
+            href: null, // Hide manage-list from tab bar
+          }}
+        />
+        <Tabs.Screen
+          name="gift-detail"
+          options={{
+            href: null,
+            tabBarStyle: { display: "none" },
+          }}
+        />
+        <Tabs.Screen
+          name="purchase-success"
+          options={{
+            href: null,
+            tabBarStyle: { display: "none" },
+          }}
+        />
+      </Tabs>
+      {isBottomSheetOpen ? (
+        <View style={styles.bottomSheetContainer}>
+          <View style={styles.headingContainer}>
+            <Text style={styles.headingText}>Create or Add</Text>
+          </View>
+          {bottomSheetOptions.map((item) => (
+            <Pressable key={item.route} style={styles.bottomSheetOption} onPress={() => handleRoute(item.route)}>
+              <View style={styles.bottomSheetIconContainer}>
+                <Image style={styles.bottomSheetIcon} source={item.icon} contentFit="contain" />
+              </View>
+              <View>
+                <Text style={styles.bottomSheetOptionText}>{item.title}</Text>
+              </View>
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
+    </>
   );
 }
