@@ -76,12 +76,17 @@ export function RibbonHeader({ title, subtitle, occasion }: RibbonHeaderProps) {
       </View>
       <BottomSheet isVisible={showSheet} onClose={handleToggleSheet} height={332}>
         <View style={styles.sheetContent}>
-          <Text style={styles.sortSheetTitle}>{title}</Text>
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollViewContent}>
-            <Text style={styles.subTitleModal}>
-              {subtitle} {subtitle} {subtitle} {subtitle} {subtitle}
-            </Text>
-          </ScrollView>
+          <View>
+            <Text style={styles.sortSheetTitle}>{title}</Text>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollViewContent}>
+              <Text style={styles.subTitleModal}>{subtitle}</Text>
+            </ScrollView>
+          </View>
+        </View>
+        <View style={styles.footer}>
+          <Pressable onPress={handleToggleSheet} style={styles.backButtonBottom}>
+            <Text style={styles.backButtonText}>Close</Text>
+          </Pressable>
         </View>
       </BottomSheet>
     </>
@@ -129,6 +134,8 @@ const styles = StyleSheet.create({
   sheetContent: {
     paddingHorizontal: 16,
     gap: 10,
+    justifyContent: "space-between",
+    flex: 1,
   },
   scrollViewContent: {
     paddingBottom: 50,
@@ -148,5 +155,24 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     lineHeight: 16,
     width: "100%",
+  },
+  backButtonBottom: {
+    marginBottom: "auto",
+    height: 56,
+    borderWidth: 1,
+    borderColor: "#3B0076",
+    borderRadius: 8,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  backButtonText: {
+    color: "#3B0076",
+    fontSize: 16,
+    fontFamily: "Nunito_700Bold",
+    lineHeight: 16,
+  },
+  footer: {
+    paddingHorizontal: 16,
   },
 });
