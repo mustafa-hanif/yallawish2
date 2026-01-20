@@ -82,14 +82,14 @@ export default function TabLayout() {
       setIsBottomSheetVisible(true);
       Animated.timing(bottomSheetAnim, {
         toValue: 1,
-        duration: 360,
+        duration: 600,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }).start();
     } else {
       Animated.timing(bottomSheetAnim, {
         toValue: 0,
-        duration: 280,
+        duration: 600,
         easing: Easing.in(Easing.cubic),
         useNativeDriver: true,
       }).start(({ finished }) => {
@@ -101,7 +101,7 @@ export default function TabLayout() {
 
     Animated.timing(iconAnim, {
       toValue,
-      duration: 420,
+      duration: 600,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     }).start();
