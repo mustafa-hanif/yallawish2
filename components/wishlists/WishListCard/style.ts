@@ -4,8 +4,8 @@ export const styles = StyleSheet.create({
   card: {
     borderRadius: 12,
     height: 165,
-    maxWidth: "48.5%",
     width: "48.5%",
+    // width: "48.5%",
     borderWidth: 1,
     borderColor: "#E5E5E5",
     backgroundColor: "#ffff",
