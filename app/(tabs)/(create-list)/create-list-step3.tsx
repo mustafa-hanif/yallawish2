@@ -1,17 +1,16 @@
+import { TextInputField } from "@/components/TextInputField";
+import BottomSheet from "@/components/ui/BottomSheet";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
+import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { Dimensions, FlatList, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, StatusBar, Switch, Text, TextInput, View, useWindowDimensions } from "react-native";
+import { Animated, Dimensions, Easing, FlatList, Image, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, StatusBar, Switch, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import { TextInputField } from "@/components/TextInputField";
-import BottomSheet from "@/components/ui/BottomSheet";
-import { Image } from "react-native";
 import { desktopStyles, styles } from "./step3styles";
 
 type PrivacyOption = "private" | "my-people" | "public" | null;
@@ -156,6 +155,35 @@ const DesktopPublicPasswordSettings = React.memo(function DesktopPublicPasswordS
   );
 });
 
+const AnimatedCheckIcon = React.memo(function AnimatedCheckIcon({ visible, size = 14, color = "#FFFFFF" }: { visible: boolean; size?: number; color?: string }) {
+  const scale = React.useRef(new Animated.Value(visible ? 1 : 0)).current;
+
+  useEffect(() => {
+    if (visible) {
+      Animated.spring(scale, {
+        toValue: 1,
+        speed: 18,
+        bounciness: 8,
+        useNativeDriver: true,
+      }).start();
+      return;
+    }
+
+    Animated.timing(scale, {
+      toValue: 0,
+      duration: 140,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: true,
+    }).start();
+  }, [scale, visible]);
+
+  return (
+    <Animated.View style={{ transform: [{ scale }], opacity: scale }}>
+      <Ionicons name="checkmark" size={size} color={color} />
+    </Animated.View>
+  );
+});
+
 function getInitials(name: string) {
   return name
     .split(" ")
@@ -239,7 +267,9 @@ function DesktopShareModal({ visible, onRequestClose, groupQuery, setGroupQuery,
                   <Pressable key={item.id} style={[desktopStyles.shareModalGroupCard, selected && desktopStyles.shareModalGroupSelected]} onPress={() => toggleGroup(item.id)}>
                     <View style={styles.groupImage} />
                     <View style={styles.groupOverlay} />
-                    <View style={[desktopStyles.shareModalGroupCheck, selected && desktopStyles.shareModalGroupCheckSelected]}>{selected && <Ionicons name="checkmark" size={15} color="#330065" />}</View>
+                    <View style={[desktopStyles.shareModalGroupCheck, selected && desktopStyles.shareModalGroupCheckSelected]}>
+                      <AnimatedCheckIcon visible={selected} size={15} color="#330065" />
+                    </View>
                     <View />
                     <View style={desktopStyles.shareModalGroupText}>
                       <Text numberOfLines={1} style={desktopStyles.shareModalGroupTitle}>
@@ -421,7 +451,9 @@ function MobileLayout({ headerTitle, selectedOption, setSelectedOption, requireP
                   >
                     {group.cover && <Image source={{ uri: group.cover }} style={styles.groupImage} />}
                     <View style={styles.groupOverlay} />
-                    <View style={[styles.groupCheck, selected && styles.groupCheckSelected]}>{selected && <Ionicons name="checkmark" size={14} color="#FFFFFF" />}</View>
+                    <View style={[styles.groupCheck, selected && styles.groupCheckSelected]}>
+                      <AnimatedCheckIcon visible={selected} size={14} color="#FFFFFF" />
+                    </View>
                     <View style={styles.groupTextWrap}>
                       <Text style={styles.groupTitle}>{group.name}</Text>
                       <Text style={styles.groupBy}>Created By: You</Text>
@@ -452,7 +484,9 @@ function MobileLayout({ headerTitle, selectedOption, setSelectedOption, requireP
                       <Text style={styles.friendName}>{friend.name}</Text>
                       <Text style={styles.friendEmail}>{friend.email}</Text>
                     </View>
-                    <View style={[styles.friendCheckbox, selected && styles.friendCheckboxSelected]}>{selected && <Ionicons name="checkmark" size={16} color="#FFFFFF" />}</View>
+                    <View style={[styles.friendCheckbox, selected && styles.friendCheckboxSelected]}>
+                      <AnimatedCheckIcon visible={selected} size={16} color="#FFFFFF" />
+                    </View>
                   </Pressable>
                 );
               })}
@@ -699,6 +733,7 @@ export default function CreateListStep3() {
   };
 
   const toggleFriend = (id: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     setSelectedFriends((prev) => (prev.includes(id) ? prev.filter((existingId) => existingId !== id) : [...prev, id]));
   };
 
