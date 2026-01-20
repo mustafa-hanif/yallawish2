@@ -312,12 +312,12 @@ export default function ListDetails({ list, items, onRemoveItem, onUpdateQuantit
               </View>
 
               <Pressable style={styles.radioRow} onPress={() => setTempFilterClaimed((v) => !v)}>
-                <View style={[styles.checkboxBox, tempFilterClaimed && styles.checkboxBoxActive]}>{tempFilterClaimed && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}</View>
+                <View style={[styles.checkboxBox, tempFilterClaimed && styles.checkboxBoxActive]}>{tempFilterClaimed && <Ionicons name="checkmark" size={14} color="#FFFFFF" />}</View>
                 <Text style={styles.radioLabel}>Claimed</Text>
               </Pressable>
 
               <Pressable style={styles.radioRow} onPress={() => setTempFilterUnclaimed((v) => !v)}>
-                <View style={[styles.checkboxBox, tempFilterUnclaimed && styles.checkboxBoxActive]}>{tempFilterUnclaimed && <Ionicons name="checkmark" size={10} color="#FFFFFF" />}</View>
+                <View style={[styles.checkboxBox, tempFilterUnclaimed && styles.checkboxBoxActive]}>{tempFilterUnclaimed && <Ionicons name="checkmark" size={14} color="#FFFFFF" />}</View>
                 <Text style={styles.radioLabel}>Unclaimed</Text>
               </Pressable>
             </View>
