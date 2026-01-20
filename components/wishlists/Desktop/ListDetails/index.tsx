@@ -123,6 +123,13 @@ export default function ListDetails({ list, items, onRemoveItem, onUpdateQuantit
     }
   };
 
+  const buyNow = () => {
+    router.push({
+      pathname: "/gift-detail",
+      params: { itemId: String(selectedItem?._id), listId: String(list._id) },
+    });
+  };
+
   const handlePressEditDetails = () => {
     router.push({ pathname: "/create-list-step2", params: { listId: String(list._id) } });
   };
@@ -366,8 +373,8 @@ export default function ListDetails({ list, items, onRemoveItem, onUpdateQuantit
                 </View>
 
                 <View style={{ marginTop: 18 }}>
-                  <Pressable disabled={!selectedItem?.buy_url} onPress={viewAtStore} style={{ opacity: selectedItem?.buy_url ? 1 : 0.6, alignSelf: "flex-start", paddingVertical: 10, paddingHorizontal: 28, borderRadius: 100, backgroundColor: "#36006C" }}>
-                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 16, color: "#FFFFFF" }}>View at store</Text>
+                  <Pressable disabled={!selectedItem?.buy_url} onPress={currentTab === "my-events" ? viewAtStore : buyNow} style={{ opacity: selectedItem?.buy_url ? 1 : 0.6, alignSelf: "flex-start", paddingVertical: 10, paddingHorizontal: 28, borderRadius: 100, backgroundColor: "#36006C" }}>
+                    <Text style={{ fontFamily: "Nunito_700Bold", fontSize: 16, color: "#FFFFFF" }}>{currentTab === "my-events" ? "View at store" : "Buy Now"}</Text>
                   </Pressable>
                 </View>
               </View>
