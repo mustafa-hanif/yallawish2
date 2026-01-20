@@ -91,19 +91,11 @@ export default function TabLayout() {
         name="add-product"
         options={{
           title: "",
-          tabBarIcon: ({ focused }) => (
-            <View
-              style={{
-                width: 60,
-                height: 60,
-                borderRadius: 36,
-                backgroundColor: "#330065",
-                alignItems: "center",
-                justifyContent: "center",
-                shadowRadius: 8,
-              }}
-            >
-              <Ionicons name="add" size={20} color="#FFFFFF" />
+          tabBarButton: (props) => (
+            <View style={{ backgroundColor: "red", width: "100%", alignItems: "center", justifyContent: "center", top: 15 }}>
+              <View style={{ width: 60, height: 60, borderRadius: 36, backgroundColor: "#330065", alignItems: "center", justifyContent: "center", shadowRadius: 8 }}>
+                <Ionicons name="add" size={20} color="#FFFFFF" />
+              </View>
             </View>
           ),
         }}
