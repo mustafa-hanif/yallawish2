@@ -274,7 +274,7 @@ export const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  removeButton: {
+  removeButtonContainer: {
     paddingHorizontal: 16,
     paddingVertical: 8,
   },

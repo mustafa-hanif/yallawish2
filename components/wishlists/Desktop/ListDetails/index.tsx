@@ -3,7 +3,7 @@ import { getDaysToGoText } from "@/utils";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { Plus, PlusCircle, Trash2 } from "lucide-react-native";
+import { PlusCircle } from "lucide-react-native";
 import React, { useMemo, useState } from "react";
 import { FlatList, Image, ImageBackground, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { styles } from "./style";
@@ -250,24 +250,18 @@ export default function ListDetails({ list, items, onRemoveItem, onUpdateQuantit
                     <View style={styles.quantityControl}>
                       <Text style={styles.quantityLabel}>Quantity</Text>
                       <View style={styles.quantitySelector}>
-                        <Pressable style={styles.quantityButton} onPress={() => handleQuantityChange(item._id, item.quantity, false)}>
-                          <Trash2 size={14} color="#421A95" />
-                        </Pressable>
-
                         <Text style={styles.quantityValue}>{item.quantity}</Text>
-
-                        <Pressable style={styles.quantityButton} onPress={() => handleQuantityChange(item._id, item.quantity, true)}>
-                          <Plus size={14} color="#421A95" />
-                        </Pressable>
                       </View>
                     </View>
                   </View>
                 </Pressable>
 
                 {currentTab === "my-events" && (
-                  <Pressable style={styles.removeButton} onPress={() => onRemoveItem?.(item._id)}>
-                    <Text style={styles.removeButtonText}>Remove</Text>
-                  </Pressable>
+                  <View style={styles.removeButtonContainer}>
+                    <Pressable onPress={() => onRemoveItem?.(item._id)}>
+                      <Text style={styles.removeButtonText}>Remove</Text>
+                    </Pressable>
+                  </View>
                 )}
               </View>
             );
