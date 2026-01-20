@@ -5,7 +5,7 @@ import { useMutation, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { Dimensions, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, StatusBar, Switch, Text, TextInput, View, useWindowDimensions } from "react-native";
+import { Dimensions, FlatList, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, StatusBar, Switch, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -308,8 +308,18 @@ function DesktopShareModal({ visible, onRequestClose, groupQuery, setGroupQuery,
 function MobileLayout({ headerTitle, selectedOption, setSelectedOption, requirePassword, setRequirePassword, password, setPassword, handleBack, handleContinue, shareVisible, openShareModal, closeShareModal, groupQuery, setGroupQuery, friendQuery, setFriendQuery, filteredGroups, filteredFriends, selectedGroups, selectedFriends, toggleGroup, toggleFriend, confirmShareAndClose, isEdit }: SharedLayoutProps) {
   const DESKTOP_BREAKPOINT = 1024;
   const { width: SCREEN_WIDTH } = Dimensions.get("window");
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
   const isDesktop = Platform.OS === "web" && SCREEN_WIDTH >= DESKTOP_BREAKPOINT;
+
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow", () => setIsKeyboardVisible(true));
+    const hide = Keyboard.addListener("keyboardDidHide", () => setIsKeyboardVisible(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
 
   const ProgressIndicator = () => (
     <View style={styles.progressContainer}>
@@ -391,8 +401,8 @@ function MobileLayout({ headerTitle, selectedOption, setSelectedOption, requireP
       </SafeAreaView> */}
 
       <BottomSheet isVisible={shareVisible} onClose={closeShareModal}>
-        <View style={styles.sheet}>
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
+        <KeyboardAvoidingView style={[styles.sheet, { flex: 1 }]} behavior={Platform.OS === "ios" ? "padding" : undefined} keyboardVerticalOffset={12}>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24, paddingTop: isKeyboardVisible ? 100 : 4 }}>
             <Text style={styles.sheetTitle}>Share with groups</Text>
 
             <TextInputField label="Search groups" value={groupQuery} onChangeText={setGroupQuery} icon={<Image source={require("@/assets/images/search.png")} />} />
@@ -457,7 +467,7 @@ function MobileLayout({ headerTitle, selectedOption, setSelectedOption, requireP
               <Text style={styles.buttonSecondaryText}>Back</Text>
             </Pressable>
           </ScrollView>
-        </View>
+        </KeyboardAvoidingView>
       </BottomSheet>
     </View>
   );
