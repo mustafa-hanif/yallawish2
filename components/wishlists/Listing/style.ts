@@ -14,5 +14,6 @@ export const styles = StyleSheet.create({
   },
   columnWrapperStyle: {
     gap: 8,
+    justifyContent: "space-between",
   },
 });
