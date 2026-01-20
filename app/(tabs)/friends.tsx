@@ -1,9 +1,9 @@
 import FriendsItem from "@/components/friends/FriendsItem";
 import FriendsSectionHeader from "@/components/friends/FriendsSectionHeader";
 import RequestItem from "@/components/friends/RequestItem";
-import FriendsTabs from "@/components/friends/Tabs";
 import UserProfileBottomSheetContent from "@/components/friends/UserProfileBottomSheetContent";
 import Header from "@/components/Header";
+import Tabs from "@/components/Tabs";
 import BottomSheet from "@/components/ui/BottomSheet";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
@@ -11,6 +11,20 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 
+const tabs = [
+  {
+    id: "friends",
+    title: "Friends",
+  },
+  {
+    id: "requests",
+    title: "Requests",
+  },
+  {
+    id: "pending-invites",
+    title: "Sent",
+  },
+];
 const Friends = () => {
   const [currentTab, setCurrentTab] = useState("friends");
   const [isAddFriendsSheetVisible, setIsAddFriendsSheetVisible] = useState(false);
@@ -38,7 +52,7 @@ const Friends = () => {
   return (
     <View style={styles.container}>
       <Header title="Friends" handleBack={handleBack} />
-      <FriendsTabs currentTab={currentTab} setCurrentTab={setCurrentTab} />
+      <Tabs currentTab={currentTab} setCurrentTab={setCurrentTab} tabs={tabs} />
       <FriendsSectionHeader title={currentTab === "friends" ? "Friends" : currentTab === "requests" ? "Requests" : "Pending Invites"} currentTab={currentTab} count={currentTab === "friends" ? friends.length : currentTab === "requests" ? requests.length : pendingInvites.length} handlePressAdd={handlePressAddFriends} />
       <FlatList showsVerticalScrollIndicator={false} contentContainerStyle={styles.listContainer} data={currentTab === "friends" ? friends : currentTab === "requests" ? requests : pendingInvites} renderItem={({ item }) => (currentTab === "friends" ? <FriendsItem /> : currentTab === "requests" ? <RequestItem /> : <RequestItem />)} keyExtractor={(item, index) => index.toString()} />\{/* AddFriendsSheet component can be placed here when implemented */}
       <BottomSheet isVisible={isAddFriendsSheetVisible} onClose={() => setIsAddFriendsSheetVisible(false)}>

@@ -1,4 +1,4 @@
-import Tabs from "@/components/wishlists/Tabs";
+import Tabs from "@/components/Tabs";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-expo";
 import { useMutation, useQuery } from "convex/react";
@@ -19,6 +19,17 @@ import ListsControlPanel from "./ListsControlPanel";
 import NoListFoundDesktop from "./NoListFoundDesktop";
 import SortAndFilterDropDown from "./SortAndFilterDropDown";
 import WishListCardDesktop from "./WishListCardDesktop";
+
+const tabs = [
+  {
+    id: "my-events",
+    title: "My Events",
+  },
+  {
+    id: "community-events",
+    title: "Community Events",
+  },
+];
 
 export function Desktop() {
   const isDesktop = true;
@@ -269,7 +280,7 @@ export function Desktop() {
                   <ListsControlPanel count={searchList(filteredWishList).length} handleToggleModal={handleToggleModal} />
                   <SortAndFilterDropDown currentTab={currentTab} showSortSheet={showSortSheet} handleToggleModal={handleToggleModal} sortBy={sortBy} setSortBy={setSortBy} filterBy={filterBy} setFilterBy={setFilterBy} handlePressApply={handlePressApply} />
                 </View>
-                <Tabs currentTab={currentTab} setCurrentTab={setCurrentTab} />
+                <Tabs currentTab={currentTab} setCurrentTab={setCurrentTab} tabs={tabs} />
                 <View style={{ height: 18 }} />
                 <FlatList
                   data={searchList(filteredWishList)}
@@ -303,7 +314,7 @@ export function Desktop() {
           </>
         ) : (
           <>
-            <Tabs currentTab={currentTab} setCurrentTab={setCurrentTab} />
+            <Tabs currentTab={currentTab} setCurrentTab={setCurrentTab} tabs={tabs} />
             <NoListFoundDesktop currentTab={currentTab} />
           </>
         )}
@@ -577,7 +588,7 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito_400Regular",
     fontSize: 14,
     color: "#1A0034",
-    outlineColor:'transparent'
+    outlineColor: "transparent",
   },
   createButton: {
     backgroundColor: "#330065",
