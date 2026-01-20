@@ -11,27 +11,9 @@ import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Dimensions,
-  Image,
-  Platform,
-  Pressable,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-  useWindowDimensions,
-} from "react-native";
+import { ActivityIndicator, Alert, Dimensions, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StatusBar, StyleSheet, Text, TextInput, View, useWindowDimensions } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type FormFieldProps = {
@@ -46,43 +28,17 @@ type FormFieldProps = {
   labelStyle?: any;
 };
 
-const FormField = React.memo(
-  ({
-    label,
-    value,
-    onChangeText,
-    multiline = false,
-    rightIcon,
-    placeholder,
-    style,
-    inputStyle,
-    labelStyle,
-  }: FormFieldProps) => (
-    <View style={[styles.fieldContainer, style]}>
-      <View style={styles.fieldWrapper}>
-        <TextInput
-          style={[
-            styles.textInput,
-            multiline && styles.textInputMultiline,
-            !value && styles.textInputEmpty,
-            inputStyle,
-          ]}
-          value={value}
-          onChangeText={onChangeText}
-          multiline={multiline}
-          placeholder={placeholder}
-          placeholderTextColor="#D1D1D6"
-        />
-        <View style={styles.floatingLabel}>
-          <Text style={[styles.floatingLabelText, labelStyle]}>{label}</Text>
-        </View>
-        {rightIcon && (
-          <View style={styles.rightIconContainer}>{rightIcon}</View>
-        )}
+const FormField = React.memo(({ label, value, onChangeText, multiline = false, rightIcon, placeholder, style, inputStyle, labelStyle }: FormFieldProps) => (
+  <View style={[styles.fieldContainer, style]}>
+    <View style={styles.fieldWrapper}>
+      <TextInput style={[styles.textInput, multiline && styles.textInputMultiline, !value && styles.textInputEmpty, inputStyle]} value={value} onChangeText={onChangeText} multiline={multiline} placeholder={placeholder} placeholderTextColor="#D1D1D6" />
+      <View style={styles.floatingLabel}>
+        <Text style={[styles.floatingLabelText, labelStyle]}>{label}</Text>
       </View>
+      {rightIcon && <View style={styles.rightIconContainer}>{rightIcon}</View>}
     </View>
-  )
-);
+  </View>
+));
 FormField.displayName = "FormField";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -95,16 +51,7 @@ type StepItem = {
   status: StepStatus;
 };
 
-type Occasion =
-  | "birthday"
-  | "wedding"
-  | "baby-shower"
-  | "graduation"
-  | "new-home"
-  | "retirement"
-  | "no-occasion"
-  | "other"
-  | null;
+type Occasion = "birthday" | "wedding" | "baby-shower" | "graduation" | "new-home" | "retirement" | "no-occasion" | "other" | null;
 
 interface FormData {
   eventTitle: string;
@@ -147,9 +94,7 @@ const OCCASION_OPTIONS: OccasionOption[] = [
     title: "Baby Shower",
     borderColor: "#91DA93",
     icon: (color, size) => <Ionicons name="person" size={size} color={color} />,
-    mobileIcon: (
-      <Image source={require("@/assets/images/babyShowerIcon.png")} />
-    ),
+    mobileIcon: <Image source={require("@/assets/images/babyShowerIcon.png")} />,
     backgroundColor: "#F0F9F0",
   },
   {
@@ -157,9 +102,7 @@ const OCCASION_OPTIONS: OccasionOption[] = [
     title: "Graduation",
     borderColor: "#32ADE6",
     icon: (color, size) => <Ionicons name="school" size={size} color={color} />,
-    mobileIcon: (
-      <Image source={require("@/assets/images/graduationIcon.png")} />
-    ),
+    mobileIcon: <Image source={require("@/assets/images/graduationIcon.png")} />,
     backgroundColor: "#D9F3FF",
   },
   {
@@ -175,21 +118,15 @@ const OCCASION_OPTIONS: OccasionOption[] = [
     title: "Retirement",
     borderColor: "#FF9500",
     icon: (color, size) => <Ionicons name="person" size={size} color={color} />,
-    mobileIcon: (
-      <Image source={require("@/assets/images/retirementIcon.png")} />
-    ),
+    mobileIcon: <Image source={require("@/assets/images/retirementIcon.png")} />,
     backgroundColor: "#FFEBCC",
   },
   {
     id: "no-occasion",
     title: "No Occasion",
     borderColor: "#4D4D4D",
-    icon: (color, size) => (
-      <Ionicons name="document-text" size={size} color={color} />
-    ),
-    mobileIcon: (
-      <Image source={require("@/assets/images/noOccasionIcon.png")} />
-    ),
+    icon: (color, size) => <Ionicons name="document-text" size={size} color={color} />,
+    mobileIcon: <Image source={require("@/assets/images/noOccasionIcon.png")} />,
     backgroundColor: "#F4F4F4",
   },
   {
@@ -218,16 +155,11 @@ export default function CreateListStep2() {
 
   const createList = useMutation(api.products.createList);
   const updateListDetails = useMutation(api.products.updateListDetails);
-  const generateCoverUploadUrl = useMutation(
-    api.products.generateListCoverUploadUrl as any
-  );
+  const generateCoverUploadUrl = useMutation(api.products.generateListCoverUploadUrl as any);
   const getCoverUrl = useMutation(api.products.getListCoverUrl as any);
   const { user } = useUser();
   const { listId } = useLocalSearchParams<{ listId?: string }>();
-  const existing = useQuery(
-    api.products.getListById,
-    listId ? { listId: listId as any } : "skip"
-  );
+  const existing = useQuery(api.products.getListById, listId ? { listId: listId as any } : "skip");
 
   React.useEffect(() => {
     if (existing) {
@@ -244,10 +176,7 @@ export default function CreateListStep2() {
     }
   }, [existing]);
 
-  const updateFormData = (
-    field: keyof FormData,
-    value: string | Occasion | null
-  ) => {
+  const updateFormData = (field: keyof FormData, value: string | Occasion | null) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -322,7 +251,7 @@ export default function CreateListStep2() {
         });
         router.push({
           pathname: "/create-list-step3",
-          params: { listId: String(listId) , isEdit: String(true)},
+          params: { listId: String(listId), isEdit: String(true) },
         });
         return;
       }
@@ -357,13 +286,9 @@ export default function CreateListStep2() {
       }
 
       if (Platform.OS !== "web") {
-        const { status } =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== "granted") {
-          Alert.alert(
-            "Permission required",
-            "Please allow photo library access to upload a cover photo."
-          );
+          Alert.alert("Permission required", "Please allow photo library access to upload a cover photo.");
           return;
         }
       }
@@ -397,12 +322,7 @@ export default function CreateListStep2() {
       const ext = uri.split(".").pop()?.toLowerCase();
       console.log("[ImageUpload] URI:", uri, "MIME:", mime, "EXT:", ext);
 
-      const isValidType =
-        mime.startsWith("image/jpeg") ||
-        mime.startsWith("image/png") ||
-        ext === "jpg" ||
-        ext === "jpeg" ||
-        ext === "png";
+      const isValidType = mime.startsWith("image/jpeg") || mime.startsWith("image/png") || ext === "jpg" || ext === "jpeg" || ext === "png";
 
       if (!isValidType) {
         console.error("[ImageUpload] Invalid file type");
@@ -471,26 +391,16 @@ export default function CreateListStep2() {
           method: "POST",
           body: blob,
           headers: {
-            "Content-Type":
-              mime && mime.length > 0 ? mime : "application/octet-stream",
+            "Content-Type": mime && mime.length > 0 ? mime : "application/octet-stream",
           },
         });
 
-        console.log(
-          "[ImageUpload] Upload response status:",
-          uploadResponse.status
-        );
+        console.log("[ImageUpload] Upload response status:", uploadResponse.status);
 
         if (!uploadResponse.ok) {
           const errorText = await uploadResponse.text().catch(() => "");
-          console.error(
-            "[ImageUpload] Upload failed:",
-            uploadResponse.status,
-            errorText
-          );
-          throw new Error(
-            `Upload failed with status ${uploadResponse.status}: ${errorText}`
-          );
+          console.error("[ImageUpload] Upload failed:", uploadResponse.status, errorText);
+          throw new Error(`Upload failed with status ${uploadResponse.status}: ${errorText}`);
         }
 
         try {
@@ -498,10 +408,7 @@ export default function CreateListStep2() {
           console.log("[ImageUpload] Upload response:", parsed);
           storageId = parsed?.storageId;
         } catch (parseError) {
-          console.error(
-            "[ImageUpload] Failed to parse upload response",
-            parseError
-          );
+          console.error("[ImageUpload] Failed to parse upload response", parseError);
           const responseText = await uploadResponse.text().catch(() => "");
           console.error("[ImageUpload] Response body:", responseText);
           throw new Error("Unexpected response from upload service");
@@ -511,8 +418,7 @@ export default function CreateListStep2() {
         const uploadResult = await FileSystem.uploadAsync(uploadUrl, uri, {
           httpMethod: "POST",
           headers: {
-            "Content-Type":
-              mime && mime.length > 0 ? mime : "application/octet-stream",
+            "Content-Type": mime && mime.length > 0 ? mime : "application/octet-stream",
           },
         });
 
@@ -552,8 +458,7 @@ export default function CreateListStep2() {
     }
   };
 
-  const isFormValid =
-    formData.eventTitle.trim().length > 0 && formData.occasion !== null;
+  const isFormValid = formData.eventTitle.trim().length > 0 && formData.occasion !== null;
 
   const headerTitle = listId ? "Edit Event" : "Create Gift List";
   const steps: StepItem[] = [
@@ -565,24 +470,14 @@ export default function CreateListStep2() {
   const { width } = useWindowDimensions();
   const isDesktop = Platform.OS === "web" && width >= DESKTOP_BREAKPOINT;
 
-  const onOccasionSelect = (occasionId: OccasionOption["id"]) =>
-    updateFormData("occasion", occasionId);
+  const onOccasionSelect = (occasionId: OccasionOption["id"]) => updateFormData("occasion", occasionId);
 
-  const datePicker =
-    Platform.OS !== "web" ? (
-      <DateTimePickerModal
-        isVisible={isDatePickerVisible}
-        mode="date"
-        onConfirm={handleDateConfirm}
-        onCancel={hideDatePicker}
-        display={Platform.OS === "ios" ? "inline" : "default"}
-      />
-    ) : null;
+  const datePicker = Platform.OS !== "web" ? <DateTimePickerModal isVisible={isDatePickerVisible} mode="date" onConfirm={handleDateConfirm} onCancel={hideDatePicker} display={Platform.OS === "ios" ? "inline" : "default"} /> : null;
 
-    const onWebDateChange = (e: any) => {
-      const value = e?.target?.value ?? "";
-      if (value) updateFormData("eventDate", value);
-    }
+  const onWebDateChange = (e: any) => {
+    const value = e?.target?.value ?? "";
+    if (value) updateFormData("eventDate", value);
+  };
 
   const layoutProps: SharedLayoutProps = {
     headerTitle,
@@ -599,7 +494,7 @@ export default function CreateListStep2() {
     occasions: OCCASION_OPTIONS,
     onOccasionSelect,
     listId,
-    onWebDateChange
+    onWebDateChange,
   };
 
   if (isDesktop) {
@@ -623,10 +518,7 @@ type SharedLayoutProps = {
   headerTitle: string;
   formData: FormData;
   characterCount: number;
-  updateFormData: (
-    field: keyof FormData,
-    value: string | Occasion | null
-  ) => void;
+  updateFormData: (field: keyof FormData, value: string | Occasion | null) => void;
   handleNoteChange: (text: string) => void;
   handleBack: () => void;
   handleContinue: () => void;
@@ -645,23 +537,7 @@ type DesktopLayoutProps = SharedLayoutProps & {
   onWebDateChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
-function DesktopLayout({
-  headerTitle,
-  formData,
-  characterCount,
-  updateFormData,
-  handleNoteChange,
-  handleBack,
-  handleContinue,
-  showDatePicker,
-  handlePickImage,
-  isFormValid,
-  isUploadingCover,
-  occasions,
-  onOccasionSelect,
-  steps,
-  onWebDateChange,
-}: DesktopLayoutProps) {
+function DesktopLayout({ headerTitle, formData, characterCount, updateFormData, handleNoteChange, handleBack, handleContinue, showDatePicker, handlePickImage, isFormValid, isUploadingCover, occasions, onOccasionSelect, steps, onWebDateChange }: DesktopLayoutProps) {
   return (
     <SafeAreaView style={styles.desktopSafeArea} edges={["top"]}>
       <StatusBar barStyle="dark-content" />
@@ -672,122 +548,52 @@ function DesktopLayout({
             <Text style={styles.desktopBackText}>Back</Text>
           </Pressable>
           <Text style={styles.desktopTitle}>{headerTitle}</Text>
-          <Text style={styles.desktopSubtitle}>
-            To create your gift list, please provide the following details:
-          </Text>
+          <Text style={styles.desktopSubtitle}>To create your gift list, please provide the following details:</Text>
           <View style={styles.desktopStepList}>
             {steps.map((step, index) => {
               const isLast = index === steps.length - 1;
               return (
                 <View key={step.label} style={styles.desktopStepItem}>
                   <View style={styles.desktopStepIndicator}>
-                    <View
-                      style={[
-                        styles.desktopStepCircle,
-                        step.status === "complete" &&
-                          styles.desktopStepCircleComplete,
-                        step.status === "current" &&
-                          styles.desktopStepCircleCurrent,
-                      ]}
-                    >
-                      {step.status === "complete" ? (
-                        <Ionicons name="checkmark" size={16} color="#FFFFFF" />
-                      ) : (
-                        <Text
-                          style={[
-                            styles.desktopStepNumber,
-                            step.status === "current"
-                              ? styles.desktopStepNumberActive
-                              : styles.desktopStepNumberInactive,
-                          ]}
-                        >
-                          {index + 1}
-                        </Text>
-                      )}
-                    </View>
+                    <View style={[styles.desktopStepCircle, step.status === "complete" && styles.desktopStepCircleComplete, step.status === "current" && styles.desktopStepCircleCurrent]}>{step.status === "complete" ? <Ionicons name="checkmark" size={16} color="#FFFFFF" /> : <Text style={[styles.desktopStepNumber, step.status === "current" ? styles.desktopStepNumberActive : styles.desktopStepNumberInactive]}>{index + 1}</Text>}</View>
                     {!isLast && <View style={styles.desktopStepConnector} />}
                   </View>
-                  <Text
-                    style={[
-                      styles.desktopStepLabel,
-                      step.status === "current" &&
-                        styles.desktopStepLabelActive,
-                      step.status === "complete" &&
-                        styles.desktopStepLabelComplete,
-                    ]}
-                  >
-                    {step.label}
-                  </Text>
+                  <Text style={[styles.desktopStepLabel, step.status === "current" && styles.desktopStepLabelActive, step.status === "complete" && styles.desktopStepLabelComplete]}>{step.label}</Text>
                 </View>
               );
             })}
           </View>
         </View>
-        <ScrollView
-          contentContainerStyle={styles.desktopContentScroll}
-          showsVerticalScrollIndicator={false}
-        >
+        <ScrollView contentContainerStyle={styles.desktopContentScroll} showsVerticalScrollIndicator={false}>
           <View style={styles.desktopContent}>
             <Text style={styles.desktopSectionHeading}>Giftlist Details</Text>
             <View style={styles.desktopCoverSection}>
-              <Text style={styles.desktopCoverLabel}>
-                Cover Photo (optional)
-              </Text>
-              <Pressable
-                style={[
-                  styles.uploadArea,
-                  styles.desktopUploadArea,
-                  formData.coverPhotoUri && styles.uploadAreaPreview,
-                  isUploadingCover && styles.uploadAreaDisabled,
-                ]}
-                onPress={handlePickImage}
-                disabled={isUploadingCover}
-              >
+              <Text style={styles.desktopCoverLabel}>Cover Photo (optional)</Text>
+              <Pressable style={[styles.uploadArea, styles.desktopUploadArea, formData.coverPhotoUri && styles.uploadAreaPreview, isUploadingCover && styles.uploadAreaDisabled]} onPress={handlePickImage} disabled={isUploadingCover}>
                 {isUploadingCover ? (
                   <View style={styles.uploadingPlaceholder}>
                     <ActivityIndicator color="#4B0082" />
                     <Text style={styles.uploadingText}>Uploading...</Text>
                   </View>
                 ) : formData.coverPhotoUri ? (
-                  <Image
-                    source={{ uri: formData.coverPhotoUri }}
-                    style={styles.desktopCoverPhotoImage}
-                    resizeMode="cover"
-                  />
+                  <Image source={{ uri: formData.coverPhotoUri }} style={styles.desktopCoverPhotoImage} resizeMode="cover" />
                 ) : (
                   <View style={styles.desktopUploadContent}>
-                    <Ionicons
-                      name="cloud-upload-outline"
-                      size={20}
-                      color="#4B0082"
-                    />
-                    <Text style={styles.desktopUploadText}>
-                      Upload cover photo
-                    </Text>
+                    <Ionicons name="cloud-upload-outline" size={20} color="#4B0082" />
+                    <Text style={styles.desktopUploadText}>Upload cover photo</Text>
                   </View>
                 )}
               </Pressable>
-              <Text style={styles.desktopUploadInfo}>
-                Max size: 4MB. Only JPG, JPEG and PNG with a ratio of 16:9
-              </Text>
+              <Text style={styles.desktopUploadInfo}>Max size: 4MB. Only JPG, JPEG and PNG with a ratio of 16:9</Text>
             </View>
 
             <View style={styles.desktopFieldGrid}>
               <View style={styles.desktopFieldColumn}>
                 <Text style={styles.desktopFieldLabel}>Event Title *</Text>
-                <TextInput
-                  style={styles.desktopTextInput}
-                  value={formData.eventTitle}
-                  onChangeText={(text) => updateFormData("eventTitle", text)}
-                  placeholder="Event Title"
-                  placeholderTextColor="#8E8EA9"
-                  maxLength={32}
-                />
+                <TextInput style={styles.desktopTextInput} value={formData.eventTitle} onChangeText={(text) => updateFormData("eventTitle", text)} placeholder="Event Title" placeholderTextColor="#8E8EA9" maxLength={32} />
               </View>
               <View style={styles.desktopFieldColumn}>
-                <Text style={styles.desktopFieldLabel}>
-                  Event Date (optional)
-                </Text>
+                <Text style={styles.desktopFieldLabel}>Event Date (optional)</Text>
 
                 {Platform.OS === "web" ? (
                   <input
@@ -812,70 +618,32 @@ function DesktopLayout({
                       backgroundColor: "#FFFFFF",
                     }}
                   />
-                ) : 
-                  <Pressable
-                    onPress={showDatePicker}
-                    style={styles.desktopDateInput}
-                  >
-                    <Text
-                      style={[
-                        styles.desktopDateText,
-                        !formData.eventDate && styles.desktopDatePlaceholder,
-                      ]}
-                    >
-                      {formData.eventDate || "DD/MM/YYYY"}
-                    </Text>
+                ) : (
+                  <Pressable onPress={showDatePicker} style={styles.desktopDateInput}>
+                    <Text style={[styles.desktopDateText, !formData.eventDate && styles.desktopDatePlaceholder]}>{formData.eventDate || "DD/MM/YYYY"}</Text>
                     <Ionicons name="calendar-outline" size={20} color="#AEAEB2" />
                   </Pressable>
-                }
+                )}
               </View>
             </View>
 
             <View style={[styles.desktopFieldGrid, styles.desktopFieldGridGap]}>
               <View style={styles.desktopFieldColumn}>
-                <Text style={styles.desktopFieldLabel}>
-                  Shipping Address (optional)
-                </Text>
-                <TextInput
-                  style={styles.desktopTextInput}
-                  value={formData.shippingAddress}
-                  onChangeText={(text) =>
-                    updateFormData("shippingAddress", text)
-                  }
-                  placeholder="Apt/house #, building/community area, city..."
-                  placeholderTextColor="#8E8EA9"
-                />
+                <Text style={styles.desktopFieldLabel}>Shipping Address (optional)</Text>
+                <TextInput style={styles.desktopTextInput} value={formData.shippingAddress} onChangeText={(text) => updateFormData("shippingAddress", text)} placeholder="Apt/house #, building/community area, city..." placeholderTextColor="#8E8EA9" />
               </View>
               <View style={styles.desktopFieldColumn}>
-                <Text style={styles.desktopFieldLabel}>
-                  Add Note (optional)
-                </Text>
-                <TextInput
-                  style={[styles.desktopTextInput, styles.desktopNoteInput]}
-                  value={formData.eventNote}
-                  onChangeText={handleNoteChange}
-                  placeholder="Share a sweet message, special instructions, or anything you'd like your guests to know"
-                  placeholderTextColor="#8E8EA9"
-                  multiline
-                />
-                <Text style={styles.desktopCharacterCount}>
-                  {characterCount}/400
-                </Text>
+                <Text style={styles.desktopFieldLabel}>Add Note (optional)</Text>
+                <TextInput style={[styles.desktopTextInput, styles.desktopNoteInput]} value={formData.eventNote} onChangeText={handleNoteChange} placeholder="Share a sweet message, special instructions, or anything you'd like your guests to know" placeholderTextColor="#8E8EA9" multiline />
+                <Text style={styles.desktopCharacterCount}>{characterCount}/400</Text>
               </View>
             </View>
 
             <View style={styles.desktopOccasionSection}>
-              <Text style={styles.desktopSectionHeading}>
-                Choose Occasion *
-              </Text>
+              <Text style={styles.desktopSectionHeading}>Choose Occasion *</Text>
               <View style={styles.desktopOccasionGrid}>
                 {occasions.map((option) => (
-                  <DesktopOccasionCard
-                    key={option.id}
-                    option={option}
-                    selected={formData.occasion === option.id}
-                    onPress={() => onOccasionSelect(option.id)}
-                  />
+                  <DesktopOccasionCard key={option.id} option={option} selected={formData.occasion === option.id} onPress={() => onOccasionSelect(option.id)} />
                 ))}
               </View>
             </View>
@@ -884,14 +652,7 @@ function DesktopLayout({
               <Pressable onPress={handleBack} style={styles.desktopBackButton}>
                 <Text style={styles.desktopBackButtonText}>Back</Text>
               </Pressable>
-              <Pressable
-                onPress={handleContinue}
-                disabled={!isFormValid}
-                style={[
-                  styles.desktopContinueButton,
-                  !isFormValid && styles.desktopContinueButtonDisabled,
-                ]}
-              >
+              <Pressable onPress={handleContinue} disabled={!isFormValid} style={[styles.desktopContinueButton, !isFormValid && styles.desktopContinueButtonDisabled]}>
                 <Text style={styles.desktopContinueButtonText}>Continue</Text>
               </Pressable>
             </View>
@@ -908,55 +669,22 @@ type DesktopOccasionCardProps = {
   onPress: () => void;
 };
 
-function DesktopOccasionCard({
-  option,
-  selected,
-  onPress,
-}: DesktopOccasionCardProps) {
+function DesktopOccasionCard({ option, selected, onPress }: DesktopOccasionCardProps) {
   const accentColor = option.borderColor;
   return (
-    <Pressable
-      onPress={onPress}
-      style={[
-        styles.desktopOccasionCard,
-        { borderColor: accentColor },
-        selected && styles.desktopOccasionCardSelected,
-      ]}
-    >
+    <Pressable onPress={onPress} style={[styles.desktopOccasionCard, { borderColor: accentColor }, selected && styles.desktopOccasionCardSelected]}>
       <View style={styles.desktopOccasionHeader}>
         <View style={styles.desktopOccasionInfo}>
           {option.icon("#330065", 18)}
           <Text style={styles.desktopOccasionTitle}>{option.title}</Text>
         </View>
-        <View
-          style={[
-            styles.desktopOccasionRadio,
-            selected && styles.desktopOccasionRadioSelected,
-          ]}
-        >
-          {selected && <View style={styles.desktopOccasionRadioDot} />}
-        </View>
+        <View style={[styles.desktopOccasionRadio, selected && styles.desktopOccasionRadioSelected]}>{selected && <View style={styles.desktopOccasionRadioDot} />}</View>
       </View>
     </Pressable>
   );
 }
 
-function MobileLayout({
-  headerTitle,
-  formData,
-  characterCount,
-  updateFormData,
-  handleNoteChange,
-  handleBack,
-  handleContinue,
-  showDatePicker,
-  handlePickImage,
-  isFormValid,
-  isUploadingCover,
-  occasions,
-  onOccasionSelect,
-  listId,
-}: SharedLayoutProps) {
+function MobileLayout({ headerTitle, formData, characterCount, updateFormData, handleNoteChange, handleBack, handleContinue, showDatePicker, handlePickImage, isFormValid, isUploadingCover, occasions, onOccasionSelect, listId }: SharedLayoutProps) {
   const ProgressIndicator = () => (
     <View style={styles.progressContainer}>
       <View style={styles.progressBarContainer}>
@@ -970,13 +698,7 @@ function MobileLayout({
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" />
-      <LinearGradient
-        colors={["#330065", "#45018ad7"]}
-        locations={[0, 0.7]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 2 }}
-        style={styles.header}
-      >
+      <LinearGradient colors={["#330065", "#45018ad7"]} locations={[0, 0.7]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 2 }} style={styles.header}>
         <SafeAreaView edges={["top"]}>
           <View style={styles.headerContent}>
             <View style={styles.navigation}>
@@ -989,115 +711,72 @@ function MobileLayout({
         </SafeAreaView>
       </LinearGradient>
 
-      {listId ? <View style={{ paddingVertical: 16 }}/> : <ProgressIndicator />}
+      {listId ? <View style={{ paddingVertical: 16 }} /> : <ProgressIndicator />}
 
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Giftlist details</Text>
+      <KeyboardAvoidingView style={styles.scrollView} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === "ios" ? 24 : 0}>
+        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Giftlist details</Text>
 
-          <View style={styles.formContainer}>
-            <TextInputField
-              label="Event title *"
-              value={formData.eventTitle}
-              onChangeText={(text) => updateFormData("eventTitle", text)}
-              maxLength={32}
-            />
-            <TextInputAreaField
-              label="Add note (optional)"
-              placeholderTextColor="#D1D1D6"
-              placeholder="Share a sweet message, special instructions, or anything you'd like your guests to know"
-              value={formData.eventNote}
-              onChangeText={handleNoteChange}
-            />
+            <View style={styles.formContainer}>
+              <TextInputField label="Event title *" value={formData.eventTitle} onChangeText={(text) => updateFormData("eventTitle", text)} maxLength={32} />
+              <TextInputAreaField label="Add note (optional)" placeholderTextColor="#D1D1D6" placeholder="Share a sweet message, special instructions, or anything you'd like your guests to know" value={formData.eventNote} onChangeText={handleNoteChange} />
 
-            <DateInputField
-              label="Event date (optional)"
-              value={formData.eventDate}
-              onChange={(date) => updateFormData("eventDate", date)}
-              placeholder="Select a date"
-            />
+              <DateInputField label="Event date (optional)" value={formData.eventDate} onChange={(date) => updateFormData("eventDate", date)} placeholder="Select a date" />
 
-            <TextInputAreaField
-              height={92}
-              label="Shipping Address (optional)"
-              value={formData.shippingAddress}
-              onChangeText={(text) => updateFormData("shippingAddress", text)}
-              placeholder="Apt/house #, building/community area, city..."
-              // icon={<Ionicons name="information-circle-outline" size={16} color="#AEAEB2" />}
-              showCounter={false}
-            />
+              <TextInputAreaField
+                height={92}
+                label="Shipping Address (optional)"
+                value={formData.shippingAddress}
+                onChangeText={(text) => updateFormData("shippingAddress", text)}
+                placeholder="Apt/house #, building/community area, city..."
+                // icon={<Ionicons name="information-circle-outline" size={16} color="#AEAEB2" />}
+                showCounter={false}
+              />
 
-            <View style={styles.coverPhotoSection}>
-              <Text style={styles.coverPhotoLabel}>Cover photo (optional)</Text>
+              <View style={styles.coverPhotoSection}>
+                <Text style={styles.coverPhotoLabel}>Cover photo (optional)</Text>
 
-              <Pressable
-                style={[
-                  styles.uploadArea,
-                  formData.coverPhotoUri && styles.uploadAreaPreview,
-                  isUploadingCover && styles.uploadAreaDisabled,
-                ]}
-                onPress={handlePickImage}
-                disabled={isUploadingCover}
-              >
-                {isUploadingCover ? (
-                  <View style={styles.uploadingPlaceholder}>
-                    <ActivityIndicator color="#4B0082" />
-                    <Text style={styles.uploadingText}>Uploading...</Text>
-                  </View>
-                ) : formData.coverPhotoUri ? (
-                  <Image
-                    source={{ uri: formData.coverPhotoUri }}
-                    style={styles.coverPhotoImage}
-                    resizeMode="contain"
-                  />
-                ) : (
-                  <View style={styles.uploadContent}>
-                    <Image source={require("@/assets/images/uploadIcon.png")} />
-                    <Text style={styles.uploadText}>Upload</Text>
-                  </View>
-                )}
-              </Pressable>
+                <Pressable style={[styles.uploadArea, formData.coverPhotoUri && styles.uploadAreaPreview, isUploadingCover && styles.uploadAreaDisabled]} onPress={handlePickImage} disabled={isUploadingCover}>
+                  {isUploadingCover ? (
+                    <View style={styles.uploadingPlaceholder}>
+                      <ActivityIndicator color="#4B0082" />
+                      <Text style={styles.uploadingText}>Uploading...</Text>
+                    </View>
+                  ) : formData.coverPhotoUri ? (
+                    <Image source={{ uri: formData.coverPhotoUri }} style={styles.coverPhotoImage} resizeMode="contain" />
+                  ) : (
+                    <View style={styles.uploadContent}>
+                      <Image source={require("@/assets/images/uploadIcon.png")} />
+                      <Text style={styles.uploadText}>Upload</Text>
+                    </View>
+                  )}
+                </Pressable>
 
-              <Text style={styles.uploadInfo}>Max: 4MB | JPG, PNG | 16:9</Text>
+                <Text style={styles.uploadInfo}>Max: 4MB | JPG, PNG | 16:9</Text>
+              </View>
             </View>
           </View>
-        </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Choose Occasion *</Text>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Choose Occasion *</Text>
 
-          <View style={styles.occasionsContainer}>
-            {occasions.map((option) => (
-              <OccasionItem
-                key={option.id}
-                option={option}
-                isSelected={formData.occasion === option.id}
-                onSelect={onOccasionSelect}
-              />
-            ))}
+            <View style={styles.occasionsContainer}>
+              {occasions.map((option) => (
+                <OccasionItem key={option.id} option={option} isSelected={formData.occasion === option.id} onSelect={onOccasionSelect} />
+              ))}
+            </View>
           </View>
-        </View>
-
-        <View style={styles.tabBarSpacer} />
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       <View style={styles.bottomButtons}>
-        <Pressable
-          style={[
-            styles.continueButton,
-            !isFormValid && styles.continueButtonDisabled,
-          ]}
-          onPress={handleContinue}
-          disabled={!isFormValid}
-        >
+        <Pressable style={[styles.continueButton, !isFormValid && styles.continueButtonDisabled]} onPress={handleContinue} disabled={!isFormValid}>
           <Text style={styles.continueButtonText}>Continue</Text>
         </Pressable>
-        <Pressable onPress={handleBack} style={styles.backButtonBottom}>
+        {/* <Pressable onPress={handleBack} style={styles.backButtonBottom}>
           <Text style={styles.backButtonText}>Back</Text>
-        </Pressable>
+        </Pressable> */}
       </View>
     </View>
   );
@@ -1121,10 +800,7 @@ function OccasionItem({ option, isSelected, onSelect }: OccasionItemProps) {
   }));
 
   return (
-    <Pressable
-      onPress={() => onSelect(option.id)}
-      style={[styles.occasionItem, { borderLeftColor: option.borderColor }]}
-    >
+    <Pressable onPress={() => onSelect(option.id)} style={[styles.occasionItem, { borderLeftColor: option.borderColor }]}>
       <Animated.View
         style={[
           {
@@ -1149,11 +825,7 @@ function OccasionItem({ option, isSelected, onSelect }: OccasionItemProps) {
           <Text style={styles.occasionTitle}>{option.title}</Text>
         </View>
 
-        <View
-          style={[styles.radioButton, isSelected && styles.radioButtonSelected]}
-        >
-          {isSelected && <View style={styles.radioButtonInner} />}
-        </View>
+        <View style={[styles.radioButton, isSelected && styles.radioButtonSelected]}>{isSelected && <View style={styles.radioButtonInner} />}</View>
       </View>
       {isSelected && option.title === "Other" && (
         <View
@@ -1812,6 +1484,6 @@ const styles = StyleSheet.create({
   specifyText: {
     fontFamily: "Nunito_700Bold",
     fontSize: 16,
-    marginBottom: 12
-  }
+    marginBottom: 12,
+  },
 });
