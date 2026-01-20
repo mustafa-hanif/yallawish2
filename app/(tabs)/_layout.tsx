@@ -25,7 +25,7 @@ export default function TabLayout() {
   const { isSignedIn } = useAuth();
   const pathname = usePathname();
   const params = useGlobalSearchParams();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const isDesktopWeb = Platform.OS === "web" && width >= DESKTOP_BREAKPOINT;
 
   const baseTabBarStyle = Platform.select({
@@ -50,6 +50,9 @@ export default function TabLayout() {
       elevation: 0,
     },
   });
+  const tabBarHeight = typeof baseTabBarStyle?.height === "number" ? baseTabBarStyle.height : 97;
+  const bottomSheetBottom = tabBarHeight + bottom + 8;
+  const bottomSheetStartOffset = Math.max(height - bottomSheetBottom + 40, 0);
   const search = new URLSearchParams();
   Object.entries(params || {}).forEach(([k, v]) => {
     if (Array.isArray(v)) {
@@ -77,18 +80,17 @@ export default function TabLayout() {
     const toValue = isBottomSheetOpen ? 1 : 0;
     if (isBottomSheetOpen) {
       setIsBottomSheetVisible(true);
-      Animated.spring(bottomSheetAnim, {
+      Animated.timing(bottomSheetAnim, {
         toValue: 1,
-        damping: 16,
-        stiffness: 180,
-        mass: 0.6,
+        duration: 360,
+        easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }).start();
     } else {
       Animated.timing(bottomSheetAnim, {
         toValue: 0,
-        duration: 180,
-        easing: Easing.out(Easing.cubic),
+        duration: 280,
+        easing: Easing.in(Easing.cubic),
         useNativeDriver: true,
       }).start(({ finished }) => {
         if (finished) {
@@ -266,17 +268,12 @@ export default function TabLayout() {
             styles.bottomSheetContainer,
             {
               opacity: bottomSheetAnim,
+              bottom: bottomSheetBottom,
               transform: [
                 {
                   translateY: bottomSheetAnim.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [24, 0],
-                  }),
-                },
-                {
-                  scale: bottomSheetAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.98, 1],
+                    outputRange: [bottomSheetStartOffset, 0],
                   }),
                 },
               ],
