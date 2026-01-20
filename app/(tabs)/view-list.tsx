@@ -35,6 +35,7 @@ export default function ViewList() {
   const shareCount = Array.isArray(shares) ? shares.length : undefined;
   const occasion = list?.occasion || "";
   const creator = list?.creator || null;
+  const isOwner = Boolean(userId && list?.user_id && String(userId) === String(list?.user_id));
 
   const daysToGoText = useMemo(() => {
     return getDaysToGoText(list?.eventDate);
@@ -56,7 +57,6 @@ export default function ViewList() {
 
   // Enforce private access: only owner may view
   if (list && privacy === "private") {
-    const isOwner = userId && list.user_id && String(userId) === String(list.user_id);
     const qs = listId ? `?listId=${encodeURIComponent(String(listId))}` : "";
     const returnTo = `${pathname}${qs}`;
     if (!isSignedIn) {
@@ -206,7 +206,7 @@ export default function ViewList() {
         </View>
         <ActionsBar sortby={sortBy} filterClaimed={filterClaimed} filterUnclaimed={filterUnclaimed} onFilterPress={() => setShowSortSheet(true)} isViewMode privacy={privacy} loading={loading} address={(list?.shippingAddress as string | undefined) ?? null} shareCount={shareCount} />
 
-        <View style={styles.addGiftSection}>{Array.isArray(visibleItems) && visibleItems.length > 0 ? visibleItems.map((item: any) => <GiftItemCard swipe={false} key={item._id} item={item} />) : <Text style={{ textAlign: "center", color: "#8E8E93" }}>No gifts yett.</Text>}</View>
+        <View style={styles.addGiftSection}>{Array.isArray(visibleItems) && visibleItems.length > 0 ? visibleItems.map((item: any) => <GiftItemCard swipe={false} key={item._id} item={item} isOwner={isOwner} />) : <Text style={{ textAlign: "center", color: "#8E8E93" }}>No gifts yett.</Text>}</View>
 
         {/* <InfoBox>
           View only mode. Ask the list owner to share edit access if you need to add items.

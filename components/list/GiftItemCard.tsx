@@ -22,11 +22,12 @@ type Props = {
   onDelete?: (itemId: string) => void;
   title?: string | null;
   swipe?: boolean;
+  isOwner?: boolean;
 };
 
 const SWIPE_WIDTH = 130;
 
-export const GiftItemCard: React.FC<Props> = ({ title, item, onPress, onDelete, swipe = true}) => {
+export const GiftItemCard: React.FC<Props> = ({ title, item, onPress, onDelete, swipe = true, isOwner }) => {
   const { listId } = useLocalSearchParams<{ listId?: string }>();
   const swipeableRef = React.useRef<any>(null);
   const pct = Math.min(100, Math.max(0, (item.claimed / Math.max(1, item.quantity)) * 100));
@@ -42,9 +43,20 @@ export const GiftItemCard: React.FC<Props> = ({ title, item, onPress, onDelete, 
       },
     });
   };
+
+  const viewStore = async () => {
+    try {
+      // Prefer native Linking for cross-platform
+      const { Linking } = require("react-native");
+      await Linking.openURL(item.buy_url);
+    } catch (e) {
+      console.warn("Failed to open store URL", e);
+    }
+  };
+
   const isSoldOut = Number(item.claimed ?? 0) >= Number(item.quantity ?? 1);
   const renderRightActions = () => (
-    <View style={{ width: SWIPE_WIDTH, justifyContent: 'center', alignItems: 'center' }}>
+    <View style={{ width: SWIPE_WIDTH, justifyContent: "center", alignItems: "center" }}>
       <Pressable
         style={[styles.rightAction]}
         onPress={() => {
@@ -60,7 +72,7 @@ export const GiftItemCard: React.FC<Props> = ({ title, item, onPress, onDelete, 
     </View>
   );
   return (
-    <Swipeable  ref={swipeableRef} overshootRight={false} renderRightActions={renderRightActions} enabled={swipe}>
+    <Swipeable ref={swipeableRef} overshootRight={false} renderRightActions={renderRightActions} enabled={swipe}>
       <View style={styles.itemCard}>
         <View style={styles.itemImageWrap}>{item.image_url ? <Image source={{ uri: item.image_url }} style={styles.itemImage} /> : <View style={[styles.itemImage, { backgroundColor: "#EEE" }]} />}</View>
         <View style={styles.itemContent}>
@@ -101,9 +113,11 @@ export const GiftItemCard: React.FC<Props> = ({ title, item, onPress, onDelete, 
                 {/* <Image resizeMode="contain" style={{ width: 16, height: 16 }} source={require("@/assets/images/dirham.png")} /> */}
                 <Text style={styles.itemPrice}>AED {item.price}</Text>
               </View>
-            ): <View />}
-            <Pressable onPress={isSoldOut ? undefined : goDetail} disabled={isSoldOut}>
-              <Text style={[styles.buyNow, isSoldOut && styles.buyNowDisabled]}>View on store</Text>
+            ) : (
+              <View />
+            )}
+            <Pressable onPress={isOwner ? viewStore : isSoldOut ? undefined : goDetail} disabled={isSoldOut}>
+              <Text style={[styles.buyNow, isSoldOut && styles.buyNowDisabled]}>{isOwner ? "View on store" : "Buy Now"}</Text>
             </Pressable>
           </View>
           <View style={styles.progressTrack}>

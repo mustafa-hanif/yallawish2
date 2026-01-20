@@ -1195,7 +1195,7 @@ function MobileLayout({ title, subtitle, coverUri, overlayText, displayedItems, 
               {displayedItems.map((item, index) => (
                 <Fragment key={item._id}>
                   {index !== 0 ? <View style={styles.giftDivider} /> : null}
-                  <GiftItemCard title={title} item={item} onDelete={onDelete} />
+                  <GiftItemCard title={title} item={item} onDelete={onDelete} isOwner/>
                 </Fragment>
               ))}
               <Pressable style={styles.addMoreButton} onPress={onAddGift}>
