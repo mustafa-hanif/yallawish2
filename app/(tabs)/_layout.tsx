@@ -1,8 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { Redirect, router, Tabs, useGlobalSearchParams, usePathname } from "expo-router";
 import React from "react";
-import { Platform, Pressable, Text, useWindowDimensions, View } from "react-native";
+import { Animated, Easing, Platform, Pressable, Text, useWindowDimensions, Vibration, View } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import TabBarBackground from "@/components/ui/TabBarBackground";
@@ -16,6 +17,9 @@ const DESKTOP_BREAKPOINT = 1024;
 
 export default function TabLayout() {
   const [isBottomSheetOpen, setIsBottomSheetOpen] = React.useState(false);
+  const [isBottomSheetVisible, setIsBottomSheetVisible] = React.useState(false);
+  const bottomSheetAnim = React.useRef(new Animated.Value(0)).current;
+  const iconAnim = React.useRef(new Animated.Value(0)).current;
   const colorScheme = useColorScheme();
   const { bottom } = useSafeAreaInsets(); // Get the safe area bottom inset
   const { isSignedIn } = useAuth();
@@ -64,8 +68,42 @@ export default function TabLayout() {
     return <Redirect href={{ pathname: "/sign-in", params: { returnTo: encoded } }} />;
   }
   const handlePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Vibration.vibrate(60);
     setIsBottomSheetOpen((prev) => !prev);
   };
+
+  React.useEffect(() => {
+    const toValue = isBottomSheetOpen ? 1 : 0;
+    if (isBottomSheetOpen) {
+      setIsBottomSheetVisible(true);
+      Animated.spring(bottomSheetAnim, {
+        toValue: 1,
+        damping: 16,
+        stiffness: 180,
+        mass: 0.6,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(bottomSheetAnim, {
+        toValue: 0,
+        duration: 180,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished) {
+          setIsBottomSheetVisible(false);
+        }
+      });
+    }
+
+    Animated.timing(iconAnim, {
+      toValue,
+      duration: 220,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [bottomSheetAnim, iconAnim, isBottomSheetOpen]);
 
   const bottomSheetOptions = [
     { icon: require("@/assets/images/plus.png"), title: "Add to your List", route: "add-gift" },
@@ -110,7 +148,26 @@ export default function TabLayout() {
             tabBarButton: (props) => (
               <View style={{ width: "100%", alignItems: "center", justifyContent: "center", top: 12 }}>
                 <Pressable onPress={handlePress} style={{ width: 60, height: 60, borderRadius: 36, backgroundColor: "#330065", alignItems: "center", justifyContent: "center", shadowRadius: 8 }}>
-                  <Ionicons name={isBottomSheetOpen ? "close" : "add"} size={20} color="#FFFFFF" />
+                  <Animated.View
+                    style={{
+                      transform: [
+                        {
+                          rotate: iconAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ["0deg", "180deg"],
+                          }),
+                        },
+                        {
+                          scale: iconAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0.95, 1.05],
+                          }),
+                        },
+                      ],
+                    }}
+                  >
+                    <Ionicons name={isBottomSheetOpen ? "close" : "add"} size={20} color="#FFFFFF" />
+                  </Animated.View>
                 </Pressable>
               </View>
             ),
@@ -203,8 +260,29 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
-      {isBottomSheetOpen ? (
-        <View style={styles.bottomSheetContainer}>
+      {isBottomSheetVisible ? (
+        <Animated.View
+          style={[
+            styles.bottomSheetContainer,
+            {
+              opacity: bottomSheetAnim,
+              transform: [
+                {
+                  translateY: bottomSheetAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [24, 0],
+                  }),
+                },
+                {
+                  scale: bottomSheetAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.98, 1],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
           <View style={styles.headingContainer}>
             <Text style={styles.headingText}>Create or Add</Text>
           </View>
@@ -218,7 +296,7 @@ export default function TabLayout() {
               </View>
             </Pressable>
           ))}
-        </View>
+        </Animated.View>
       ) : null}
     </>
   );
