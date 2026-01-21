@@ -155,11 +155,9 @@ const FriendsProfile = () => {
             <TextInputField label="Custom Display Name" value={customDisplayName} onChangeText={setCustomDisplayName} placeholder={displayName} />
             <TextInputAreaField height={100} label="Personal Note (Private)" descriptionLimit={150} value={personalNote} onChangeText={setPersonalNote} placeholder="Add a personal note about this friend..." />
 
-            {hasChanges && (
-              <Pressable style={styles.saveButton} onPress={handleSaveNotes}>
-                <Text style={styles.saveButtonText}>Save Notes</Text>
-              </Pressable>
-            )}
+            <Pressable style={[styles.saveButton, !hasChanges && styles.saveButtonDisabled]} onPress={handleSaveNotes} disabled={!hasChanges}>
+              <Text style={[styles.saveButtonText, !hasChanges && styles.saveButtonTextDisabled]}>Save Notes</Text>
+            </Pressable>
           </View>
 
           <Pressable style={styles.backToCirclesButton} onPress={handleBackToCircles}>
@@ -247,11 +245,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 8,
   },
+  saveButtonDisabled: {
+    backgroundColor: "#E0E0E0",
+    opacity: 0.6,
+  },
   saveButtonText: {
     fontSize: 16,
     fontWeight: "600",
     color: "#FFFFFF",
     fontFamily: "Nunito_700Bold",
+  },
+  saveButtonTextDisabled: {
+    color: "#9E9E9E",
   },
   actionContainer: {
     width: "100%",
