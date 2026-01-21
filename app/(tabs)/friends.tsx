@@ -55,7 +55,7 @@ const Friends = () => {
       <Header title="Friends" handleBack={handleBack} />
       <Tabs currentTab={currentTab} setCurrentTab={setCurrentTab} tabs={tabs} />
       <FriendsSectionHeader title={currentTab === "friends" ? "Friends" : currentTab === "requests" ? "Requests" : "Pending Invites"} currentTab={currentTab} count={currentTab === "friends" ? friends.length : currentTab === "requests" ? requests.length : pendingInvites.length} handlePressAdd={handlePressAddFriends} />
-      <FlatList showsVerticalScrollIndicator={false} contentContainerStyle={styles.listContainer} data={currentTab === "friends" ? friends : currentTab === "requests" ? requests : pendingInvites} renderItem={({ item }) => (currentTab === "friends" ? <FriendsItem /> : currentTab === "requests" ? <RequestItem /> : <RequestItem />)} keyExtractor={(item, index) => index.toString()} />\{/* AddFriendsSheet component can be placed here when implemented */}
+      <FlatList showsVerticalScrollIndicator={false} contentContainerStyle={styles.listContainer} data={currentTab === "friends" ? friends : currentTab === "requests" ? requests : pendingInvites} renderItem={({ item }) => (currentTab === "friends" ? <FriendsItem /> : currentTab === "requests" ? <RequestItem /> : <RequestItem />)} keyExtractor={(item, index) => index.toString()} />
       <BottomSheet isVisible={isAddFriendsSheetVisible} onClose={() => setIsAddFriendsSheetVisible(false)}>
         <UserProfileBottomSheetContent userProfiles={userProfiles} />
       </BottomSheet>
