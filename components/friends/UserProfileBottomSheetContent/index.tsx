@@ -1,14 +1,15 @@
 import { TextInputField } from "@/components/TextInputField";
 import { getProfileInitials } from "@/utils";
 import React from "react";
-import { Image, Keyboard, KeyboardAvoidingView, ScrollView, Text, View } from "react-native";
+import { Image, Keyboard, KeyboardAvoidingView, Pressable, ScrollView, Text, View } from "react-native";
 import { styles } from "./style";
 
 interface UserProfileBottomSheetContentProps {
   userProfiles?: Array<any>;
+  onSendRequest: (userId: string) => void;
 }
 
-export default function UserProfileBottomSheetContent({ userProfiles }: UserProfileBottomSheetContentProps) {
+export default function UserProfileBottomSheetContent({ userProfiles, onSendRequest }: UserProfileBottomSheetContentProps) {
   const [searchText, setSearchText] = React.useState("");
   const [isKeyboardVisible, setIsKeyboardVisible] = React.useState(false);
 
@@ -22,19 +23,11 @@ export default function UserProfileBottomSheetContent({ userProfiles }: UserProf
     };
   }, []);
 
-  const searchFilteredProfiles = React.useMemo(() => {
-    if (!userProfiles) return [];
-    if (searchText.trim() === "") return userProfiles;
-    const lowercasedSearchText = searchText.toLowerCase();
-    return userProfiles.filter((profile) => {
-      const name = profile?.displayName || (profile?.firstName && profile?.lastName ? `${profile?.firstName} ${profile?.lastName}` : "");
-      const email = profile?.contactEmail || "";
-      return name.toLowerCase().includes(lowercasedSearchText) || email.toLowerCase().includes(lowercasedSearchText);
-    });
-  }, [searchText, userProfiles]);
+  // Profiles are already filtered by search text from backend
+  const searchFilteredProfiles = userProfiles || [];
 
   return (
-    <KeyboardAvoidingView style={[styles.container, isKeyboardVisible ? { paddingTop: 150 } : null]} behavior="padding">
+    <KeyboardAvoidingView style={[styles.container, isKeyboardVisible && styles.containerWithKeyboard]} behavior="padding">
       <View style={styles.searchContainer}>
         <TextInputField value={searchText} onChangeText={setSearchText} label="Search by name or email" icon={<Image source={require("@/assets/images/search.png")} />} />
       </View>
@@ -69,9 +62,36 @@ export default function UserProfileBottomSheetContent({ userProfiles }: UserProf
                   {email ? <Text style={styles.email}>{email}</Text> : null}
                 </View>
               </View>
-              <View>
-                <Image resizeMode="contain" source={require("@/assets/images/addFriend.png")} />
-              </View>
+              {(() => {
+                const status = item?.connectionStatus || "none";
+                const perspective = item?.connectionPerspective;
+
+                if (status === "accepted") {
+                  return (
+                    <View style={styles.statusAccepted}>
+                      <Text style={styles.statusAcceptedText}>Added</Text>
+                    </View>
+                  );
+                } else if (status === "pending" && perspective === "sent") {
+                  return (
+                    <View style={styles.statusSent}>
+                      <Text style={styles.statusSentText}>Sent</Text>
+                    </View>
+                  );
+                } else if (status === "pending" && perspective === "received") {
+                  return (
+                    <View style={styles.statusRespond}>
+                      <Text style={styles.statusRespondText}>Respond</Text>
+                    </View>
+                  );
+                } else {
+                  return (
+                    <Pressable onPress={() => onSendRequest(item?.user_id)}>
+                      <Image resizeMode="contain" source={require("@/assets/images/addFriend.png")} />
+                    </Pressable>
+                  );
+                }
+              })()}
             </View>
           );
         })}

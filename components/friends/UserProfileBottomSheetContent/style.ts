@@ -117,4 +117,45 @@ export const styles = StyleSheet.create({
   listContent: {
     paddingBottom: 16,
   },
+  containerWithKeyboard: {
+    paddingTop: 150,
+  },
+  statusAccepted: {
+    justifyContent: "center",
+    alignItems: "center",
+    height: 24,
+    width: 69,
+    borderColor: "#330065",
+    borderWidth: 1,
+    borderRadius: 16.75,
+  },
+  statusAcceptedText: {
+    fontSize: 9,
+    color: "#330065",
+    fontFamily: "Nunito_600SemiBold",
+  },
+  statusSent: {
+    justifyContent: "center",
+    alignItems: "center",
+    height: 24,
+    width: 69,
+    backgroundColor: "#8E8E93",
+    borderRadius: 16.75,
+  },
+  statusSentText: {
+    fontSize: 9,
+    color: "#FFFFFF",
+    fontFamily: "Nunito_600SemiBold",
+  },
+  statusRespond: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: "#E6F4FF",
+    borderRadius: 6,
+  },
+  statusRespondText: {
+    fontSize: 12,
+    color: "#1890FF",
+    fontFamily: "Nunito_600SemiBold",
+  },
 });
