@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import { TextInputAreaField } from "@/components/TextInputAreaField";
 import { TextInputField } from "@/components/TextInputField";
 import { api } from "@/convex/_generated/api";
+import { getProfileInitials } from "@/utils";
 import { useUser } from "@clerk/clerk-expo";
 import { FontAwesome } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
@@ -116,7 +117,8 @@ const FriendsProfile = () => {
   };
 
   const displayName = friend?.displayName || friend?.firstName || "Unknown User";
-  const imageUrl = friend?.profileImageUrl || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde";
+  const imageUrl = friend?.profileImageUrl || "";
+  const nameInitials = getProfileInitials(friend);
 
   return (
     <View style={styles.container}>
@@ -124,9 +126,15 @@ const FriendsProfile = () => {
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.keyboardView} keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}>
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           <View style={styles.profileContainer}>
-            <View style={styles.imageContainer}>
-              <Image resizeMode="cover" style={styles.image} source={{ uri: imageUrl }} />
-            </View>
+            {imageUrl ? (
+              <View style={styles.imageContainer}>
+                <Image resizeMode="cover" style={styles.image} source={{ uri: imageUrl }} />
+              </View>
+            ) : (
+              <View style={[styles.imageContainer, styles.initialsContainer]}>
+                <Text style={styles.nameInitials}>{nameInitials || ""}</Text>
+              </View>
+            )}
             <View style={styles.nameContainer}>
               <Text style={styles.nameText}>{displayName}</Text>
             </View>
@@ -203,6 +211,17 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
+  },
+  initialsContainer: {
+    backgroundColor: "#330065",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  nameInitials: {
+    fontSize: 32,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    fontFamily: "Nunito_700Bold",
   },
   nameContainer: {
     justifyContent: "center",
