@@ -68,7 +68,11 @@ const FriendsProfile = () => {
   };
 
   const handleBack = () => {
-    router.back();
+    router.push("/(tabs)/friends");
+  };
+
+  const handleBackToCircles = () => {
+    router.push("/(tabs)/circle");
   };
 
   const handleRemoveFriend = async () => {
@@ -149,6 +153,10 @@ const FriendsProfile = () => {
               </Pressable>
             )}
           </View>
+
+          <Pressable style={styles.backToCirclesButton} onPress={handleBackToCircles}>
+            <Text style={styles.backToCirclesText}>Back to circles</Text>
+          </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -169,6 +177,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 20,
     paddingBottom: 40,
+    justifyContent: "center",
   },
   profileContainer: {
     width: "100%",
@@ -268,6 +277,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: "#FFFFFF",
+    fontFamily: "Nunito_700Bold",
+  },
+  backToCirclesButton: {
+    width: "100%",
+    height: 56,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#330065",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 24,
+  },
+  backToCirclesText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#330065",
     fontFamily: "Nunito_700Bold",
   },
 });
