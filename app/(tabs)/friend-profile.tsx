@@ -191,10 +191,10 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   imageContainer: {
-    width: 90,
-    height: 90,
+    width: 88,
+    height: 88,
     borderRadius: 16.67,
-    borderWidth: 4.71,
+    borderWidth: 4,
     borderColor: "#ffff",
     shadowColor: "#000",
     shadowOffset: {
@@ -211,13 +211,12 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   initialsContainer: {
-    backgroundColor: "#330065",
+    backgroundColor: "#007AFF",
     justifyContent: "center",
     alignItems: "center",
   },
   nameInitials: {
-    fontSize: 32,
-    fontWeight: "700",
+    fontSize: 28,
     color: "#FFFFFF",
     fontFamily: "Nunito_700Bold",
   },
