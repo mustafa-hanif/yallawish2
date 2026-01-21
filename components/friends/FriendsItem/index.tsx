@@ -1,3 +1,4 @@
+import { getProfileInitials } from "@/utils";
 import { router } from "expo-router";
 import React from "react";
 import { Image, Pressable, Text, View } from "react-native";
@@ -6,7 +7,14 @@ import { styles } from "./style";
 
 const SWIPE_WIDTH = 130;
 
-export default function FriendsItem() {
+type FriendsItemProps = {
+  connection: any;
+  profile: any;
+  onRemove: (connectionId: string) => void;
+  onBlock: (userId: string) => void;
+};
+
+export default function FriendsItem({ connection, profile, onRemove, onBlock }: FriendsItemProps) {
   const swipeableRef = React.useRef<any>(null);
 
   const renderRightActions = () => (
@@ -15,7 +23,7 @@ export default function FriendsItem() {
         style={[styles.rightAction]}
         onPress={() => {
           swipeableRef.current?.close();
-          // onDelete?.(String(item._id));
+          onRemove(connection._id);
         }}
       >
         <View>
@@ -27,7 +35,7 @@ export default function FriendsItem() {
         style={[styles.rightAction, { backgroundColor: "#9A001D" }]}
         onPress={() => {
           swipeableRef.current?.close();
-          // onDelete?.(String(item._id));
+          onBlock(profile?.user_id);
         }}
       >
         <View>
@@ -37,19 +45,36 @@ export default function FriendsItem() {
       </Pressable>
     </View>
   );
+
   const onPress = () => {
-    router.push("/(tabs)/friend-profile");
+    router.push({
+      pathname: "/(tabs)/friend-profile",
+      params: {
+        connectionId: connection._id,
+        friendUserId: profile?.user_id,
+      },
+    });
   };
+
+  const displayName = profile?.displayName || profile?.firstName || "Unknown User";
+  const imageUrl = profile?.profileImageUrl || "";
+  const nameInitials = getProfileInitials(profile);
 
   return (
     <Swipeable ref={swipeableRef} overshootRight={false} renderRightActions={renderRightActions}>
       <Pressable style={styles.container} onPress={onPress}>
+        {imageUrl ? (
+          <View>
+            <Image source={{ uri: imageUrl }} style={styles.image} />
+          </View>
+        ) : (
+          <View style={[styles.image, styles.initialsContainer]}>
+            <Text style={styles.nameInitials}>{nameInitials || ""}</Text>
+          </View>
+        )}
         <View>
-          <Image source={{ uri: "https://htmlstream.com/preview/unify-v2.6.1/assets/img-temp/400x450/img5.jpg" }} style={styles.image} />
-        </View>
-        <View>
-          <Text style={styles.name}>Adam Sandlers</Text>
-          <Text style={styles.commonCircles}>3 circles in common</Text>
+          <Text style={styles.name}>{displayName}</Text>
+          <Text style={styles.commonCircles}>{profile?.contactEmail || ""}</Text>
         </View>
       </Pressable>
     </Swipeable>

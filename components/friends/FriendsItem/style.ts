@@ -17,16 +17,25 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#D1D1D6",
   },
+  initialsContainer: {
+    backgroundColor: "#007AFF",
+    justifyContent: "center",
+    alignItems: "center",
+    borderColor: "#007AFF",
+  },
+  nameInitials: {
+    fontSize: 16,
+    color: "#FFFFFF",
+    fontFamily: "Nunito_700Bold",
+  },
   name: {
     fontSize: 16,
-    fontWeight: "500",
     lineHeight: 24,
     color: "#1C0335",
     fontFamily: "Nunito_700Bold",
   },
   commonCircles: {
     fontSize: 12,
-    fontWeight: "400",
     lineHeight: 20,
     color: "#1C0335",
     fontFamily: "Nunito_300Light",
@@ -35,7 +44,6 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "flex-end",
     width: 96,
-    // keep same height as card padding (~112)
     paddingVertical: 8,
   },
   rightAction: {
