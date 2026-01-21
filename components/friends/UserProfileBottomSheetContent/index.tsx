@@ -1,7 +1,7 @@
 import { TextInputField } from "@/components/TextInputField";
 import { getProfileInitials } from "@/utils";
 import React from "react";
-import { FlatList, Image, Text, View } from "react-native";
+import { Image, Keyboard, KeyboardAvoidingView, ScrollView, Text, View } from "react-native";
 import { styles } from "./style";
 
 interface UserProfileBottomSheetContentProps {
@@ -10,6 +10,17 @@ interface UserProfileBottomSheetContentProps {
 
 export default function UserProfileBottomSheetContent({ userProfiles }: UserProfileBottomSheetContentProps) {
   const [searchText, setSearchText] = React.useState("");
+  const [isKeyboardVisible, setIsKeyboardVisible] = React.useState(false);
+
+  React.useEffect(() => {
+    const showSubscription = Keyboard.addListener("keyboardDidShow", () => setIsKeyboardVisible(true));
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => setIsKeyboardVisible(false));
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
 
   const searchFilteredProfiles = React.useMemo(() => {
     if (!userProfiles) return [];
@@ -23,29 +34,24 @@ export default function UserProfileBottomSheetContent({ userProfiles }: UserProf
   }, [searchText, userProfiles]);
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView style={[styles.container, isKeyboardVisible ? { paddingTop: 150 } : null]} behavior="padding">
       <View style={styles.searchContainer}>
         <TextInputField value={searchText} onChangeText={setSearchText} label="Search by name or email" icon={<Image source={require("@/assets/images/search.png")} />} />
       </View>
       <View style={styles.titleAndCountContainer}>
-        <Text style={styles.title}>Friends</Text>
+        <Text style={styles.title}>Profiles</Text>
         <View style={styles.countContainer}>
           <Text style={styles.count}>{searchFilteredProfiles.length}</Text>
         </View>
       </View>
-      <FlatList
-        showsVerticalScrollIndicator={false}
-        data={searchFilteredProfiles}
-        keyExtractor={(_item, index) => _item?.id || index.toString()}
-        style={styles.list}
-        contentContainerStyle={styles.listContent}
-        renderItem={({ item }) => {
+      <ScrollView showsVerticalScrollIndicator={false} style={styles.list} contentContainerStyle={styles.listContent} keyboardShouldPersistTaps="handled">
+        {searchFilteredProfiles.map((item, index) => {
           const avatarUrl = item?.profileImageUrl || "";
           const nameInitials = getProfileInitials(item);
           const name = item?.displayName || (item?.firstName && item?.lastName ? `${item?.firstName} ${item?.lastName}` : "");
           const email = item?.contactEmail || "";
           return (
-            <View style={styles.containerIItem}>
+            <View key={item?.id || index.toString()} style={styles.containerIItem}>
               <View style={styles.infoContainer}>
                 <View>
                   {avatarUrl ? (
@@ -68,8 +74,8 @@ export default function UserProfileBottomSheetContent({ userProfiles }: UserProf
               </View>
             </View>
           );
-        }}
-      />
-    </View>
+        })}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
