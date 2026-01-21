@@ -11,11 +11,22 @@ export const styles = StyleSheet.create({
     padding: 16,
   },
   image: {
-    width: 63,
+    width: 60,
     height: 63,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#D1D1D6",
+  },
+  initialsContainer: {
+    backgroundColor: "#007AFF",
+    justifyContent: "center",
+    alignItems: "center",
+    borderColor: "#007AFF",
+  },
+  nameInitials: {
+    fontSize: 16,
+    color: "#FFFFFF",
+    fontFamily: "Nunito_700Bold",
   },
   name: {
     fontSize: 16,
@@ -24,7 +35,6 @@ export const styles = StyleSheet.create({
   },
   email: {
     fontSize: 10,
-    fontWeight: "300",
     color: "#1C0335",
     fontFamily: "Nunito_300Light",
   },
