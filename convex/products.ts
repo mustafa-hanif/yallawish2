@@ -349,7 +349,7 @@ export const getMyLists = query({
         }
 
         return { ...list, coverPhotoUri, totalItems, totalClaimed, creator };
-      })
+      }),
     );
   },
 });
@@ -826,7 +826,7 @@ export const getCommunityLists = query({
         }
 
         return { ...list, coverPhotoUri, totalItems, totalClaimed, creator };
-      })
+      }),
     );
   },
 });
@@ -907,5 +907,510 @@ export const getUserProfiles = query({
   handler: async (ctx, args) => {
     const users = await ctx.db.query("user_profiles").collect();
     return users.filter((u) => u.user_id !== args.user_id);
+  },
+});
+
+// ============ FRIEND CONNECTION MUTATIONS ============
+
+export const sendFriendRequest = mutation({
+  args: {
+    requester_id: v.string(),
+    receiver_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Validate users exist
+    const requester = await ctx.db
+      .query("user_profiles")
+      .withIndex("by_user", (q) => q.eq("user_id", args.requester_id))
+      .first();
+
+    const receiver = await ctx.db
+      .query("user_profiles")
+      .withIndex("by_user", (q) => q.eq("user_id", args.receiver_id))
+      .first();
+
+    if (!requester || !receiver) {
+      throw new Error("One or both users do not exist");
+    }
+
+    // Check if connection already exists (either direction)
+    const existingConnection1 = await ctx.db
+      .query("user_connections")
+      .withIndex("by_both_users", (q) => q.eq("requester_id", args.requester_id).eq("receiver_id", args.receiver_id))
+      .first();
+
+    const existingConnection2 = await ctx.db
+      .query("user_connections")
+      .withIndex("by_both_users", (q) => q.eq("requester_id", args.receiver_id).eq("receiver_id", args.requester_id))
+      .first();
+
+    if (existingConnection1 || existingConnection2) {
+      const existing = existingConnection1 || existingConnection2;
+      if (existing?.status === "blocked") {
+        throw new Error("Cannot send friend request to blocked user");
+      }
+      if (existing?.status === "accepted") {
+        throw new Error("Already friends");
+      }
+      if (existing?.status === "pending") {
+        throw new Error("Friend request already sent");
+      }
+    }
+
+    // Create pending connection
+    const connectionId = await ctx.db.insert("user_connections", {
+      requester_id: args.requester_id,
+      receiver_id: args.receiver_id,
+      status: "pending",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+
+    return connectionId;
+  },
+});
+
+export const acceptFriendRequest = mutation({
+  args: {
+    connection_id: v.id("user_connections"),
+    user_id: v.string(), // Current user accepting the request
+  },
+  handler: async (ctx, args) => {
+    const connection = await ctx.db.get(args.connection_id);
+
+    if (!connection) {
+      throw new Error("Friend request not found");
+    }
+
+    // Verify the current user is the receiver
+    if (connection.receiver_id !== args.user_id) {
+      throw new Error("You can only accept requests sent to you");
+    }
+
+    if (connection.status !== "pending") {
+      throw new Error("Request is not pending");
+    }
+
+    // Update status to accepted
+    await ctx.db.patch(args.connection_id, {
+      status: "accepted",
+      updated_at: new Date().toISOString(),
+    });
+
+    return true;
+  },
+});
+
+export const rejectFriendRequest = mutation({
+  args: {
+    connection_id: v.id("user_connections"),
+    user_id: v.string(), // Current user rejecting the request
+  },
+  handler: async (ctx, args) => {
+    const connection = await ctx.db.get(args.connection_id);
+
+    if (!connection) {
+      throw new Error("Friend request not found");
+    }
+
+    // Verify the current user is the receiver
+    if (connection.receiver_id !== args.user_id) {
+      throw new Error("You can only reject requests sent to you");
+    }
+
+    if (connection.status !== "pending") {
+      throw new Error("Request is not pending");
+    }
+
+    // Delete the connection
+    await ctx.db.delete(args.connection_id);
+
+    return true;
+  },
+});
+
+export const blockUser = mutation({
+  args: {
+    blocker_id: v.string(),
+    blocked_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    if (args.blocker_id === args.blocked_id) {
+      throw new Error("Cannot block yourself");
+    }
+
+    // Check if connection already exists (either direction)
+    const existingConnection1 = await ctx.db
+      .query("user_connections")
+      .withIndex("by_both_users", (q) => q.eq("requester_id", args.blocker_id).eq("receiver_id", args.blocked_id))
+      .first();
+
+    const existingConnection2 = await ctx.db
+      .query("user_connections")
+      .withIndex("by_both_users", (q) => q.eq("requester_id", args.blocked_id).eq("receiver_id", args.blocker_id))
+      .first();
+
+    // Delete any existing connection
+    if (existingConnection1) {
+      await ctx.db.delete(existingConnection1._id);
+    }
+    if (existingConnection2) {
+      await ctx.db.delete(existingConnection2._id);
+    }
+
+    // Create new blocked connection
+    const connectionId = await ctx.db.insert("user_connections", {
+      requester_id: args.blocker_id,
+      receiver_id: args.blocked_id,
+      status: "blocked",
+      blocked_by: args.blocker_id, // Explicitly track who blocked
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+
+    return connectionId;
+  },
+});
+
+export const removeFriend = mutation({
+  args: {
+    connection_id: v.id("user_connections"),
+    user_id: v.string(), // Current user removing the friend
+  },
+  handler: async (ctx, args) => {
+    const connection = await ctx.db.get(args.connection_id);
+
+    if (!connection) {
+      throw new Error("Friend connection not found");
+    }
+
+    // Verify the current user is part of this connection
+    if (connection.requester_id !== args.user_id && connection.receiver_id !== args.user_id) {
+      throw new Error("You can only remove your own friends");
+    }
+
+    if (connection.status !== "accepted") {
+      throw new Error("Not friends");
+    }
+
+    // Delete the connection
+    await ctx.db.delete(args.connection_id);
+
+    return true;
+  },
+});
+
+export const updateFriendNotes = mutation({
+  args: {
+    connection_id: v.id("user_connections"),
+    user_id: v.string(),
+    personal_note: v.optional(v.string()),
+    custom_display_name: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const connection = await ctx.db.get(args.connection_id);
+
+    if (!connection) {
+      throw new Error("Friend connection not found");
+    }
+
+    // Verify the current user is part of this connection
+    if (connection.requester_id !== args.user_id && connection.receiver_id !== args.user_id) {
+      throw new Error("You can only update your own notes");
+    }
+
+    if (connection.status !== "accepted") {
+      throw new Error("Not friends");
+    }
+
+    // Determine which fields to update based on user's role
+    const isRequester = connection.requester_id === args.user_id;
+    const updates: any = {
+      updated_at: new Date().toISOString(),
+    };
+
+    if (args.personal_note !== undefined) {
+      if (isRequester) {
+        updates.requester_note = args.personal_note;
+      } else {
+        updates.receiver_note = args.personal_note;
+      }
+    }
+
+    if (args.custom_display_name !== undefined) {
+      if (isRequester) {
+        updates.requester_custom_name = args.custom_display_name;
+      } else {
+        updates.receiver_custom_name = args.custom_display_name;
+      }
+    }
+
+    await ctx.db.patch(args.connection_id, updates);
+
+    return true;
+  },
+});
+
+// ============ FRIEND CONNECTION QUERIES ============
+
+export const getMyFriends = query({
+  args: { user_id: v.string() },
+  handler: async (ctx, args) => {
+    // Get all accepted connections where user is requester or receiver
+    const connectionsAsRequester = await ctx.db
+      .query("user_connections")
+      .withIndex("by_requester_and_status", (q) => q.eq("requester_id", args.user_id).eq("status", "accepted"))
+      .collect();
+
+    const connectionsAsReceiver = await ctx.db
+      .query("user_connections")
+      .withIndex("by_receiver_and_status", (q) => q.eq("receiver_id", args.user_id).eq("status", "accepted"))
+      .collect();
+
+    // Combine and get friend user IDs
+    const allConnections = [...connectionsAsRequester, ...connectionsAsReceiver];
+    const friendUserIds = allConnections.map((conn) => (conn.requester_id === args.user_id ? conn.receiver_id : conn.requester_id));
+
+    // Fetch user profiles for all friends
+    const friendProfiles = await Promise.all(
+      friendUserIds.map(async (friendId) => {
+        const profile = await ctx.db
+          .query("user_profiles")
+          .withIndex("by_user", (q) => q.eq("user_id", friendId))
+          .first();
+        return profile;
+      }),
+    );
+
+    // Return friends with connection info and personal data
+    return allConnections.map((conn, index) => {
+      const isRequester = conn.requester_id === args.user_id;
+      return {
+        connection: conn,
+        profile: friendProfiles[index],
+        // Include user's personal note and custom name for this friend
+        myPersonalNote: isRequester ? conn.requester_note : conn.receiver_note,
+        myCustomName: isRequester ? conn.requester_custom_name : conn.receiver_custom_name,
+      };
+    });
+  },
+});
+
+export const getReceivedRequests = query({
+  args: { user_id: v.string() },
+  handler: async (ctx, args) => {
+    // Get pending requests where user is the receiver
+    const requests = await ctx.db
+      .query("user_connections")
+      .withIndex("by_receiver_and_status", (q) => q.eq("receiver_id", args.user_id).eq("status", "pending"))
+      .collect();
+
+    // Fetch requester profiles
+    const requestsWithProfiles = await Promise.all(
+      requests.map(async (request) => {
+        const profile = await ctx.db
+          .query("user_profiles")
+          .withIndex("by_user", (q) => q.eq("user_id", request.requester_id))
+          .first();
+        return {
+          connection: request,
+          profile,
+        };
+      }),
+    );
+
+    return requestsWithProfiles;
+  },
+});
+
+export const getSentRequests = query({
+  args: { user_id: v.string() },
+  handler: async (ctx, args) => {
+    // Get pending requests where user is the requester
+    const requests = await ctx.db
+      .query("user_connections")
+      .withIndex("by_requester_and_status", (q) => q.eq("requester_id", args.user_id).eq("status", "pending"))
+      .collect();
+
+    // Fetch receiver profiles
+    const requestsWithProfiles = await Promise.all(
+      requests.map(async (request) => {
+        const profile = await ctx.db
+          .query("user_profiles")
+          .withIndex("by_user", (q) => q.eq("user_id", request.receiver_id))
+          .first();
+        return {
+          connection: request,
+          profile,
+        };
+      }),
+    );
+
+    return requestsWithProfiles;
+  },
+});
+
+export const searchUsers = query({
+  args: {
+    user_id: v.string(),
+    searchText: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Get all user connections (friends, pending, blocked)
+    const myConnectionsAsRequester = await ctx.db
+      .query("user_connections")
+      .withIndex("by_requester", (q) => q.eq("requester_id", args.user_id))
+      .collect();
+
+    const myConnectionsAsReceiver = await ctx.db
+      .query("user_connections")
+      .withIndex("by_receiver", (q) => q.eq("receiver_id", args.user_id))
+      .collect();
+
+    const allConnections = [...myConnectionsAsRequester, ...myConnectionsAsReceiver];
+
+    // Get set of user IDs to exclude
+    const excludedUserIds = new Set([args.user_id]);
+    allConnections.forEach((conn) => {
+      const otherUserId = conn.requester_id === args.user_id ? conn.receiver_id : conn.requester_id;
+      excludedUserIds.add(otherUserId);
+    });
+
+    // Get all user profiles
+    const allUsers = await ctx.db.query("user_profiles").collect();
+
+    // Filter users
+    const filteredUsers = allUsers.filter((user) => {
+      // Exclude self and existing connections
+      if (excludedUserIds.has(user.user_id)) {
+        return false;
+      }
+
+      // Apply search filter if provided
+      if (args.searchText && args.searchText.trim() !== "") {
+        const searchLower = args.searchText.toLowerCase();
+        const name = user.displayName || "";
+        const email = user.contactEmail || "";
+        return name.toLowerCase().includes(searchLower) || email.toLowerCase().includes(searchLower);
+      }
+
+      return true;
+    });
+
+    return filteredUsers;
+  },
+});
+
+export const getConnectionStatus = query({
+  args: {
+    user_id: v.string(),
+    other_user_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Check connection in both directions
+    const connection1 = await ctx.db
+      .query("user_connections")
+      .withIndex("by_both_users", (q) => q.eq("requester_id", args.user_id).eq("receiver_id", args.other_user_id))
+      .first();
+
+    const connection2 = await ctx.db
+      .query("user_connections")
+      .withIndex("by_both_users", (q) => q.eq("requester_id", args.other_user_id).eq("receiver_id", args.user_id))
+      .first();
+
+    const connection = connection1 || connection2;
+
+    if (!connection) {
+      return { status: "none", connection: null };
+    }
+
+    // Determine the perspective
+    let perspective: "sent" | "received" | "mutual" = "mutual";
+    if (connection.status === "pending") {
+      perspective = connection.requester_id === args.user_id ? "sent" : "received";
+    }
+
+    return {
+      status: connection.status,
+      connection,
+      perspective,
+    };
+  },
+});
+
+export const getAllUsersWithConnectionStatus = query({
+  args: {
+    user_id: v.string(),
+    searchText: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Get all user profiles except current user
+    const allUsers = await ctx.db.query("user_profiles").collect();
+    const otherUsers = allUsers.filter((u) => u.user_id !== args.user_id);
+
+    // Get all connections for current user (both directions)
+    const connectionsAsRequester = await ctx.db
+      .query("user_connections")
+      .withIndex("by_requester", (q) => q.eq("requester_id", args.user_id))
+      .collect();
+
+    const connectionsAsReceiver = await ctx.db
+      .query("user_connections")
+      .withIndex("by_receiver", (q) => q.eq("receiver_id", args.user_id))
+      .collect();
+
+    // Create a map of user_id -> connection info
+    const connectionMap = new Map<string, { status: string; perspective: "sent" | "received" | "mutual" }>();
+
+    connectionsAsRequester.forEach((conn) => {
+      let perspective: "sent" | "received" | "mutual" = "mutual";
+      if (conn.status === "pending") {
+        perspective = "sent";
+      } else if (conn.status === "blocked") {
+        // Use blocked_by field to determine who blocked whom
+        perspective = conn.blocked_by === args.user_id ? "sent" : "received";
+      } else if (conn.status === "accepted") {
+        perspective = "mutual";
+      }
+      connectionMap.set(conn.receiver_id, { status: conn.status, perspective });
+    });
+
+    connectionsAsReceiver.forEach((conn) => {
+      let perspective: "sent" | "received" | "mutual" = "mutual";
+      if (conn.status === "pending") {
+        perspective = "received";
+      } else if (conn.status === "blocked") {
+        // Use blocked_by field to determine who blocked whom
+        perspective = conn.blocked_by === args.user_id ? "sent" : "received";
+      } else if (conn.status === "accepted") {
+        perspective = "mutual";
+      }
+      connectionMap.set(conn.requester_id, { status: conn.status, perspective });
+    });
+
+    // Map users with their connection status
+    let usersWithStatus = otherUsers.map((user) => {
+      const connectionInfo = connectionMap.get(user.user_id);
+      return {
+        ...user,
+        connectionStatus: connectionInfo?.status || "none",
+        connectionPerspective: connectionInfo?.perspective || null,
+      };
+    });
+
+    // Filter out blocked users (both directions)
+    usersWithStatus = usersWithStatus.filter((user) => user.connectionStatus !== "blocked");
+
+    // Apply search filter if provided
+    if (args.searchText && args.searchText.trim() !== "") {
+      const searchLower = args.searchText.toLowerCase();
+      usersWithStatus = usersWithStatus.filter((user) => {
+        const name = user.displayName || "";
+        const email = user.contactEmail || "";
+        return name.toLowerCase().includes(searchLower) || email.toLowerCase().includes(searchLower);
+      });
+    }
+
+    return usersWithStatus;
   },
 });

@@ -140,6 +140,27 @@ export default defineSchema({
     updated_at: v.string(),
   }).index("by_user", ["user_id"]),
 
+  // User connections for friend relationships
+  user_connections: defineTable({
+    requester_id: v.string(), // Clerk user id who sent the request
+    receiver_id: v.string(), // Clerk user id who received the request
+    status: v.union(v.literal("pending"), v.literal("accepted"), v.literal("blocked")),
+    blocked_by: v.optional(v.string()), // Clerk user id who initiated the block (only set when status is "blocked")
+    // Personal notes (private, only visible to the person who wrote it)
+    requester_note: v.optional(v.string()), // Private note by requester about receiver
+    receiver_note: v.optional(v.string()), // Private note by receiver about requester
+    // Custom display names (private, only visible to the person who set it)
+    requester_custom_name: v.optional(v.string()), // Custom name set by requester for receiver
+    receiver_custom_name: v.optional(v.string()), // Custom name set by receiver for requester
+    created_at: v.string(),
+    updated_at: v.string(),
+  })
+    .index("by_requester", ["requester_id"])
+    .index("by_receiver", ["receiver_id"])
+    .index("by_requester_and_status", ["requester_id", "status"])
+    .index("by_receiver_and_status", ["receiver_id", "status"])
+    .index("by_both_users", ["requester_id", "receiver_id"]),
+
   // Requests to view password-protected lists
   password_requests: defineTable({
     list_id: v.id("lists"),
