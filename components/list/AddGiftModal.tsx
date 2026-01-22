@@ -386,6 +386,7 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
     }
   };
 
+  console.log("scrapeError", scrapeError);
   return (
     <>
       <Modal visible={visible} transparent animationType={isDesktop ? "fade" : "none"} onRequestClose={onClose}>
