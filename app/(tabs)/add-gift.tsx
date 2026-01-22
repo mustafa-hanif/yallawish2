@@ -11,7 +11,7 @@ import { formatLastUpdated, getDaysToGoText } from "@/utils";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useAction, useMutation, useQuery } from "convex/react";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Linking from "expo-linking";
@@ -1138,6 +1138,16 @@ export default function AddGift() {
                 <Text style={styles.sheetTitle}> Add a gift item</Text>
 
                 <TextInputField label="Add a web link" value={link} onChangeText={setLink} icon={<Image source={require("@/assets/images/externalLink.png")} />} keyboardType="url" placeholder="https://" autoCapitalize="none" autoCorrect={false} error={[...(!isUrlValid && link.trim().length > 0 ? ["Invalid URL"] : []), ...(scrapeError ? [String("We couldn’t fetch details from this link. Try again, remove extra tracking from the URL, or add the gift manually")] : [])]} />
+                {imageUrl ? (
+                  <View style={{ height: 343, width: "100%", borderRadius: 8, borderWidth: 1, borderColor: "#D1D1D6", justifyContent: "center", alignItems: "center", backgroundColor: "#FFFFFF" }}>
+                    <View style={{ width: "100%", height: "100%", position: "relative", justifyContent: "center", alignItems: "center" }}>
+                      <Pressable style={{ position: "absolute", top: 8, right: 8, zIndex: 10, backgroundColor: "#FFFFFF", padding: 6, borderRadius: 20 }} onPress={handleGiftImageUpload} disabled={isUploadingGiftImage}>
+                        <Image source={require("@/assets/images/addImage.png")} />
+                      </Pressable>
+                      <Image source={{ uri: imageUrl }} style={{ width: "100%", height: "100%", borderRadius: 8 }} resizeMode="contain" />
+                    </View>
+                  </View>
+                ) : null}
                 <View style={styles.orDivider}>
                   <View style={styles.orLine} />
                   <Text style={styles.orText}>OR</Text>

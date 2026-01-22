@@ -1391,6 +1391,20 @@ export const desktopStyles = StyleSheet.create({
     borderColor: "#E5E5EA",
     alignItems: "center",
     justifyContent: "center",
+    gap: 12,
+  },
+  modalImagePlaceholderText: {
+    fontSize: 14,
+    fontFamily: "Nunito_600SemiBold",
+    color: "#8E8EA9",
+    marginTop: 8,
+  },
+  modalImageLoadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(255, 255, 255, 0.85)",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 16,
   },
   modalPriceQtyColumn: {
     flex: 1,
