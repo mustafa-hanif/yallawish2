@@ -4,9 +4,11 @@ import { api } from "@/convex/_generated/api";
 import { desktopStyles, styles } from "@/styles/addGiftStyles";
 import { Ionicons } from "@expo/vector-icons";
 import { useAction, useMutation } from "convex/react";
+import * as FileSystem from "expo-file-system";
+import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Animated, Easing, Image, Modal, Platform, Pressable, ScrollView, Text, TextInput, useWindowDimensions, View } from "react-native";
+import { ActivityIndicator, Alert, Animated, Easing, Image, Modal, Platform, Pressable, ScrollView, Text, TextInput, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 
@@ -48,6 +50,10 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
   const [saving, setSaving] = useState(false);
   const [isUrlValid, setIsUrlValid] = useState(true);
 
+  // Gift image upload state
+  const [isUploadingGiftImage, setIsUploadingGiftImage] = useState(false);
+  const [giftImageUploadError, setGiftImageUploadError] = useState<string | null>(null);
+
   // In-sheet browser state (mobile)
   const [showBrowser, setShowBrowser] = useState(false);
   const [browserUrl, setBrowserUrl] = useState<string | null>(null);
@@ -57,6 +63,8 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
   // @ts-ignore generated after adding convex action
   const scrape = useAction((api as any).scrape.productMetadata);
   const createItem = useMutation(api.products.createListItem as any);
+  const generateCoverUploadUrl = useMutation(api.products.generateListCoverUploadUrl);
+  const getCoverUrl = useMutation(api.products.getListCoverUrl);
 
   // Derived
   const DESCRIPTION_LIMIT = 400;
@@ -184,6 +192,200 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
     setShowBrowser(false);
   };
 
+  // Handle gift item image upload
+  const handleGiftImageUpload = async () => {
+    try {
+      console.log("[GiftImageUpload] Starting image picker...");
+      setGiftImageUploadError(null);
+
+      if (isUploadingGiftImage) {
+        console.log("[GiftImageUpload] Already uploading, skipping");
+        return;
+      }
+
+      // Request permissions for mobile
+      if (Platform.OS !== "web") {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== "granted") {
+          setGiftImageUploadError("Permission denied to access photos");
+          Alert.alert("Permission Required", "Please grant access to your photo library to upload images.");
+          return;
+        }
+      }
+
+      // Launch image picker
+      console.log("[GiftImageUpload] Launching image library...");
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        quality: 0.9,
+      });
+
+      console.log("[GiftImageUpload] Image picker result:", result);
+
+      if (result.canceled) {
+        console.log("[GiftImageUpload] User canceled");
+        return;
+      }
+
+      const asset = result.assets?.[0];
+      console.log("[GiftImageUpload] Selected asset:", asset);
+
+      if (!asset?.uri) {
+        console.error("[GiftImageUpload] No asset URI found");
+        setGiftImageUploadError("Failed to get image. Please try again.");
+        return;
+      }
+
+      const uri = asset.uri;
+      const mime = asset.mimeType ?? "";
+      const ext = uri.split(".").pop()?.toLowerCase();
+      console.log("[GiftImageUpload] URI:", uri, "MIME:", mime, "EXT:", ext);
+
+      // Validate file type
+      const isValidType = mime.startsWith("image/jpeg") || mime.startsWith("image/png") || ext === "jpg" || ext === "jpeg" || ext === "png";
+
+      if (!isValidType) {
+        console.error("[GiftImageUpload] Invalid file type");
+        setGiftImageUploadError("Only JPG and PNG images are supported");
+        Alert.alert("Invalid File Type", "Only JPG and PNG images are supported");
+        return;
+      }
+
+      // Validate file size (4MB max)
+      const sizeBytes = asset.fileSize;
+      console.log("[GiftImageUpload] File size:", sizeBytes);
+      if (typeof sizeBytes === "number" && sizeBytes > 4 * 1024 * 1024) {
+        console.error("[GiftImageUpload] File too large");
+        setGiftImageUploadError("Image must be less than 4MB");
+        Alert.alert("File Too Large", "Image must be less than 4MB");
+        return;
+      }
+
+      // Start upload
+      console.log("[GiftImageUpload] Starting upload process...");
+      setIsUploadingGiftImage(true);
+
+      // Generate upload URL from Convex
+      console.log("[GiftImageUpload] Generating upload URL...");
+      const uploadUrl = await generateCoverUploadUrl();
+      console.log("[GiftImageUpload] Upload URL:", uploadUrl);
+
+      if (typeof uploadUrl !== "string" || uploadUrl.length === 0) {
+        throw new Error("Failed to get upload URL");
+      }
+
+      // Upload file to Convex storage
+      let storageId: string | undefined;
+
+      if (Platform.OS === "web") {
+        // Web platform: use fetch with blob
+        console.log("[GiftImageUpload] Web platform detected, processing blob...");
+        let blob: Blob;
+
+        if (asset && "file" in asset && asset.file instanceof File) {
+          console.log("[GiftImageUpload] Using File object directly");
+          blob = asset.file;
+        } else if (uri.startsWith("blob:")) {
+          console.log("[GiftImageUpload] Fetching blob URL...");
+          const response = await fetch(uri);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch blob: ${response.status}`);
+          }
+          blob = await response.blob();
+          console.log("[GiftImageUpload] Blob fetched, size:", blob.size);
+        } else if (uri.startsWith("data:")) {
+          console.log("[GiftImageUpload] Converting data URL to blob...");
+          const response = await fetch(uri);
+          blob = await response.blob();
+          console.log("[GiftImageUpload] Blob created, size:", blob.size);
+        } else {
+          console.log("[GiftImageUpload] Fetching as regular URL...");
+          const response = await fetch(uri);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch image: ${response.status}`);
+          }
+          blob = await response.blob();
+          console.log("[GiftImageUpload] Blob fetched, size:", blob.size);
+        }
+
+        console.log("[GiftImageUpload] Uploading blob to:", uploadUrl);
+        const uploadResponse = await fetch(uploadUrl, {
+          method: "POST",
+          body: blob,
+          headers: {
+            "Content-Type": mime && mime.length > 0 ? mime : "application/octet-stream",
+          },
+        });
+
+        console.log("[GiftImageUpload] Upload response status:", uploadResponse.status);
+
+        if (!uploadResponse.ok) {
+          const errorText = await uploadResponse.text().catch(() => "");
+          console.error("[GiftImageUpload] Upload failed:", uploadResponse.status, errorText);
+          throw new Error(`Upload failed with status ${uploadResponse.status}`);
+        }
+
+        try {
+          const parsed = await uploadResponse.json();
+          console.log("[GiftImageUpload] Upload response:", parsed);
+          storageId = parsed?.storageId;
+        } catch (parseError) {
+          console.error("[GiftImageUpload] Failed to parse upload response", parseError);
+          throw new Error("Unexpected response from upload service");
+        }
+      } else {
+        // Native platforms: use FileSystem
+        console.log("[GiftImageUpload] Native platform detected, using FileSystem...");
+        const uploadResult = await FileSystem.uploadAsync(uploadUrl, uri, {
+          httpMethod: "POST",
+          headers: {
+            "Content-Type": mime && mime.length > 0 ? mime : "application/octet-stream",
+          },
+        });
+
+        console.log("[GiftImageUpload] Upload result status:", uploadResult.status);
+
+        if (uploadResult.status !== 200) {
+          throw new Error(`Upload failed with status ${uploadResult.status}`);
+        }
+
+        try {
+          const parsed = JSON.parse(uploadResult.body ?? "{}");
+          console.log("[GiftImageUpload] Upload response:", parsed);
+          storageId = parsed?.storageId;
+        } catch (parseError) {
+          console.error("[GiftImageUpload] Failed to parse upload response", parseError);
+          throw new Error("Unexpected response from upload service");
+        }
+      }
+
+      if (!storageId) {
+        console.error("[GiftImageUpload] No storageId returned");
+        throw new Error("No storageId returned from upload");
+      }
+
+      // Get the permanent URL
+      console.log("[GiftImageUpload] Getting public URL for storageId:", storageId);
+      const publicUrl = await getCoverUrl({ storageId } as any);
+      console.log("[GiftImageUpload] Public URL:", publicUrl);
+
+      // Update the imageUrl state with the uploaded image
+      setImageUrl(publicUrl);
+      console.log("[GiftImageUpload] Upload completed successfully!");
+
+      setIsUploadingGiftImage(false);
+      setGiftImageUploadError(null);
+    } catch (error) {
+      console.error("[GiftImageUpload] Error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      console.error("[GiftImageUpload] Error message:", errorMessage);
+      setGiftImageUploadError(`Failed to upload: ${errorMessage}`);
+      Alert.alert("Upload Failed", `Failed to upload image: ${errorMessage}`);
+      setIsUploadingGiftImage(false);
+    }
+  };
+
   return (
     <>
       <Modal visible={visible} transparent animationType={isDesktop ? "fade" : "none"} onRequestClose={onClose}>
@@ -220,15 +422,28 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
                     {imageUrl ? (
                       <View style={desktopStyles.modalImageWrapper}>
                         <Image source={{ uri: imageUrl }} style={desktopStyles.modalProductImage} resizeMode="contain" />
-                        <Pressable style={desktopStyles.modalImageEditButton}>
+                        {isUploadingGiftImage && (
+                          <View style={desktopStyles.modalImageLoadingOverlay}>
+                            <ActivityIndicator size="large" color="#3B0076" />
+                          </View>
+                        )}
+                        <Pressable style={desktopStyles.modalImageEditButton} onPress={handleGiftImageUpload} disabled={isUploadingGiftImage}>
                           <Ionicons name="image-outline" size={20} color="#3B0076" />
                         </Pressable>
                       </View>
                     ) : (
-                      <View style={desktopStyles.modalImagePlaceholder}>
-                        <Ionicons name="image-outline" size={48} color="#D1D1D6" />
-                      </View>
+                      <Pressable style={desktopStyles.modalImagePlaceholder} onPress={handleGiftImageUpload} disabled={isUploadingGiftImage}>
+                        {isUploadingGiftImage ? (
+                          <ActivityIndicator size="large" color="#3B0076" />
+                        ) : (
+                          <>
+                            <Ionicons name="image-outline" size={48} color="#D1D1D6" />
+                            <Text style={desktopStyles.modalImagePlaceholderText}>Click to upload image</Text>
+                          </>
+                        )}
+                      </Pressable>
                     )}
+                    {giftImageUploadError && <Text style={desktopStyles.modalErrorText}>{giftImageUploadError}</Text>}
                   </View>
 
                   <View style={desktopStyles.modalPriceQtyColumn}>
