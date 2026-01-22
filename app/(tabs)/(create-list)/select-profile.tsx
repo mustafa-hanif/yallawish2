@@ -15,7 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Image, StatusBar } from "react-native";
 const DESKTOP_BREAKPOINT = 1024;
 const DEFAULT_COUNTRY_CODE = "+971";
-const GENDER_OPTIONS = ["Female", "Male", "Non-binary", "Prefer not to say"];
+const GENDER_OPTIONS = ["Female", "Male"];
 const RELATION_OPTIONS = ["Spouse", "Partner", "Son", "Daughter", "Parent", "Sibling", "Friend", "Colleague", "Pet", "Other"];
 const STEP_ITEMS = ["Who is this list for?", "Giftlist Details", "Who can see this list?"];
 
