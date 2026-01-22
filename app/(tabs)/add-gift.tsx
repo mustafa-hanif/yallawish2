@@ -10,6 +10,7 @@ import { desktopStyles, styles } from "@/styles/addGiftStyles";
 import { formatLastUpdated, getDaysToGoText } from "@/utils";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import { useAction, useMutation, useQuery } from "convex/react";
 import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
@@ -326,11 +327,32 @@ export default function AddGift() {
     setDescription("");
     setImageUrl(null);
     setScrapeError(null);
+    setIsUrlValid(true);
+    setGiftImageUploadError(null);
   };
   const handleCancel = () => {
     closeSheet();
     resetForm();
   };
+
+  // Reset form when sheet is closed
+  useEffect(() => {
+    if (!showSheet) {
+      resetForm();
+    }
+  }, [showSheet]);
+
+  // Reset form when user leaves the screen
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        // Cleanup when screen loses focus (user navigates away)
+        setShowSheet(false);
+        resetForm();
+      };
+    }, []),
+  );
+
   const createItem = useMutation(api.products.createListItem as any);
   const handleSave = async () => {
     if (!canSave || !listId) return;
