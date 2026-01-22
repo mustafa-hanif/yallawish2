@@ -599,7 +599,10 @@ function DesktopLayout({ headerTitle, formData, characterCount, updateFormData, 
                   <input
                     type="date"
                     value={formData.eventDate ?? ""}
+                    onKeyDown={(e) => e.preventDefault()}
+                    onPaste={(e) => e.preventDefault()}
                     onChange={onWebDateChange}
+                    min="1900-01-01"
                     style={{
                       width: "100%",
                       paddingTop: 15.5,
