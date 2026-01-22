@@ -130,7 +130,7 @@ export function ProfileModalContent({
       boxSizing: "border-box",
       backgroundColor: "#FFFFFF",
     }),
-    []
+    [],
   );
 
   const handleWebDateChange = (event: WebDateChangeEvent) => {
