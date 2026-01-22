@@ -1047,12 +1047,12 @@ export default function AddGift() {
                     <Text style={desktopStyles.modalFieldLabel}>Web Link</Text>
                     <View style={desktopStyles.modalInputRow}>
                       <TextInput value={link} onChangeText={setLink} style={desktopStyles.modalInput} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="Type, paste or search" placeholderTextColor="#8E8EA9" />
-                      <Pressable onPress={openSearchBrowser} style={desktopStyles.modalSearchButton}>
-                        <Text style={desktopStyles.modalSearchButtonText}>Search via</Text>
+                      {/* <Pressable onPress={openSearchBrowser} style={desktopStyles.modalSearchButton}>
+                        <Text style={desktopStyles.modalSearchButtonText}>Search viaa</Text>
                         <View style={desktopStyles.googleLogo}>
                           <Text style={desktopStyles.googleG}>G</Text>
                         </View>
-                      </Pressable>
+                      </Pressable> */}
                     </View>
                     {!isUrlValid && link.trim().length > 0 && <Text style={desktopStyles.modalErrorText}>Invalid URL</Text>}
                     {scrapeError && <Text style={desktopStyles.modalErrorText}>{"We couldn’t fetch details from this link. Try again, remove extra tracking from the URL, or add the gift manually"}</Text>}
