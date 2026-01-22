@@ -61,13 +61,7 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
   // Derived
   const DESCRIPTION_LIMIT = 400;
   const canSave = useMemo(() => {
-    return (
-      !!listId &&
-      (link.trim().length > 0 || name.trim().length > 0) &&
-      quantity > 0 &&
-      !saving &&
-      (link.trim().length === 0 || isUrlValid)
-    );
+    return !!listId && (link.trim().length > 0 || name.trim().length > 0) && quantity > 0 && !saving && (link.trim().length === 0 || isUrlValid);
   }, [listId, link, name, quantity, saving, isUrlValid]);
 
   const validateUrl = (value: string) => {
@@ -192,12 +186,7 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
 
   return (
     <>
-      <Modal
-        visible={visible}
-        transparent
-        animationType={isDesktop ? "fade" : "none"}
-        onRequestClose={onClose}
-      >
+      <Modal visible={visible} transparent animationType={isDesktop ? "fade" : "none"} onRequestClose={onClose}>
         <Pressable style={styles.backdrop} onPress={onClose} />
         {isDesktop ? (
           <View style={desktopStyles.modalContainer}>
@@ -213,16 +202,7 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
                 <View style={desktopStyles.modalFieldGroup}>
                   <Text style={desktopStyles.modalFieldLabel}>Web Link</Text>
                   <View style={desktopStyles.modalInputRow}>
-                    <TextInput
-                      value={link}
-                      onChangeText={setLink}
-                      style={desktopStyles.modalInput}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      keyboardType="url"
-                      placeholder="Type, paste or search"
-                      placeholderTextColor="#8E8EA9"
-                    />
+                    <TextInput value={link} onChangeText={setLink} style={desktopStyles.modalInput} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="Type, paste or search" placeholderTextColor="#8E8EA9" />
                     <Pressable onPress={openSearchBrowser} style={desktopStyles.modalSearchButton}>
                       <Text style={desktopStyles.modalSearchButtonText}>Search via</Text>
                       <View style={desktopStyles.googleLogo}>
@@ -230,12 +210,8 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
                       </View>
                     </Pressable>
                   </View>
-                  {!isUrlValid && link.trim().length > 0 && (
-                    <Text style={desktopStyles.modalErrorText}>Invalid URL</Text>
-                  )}
-                  {scrapeError && (
-                    <Text style={desktopStyles.modalErrorText}>{scrapeError}</Text>
-                  )}
+                  {!isUrlValid && link.trim().length > 0 && <Text style={desktopStyles.modalErrorText}>Invalid URL</Text>}
+                  {scrapeError && <Text style={desktopStyles.modalErrorText}>{"We couldn’t fetch details from this link. Try again, remove extra tracking from the URL, or add the gift manually"}</Text>}
                   {scraping && <Text style={desktopStyles.modalScrapingText}>Loading...</Text>}
                 </View>
 
@@ -258,14 +234,7 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
                   <View style={desktopStyles.modalPriceQtyColumn}>
                     <View style={desktopStyles.modalFieldGroup}>
                       <Text style={desktopStyles.modalFieldLabel}>Price of gift</Text>
-                      <TextInput
-                        value={price}
-                        onChangeText={setPrice}
-                        style={desktopStyles.modalPriceInput}
-                        keyboardType="decimal-pad"
-                        placeholder="AED 0.00"
-                        placeholderTextColor="#8E8EA9"
-                      />
+                      <TextInput value={price} onChangeText={setPrice} style={desktopStyles.modalPriceInput} keyboardType="decimal-pad" placeholder="AED 0.00" placeholderTextColor="#8E8EA9" />
                     </View>
                     <View style={desktopStyles.modalFieldGroup}>
                       <Text style={desktopStyles.modalFieldLabel}>Quantity</Text>
@@ -285,13 +254,7 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
                 <View style={desktopStyles.modalFieldGroup}>
                   <Text style={desktopStyles.modalFieldLabel}>Name of Gift</Text>
                   <View style={desktopStyles.modalInputRow}>
-                    <TextInput
-                      value={name}
-                      onChangeText={setName}
-                      style={desktopStyles.modalInput}
-                      placeholder="Enter gift name"
-                      placeholderTextColor="#8E8EA9"
-                    />
+                    <TextInput value={name} onChangeText={setName} style={desktopStyles.modalInput} placeholder="Enter gift name" placeholderTextColor="#8E8EA9" />
                     <Ionicons name="pencil-outline" size={20} color="#AEAEB2" />
                   </View>
                 </View>
@@ -299,14 +262,7 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
                 <View style={desktopStyles.modalFieldGroup}>
                   <Text style={desktopStyles.modalFieldLabel}>Description</Text>
                   <View style={desktopStyles.modalTextareaWrapper}>
-                    <TextInput
-                      placeholder="Prefer color white, size medium etc"
-                      value={description}
-                      onChangeText={(t) => t.length <= DESCRIPTION_LIMIT && setDescription(t)}
-                      style={desktopStyles.modalTextarea}
-                      multiline
-                      placeholderTextColor="#8E8EA9"
-                    />
+                    <TextInput placeholder="Prefer color white, size medium etc" value={description} onChangeText={(t) => t.length <= DESCRIPTION_LIMIT && setDescription(t)} style={desktopStyles.modalTextarea} multiline placeholderTextColor="#8E8EA9" />
                     <Text style={desktopStyles.modalCharCount}>{description.length}/100</Text>
                   </View>
                 </View>
@@ -316,14 +272,8 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
                 <Pressable style={desktopStyles.modalCancelButton} onPress={handleCancel}>
                   <Text style={desktopStyles.modalCancelButtonText}>Cancel</Text>
                 </Pressable>
-                <Pressable
-                  style={[desktopStyles.modalSaveButton, !canSave && desktopStyles.modalSaveButtonDisabled]}
-                  onPress={handleSave}
-                  disabled={!canSave}
-                >
-                  <Text style={[desktopStyles.modalSaveButtonText, !canSave && desktopStyles.modalSaveButtonTextDisabled]}>
-                    {saving ? "Saving..." : "Save"}
-                  </Text>
+                <Pressable style={[desktopStyles.modalSaveButton, !canSave && desktopStyles.modalSaveButtonDisabled]} onPress={handleSave} disabled={!canSave}>
+                  <Text style={[desktopStyles.modalSaveButtonText, !canSave && desktopStyles.modalSaveButtonTextDisabled]}>{saving ? "Saving..." : "Save"}</Text>
                 </Pressable>
               </View>
             </View>
@@ -333,27 +283,11 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
             <Pressable style={{ backgroundColor: "#FFFF", borderWidth: 0 }} onPress={onClose}>
               <View style={styles.sheetHandle} />
             </Pressable>
-            <ScrollView
-              contentContainerStyle={{ ...styles.sheetContent, paddingHorizontal: 0, gap: 0 }}
-              showsVerticalScrollIndicator={false}
-            >
+            <ScrollView contentContainerStyle={{ ...styles.sheetContent, paddingHorizontal: 0, gap: 0 }} showsVerticalScrollIndicator={false}>
               <View style={{ padding: 16, gap: 20, backgroundColor: "#ffff" }}>
                 <Text style={styles.sheetTitle}> Add a gift item</Text>
 
-                <TextInputField
-                  label="Add a web link"
-                  value={link}
-                  onChangeText={setLink}
-                  icon={<Image source={require("@/assets/images/externalLink.png")} />}
-                  keyboardType="url"
-                  placeholder="https://"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  error={[
-                    ...(!isUrlValid && link.trim().length > 0 ? ["Invalid URL"] : []),
-                    ...(scrapeError ? [String(scrapeError)] : []),
-                  ]}
-                />
+                <TextInputField label="Add a web link" value={link} onChangeText={setLink} icon={<Image source={require("@/assets/images/externalLink.png")} />} keyboardType="url" placeholder="https://" autoCapitalize="none" autoCorrect={false} error={[...(!isUrlValid && link.trim().length > 0 ? ["Invalid URL"] : []), ...(scrapeError ? [String("We couldn’t fetch details from this link. Try again, remove extra tracking from the URL, or add the gift manually")] : [])]} />
                 <View style={styles.orDivider}>
                   <View style={styles.orLine} />
                   <Text style={styles.orText}>OR</Text>
@@ -385,34 +319,13 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
                     </Pressable>
                   </View>
                 </View>
-                <TextInputField
-                  label="Price of gift"
-                  value={price}
-                  onChangeText={setPrice}
-                  keyboardType="decimal-pad"
-                  inputLabelContainerStyle={{ backgroundColor: "#F2F2F7" }}
-                />
+                <TextInputField label="Price of gift" value={price} onChangeText={setPrice} keyboardType="decimal-pad" inputLabelContainerStyle={{ backgroundColor: "#F2F2F7" }} />
 
-                <TextInputField
-                  label="Name of gift"
-                  value={name}
-                  onChangeText={setName}
-                  inputLabelContainerStyle={{ backgroundColor: "#F2F2F7" }}
-                  icon={<Image source={require("@/assets/images/Edit.png")} />}
-                />
+                <TextInputField label="Name of gift" value={name} onChangeText={setName} inputLabelContainerStyle={{ backgroundColor: "#F2F2F7" }} icon={<Image source={require("@/assets/images/Edit.png")} />} />
 
-                <TextInputAreaField
-                  label="Description (optional)"
-                  placeholder="Prefer white, size M."
-                  value={description}
-                  onChangeText={(t) => t.length <= DESCRIPTION_LIMIT && setDescription(t)}
-                  inputLabelContainerStyle={{ backgroundColor: "#F2F2F7" }}
-                  descriptionLimit={DESCRIPTION_LIMIT}
-                />
+                <TextInputAreaField label="Description (optional)" placeholder="Prefer white, size M." value={description} onChangeText={(t) => t.length <= DESCRIPTION_LIMIT && setDescription(t)} inputLabelContainerStyle={{ backgroundColor: "#F2F2F7" }} descriptionLimit={DESCRIPTION_LIMIT} />
                 <Pressable style={[styles.saveBtn, !canSave && styles.saveBtnDisabled]} onPress={handleSave} disabled={!canSave}>
-                  <Text style={[styles.saveBtnText, !canSave && styles.saveBtnTextDisabled]}>
-                    {saving ? "Saving..." : "Save"}
-                  </Text>
+                  <Text style={[styles.saveBtnText, !canSave && styles.saveBtnTextDisabled]}>{saving ? "Saving..." : "Save"}</Text>
                 </Pressable>
                 <Pressable style={styles.cancelBtn} onPress={handleCancel}>
                   <Text style={styles.cancelBtnText}>Cancel</Text>
@@ -424,12 +337,7 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
       </Modal>
 
       {/* Product search browser modal for mobile */}
-      <Modal
-        visible={showBrowser}
-        animationType="slide"
-        presentationStyle="fullScreen"
-        onRequestClose={() => setShowBrowser(false)}
-      >
+      <Modal visible={showBrowser} animationType="slide" presentationStyle="fullScreen" onRequestClose={() => setShowBrowser(false)}>
         <LinearGradient colors={["#330065", "#45018ad7"]} locations={[0, 0.7]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 2 }}>
           <View style={[styles.browserHeader, { backgroundColor: "transparent", height: 80 }]}>
             <View style={[styles.navigation, { paddingBottom: 16 }]}>
@@ -446,14 +354,7 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
           </View>
         </LinearGradient>
         <View style={styles.browserModalContainer}>
-          {browserUrl && (
-            <WebView
-              source={{ uri: browserUrl }}
-              onNavigationStateChange={(nav) => setCurrentBrowserUrl(nav.url)}
-              startInLoadingState
-              style={styles.webview}
-            />
-          )}
+          {browserUrl && <WebView source={{ uri: browserUrl }} onNavigationStateChange={(nav) => setCurrentBrowserUrl(nav.url)} startInLoadingState style={styles.webview} />}
           <SafeAreaView edges={["bottom"]} style={styles.browserActionBarWrapper}>
             <Pressable style={styles.browserActionBar} onPress={handleBrowserAdd}>
               <Ionicons name="add" size={20} color="#FFFFFF" />

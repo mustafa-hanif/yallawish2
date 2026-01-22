@@ -835,7 +835,7 @@ export default function AddGift() {
                       </Pressable>
                     </View>
                     {!isUrlValid && link.trim().length > 0 && <Text style={desktopStyles.modalErrorText}>Invalid URL</Text>}
-                    {scrapeError && <Text style={desktopStyles.modalErrorText}>{scrapeError}</Text>}
+                    {scrapeError && <Text style={desktopStyles.modalErrorText}>{"We couldn’t fetch details from this link. Try again, remove extra tracking from the URL, or add the gift manually"}</Text>}
                     {scraping && <Text style={desktopStyles.modalScrapingText}>Loading...</Text>}
                   </View>
 
@@ -926,7 +926,7 @@ export default function AddGift() {
               <View style={{ padding: 16, gap: 20, backgroundColor: "#ffff" }}>
                 <Text style={styles.sheetTitle}> Add a gift item</Text>
 
-                <TextInputField label="Add a web link" value={link} onChangeText={setLink} icon={<Image source={require("@/assets/images/externalLink.png")} />} keyboardType="url" placeholder="https://" autoCapitalize="none" autoCorrect={false} error={[...(!isUrlValid && link.trim().length > 0 ? ["Invalid URL"] : []), ...(scrapeError ? [String(scrapeError)] : [])]} />
+                <TextInputField label="Add a web link" value={link} onChangeText={setLink} icon={<Image source={require("@/assets/images/externalLink.png")} />} keyboardType="url" placeholder="https://" autoCapitalize="none" autoCorrect={false} error={[...(!isUrlValid && link.trim().length > 0 ? ["Invalid URL"] : []), ...(scrapeError ? [String("We couldn’t fetch details from this link. Try again, remove extra tracking from the URL, or add the gift manually")] : [])]} />
                 <View style={styles.orDivider}>
                   <View style={styles.orLine} />
                   <Text style={styles.orText}>OR</Text>
@@ -945,7 +945,7 @@ export default function AddGift() {
                   }
                 />
               </View>
-              <View style={{ padding: 16, paddingTop: 24, gap: 20 }}>
+              <View style={{ padding: 16, paddingTop: 24, gap: 30 }}>
                 <View style={styles.fieldGroup}>
                   <Text style={styles.fieldLabel}>Desired quantity</Text>
                   <View style={styles.qtyRow}>
