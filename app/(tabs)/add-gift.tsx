@@ -156,7 +156,7 @@ export default function AddGift() {
           break;
       }
     },
-    [setFilterClaimed, setFilterUnclaimed]
+    [setFilterClaimed, setFilterUnclaimed],
   );
 
   const totals = useMemo(() => {
@@ -183,7 +183,7 @@ export default function AddGift() {
         claimedCount: 0,
         unclaimedCount: 0,
         claimedUnits: 0,
-      }
+      },
     );
   }, [giftItems]);
 
@@ -198,16 +198,23 @@ export default function AddGift() {
   const listIdString = listId ? String(listId) : undefined;
 
   const handleOpenGift = useCallback(
-    (item: GiftItemType) => {
-      router.push({
-        pathname: "/gift-detail",
-        params: {
-          itemId: String(item._id),
-          ...(listIdString ? { listId: listIdString } : {}),
-        },
-      });
+    async (item: GiftItemType) => {
+      if (!item?.buy_url) return;
+      try {
+        const { Linking } = require("react-native");
+        await Linking.openURL(item.buy_url);
+      } catch (e) {
+        console.warn("Failed to open store URL", e);
+      }
+      // router.push({
+      //   pathname: "/gift-detail",
+      //   params: {
+      //     itemId: String(item._id),
+      //     ...(listIdString ? { listId: listIdString } : {}),
+      //   },
+      // });
     },
-    [listIdString]
+    [listIdString],
   );
 
   const handleBack = () => {
@@ -1195,7 +1202,7 @@ function MobileLayout({ title, subtitle, coverUri, overlayText, displayedItems, 
               {displayedItems.map((item, index) => (
                 <Fragment key={item._id}>
                   {index !== 0 ? <View style={styles.giftDivider} /> : null}
-                  <GiftItemCard title={title} item={item} onDelete={onDelete} isOwner/>
+                  <GiftItemCard title={title} item={item} onDelete={onDelete} isOwner />
                 </Fragment>
               ))}
               <Pressable style={styles.addMoreButton} onPress={onAddGift}>
