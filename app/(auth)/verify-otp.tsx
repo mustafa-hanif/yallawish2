@@ -6,14 +6,7 @@ import { useSignUp } from "@clerk/clerk-expo";
 import { useMutation } from "convex/react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as React from "react";
-import {
-  Dimensions,
-  Platform,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Dimensions, Platform, Pressable, Text, TextInput, View } from "react-native";
 
 const OTP_LENGTH = 6;
 
@@ -26,22 +19,15 @@ export default function VerifyOtpScreen() {
     returnTo?: string;
     addToList?: string;
   }>();
-  const decodedReturnTo = returnTo
-    ? decodeURIComponent(String(returnTo))
-    : undefined;
+  const decodedReturnTo = returnTo ? decodeURIComponent(String(returnTo)) : undefined;
   const emailAddress = email ? String(email) : undefined;
-  const showAddToList =
-    addToList && String(addToList).toLowerCase() !== "false";
+  const showAddToList = addToList && String(addToList).toLowerCase() !== "false";
 
   const { width } = Dimensions.get("window");
   const isDesktop = Platform.OS === "web" && width >= 768;
-  const instructionCopy = emailAddress
-    ? `Enter the 6-digit code we sent to ${emailAddress}.`
-    : "Enter the 6-digit code we just emailed to you.";
+  const instructionCopy = emailAddress ? `Enter the 6-digit code we sent to ${emailAddress}.` : "Enter the 6-digit code we just emailed to you.";
 
-  const [digits, setDigits] = React.useState<string[]>(
-    Array(OTP_LENGTH).fill("")
-  );
+  const [digits, setDigits] = React.useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [errors, setErrors] = React.useState<string[]>([]);
   const [infoMessage, setInfoMessage] = React.useState<string | null>(null);
   const [isVerifying, setIsVerifying] = React.useState(false);
@@ -51,8 +37,7 @@ export default function VerifyOtpScreen() {
   const inputRefs = React.useRef<(TextInput | null)[]>([]);
 
   const code = React.useMemo(() => digits.join(""), [digits]);
-  const canVerify =
-    code.length === OTP_LENGTH && digits.every((digit) => digit !== "");
+  const canVerify = code.length === OTP_LENGTH && digits.every((digit) => digit !== "");
 
   React.useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -101,7 +86,7 @@ export default function VerifyOtpScreen() {
 
     const nextIndex = Math.min(index + sanitized.length, OTP_LENGTH - 1);
     if (index + sanitized.length >= OTP_LENGTH) {
-      inputRefs.current[OTP_LENGTH - 1]?.blur();
+      focusInput(OTP_LENGTH - 1);
     } else {
       focusInput(nextIndex);
     }
@@ -175,9 +160,7 @@ export default function VerifyOtpScreen() {
           }
         }
         await setActive?.({ session: attempt.createdSessionId });
-        const target = decodedReturnTo
-          ? (decodedReturnTo as any)
-          : "/profile-setup";
+        const target = decodedReturnTo ? (decodedReturnTo as any) : "/profile-setup";
         router.replace(target);
         return;
       }
@@ -185,12 +168,7 @@ export default function VerifyOtpScreen() {
       setErrors(["We couldn't verify that code. Please try again."]);
     } catch (err) {
       console.error(JSON.stringify(err, null, 2));
-      if (
-        typeof err === "object" &&
-        err !== null &&
-        "errors" in err &&
-        Array.isArray((err as any).errors)
-      ) {
+      if (typeof err === "object" && err !== null && "errors" in err && Array.isArray((err as any).errors)) {
         setErrors((err as any).errors.map((e: any) => e.longMessage));
       } else {
         setErrors(["An unknown error occurred. Please try again."]);
@@ -214,17 +192,10 @@ export default function VerifyOtpScreen() {
       setResendCooldown(30);
     } catch (err) {
       console.error(JSON.stringify(err, null, 2));
-      if (
-        typeof err === "object" &&
-        err !== null &&
-        "errors" in err &&
-        Array.isArray((err as any).errors)
-      ) {
+      if (typeof err === "object" && err !== null && "errors" in err && Array.isArray((err as any).errors)) {
         setErrors((err as any).errors.map((e: any) => e.longMessage));
       } else {
-        setErrors([
-          "Unable to resend the code right now. Please try again later.",
-        ]);
+        setErrors(["Unable to resend the code right now. Please try again later."]);
       }
     } finally {
       setIsResending(false);
@@ -237,36 +208,17 @@ export default function VerifyOtpScreen() {
       params: {
         mode: "signup",
         ...(showAddToList ? { addToList: String(addToList) } : {}),
-        ...(decodedReturnTo
-          ? { returnTo: encodeURIComponent(decodedReturnTo) }
-          : {}),
+        ...(decodedReturnTo ? { returnTo: encodeURIComponent(decodedReturnTo) } : {}),
       },
     });
   };
 
   return (
-    <ResponsiveAuthLayout
-      showHero={!isDesktop}
-      heroTitle="Verify your email"
-      heroSubtitle={!isDesktop ? undefined : instructionCopy}
-    >
-      <View
-        style={[
-          styles.formContainer,
-          isDesktop ? styles.formContainerDesktop : styles.formContainerMobile,
-        ]}
-      >
-        {isDesktop && (
-          <Text style={[styles.welcomeTitle, styles.welcomeTitleDesktop]}>
-            Verify your email
-          </Text>
-        )}
+    <ResponsiveAuthLayout showHero={!isDesktop} heroTitle="Verify your email" heroSubtitle={!isDesktop ? undefined : instructionCopy}>
+      <View style={[styles.formContainer, isDesktop ? styles.formContainerDesktop : styles.formContainerMobile]}>
+        {isDesktop && <Text style={[styles.welcomeTitle, styles.welcomeTitleDesktop]}>Verify your email</Text>}
 
-        <Text
-          style={[styles.otpMessage, isDesktop && styles.cardSubtitleDesktop]}
-        >
-          {instructionCopy}
-        </Text>
+        <Text style={[styles.otpMessage, isDesktop && styles.cardSubtitleDesktop]}>{instructionCopy}</Text>
 
         <View style={styles.otpInputsRow}>
           {digits.map((digit, index) => (
@@ -277,12 +229,9 @@ export default function VerifyOtpScreen() {
               }}
               keyboardType="number-pad"
               textContentType="oneTimeCode"
-              maxLength={1}
               value={digit}
               onChangeText={(value) => handleDigitChange(index, value)}
-              onKeyPress={({ nativeEvent }) =>
-                handleKeyPress(index, nativeEvent.key)
-              }
+              onKeyPress={({ nativeEvent }) => handleKeyPress(index, nativeEvent.key)}
               style={isDesktop ? styles.otpInput : styles.mobileOtpInput}
               autoFocus={index === 0}
               returnKeyType="done"
@@ -290,13 +239,7 @@ export default function VerifyOtpScreen() {
           ))}
         </View>
 
-        <SocialButton
-          onPress={handleVerify}
-          icon={null}
-          label={isVerifying ? "Verifying..." : "Verify code"}
-          variant={!isDesktop ? "default" : "primary"}
-          style={!canVerify || isVerifying ? { opacity: 0.65 } : undefined}
-        />
+        <SocialButton onPress={handleVerify} icon={null} label={isVerifying ? "Verifying..." : "Verify code"} variant={!isDesktop ? "default" : "primary"} style={!canVerify || isVerifying ? { opacity: 0.65 } : undefined} />
 
         {errors.length > 0 && (
           <View style={styles.errorContainer}>
@@ -312,23 +255,8 @@ export default function VerifyOtpScreen() {
 
         <View style={styles.resendContainer}>
           <Text style={styles.resendText}>Didn’t receive the code?</Text>
-          <Pressable
-            disabled={isResending || resendCooldown > 0}
-            onPress={handleResend}
-          >
-            <Text
-              style={[
-                styles.resendLink,
-                (isResending || resendCooldown > 0) &&
-                  styles.resendLinkDisabled,
-              ]}
-            >
-              {isResending
-                ? "Sending..."
-                : resendCooldown > 0
-                  ? `Resend available in ${resendCooldown}s`
-                  : "Resend code"}
-            </Text>
+          <Pressable disabled={isResending || resendCooldown > 0} onPress={handleResend}>
+            <Text style={[styles.resendLink, (isResending || resendCooldown > 0) && styles.resendLinkDisabled]}>{isResending ? "Sending..." : resendCooldown > 0 ? `Resend available in ${resendCooldown}s` : "Resend code"}</Text>
           </Pressable>
         </View>
 
