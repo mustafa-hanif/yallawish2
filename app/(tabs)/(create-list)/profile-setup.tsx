@@ -492,7 +492,16 @@ export default function ProfileSetupScreen() {
         const isCurrent = step.status === "current";
         const isComplete = step.status === "complete";
         return (
-          <View key={step.label} style={styles.stepItem}>
+          <Pressable
+            key={step.label}
+            style={styles.stepItem}
+            onPress={() => {
+              if (isComplete) {
+                setCurrentStepIndex(index);
+              }
+            }}
+            disabled={!isComplete || isSubmitting || profileImageUploading}
+          >
             <View
               style={[
                 styles.stepBadge,
@@ -503,7 +512,7 @@ export default function ProfileSetupScreen() {
               {isComplete ? <Ionicons name="checkmark" size={20} color={ACCENT_TEAL} /> : <Text style={[styles.stepBadgeText, (isCurrent || isComplete) && styles.stepBadgeTextActive]}>{index + 1}</Text>}
             </View>
             <Text style={[styles.stepLabel, (isCurrent || isComplete) && styles.stepLabelActive]}>{step.label}</Text>
-          </View>
+          </Pressable>
         );
       })}
     </View>
