@@ -5,7 +5,7 @@ import { allCountries } from "country-telephone-data";
 import { Image } from "expo-image";
 import React, { useMemo } from "react";
 import { ActivityIndicator, Platform, Pressable, Text, TextInput, View } from "react-native";
-import { GENDER_OPTIONS } from "./constants";
+import { COUNTRY_OPTIONS, GENDER_OPTIONS } from "./constants";
 
 // Convert ISO2 country code to flag emoji
 const getCountryFlag = (iso2: string): string => {
@@ -32,7 +32,7 @@ type ProfileStepProps = {
   isSubmitting: boolean;
   initials: string;
   formattedDateOfBirth: string;
-  activeDropdown: "gender" | "countryCode" | null;
+  activeDropdown: "gender" | "countryCode" | "location" | null;
   isWebDatePickerOpen: boolean;
   onFirstNameChange: (value: string) => void;
   onLastNameChange: (value: string) => void;
@@ -51,8 +51,11 @@ type ProfileStepProps = {
   onSelectGender: (value: string) => void;
   onToggleCountryCodeDropdown: () => void;
   onSelectCountryCode: (value: string) => void;
+  onToggleLocationDropdown: () => void;
+  onSelectLocation: (value: string) => void;
   renderGenderDropdown: () => React.ReactNode;
   renderCountryCodeDropdown: () => React.ReactNode;
+  renderLocationDropdown: () => React.ReactNode;
 };
 
 export function ProfileStep({
@@ -89,8 +92,11 @@ export function ProfileStep({
   onSelectGender,
   onToggleCountryCodeDropdown,
   onSelectCountryCode,
+  onToggleLocationDropdown,
+  onSelectLocation,
   renderGenderDropdown,
   renderCountryCodeDropdown,
+  renderLocationDropdown,
 }: ProfileStepProps) {
   const SECONDARY_PURPLE = "#4B0082";
 
@@ -239,11 +245,49 @@ export function ProfileStep({
           </View>
         </View>
 
-        <View style={styles.desktopFormRow}>
-          <View style={styles.desktopField}>
-            <Text style={styles.fieldLabel}>Location (optional)</Text>
-            <TextInput value={location} onChangeText={onLocationChange} placeholder="e.g. Dubai" placeholderTextColor="rgba(28, 3, 53, 0.35)" style={styles.desktopInput} autoCapitalize="words" />
+        <View style={[styles.desktopFormRow]}>
+          <View style={[styles.desktopField, Platform.OS === "web" ? {} : activeDropdown === "location" && styles.fieldDropdownActive]}>
+            <Text style={styles.fieldLabel}>Country (optional)</Text>
+            {Platform.OS === "web" ? (
+              <View style={styles.webSelectWrapper}>
+                <select
+                  value={location || ""}
+                  onChange={(e) => onSelectLocation(e.target.value)}
+                  style={
+                    {
+                      width: "100%",
+                      height: 52,
+                      borderRadius: 12,
+                      border: "1.5px solid #DDD7E4",
+                      paddingLeft: 16,
+                      paddingRight: 16,
+                      fontFamily: "Nunito_500Medium, Nunito, sans-serif",
+                      fontSize: 16,
+                      color: "#1C0335",
+                      backgroundColor: "#FBFAFF",
+                      outline: "none",
+                    } as React.CSSProperties
+                  }
+                >
+                  <option value="">Select</option>
+                  {COUNTRY_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </View>
+            ) : (
+              <>
+                <Pressable onPress={onToggleLocationDropdown} style={[styles.desktopInput, styles.inputPressable]}>
+                  <Text style={location ? styles.inputValue : styles.inputPlaceholder}>{location || "Select"}</Text>
+                  <Ionicons name="chevron-down" size={18} color="#6F5F8F" />
+                </Pressable>
+                {activeDropdown === "location" ? renderLocationDropdown() : null}
+              </>
+            )}
           </View>
+          <View style={[styles.desktopField]} />
         </View>
       </>
     );
@@ -358,9 +402,46 @@ export function ProfileStep({
             </Pressable>
           )}
         </View>
-        <View style={styles.mobileFieldBlock}>
-          <Text style={styles.fieldLabel}>Location (optional)</Text>
-          <TextInput value={location} onChangeText={onLocationChange} placeholder="e.g. Dubai" placeholderTextColor="rgba(28, 3, 53, 0.35)" style={styles.mobileInput} autoCapitalize="words" />
+        <View style={[styles.mobileFieldBlock, activeDropdown === "location" && styles.fieldDropdownActive]}>
+          <Text style={styles.fieldLabel}>Country (optional)</Text>
+          {Platform.OS === "web" ? (
+            <View style={styles.webSelectWrapper}>
+              <select
+                value={location || ""}
+                onChange={(e) => onSelectLocation(e.target.value)}
+                style={
+                  {
+                    width: "100%",
+                    height: 52,
+                    borderRadius: 12,
+                    border: "1.5px solid #DDD7E4",
+                    paddingLeft: 16,
+                    paddingRight: 16,
+                    fontFamily: "Nunito_500Medium, Nunito, sans-serif",
+                    fontSize: 16,
+                    color: "#1C0335",
+                    backgroundColor: "#FBFAFF",
+                    outline: "none",
+                  } as React.CSSProperties
+                }
+              >
+                <option value="">Select</option>
+                {COUNTRY_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </View>
+          ) : (
+            <>
+              <Pressable onPress={onToggleLocationDropdown} style={[styles.mobileInput, styles.inputPressable]}>
+                <Text style={location ? styles.inputValue : styles.inputPlaceholder}>{location || "Select"}</Text>
+                <Ionicons name="chevron-down" size={18} color="#6F5F8F" />
+              </Pressable>
+              {activeDropdown === "location" ? renderLocationDropdown() : null}
+            </>
+          )}
         </View>
       </View>
     </>

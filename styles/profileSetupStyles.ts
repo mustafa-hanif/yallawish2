@@ -617,10 +617,11 @@ export const profileSetupStyles = StyleSheet.create({
     elevation: 16,
   },
   dropdown: {
+    width: "100%",
     position: "absolute",
-    top: 60,
+    top: 80,
     left: 0,
-    width: 140,
+    // width: 140,
     borderRadius: 14,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,

@@ -9,19 +9,9 @@ import { allCountries } from "country-telephone-data";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { JSX, useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Platform,
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  Text,
-  View,
-  useWindowDimensions,
-} from "react-native";
+import { ActivityIndicator, Platform, Pressable, SafeAreaView, ScrollView, StatusBar, Text, View, useWindowDimensions } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { GENDER_OPTIONS, PersonaChoice } from "./profile-setup/constants";
+import { COUNTRY_OPTIONS, GENDER_OPTIONS, PersonaChoice } from "./profile-setup/constants";
 import { ExperienceSettingsStep } from "./profile-setup/ExperienceSettingsStep";
 import { FavoriteStoresStep } from "./profile-setup/FavoriteStoresStep";
 import { GiftPreferencesStep } from "./profile-setup/GiftPreferencesStep";
@@ -50,9 +40,7 @@ export default function ProfileSetupScreen() {
   const palette = Colors[colorScheme ?? "light"];
   const { user, isLoaded } = useUser();
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
-  const decodedReturnTo = returnTo
-    ? decodeURIComponent(String(returnTo))
-    : undefined;
+  const decodedReturnTo = returnTo ? decodeURIComponent(String(returnTo)) : undefined;
   const { width } = useWindowDimensions();
   const isDesktop = Platform.OS === "web" && width >= DESKTOP_BREAKPOINT;
   const upsertUserProfile = useMutation(api.products.upsertUserProfile);
@@ -67,28 +55,20 @@ export default function ProfileSetupScreen() {
   const [location, setLocation] = useState("");
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
   const [isWebDatePickerOpen, setWebDatePickerOpen] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState<
-    "gender" | "countryCode" | null
-  >(null);
+  const [activeDropdown, setActiveDropdown] = useState<"gender" | "countryCode" | "location" | null>(null);
   const [persona, setPersona] = useState<PersonaChoice>("giftee");
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
   const [shareUpdates, setShareUpdates] = useState(true);
   const [giftInterests, setGiftInterests] = useState<string[]>([]);
-  const [giftShoppingStyle, setGiftShoppingStyle] = useState<string | null>(
-    null
-  );
+  const [giftShoppingStyle, setGiftShoppingStyle] = useState<string | null>(null);
   const [giftBudgetRange, setGiftBudgetRange] = useState<string | null>(null);
-  const [giftDiscoveryChannels, setGiftDiscoveryChannels] = useState<string[]>(
-    []
-  );
+  const [giftDiscoveryChannels, setGiftDiscoveryChannels] = useState<string[]>([]);
   const [favoriteStores, setFavoriteStores] = useState<string[]>([]);
   const [customStoreInput, setCustomStoreInput] = useState("");
   const [reminderOptIn, setReminderOptIn] = useState(true);
   const [aiIdeasOptIn, setAiIdeasOptIn] = useState(true);
   const [communityUpdatesOptIn, setCommunityUpdatesOptIn] = useState(true);
-  const [profileImagePreview, setProfileImagePreview] = useState<
-    string | undefined
-  >(undefined);
+  const [profileImagePreview, setProfileImagePreview] = useState<string | undefined>(undefined);
   const [profileImageUploading, setProfileImageUploading] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -99,81 +79,26 @@ export default function ProfileSetupScreen() {
 
     const metadata = user?.unsafeMetadata ?? {};
     const savedPersona = metadata?.persona as PersonaChoice | undefined;
-    const savedOccasions = Array.isArray(metadata?.giftOccasions)
-      ? (metadata.giftOccasions as string[])
-      : [];
-    const savedUpdates =
-      typeof metadata?.shareUpdates === "boolean"
-        ? (metadata.shareUpdates as boolean)
-        : true;
+    const savedOccasions = Array.isArray(metadata?.giftOccasions) ? (metadata.giftOccasions as string[]) : [];
+    const savedUpdates = typeof metadata?.shareUpdates === "boolean" ? (metadata.shareUpdates as boolean) : true;
 
-    const metadataFirst =
-      typeof metadata?.firstName === "string"
-        ? (metadata.firstName as string)
-        : undefined;
-    const metadataLast =
-      typeof metadata?.lastName === "string"
-        ? (metadata.lastName as string)
-        : undefined;
-    const metadataEmail =
-      typeof metadata?.contactEmail === "string"
-        ? (metadata.contactEmail as string)
-        : undefined;
-    const metadataPhoneCode =
-      typeof metadata?.phoneCountryCode === "string"
-        ? (metadata.phoneCountryCode as string)
-        : undefined;
-    const metadataPhone =
-      typeof metadata?.phoneNumber === "string"
-        ? (metadata.phoneNumber as string)
-        : undefined;
-    const metadataGender =
-      typeof metadata?.gender === "string"
-        ? (metadata.gender as string)
-        : undefined;
-    const metadataDob =
-      typeof metadata?.dateOfBirth === "string"
-        ? (metadata.dateOfBirth as string)
-        : undefined;
-    const metadataLocation =
-      typeof metadata?.location === "string"
-        ? (metadata.location as string)
-        : undefined;
-    const metadataProfileImage =
-      typeof metadata?.profileImageUrl === "string"
-        ? (metadata.profileImageUrl as string)
-        : undefined;
-    const metadataGiftInterests = Array.isArray(metadata?.giftInterests)
-      ? (metadata.giftInterests as string[])
-      : [];
-    const metadataGiftShoppingStyle =
-      typeof metadata?.giftShoppingStyle === "string"
-        ? (metadata.giftShoppingStyle as string)
-        : undefined;
-    const metadataGiftBudgetRange =
-      typeof metadata?.giftBudgetRange === "string"
-        ? (metadata.giftBudgetRange as string)
-        : undefined;
-    const metadataDiscoveryChannels = Array.isArray(
-      metadata?.giftDiscoveryChannels
-    )
-      ? (metadata.giftDiscoveryChannels as string[])
-      : [];
-    const metadataFavoriteStores = Array.isArray(metadata?.favoriteStores)
-      ? (metadata.favoriteStores as string[])
-      : [];
-    const metadataReminderOptIn =
-      typeof metadata?.reminderOptIn === "boolean"
-        ? (metadata.reminderOptIn as boolean)
-        : true;
-    const metadataAiIdeasOptIn =
-      typeof metadata?.aiIdeasOptIn === "boolean"
-        ? (metadata.aiIdeasOptIn as boolean)
-        : true;
-    const metadataCommunityUpdatesOptIn =
-      typeof metadata?.communityUpdatesOptIn === "boolean"
-        ? (metadata.communityUpdatesOptIn as boolean)
-        : true;
+    const metadataFirst = typeof metadata?.firstName === "string" ? (metadata.firstName as string) : undefined;
+    const metadataLast = typeof metadata?.lastName === "string" ? (metadata.lastName as string) : undefined;
+    const metadataEmail = typeof metadata?.contactEmail === "string" ? (metadata.contactEmail as string) : undefined;
+    const metadataPhoneCode = typeof metadata?.phoneCountryCode === "string" ? (metadata.phoneCountryCode as string) : undefined;
+    const metadataPhone = typeof metadata?.phoneNumber === "string" ? (metadata.phoneNumber as string) : undefined;
+    const metadataGender = typeof metadata?.gender === "string" ? (metadata.gender as string) : undefined;
+    const metadataDob = typeof metadata?.dateOfBirth === "string" ? (metadata.dateOfBirth as string) : undefined;
+    const metadataLocation = typeof metadata?.location === "string" ? (metadata.location as string) : undefined;
+    const metadataProfileImage = typeof metadata?.profileImageUrl === "string" ? (metadata.profileImageUrl as string) : undefined;
+    const metadataGiftInterests = Array.isArray(metadata?.giftInterests) ? (metadata.giftInterests as string[]) : [];
+    const metadataGiftShoppingStyle = typeof metadata?.giftShoppingStyle === "string" ? (metadata.giftShoppingStyle as string) : undefined;
+    const metadataGiftBudgetRange = typeof metadata?.giftBudgetRange === "string" ? (metadata.giftBudgetRange as string) : undefined;
+    const metadataDiscoveryChannels = Array.isArray(metadata?.giftDiscoveryChannels) ? (metadata.giftDiscoveryChannels as string[]) : [];
+    const metadataFavoriteStores = Array.isArray(metadata?.favoriteStores) ? (metadata.favoriteStores as string[]) : [];
+    const metadataReminderOptIn = typeof metadata?.reminderOptIn === "boolean" ? (metadata.reminderOptIn as boolean) : true;
+    const metadataAiIdeasOptIn = typeof metadata?.aiIdeasOptIn === "boolean" ? (metadata.aiIdeasOptIn as boolean) : true;
+    const metadataCommunityUpdatesOptIn = typeof metadata?.communityUpdatesOptIn === "boolean" ? (metadata.communityUpdatesOptIn as boolean) : true;
 
     setFirstName(metadataFirst ?? user?.firstName ?? "");
     setLastName(metadataLast ?? user?.lastName ?? "");
@@ -250,10 +175,7 @@ export default function ProfileSetupScreen() {
     }
   };
 
-  const formattedDateOfBirth = useMemo(
-    () => formatDisplayDate(dateOfBirth),
-    [dateOfBirth]
-  );
+  const formattedDateOfBirth = useMemo(() => formatDisplayDate(dateOfBirth), [dateOfBirth]);
 
   const handleOpenDatePicker = () => {
     setActiveDropdown(null);
@@ -310,11 +232,7 @@ export default function ProfileSetupScreen() {
   const renderGenderDropdown = () => (
     <View style={styles.dropdown}>
       {GENDER_OPTIONS.map((option) => (
-        <Pressable
-          key={option}
-          onPress={() => handleSelectGender(option)}
-          style={styles.dropdownItem}
-        >
+        <Pressable key={option} onPress={() => handleSelectGender(option)} style={styles.dropdownItem}>
           <Text style={styles.dropdownItemText}>{option}</Text>
         </Pressable>
       ))}
@@ -322,21 +240,15 @@ export default function ProfileSetupScreen() {
   );
 
   const countries = useMemo(() => {
-    const uaeIndex = allCountries.findIndex(
-      (c: any) => c.iso2?.toLowerCase() === "ae"
-    );
+    const uaeIndex = allCountries.findIndex((c: any) => c.iso2?.toLowerCase() === "ae");
     const uae = uaeIndex >= 0 ? allCountries[uaeIndex] : null;
-    const otherCountries = allCountries.filter(
-      (c: any) => c.iso2?.toLowerCase() !== "ae"
-    );
+    const otherCountries = allCountries.filter((c: any) => c.iso2?.toLowerCase() !== "ae");
     return uae ? [uae, ...otherCountries] : allCountries;
   }, []);
 
   const handleToggleCountryCodeDropdown = () => {
     setWebDatePickerOpen(false);
-    setActiveDropdown((prev) =>
-      prev === "countryCode" ? null : "countryCode"
-    );
+    setActiveDropdown((prev) => (prev === "countryCode" ? null : "countryCode"));
   };
 
   const handleSelectCountryCode = (value: string) => {
@@ -358,11 +270,7 @@ export default function ProfileSetupScreen() {
     <View style={styles.dropdown}>
       <ScrollView style={{ maxHeight: 300 }} nestedScrollEnabled>
         {countries.map((country: any) => (
-          <Pressable
-            key={country.iso2}
-            onPress={() => handleSelectCountryCode(country.dialCode)}
-            style={styles.dropdownItem}
-          >
+          <Pressable key={country.iso2} onPress={() => handleSelectCountryCode(country.dialCode)} style={styles.dropdownItem}>
             <Text style={styles.dropdownItemText}>
               {getCountryFlag(country.iso2)} {country.dialCode} {country.name}
             </Text>
@@ -372,20 +280,34 @@ export default function ProfileSetupScreen() {
     </View>
   );
 
+  const handleToggleLocationDropdown = () => {
+    setWebDatePickerOpen(false);
+    setActiveDropdown((prev) => (prev === "location" ? null : "location"));
+  };
+
+  const handleSelectLocation = (value: string) => {
+    setLocation(value);
+    setActiveDropdown(null);
+  };
+
+  const renderLocationDropdown = () => (
+    <View style={styles.dropdown}>
+      <ScrollView style={{ maxHeight: 300 }} nestedScrollEnabled>
+        {COUNTRY_OPTIONS.map((country) => (
+          <Pressable key={country} onPress={() => handleSelectLocation(country)} style={styles.dropdownItem}>
+            <Text style={styles.dropdownItemText}>{country}</Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+    </View>
+  );
+
   const toggleOccasion = (occasion: string) => {
-    setSelectedOccasions((current) =>
-      current.includes(occasion)
-        ? current.filter((item) => item !== occasion)
-        : [...current, occasion]
-    );
+    setSelectedOccasions((current) => (current.includes(occasion) ? current.filter((item) => item !== occasion) : [...current, occasion]));
   };
 
   const toggleGiftInterest = (interest: string) => {
-    setGiftInterests((current) =>
-      current.includes(interest)
-        ? current.filter((item) => item !== interest)
-        : [...current, interest]
-    );
+    setGiftInterests((current) => (current.includes(interest) ? current.filter((item) => item !== interest) : [...current, interest]));
   };
 
   const selectGiftShoppingStyle = (style: string) => {
@@ -397,39 +319,26 @@ export default function ProfileSetupScreen() {
   };
 
   const toggleDiscoveryChannel = (channel: string) => {
-    setGiftDiscoveryChannels((current) =>
-      current.includes(channel)
-        ? current.filter((item) => item !== channel)
-        : [...current, channel]
-    );
+    setGiftDiscoveryChannels((current) => (current.includes(channel) ? current.filter((item) => item !== channel) : [...current, channel]));
   };
 
   const toggleFavoriteStoreSelection = (store: string) => {
-    setFavoriteStores((current) =>
-      current.includes(store)
-        ? current.filter((item) => item !== store)
-        : [...current, store]
-    );
+    setFavoriteStores((current) => (current.includes(store) ? current.filter((item) => item !== store) : [...current, store]));
   };
 
   const handleAddCustomStore = () => {
     const trimmed = customStoreInput.trim();
     if (!trimmed) return;
-    setFavoriteStores((current) =>
-      current.includes(trimmed) ? current : [...current, trimmed]
-    );
+    setFavoriteStores((current) => (current.includes(trimmed) ? current : [...current, trimmed]));
     setCustomStoreInput("");
   };
 
   const handlePickProfileImage = async () => {
     try {
       setError(null);
-      const permission =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (permission.status !== "granted") {
-        setError(
-          "We need access to your photos to update your profile picture."
-        );
+        setError("We need access to your photos to update your profile picture.");
         return;
       }
 
@@ -505,12 +414,9 @@ export default function ProfileSetupScreen() {
       const trimmedPhoneCode = phoneCountryCode.trim();
       const trimmedPhoneNumber = phoneNumber.trim();
       const trimmedGender = gender.trim();
-      const trimmedDob = dateOfBirth
-        ? dateOfBirth.toISOString().split("T")[0]
-        : "";
+      const trimmedDob = dateOfBirth ? dateOfBirth.toISOString().split("T")[0] : "";
       const trimmedLocation = location.trim();
-      const displayName =
-        `${trimmedFirstName} ${trimmedLastName}`.trim() || trimmedEmail;
+      const displayName = `${trimmedFirstName} ${trimmedLastName}`.trim() || trimmedEmail;
 
       await user.update({
         firstName: trimmedFirstName || undefined,
@@ -581,9 +487,7 @@ export default function ProfileSetupScreen() {
   const renderStepper = () => (
     <View style={styles.desktopSidebar}>
       <Text style={styles.sidebarTitle}>Profile Setup</Text>
-      <Text style={styles.sidebarSubtitle}>
-        To setup your profile, please provide the following information.
-      </Text>
+      <Text style={styles.sidebarSubtitle}>To setup your profile, please provide the following information.</Text>
       {stepStatuses.map((step, index) => {
         const isCurrent = step.status === "current";
         const isComplete = step.status === "complete";
@@ -596,27 +500,9 @@ export default function ProfileSetupScreen() {
                 isComplete && styles.stepBadgeComplete,
               ]}
             >
-              {isComplete ? (
-                <Ionicons name="checkmark" size={20} color={ACCENT_TEAL} />
-              ) : (
-                <Text
-                  style={[
-                    styles.stepBadgeText,
-                    (isCurrent || isComplete) && styles.stepBadgeTextActive,
-                  ]}
-                >
-                  {index + 1}
-                </Text>
-              )}
+              {isComplete ? <Ionicons name="checkmark" size={20} color={ACCENT_TEAL} /> : <Text style={[styles.stepBadgeText, (isCurrent || isComplete) && styles.stepBadgeTextActive]}>{index + 1}</Text>}
             </View>
-            <Text
-              style={[
-                styles.stepLabel,
-                (isCurrent || isComplete) && styles.stepLabelActive,
-              ]}
-            >
-              {step.label}
-            </Text>
+            <Text style={[styles.stepLabel, (isCurrent || isComplete) && styles.stepLabelActive]}>{step.label}</Text>
           </View>
         );
       })}
@@ -667,6 +553,9 @@ export default function ProfileSetupScreen() {
             onSelectCountryCode={handleSelectCountryCode}
             renderGenderDropdown={renderGenderDropdown}
             renderCountryCodeDropdown={renderCountryCodeDropdown}
+            onToggleLocationDropdown={handleToggleLocationDropdown}
+            onSelectLocation={handleSelectLocation}
+            renderLocationDropdown={renderLocationDropdown}
           />
         );
         break;
@@ -690,51 +579,22 @@ export default function ProfileSetupScreen() {
         );
         break;
       case "stores":
-        stepContent = (
-          <FavoriteStoresStep
-            variant="desktop"
-            favoriteStores={favoriteStores}
-            customStoreInput={customStoreInput}
-            onToggleFavoriteStore={toggleFavoriteStoreSelection}
-            onCustomStoreInputChange={setCustomStoreInput}
-            onAddCustomStore={handleAddCustomStore}
-          />
-        );
+        stepContent = <FavoriteStoresStep variant="desktop" favoriteStores={favoriteStores} customStoreInput={customStoreInput} onToggleFavoriteStore={toggleFavoriteStoreSelection} onCustomStoreInputChange={setCustomStoreInput} onAddCustomStore={handleAddCustomStore} />;
         break;
       case "experience":
-        stepContent = (
-          <ExperienceSettingsStep
-            variant="desktop"
-            reminderOptIn={reminderOptIn}
-            aiIdeasOptIn={aiIdeasOptIn}
-            communityUpdatesOptIn={communityUpdatesOptIn}
-            shareUpdates={shareUpdates}
-            onReminderOptInChange={setReminderOptIn}
-            onAiIdeasOptInChange={setAiIdeasOptIn}
-            onCommunityUpdatesOptInChange={setCommunityUpdatesOptIn}
-            onShareUpdatesChange={setShareUpdates}
-          />
-        );
+        stepContent = <ExperienceSettingsStep variant="desktop" reminderOptIn={reminderOptIn} aiIdeasOptIn={aiIdeasOptIn} communityUpdatesOptIn={communityUpdatesOptIn} shareUpdates={shareUpdates} onReminderOptInChange={setReminderOptIn} onAiIdeasOptInChange={setAiIdeasOptIn} onCommunityUpdatesOptInChange={setCommunityUpdatesOptIn} onShareUpdatesChange={setShareUpdates} />;
         break;
       default:
         stepContent = null;
     }
 
     return (
-      <ScrollView
-        contentContainerStyle={styles.desktopWrapper}
-        bounces={false}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.desktopWrapper} bounces={false} showsVerticalScrollIndicator={false}>
         <View style={styles.desktopCard}>
           {renderStepper()}
           <View style={styles.desktopContent}>
             <View style={styles.desktopTopBar}>
-              <Pressable
-                style={styles.skipButton}
-                onPress={goToApp}
-                accessibilityRole="button"
-              >
+              <Pressable style={styles.skipButton} onPress={goToApp} accessibilityRole="button">
                 <Text style={styles.skipButtonText}>Skip for now</Text>
               </Pressable>
             </View>
@@ -749,36 +609,12 @@ export default function ProfileSetupScreen() {
 
             <View style={styles.desktopActions}>
               {currentStepIndex > 0 ? (
-                <Pressable
-                  onPress={handleBack}
-                  style={[
-                    styles.secondaryButton,
-                    (isSubmitting || profileImageUploading) &&
-                      styles.secondaryButtonDisabled,
-                  ]}
-                  disabled={isSubmitting || profileImageUploading}
-                  accessibilityRole="button"
-                >
+                <Pressable onPress={handleBack} style={[styles.secondaryButton, (isSubmitting || profileImageUploading) && styles.secondaryButtonDisabled]} disabled={isSubmitting || profileImageUploading} accessibilityRole="button">
                   <Text style={styles.secondaryButtonText}>Back</Text>
                 </Pressable>
               ) : null}
-              <Pressable
-                onPress={handleContinue}
-                style={[
-                  styles.primaryButton,
-                  (isSubmitting || profileImageUploading) &&
-                    styles.primaryButtonDisabled,
-                ]}
-                disabled={isSubmitting || profileImageUploading}
-                accessibilityRole="button"
-              >
-                {isSubmitting ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <Text style={styles.primaryButtonText}>
-                    {isFinalStep ? "Finish setup" : "Save & Continue"}
-                  </Text>
-                )}
+              <Pressable onPress={handleContinue} style={[styles.primaryButton, (isSubmitting || profileImageUploading) && styles.primaryButtonDisabled]} disabled={isSubmitting || profileImageUploading} accessibilityRole="button">
+                {isSubmitting ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.primaryButtonText}>{isFinalStep ? "Finish setup" : "Save & Continue"}</Text>}
               </Pressable>
             </View>
           </View>
@@ -831,6 +667,9 @@ export default function ProfileSetupScreen() {
             onSelectCountryCode={handleSelectCountryCode}
             renderGenderDropdown={renderGenderDropdown}
             renderCountryCodeDropdown={renderCountryCodeDropdown}
+            onToggleLocationDropdown={handleToggleLocationDropdown}
+            onSelectLocation={handleSelectLocation}
+            renderLocationDropdown={renderLocationDropdown}
           />
         );
         break;
@@ -854,52 +693,21 @@ export default function ProfileSetupScreen() {
         );
         break;
       case "stores":
-        stepContent = (
-          <FavoriteStoresStep
-            variant="mobile"
-            favoriteStores={favoriteStores}
-            customStoreInput={customStoreInput}
-            onToggleFavoriteStore={toggleFavoriteStoreSelection}
-            onCustomStoreInputChange={setCustomStoreInput}
-            onAddCustomStore={handleAddCustomStore}
-          />
-        );
+        stepContent = <FavoriteStoresStep variant="mobile" favoriteStores={favoriteStores} customStoreInput={customStoreInput} onToggleFavoriteStore={toggleFavoriteStoreSelection} onCustomStoreInputChange={setCustomStoreInput} onAddCustomStore={handleAddCustomStore} />;
         break;
       case "experience":
-        stepContent = (
-          <ExperienceSettingsStep
-            variant="mobile"
-            reminderOptIn={reminderOptIn}
-            aiIdeasOptIn={aiIdeasOptIn}
-            communityUpdatesOptIn={communityUpdatesOptIn}
-            shareUpdates={shareUpdates}
-            onReminderOptInChange={setReminderOptIn}
-            onAiIdeasOptInChange={setAiIdeasOptIn}
-            onCommunityUpdatesOptInChange={setCommunityUpdatesOptIn}
-            onShareUpdatesChange={setShareUpdates}
-          />
-        );
+        stepContent = <ExperienceSettingsStep variant="mobile" reminderOptIn={reminderOptIn} aiIdeasOptIn={aiIdeasOptIn} communityUpdatesOptIn={communityUpdatesOptIn} shareUpdates={shareUpdates} onReminderOptInChange={setReminderOptIn} onAiIdeasOptInChange={setAiIdeasOptIn} onCommunityUpdatesOptInChange={setCommunityUpdatesOptIn} onShareUpdatesChange={setShareUpdates} />;
         break;
       default:
         stepContent = null;
     }
 
     return (
-      <ScrollView
-        contentContainerStyle={styles.mobileScroll}
-        showsVerticalScrollIndicator={false}
-        bounces={false}
-      >
-        <SafeAreaView style={styles.mobileContainer}>
+      <ScrollView contentContainerStyle={styles.mobileScroll} showsVerticalScrollIndicator={false} bounces={false}>
+        <View style={styles.mobileContainer}>
           <View style={styles.mobileHeader}>
-            <Pressable
-              onPress={handleBack}
-              style={styles.mobileBackButton}
-              accessibilityRole="button"
-            >
-              <Text style={styles.mobileBackText}>
-                {currentStepIndex === 0 ? "Close" : "Back"}
-              </Text>
+            <Pressable onPress={handleBack} style={styles.mobileBackButton} accessibilityRole="button">
+              <Text style={styles.mobileBackText}>{currentStepIndex === 0 ? "Close" : "Back"}</Text>
             </Pressable>
             <Pressable onPress={goToApp} accessibilityRole="button">
               <Text style={styles.skipButtonText}>Skip for now</Text>
@@ -921,65 +729,24 @@ export default function ProfileSetupScreen() {
 
           <View style={styles.mobileActions}>
             {currentStepIndex > 0 ? (
-              <Pressable
-                onPress={handleBack}
-                style={[
-                  styles.secondaryButton,
-                  styles.secondaryButtonMobile,
-                  (isSubmitting || profileImageUploading) &&
-                    styles.secondaryButtonDisabled,
-                ]}
-                disabled={isSubmitting || profileImageUploading}
-                accessibilityRole="button"
-              >
+              <Pressable onPress={handleBack} style={[styles.secondaryButton, styles.secondaryButtonMobile, (isSubmitting || profileImageUploading) && styles.secondaryButtonDisabled]} disabled={isSubmitting || profileImageUploading} accessibilityRole="button">
                 <Text style={styles.secondaryButtonText}>Back</Text>
               </Pressable>
             ) : null}
-            <Pressable
-              onPress={handleContinue}
-              style={[
-                styles.primaryButton,
-                (isSubmitting || profileImageUploading) &&
-                  styles.primaryButtonDisabled,
-              ]}
-              disabled={isSubmitting || profileImageUploading}
-              accessibilityRole="button"
-            >
-              {isSubmitting ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={styles.primaryButtonText}>
-                  {isFinalStep ? "Finish setup" : "Save & Continue"}
-                </Text>
-              )}
+            <Pressable onPress={handleContinue} style={[styles.primaryButton, (isSubmitting || profileImageUploading) && styles.primaryButtonDisabled]} disabled={isSubmitting || profileImageUploading} accessibilityRole="button">
+              {isSubmitting ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.primaryButtonText}>{isFinalStep ? "Finish setup" : "Save & Continue"}</Text>}
             </Pressable>
           </View>
-        </SafeAreaView>
+        </View>
       </ScrollView>
     );
   };
 
   return (
-    <SafeAreaView
-      style={[
-        styles.safeArea,
-        { backgroundColor: isDesktop ? "#F6F2FF" : "#ffff" },
-      ]}
-    >
-      <StatusBar
-        barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
-      />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: isDesktop ? "#F6F2FF" : "#ffff" }]}>
+      <StatusBar barStyle={colorScheme === "dark" ? "light-content" : "dark-content"} />
       {isDesktop ? renderDesktop() : renderMobile()}
-      {Platform.OS !== "web" && (
-        <DateTimePickerModal
-          isVisible={isDatePickerVisible}
-          mode="date"
-          onConfirm={handleDateConfirm}
-          onCancel={handleCloseDatePicker}
-          display={Platform.OS === "ios" ? "inline" : "default"}
-          maximumDate={new Date()}
-        />
-      )}
+      {Platform.OS !== "web" && <DateTimePickerModal isVisible={isDatePickerVisible} mode="date" onConfirm={handleDateConfirm} onCancel={handleCloseDatePicker} display={Platform.OS === "ios" ? "inline" : "default"} maximumDate={new Date()} />}
     </SafeAreaView>
   );
 }
