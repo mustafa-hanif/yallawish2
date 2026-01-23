@@ -634,7 +634,8 @@ function DesktopLayout({ headerTitle, formData, characterCount, updateFormData, 
             <View style={[styles.desktopFieldGrid, styles.desktopFieldGridGap]}>
               <View style={styles.desktopFieldColumn}>
                 <Text style={styles.desktopFieldLabel}>Shipping Address (optional)</Text>
-                <TextInput style={styles.desktopTextInput} value={formData.shippingAddress} onChangeText={(text) => updateFormData("shippingAddress", text)} placeholder="Apt/house #, building/community area, city..." placeholderTextColor="#8E8EA9" />
+                <TextInput style={[styles.desktopTextInput, styles.desktopNoteInput]} value={formData.shippingAddress} onChangeText={(text) => updateFormData("shippingAddress", text)} placeholder="Apt/house #, building/community area, city..." placeholderTextColor="#8E8EA9" multiline />
+                <Text style={styles.desktopCharacterCount}>{characterCount}/400</Text>
               </View>
               <View style={styles.desktopFieldColumn}>
                 <Text style={styles.desktopFieldLabel}>Add Note (optional)</Text>
