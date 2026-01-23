@@ -1544,13 +1544,26 @@ function DesktopLayout({ title, subtitle, ribbonSubtitle, coverUri, formattedEve
               Home / My List / <Text style={desktopStyles.breadcrumbCurrent}>{title}</Text>
             </Text>
             <View style={desktopStyles.topActions}>
+              {isShowDropDownMenu && (
+                <Pressable
+                  style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 99,
+                  }}
+                  onPress={() => setIsShowDropDownMenu(false)}
+                />
+              )}
               <View style={{ position: "relative", zIndex: 100 }}>
                 <Pressable style={[desktopStyles.manageButton, { shadowOffset: { width: 0, height: 0 }, gap: 10, borderWidth: 2, borderColor: "#330065", borderRadius: 8, paddingHorizontal: 24, paddingVertical: 8, height: 48 }]} onPress={() => setIsShowDropDownMenu((prev) => !prev)}>
                   <Text style={desktopStyles.manageButtonText}>Manage List</Text>
                   <Ionicons name="caret-down" size={18} color="#3B0076" />
                 </Pressable>
                 {isShowDropDownMenu && (
-                  <View style={{ padding: 16, shadowColor: "#000", shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.2, shadowRadius: 12, borderRadius: 8, top: "100%", left: 0, marginTop: 8, zIndex: 9999, position: "absolute", width: 287, minHeight: 200, backgroundColor: "#ffff" }}>
+                  <Pressable style={{ padding: 16, shadowColor: "#000", shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.2, shadowRadius: 12, borderRadius: 8, top: "100%", left: 0, marginTop: 8, zIndex: 9999, position: "absolute", width: 287, minHeight: 200, backgroundColor: "#ffff" }} onPress={(e) => e.stopPropagation()}>
                     <Text style={{ fontSize: 16, fontFamily: "Nunito_700Bold" }}>Manage List</Text>
                     <View style={{ rowGap: 12, marginTop: 8 }}>
                       {dropdownOptions.map((option) => (
@@ -1578,7 +1591,7 @@ function DesktopLayout({ title, subtitle, ribbonSubtitle, coverUri, formattedEve
                         </Pressable>
                       ))}
                     </View>
-                  </View>
+                  </Pressable>
                 )}
               </View>
               <Pressable style={[desktopStyles.addButton, { shadowOffset: { width: 0, height: 0 }, gap: 10, backgroundColor: "#330065", borderRadius: 8, paddingHorizontal: 24, paddingVertical: 8, height: 48 }]} onPress={onAddGift}>
