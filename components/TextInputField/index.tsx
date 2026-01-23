@@ -27,9 +27,12 @@ type TextInputFieldProps = {
   editable?: boolean;
   maxLength?: number;
   hint?: string;
+  showCounter?: boolean;
+  descriptionLimit?: number;
+  characterCount?: number;
 };
 
-export function TextInputField({ icon, label, autoCorrect, autoCapitalize, variant = "default", keyboardType, placeholder, value, onChangeText, placeholderTextColor = "#D1D1D6", error, inputLabelContainerStyle, containerStyle, secureTextEntry = false, maxLength, hint, editable = true }: TextInputFieldProps) {
+export function TextInputField({ icon, label, autoCorrect, autoCapitalize, variant = "default", keyboardType, placeholder, value, onChangeText, placeholderTextColor = "#D1D1D6", error, inputLabelContainerStyle, containerStyle, secureTextEntry = false, maxLength, hint, editable = true, showCounter = false, descriptionLimit, characterCount = 0 }: TextInputFieldProps) {
   const { width: SCREEN_WIDTH } = Dimensions.get("window");
   const isDesktop = Platform.OS === "web" && SCREEN_WIDTH >= 768;
   const [isSecureEntry, setIsSecureEntry] = React.useState(secureTextEntry);
@@ -55,6 +58,16 @@ export function TextInputField({ icon, label, autoCorrect, autoCapitalize, varia
           <Text style={styles.hintText}>{hint}</Text>
         </View>
       )}
+      {showCounter ? (
+        <>
+          <View style={styles.characterCount}>
+            <Text style={styles.characterCountText}>
+              {characterCount}
+              {descriptionLimit ? `/${descriptionLimit}` : ""}
+            </Text>
+          </View>
+        </>
+      ) : null}
       {error ? <>{Array.isArray(error) ? <>{error?.map((errorItem) => <Text style={styles.errorText}>{errorItem || ""}</Text>)}</> : <Text style={styles.errorText}>{error || ""}</Text>}</> : <></>}
     </View>
   );

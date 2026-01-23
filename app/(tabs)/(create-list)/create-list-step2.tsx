@@ -590,7 +590,8 @@ function DesktopLayout({ headerTitle, formData, characterCount, updateFormData, 
             <View style={styles.desktopFieldGrid}>
               <View style={styles.desktopFieldColumn}>
                 <Text style={styles.desktopFieldLabel}>Event Title *</Text>
-                <TextInput style={styles.desktopTextInput} value={formData.eventTitle} onChangeText={(text) => updateFormData("eventTitle", text)} placeholder="Event Title" placeholderTextColor="#8E8EA9" maxLength={32} />
+                <TextInput style={styles.desktopTextInput} value={formData.eventTitle} onChangeText={(text) => updateFormData("eventTitle", text)} placeholder="Event title (32 chars max)" placeholderTextColor="#8E8EA9" maxLength={32} />
+                <Text style={styles.desktopCharacterCount}>{formData.eventTitle.length}/32</Text>
               </View>
               <View style={styles.desktopFieldColumn}>
                 <Text style={styles.desktopFieldLabel}>Event Date (optional)</Text>
@@ -722,7 +723,7 @@ function MobileLayout({ headerTitle, formData, characterCount, updateFormData, h
             <Text style={styles.sectionTitle}>Giftlist details</Text>
 
             <View style={styles.formContainer}>
-              <TextInputField label="Event title *" value={formData.eventTitle} onChangeText={(text) => updateFormData("eventTitle", text)} maxLength={32} />
+              <TextInputField placeholder="Event title (32 chars max)" label="Event title *" value={formData.eventTitle} onChangeText={(text) => updateFormData("eventTitle", text)} maxLength={32} showCounter={true} descriptionLimit={32} characterCount={formData.eventTitle.length} />
               <TextInputAreaField label="Add note (optional)" placeholderTextColor="#D1D1D6" placeholder="Share a sweet message, special instructions, or anything you'd like your guests to know" value={formData.eventNote} onChangeText={handleNoteChange} />
 
               <DateInputField label="Event date (optional)" value={formData.eventDate} onChange={(date) => updateFormData("eventDate", date)} placeholder="Select a date" />

@@ -45,4 +45,13 @@ export const styles = StyleSheet.create({
     fontFamily: "Nunito_300Light",
     color: "#8E8E93",
   },
+  characterCount: {
+    marginTop: 4,
+    alignItems: "flex-end",
+  },
+  characterCountText: {
+    fontSize: 12,
+    fontFamily: "Nunito_400Regular",
+    color: "#8E8E93",
+  },
 });
