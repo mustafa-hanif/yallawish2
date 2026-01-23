@@ -269,7 +269,9 @@ export function ProfileStep({
                     } as React.CSSProperties
                   }
                 >
-                  <option value="">Select</option>
+                  <option disabled value="">
+                    Select
+                  </option>
                   {COUNTRY_OPTIONS.map((option) => (
                     <option key={option} value={option}>
                       {option}
@@ -425,7 +427,9 @@ export function ProfileStep({
                   } as React.CSSProperties
                 }
               >
-                <option value="">Select</option>
+                <option disabled value="">
+                  Select
+                </option>
                 {COUNTRY_OPTIONS.map((option) => (
                   <option key={option} value={option}>
                     {option}
