@@ -569,7 +569,7 @@ function DesktopLayout({ headerTitle, formData, characterCount, updateFormData, 
             <Text style={styles.desktopSectionHeading}>Giftlist Details</Text>
             <View style={styles.desktopCoverSection}>
               <Text style={styles.desktopCoverLabel}>Cover Photo (optional)</Text>
-              <Pressable style={[styles.uploadArea, styles.desktopUploadArea, formData.coverPhotoUri && styles.uploadAreaPreview, isUploadingCover && styles.uploadAreaDisabled]} onPress={handlePickImage} disabled={isUploadingCover}>
+              <Pressable style={[styles.uploadArea, styles.desktopUploadArea, formData.coverPhotoUri && styles.uploadAreaPreview, isUploadingCover && styles.uploadAreaDisabled, { height: 260, borderRadius: 8, overflow: "hidden" }]} onPress={handlePickImage} disabled={isUploadingCover}>
                 {isUploadingCover ? (
                   <View style={styles.uploadingPlaceholder}>
                     <ActivityIndicator color="#4B0082" />
