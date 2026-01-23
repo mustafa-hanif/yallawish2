@@ -157,7 +157,7 @@ export default function AddGift() {
           break;
       }
     },
-    [setFilterClaimed, setFilterUnclaimed],
+    [setFilterClaimed, setFilterUnclaimed]
   );
 
   const totals = useMemo(() => {
@@ -184,7 +184,7 @@ export default function AddGift() {
         claimedCount: 0,
         unclaimedCount: 0,
         claimedUnits: 0,
-      },
+      }
     );
   }, [giftItems]);
 
@@ -215,7 +215,7 @@ export default function AddGift() {
       //   },
       // });
     },
-    [listIdString],
+    [listIdString]
   );
 
   const handleBack = () => {
@@ -350,7 +350,7 @@ export default function AddGift() {
         setShowSheet(false);
         resetForm();
       };
-    }, []),
+    }, [])
   );
 
   const createItem = useMutation(api.products.createListItem as any);
@@ -1649,14 +1649,14 @@ function DesktopLayout({ title, subtitle, ribbonSubtitle, coverUri, formattedEve
             <View style={desktopStyles.filterCluster}>
               <View style={desktopStyles.filterGroup}>
                 <Text style={desktopStyles.filterLabel}>Availability:</Text>
-                <Pressable style={desktopStyles.filterButton} onPress={() => setShowAvailabilityMenu(true)}>
+                <Pressable style={[desktopStyles.filterButton, { width: 150, justifyContent: "space-between" }]} onPress={() => setShowAvailabilityMenu(true)}>
                   <Text style={desktopStyles.filterButtonText}>{availabilityLabel}</Text>
                   <Ionicons name="chevron-down" size={14} color="#3B0076" />
                 </Pressable>
               </View>
               <View style={desktopStyles.filterGroup}>
                 <Text style={desktopStyles.filterLabel}>Sort</Text>
-                <Pressable style={desktopStyles.filterButton} onPress={() => setShowSortMenu(true)}>
+                <Pressable style={[desktopStyles.filterButton, { width: 200, justifyContent: "space-between" }]} onPress={() => setShowSortMenu(true)}>
                   <Text style={desktopStyles.filterButtonText}>{sortLabel}</Text>
                   <Ionicons name="chevron-down" size={14} color="#3B0076" />
                 </Pressable>
