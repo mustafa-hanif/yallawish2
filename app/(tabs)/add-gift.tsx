@@ -8,6 +8,7 @@ import BottomSheet from "@/components/ui/BottomSheet";
 import { api } from "@/convex/_generated/api";
 import { desktopStyles, styles } from "@/styles/addGiftStyles";
 import { formatLastUpdated, getDaysToGoText } from "@/utils";
+import { detectCurrencyFromUrl, getDefaultCurrency } from "@/utils/currencyUtils";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
@@ -157,7 +158,7 @@ export default function AddGift() {
           break;
       }
     },
-    [setFilterClaimed, setFilterUnclaimed]
+    [setFilterClaimed, setFilterUnclaimed],
   );
 
   const totals = useMemo(() => {
@@ -184,7 +185,7 @@ export default function AddGift() {
         claimedCount: 0,
         unclaimedCount: 0,
         claimedUnits: 0,
-      }
+      },
     );
   }, [giftItems]);
 
@@ -215,7 +216,7 @@ export default function AddGift() {
       //   },
       // });
     },
-    [listIdString]
+    [listIdString],
   );
 
   const handleBack = () => {
@@ -245,6 +246,8 @@ export default function AddGift() {
   const [scrapeError, setScrapeError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState("");
+  const [currency, setCurrency] = useState<string>(getDefaultCurrency());
+  const [detectedCurrency, setDetectedCurrency] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
@@ -323,6 +326,8 @@ export default function AddGift() {
     setSearch("");
     setQuantity(1);
     setPrice("");
+    setCurrency(getDefaultCurrency());
+    setDetectedCurrency(null);
     setName("");
     setDescription("");
     setImageUrl(null);
@@ -350,7 +355,7 @@ export default function AddGift() {
         setShowSheet(false);
         resetForm();
       };
-    }, [])
+    }, []),
   );
 
   const createItem = useMutation(api.products.createListItem as any);
@@ -365,7 +370,7 @@ export default function AddGift() {
         image_url: imageUrl || null,
         quantity,
         price: price || null,
-        currency: "AED",
+        currency: currency || getDefaultCurrency(),
         buy_url: link || null,
       });
     } catch (e) {
@@ -818,6 +823,11 @@ export default function AddGift() {
         console.log("Scrape result:", JSON.stringify(meta, null, 2));
         if (cancelled) return;
         if (meta.ok) {
+          // Update currency from detected source or URL
+          const detectedCurr = meta.currency || detectCurrencyFromUrl(link) || getDefaultCurrency();
+          setDetectedCurrency(detectedCurr);
+          setCurrency(detectedCurr);
+
           if (!name && meta.title) {
             // Clean title by removing common e-commerce site prefixes
             let cleanTitle = meta.title
@@ -839,10 +849,18 @@ export default function AddGift() {
         } else {
           console.log("Scrape failed:", meta.error);
           setScrapeError(meta.error || "Could not extract data");
+          // Still try to detect currency from URL on error
+          const detectedCurr = detectCurrencyFromUrl(link) || getDefaultCurrency();
+          setDetectedCurrency(detectedCurr);
+          setCurrency(detectedCurr);
         }
       } catch (e: any) {
         console.error("Scrape exception:", e);
         if (!cancelled) setScrapeError(e.message);
+        // Still try to detect currency from URL on exception
+        const detectedCurr = detectCurrencyFromUrl(link) || getDefaultCurrency();
+        setDetectedCurrency(detectedCurr);
+        setCurrency(detectedCurr);
       } finally {
         if (!cancelled) setScraping(false);
       }
@@ -1094,7 +1112,33 @@ export default function AddGift() {
                     <View style={desktopStyles.modalPriceQtyColumn}>
                       <View style={desktopStyles.modalFieldGroup}>
                         <Text style={desktopStyles.modalFieldLabel}>Price of gift</Text>
-                        <TextInput value={price} onChangeText={setPrice} style={desktopStyles.modalPriceInput} keyboardType="decimal-pad" placeholder="AED 0.00" placeholderTextColor="#8E8EA9" />
+                        <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+                          <Pressable
+                            style={{
+                              paddingHorizontal: 12,
+                              paddingVertical: 10,
+                              backgroundColor: "#F2F2F7",
+                              borderRadius: 8,
+                              minWidth: 80,
+                              justifyContent: "center",
+                              alignItems: "center",
+                              borderWidth: 1,
+                              borderColor: "#E0E0E5",
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 14,
+                                fontWeight: "600",
+                                color: "#330065",
+                              }}
+                            >
+                              {currency}
+                            </Text>
+                          </Pressable>
+                          <TextInput value={price} onChangeText={setPrice} style={[desktopStyles.modalPriceInput, { flex: 1 }]} keyboardType="decimal-pad" placeholder="0.00" placeholderTextColor="#8E8EA9" />
+                        </View>
+                        {detectedCurrency && detectedCurrency !== getDefaultCurrency() && <Text style={{ fontSize: 12, color: "#8E8EA9", marginTop: 4 }}>Detected: {detectedCurrency}</Text>}
                       </View>
                       <View style={desktopStyles.modalFieldGroup}>
                         <Text style={desktopStyles.modalFieldLabel}>Quantity</Text>
@@ -1201,7 +1245,53 @@ export default function AddGift() {
                     </Pressable>
                   </View>
                 </View>
-                <TextInputField label="Price of gift" value={price} onChangeText={setPrice} keyboardType="decimal-pad" inputLabelContainerStyle={{ backgroundColor: "#F2F2F7" }} />
+                <View style={styles.fieldGroup}>
+                  <Text style={styles.fieldLabel}>Price of gift</Text>
+                  <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+                    <Pressable
+                      style={{
+                        paddingHorizontal: 10,
+                        paddingVertical: 8,
+                        backgroundColor: "#F2F2F7",
+                        borderRadius: 6,
+                        minWidth: 70,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        borderWidth: 1,
+                        borderColor: "#E0E0E5",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          fontWeight: "600",
+                          color: "#330065",
+                        }}
+                      >
+                        {currency}
+                      </Text>
+                    </Pressable>
+                    <TextInput
+                      value={price}
+                      onChangeText={setPrice}
+                      keyboardType="decimal-pad"
+                      placeholder="0.00"
+                      placeholderTextColor="#8E8EA9"
+                      style={{
+                        flex: 1,
+                        paddingHorizontal: 12,
+                        paddingVertical: 10,
+                        backgroundColor: "#F2F2F7",
+                        borderRadius: 6,
+                        borderWidth: 1,
+                        borderColor: "#E0E0E5",
+                        fontSize: 14,
+                        fontFamily: "Nunito_400Regular",
+                      }}
+                    />
+                  </View>
+                  {detectedCurrency && detectedCurrency !== getDefaultCurrency() && <Text style={{ fontSize: 11, color: "#8E8EA9", marginTop: 4 }}>Detected: {detectedCurrency}</Text>}
+                </View>
 
                 <TextInputField label="Name of gift" value={name} onChangeText={setName} inputLabelContainerStyle={{ backgroundColor: "#F2F2F7" }} icon={<Image source={require("@/assets/images/Edit.png")} />} />
 
@@ -1794,14 +1884,7 @@ function DesktopGiftItemRow({ item, onPress, onDelete, index }: DesktopGiftItemR
   const badgeStyle = isSoldOut ? desktopStyles.statusBadgeSuccess : hasClaims ? desktopStyles.statusBadgeWarning : desktopStyles.statusBadgeNeutral;
   const badgeTextStyle = isSoldOut ? desktopStyles.statusBadgeSuccessText : hasClaims ? desktopStyles.statusBadgeWarningText : desktopStyles.statusBadgeNeutralText;
   const quantityLabel = String(quantity).padStart(2, "0");
-  let currencyLabel = "AED";
-
-  if (typeof item.price === "string") {
-    const match = item.price.trim().match(/^([A-Za-z]{3})/);
-    if (match && match[1]) {
-      currencyLabel = match[1].toUpperCase();
-    }
-  }
+  let currencyLabel = item.currency || "AED";
 
   const formatPriceNumber = (value: number) => {
     try {

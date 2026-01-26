@@ -11,6 +11,7 @@ export type GiftItem = {
   quantity: number;
   claimed: number;
   price?: string | number | null;
+  currency?: string | null;
   buy_url?: string | null;
   description?: string | null;
   title?: string | null;
@@ -111,7 +112,9 @@ export const GiftItemCard: React.FC<Props> = ({ title, item, onPress, onDelete, 
                 }}
               >
                 {/* <Image resizeMode="contain" style={{ width: 16, height: 16 }} source={require("@/assets/images/dirham.png")} /> */}
-                <Text style={styles.itemPrice}>AED {item.price}</Text>
+                <Text style={styles.itemPrice}>
+                  {item.currency || "AED"} {item.price}
+                </Text>
               </View>
             ) : (
               <View />

@@ -2,6 +2,7 @@ import { TextInputAreaField } from "@/components/TextInputAreaField";
 import { TextInputField } from "@/components/TextInputField";
 import { api } from "@/convex/_generated/api";
 import { desktopStyles, styles } from "@/styles/addGiftStyles";
+import { detectCurrencyFromUrl, getDefaultCurrency } from "@/utils/currencyUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { useAction, useMutation } from "convex/react";
 import * as FileSystem from "expo-file-system/legacy";
@@ -45,6 +46,8 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
   const [scrapeError, setScrapeError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState("");
+  const [currency, setCurrency] = useState<string>(getDefaultCurrency());
+  const [detectedCurrency, setDetectedCurrency] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
@@ -111,13 +114,22 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
               .trim();
             setName(cleanTitle);
           }
+          const detected = meta.currency || detectCurrencyFromUrl(link) || getDefaultCurrency();
+          setDetectedCurrency(detected);
+          setCurrency(detected);
           if (!price && meta.price) setPrice(meta.price);
           if (meta.image) setImageUrl(meta.image);
         } else {
           setScrapeError(meta.error || "Could not extract data");
+          const fallbackCurrency = detectCurrencyFromUrl(link) || getDefaultCurrency();
+          setDetectedCurrency(fallbackCurrency);
+          setCurrency(fallbackCurrency);
         }
       } catch (e: any) {
         if (!cancelled) setScrapeError(e.message);
+        const fallbackCurrency = detectCurrencyFromUrl(link) || getDefaultCurrency();
+        setDetectedCurrency(fallbackCurrency);
+        setCurrency(fallbackCurrency);
       } finally {
         if (!cancelled) setScraping(false);
       }
@@ -137,6 +149,8 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
     setSearch("");
     setQuantity(1);
     setPrice("");
+    setCurrency(getDefaultCurrency());
+    setDetectedCurrency(null);
     setName("");
     setDescription("");
     setImageUrl(null);
@@ -159,7 +173,7 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
         image_url: imageUrl || null,
         quantity,
         price: price || null,
-        currency: "AED",
+        currency: currency || getDefaultCurrency(),
         buy_url: link || null,
       });
       onSaved?.(String(newId));
@@ -450,7 +464,33 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
                   <View style={desktopStyles.modalPriceQtyColumn}>
                     <View style={desktopStyles.modalFieldGroup}>
                       <Text style={desktopStyles.modalFieldLabel}>Price of gift</Text>
-                      <TextInput value={price} onChangeText={setPrice} style={desktopStyles.modalPriceInput} keyboardType="decimal-pad" placeholder="AED 0.00" placeholderTextColor="#8E8EA9" />
+                      <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+                        <Pressable
+                          style={{
+                            paddingHorizontal: 12,
+                            paddingVertical: 10,
+                            backgroundColor: "#F2F2F7",
+                            borderRadius: 8,
+                            minWidth: 80,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            borderWidth: 1,
+                            borderColor: "#E0E0E5",
+                          }}
+                        >
+                          <Text
+                            style={{
+                              fontSize: 14,
+                              fontWeight: "600",
+                              color: "#330065",
+                            }}
+                          >
+                            {currency}
+                          </Text>
+                        </Pressable>
+                        <TextInput value={price} onChangeText={setPrice} style={[desktopStyles.modalPriceInput, { flex: 1 }]} keyboardType="decimal-pad" placeholder="0.00" placeholderTextColor="#8E8EA9" />
+                      </View>
+                      {detectedCurrency && detectedCurrency !== getDefaultCurrency() && <Text style={{ fontSize: 12, color: "#8E8EA9", marginTop: 4 }}>Detected: {detectedCurrency}</Text>}
                     </View>
                     <View style={desktopStyles.modalFieldGroup}>
                       <Text style={desktopStyles.modalFieldLabel}>Quantity</Text>
@@ -535,7 +575,52 @@ export default function AddGiftModal({ visible, onClose, listId, onSaved }: AddG
                     </Pressable>
                   </View>
                 </View>
-                <TextInputField label="Price of gift" value={price} onChangeText={setPrice} keyboardType="decimal-pad" inputLabelContainerStyle={{ backgroundColor: "#F2F2F7" }} />
+                <View style={styles.fieldGroup}>
+                  <Text style={styles.fieldLabel}>Price of gift</Text>
+                  <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+                    <Pressable
+                      style={{
+                        paddingHorizontal: 10,
+                        paddingVertical: 8,
+                        backgroundColor: "#F2F2F7",
+                        borderRadius: 6,
+                        minWidth: 70,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        borderWidth: 1,
+                        borderColor: "#E0E0E5",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          fontWeight: "600",
+                          color: "#330065",
+                        }}
+                      >
+                        {currency}
+                      </Text>
+                    </Pressable>
+                    <TextInput
+                      value={price}
+                      onChangeText={setPrice}
+                      keyboardType="decimal-pad"
+                      placeholder="0.00"
+                      placeholderTextColor="#8E8EA9"
+                      style={{
+                        flex: 1,
+                        paddingHorizontal: 12,
+                        paddingVertical: 10,
+                        backgroundColor: "#F2F2F7",
+                        borderRadius: 6,
+                        borderWidth: 1,
+                        borderColor: "#E0E0E5",
+                        fontSize: 14,
+                      }}
+                    />
+                  </View>
+                  {detectedCurrency && detectedCurrency !== getDefaultCurrency() && <Text style={{ fontSize: 11, color: "#8E8EA9", marginTop: 4 }}>Detected: {detectedCurrency}</Text>}
+                </View>
 
                 <TextInputField label="Name of gift" value={name} onChangeText={setName} inputLabelContainerStyle={{ backgroundColor: "#F2F2F7" }} icon={<Image source={require("@/assets/images/Edit.png")} />} />
 

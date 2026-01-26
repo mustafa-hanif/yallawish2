@@ -171,7 +171,7 @@ export default function GiftDetail() {
         listId: listId ? String(listId) : undefined,
         action: action ? String(action) : undefined,
       }),
-    [pathname, itemId, listId, action]
+    [pathname, itemId, listId, action],
   );
 
   const goToSignIn = useCallback(() => {
@@ -190,7 +190,7 @@ export default function GiftDetail() {
   const buyUrl = item && item.buy_url ? String(item.buy_url) : undefined;
   const host = useMemo(() => extractHost(buyUrl), [buyUrl]);
   const storeDisplayName = useMemo(() => storeLabelFromHost(host), [host]);
-  const priceLabel = useMemo(() => formatPrice(item?.price, "AED"), [item?.price]);
+  const priceLabel = useMemo(() => formatPrice(item?.price, item?.currency || "AED"), [item?.price, item?.currency]);
   const listTitle = list?.title ?? "Gift List";
   const ownerName = useMemo(() => ownerNameFromTitle(list?.title as string | null), [list?.title]);
 
@@ -272,7 +272,7 @@ export default function GiftDetail() {
       }
       setMarked(value);
     },
-    [isSignedIn, goToSignIn]
+    [isSignedIn, goToSignIn],
   );
 
   const onBack = useCallback(() => {
@@ -359,7 +359,7 @@ export default function GiftDetail() {
         },
       });
     },
-    [listId]
+    [listId],
   );
 
   const onSeeAll = useCallback(() => {
@@ -379,7 +379,7 @@ export default function GiftDetail() {
             image_url: item.image_url ?? null,
             quantity: 1,
             price: item.price ?? null,
-            currency: "AED",
+            currency: item.currency || "AED",
             buy_url: item.buy_url ?? null,
           } as any);
         }
@@ -389,7 +389,7 @@ export default function GiftDetail() {
         return false;
       }
     },
-    [item, createItem]
+    [item, createItem],
   );
 
   if (item === undefined) {
@@ -785,7 +785,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ item, price, buyUrl, marked
                       {entry.name}
                     </Text>
                     <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                      {entry.price != null && <Text style={mobileStyles.morePrice}>{formatPrice(entry.price, "") ?? ""}</Text>}
+                      {entry.price != null && <Text style={mobileStyles.morePrice}>{formatPrice(entry.price, entry.currency || "AED") ?? ""}</Text>}
                       <Text style={mobileStyles.moreMeta}>
                         {" "}
                         {Number(entry.claimed ?? 0)} of {Number(entry.quantity ?? 1)} claimed{" "}
@@ -1054,7 +1054,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({ item, price, listTitle, b
                           <Text numberOfLines={2} style={desktopStyles.moreName}>
                             {entry.name}
                           </Text>
-                          <Text style={desktopStyles.morePrice}> {entry.price != null ? formatPrice(entry.price, "AED") : "Price: N/A"} </Text>
+                          <Text style={desktopStyles.morePrice}> {entry.price != null ? formatPrice(entry.price, entry.currency || "AED") : "Price: N/A"} </Text>
                           <Text style={desktopStyles.moreMeta}>
                             {Number(entry.claimed ?? 0)} of {Number(entry.quantity ?? 1)} claimed
                           </Text>

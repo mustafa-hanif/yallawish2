@@ -1,17 +1,62 @@
 import { v } from "convex/values";
 import { action } from "./_generated/server";
 
+/**
+ * Detect currency from a product URL by domain
+ */
+function detectCurrencyFromUrl(urlStr: string): string | null {
+  const domainToCurrency: Record<string, string> = {
+    "amazon.ae": "AED",
+    "amazon.sa": "SAR",
+    "amazon.eg": "EGP",
+    "amazon.com": "USD",
+    "amazon.co.uk": "GBP",
+    "amazon.de": "EUR",
+    "amazon.fr": "EUR",
+    "amazon.it": "EUR",
+    "amazon.es": "EUR",
+    "namshi.com": "AED",
+    "noon.com": "AED",
+    "souq.com": "AED",
+    "ebay.ae": "AED",
+    "ebay.com": "USD",
+  };
+
+  try {
+    const urlObj = new URL(urlStr);
+    const hostname = urlObj.hostname.toLowerCase();
+
+    // Direct match
+    if (domainToCurrency[hostname]) {
+      return domainToCurrency[hostname];
+    }
+
+    // Check last 2 parts (domain + TLD)
+    const parts = hostname.split(".");
+    if (parts.length >= 2) {
+      const domainTld = parts.slice(-2).join(".");
+      if (domainToCurrency[domainTld]) {
+        return domainToCurrency[domainTld];
+      }
+    }
+  } catch (e) {
+    console.warn("Invalid URL for currency detection:", urlStr);
+  }
+
+  return null;
+}
+
 // Very light-weight HTML metadata extraction. Not bullet-proof but works for common ecommerce pages.
 export const productMetadata = action({
   args: { url: v.string() },
   handler: async (ctx, args) => {
     const { url } = args;
-    
+
     console.log("Scraping URL:", url);
-    
+
     // Check if it's an Amazon URL - use special handling
     const isAmazon = /amazon\.(com|co\.uk|de|fr|it|es|ca|com\.au|ae|sa)/i.test(url);
-    
+
     // Extract ASIN from Amazon URL for fallback image
     let asin: string | null = null;
     if (isAmazon) {
@@ -21,44 +66,43 @@ export const productMetadata = action({
         console.log("Extracted ASIN:", asin);
       }
     }
-    
+
     try {
       // Fetch the page with different headers
       const res = await fetch(url, {
         headers: {
           "User-Agent": "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)",
-          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
           "Accept-Language": "en-US,en;q=0.5",
         },
       });
-      
+
       console.log("Fetch response status:", res.status);
-      
+
       if (!res.ok) {
         throw new Error(`Fetch failed: ${res.status}`);
       }
-      
+
       const html = await res.text();
       console.log("HTML length:", html.length);
-      
+
       // Debug: Log first 500 chars to see what we're getting
       console.log("HTML preview:", html.substring(0, 500));
 
       let title: string | null = null;
       let price: string | null = null;
       let image: string | null = null;
+      let currency: string | null = null;
 
       // Try og:image first - works for most sites including Amazon when using Facebook UA
-      const ogImageMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i) ||
-                          html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+      const ogImageMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i) || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
       if (ogImageMatch && ogImageMatch[1]) {
         image = ogImageMatch[1];
         console.log("Found og:image:", image);
       }
 
       // Try og:title
-      const ogTitleMatch = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i) ||
-                          html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:title["']/i);
+      const ogTitleMatch = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i) || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:title["']/i);
       if (ogTitleMatch && ogTitleMatch[1]) {
         title = ogTitleMatch[1];
         console.log("Found og:title:", title);
@@ -78,16 +122,16 @@ export const productMetadata = action({
           // Try hiRes from colorImages JSON
           const hiResMatch = html.match(/"hiRes"\s*:\s*"(https:[^"]+)"/);
           if (hiResMatch && hiResMatch[1]) {
-            image = hiResMatch[1].replace(/\\u002F/g, '/').replace(/\\/g, '');
+            image = hiResMatch[1].replace(/\\u002F/g, "/").replace(/\\/g, "");
             console.log("Found hiRes:", image);
           }
         }
-        
+
         if (!image) {
-          // Try large from colorImages JSON  
+          // Try large from colorImages JSON
           const largeMatch = html.match(/"large"\s*:\s*"(https:[^"]+)"/);
           if (largeMatch && largeMatch[1]) {
-            image = largeMatch[1].replace(/\\u002F/g, '/').replace(/\\/g, '');
+            image = largeMatch[1].replace(/\\u002F/g, "/").replace(/\\/g, "");
             console.log("Found large:", image);
           }
         }
@@ -96,21 +140,17 @@ export const productMetadata = action({
           // Try any amazon image URL
           const anyImg = html.match(/"(https:\/\/m\.media-amazon\.com\/images\/I\/[^"]+)"/);
           if (anyImg && anyImg[1]) {
-            image = anyImg[1].replace(/\\u002F/g, '/').replace(/\\/g, '');
+            image = anyImg[1].replace(/\\u002F/g, "/").replace(/\\/g, "");
             console.log("Found any amazon img:", image);
           }
         }
 
         // Price extraction for Amazon
-        const pricePatterns = [
-          /"priceAmount"\s*:\s*"?([0-9.]+)"?/,
-          /<span[^>]*class=["'][^"']*a-price-whole["'][^>]*>([0-9,]+)/i,
-          /<span[^>]*class=["'][^"']*a-offscreen["'][^>]*>\$?([0-9.,]+)/i,
-        ];
+        const pricePatterns = [/"priceAmount"\s*:\s*"?([0-9.]+)"?/, /<span[^>]*class=["'][^"']*a-price-whole["'][^>]*>([0-9,]+)/i, /<span[^>]*class=["'][^"']*a-offscreen["'][^>]*>\$?([0-9.,]+)/i];
         for (const pattern of pricePatterns) {
           const match = html.match(pattern);
           if (match && match[1]) {
-            price = match[1].trim().replace(/,/g, '');
+            price = match[1].trim().replace(/,/g, "");
             break;
           }
         }
@@ -124,13 +164,15 @@ export const productMetadata = action({
 
       // Decode HTML entities
       if (image) {
-        image = image.replace(/&amp;/g, '&');
+        image = image.replace(/&amp;/g, "&");
       }
 
-      console.log("Final result:", { title: title?.substring(0, 50), price, image: image?.substring(0, 100) });
+      // Detect currency from URL
+      currency = detectCurrencyFromUrl(url) || "AED";
 
-      return { ok: true, title, price, image };
-      
+      console.log("Final result:", { title: title?.substring(0, 50), price, currency, image: image?.substring(0, 100) });
+
+      return { ok: true, title, price, currency, image };
     } catch (e: any) {
       console.error("scrape error:", e.message);
       return { ok: false, error: e.message };
