@@ -1,7 +1,7 @@
 import { getProfileInitials } from "@/utils";
 import { router } from "expo-router";
 import React from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { Animated, Image, Pressable, Text, View } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { styles } from "./style";
 
@@ -17,34 +17,57 @@ type FriendsItemProps = {
 export default function FriendsItem({ connection, profile, onRemove, onBlock }: FriendsItemProps) {
   const swipeableRef = React.useRef<any>(null);
 
-  const renderRightActions = () => (
-    <View style={{ width: SWIPE_WIDTH, flexDirection: "row", gap: 3, justifyContent: "center", alignItems: "center" }}>
-      <Pressable
-        style={[styles.rightAction]}
-        onPress={() => {
-          swipeableRef.current?.close();
-          onRemove(connection._id);
+  const renderRightActions = (progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>) => {
+    const opacity = progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, 1],
+    });
+
+    const translateX = dragX.interpolate({
+      inputRange: [-SWIPE_WIDTH, 0],
+      outputRange: [0, SWIPE_WIDTH],
+      extrapolate: "clamp",
+    });
+
+    return (
+      <Animated.View
+        style={{
+          width: SWIPE_WIDTH,
+          flexDirection: "row",
+          gap: 3,
+          justifyContent: "center",
+          alignItems: "center",
+          opacity,
+          transform: [{ translateX }],
         }}
       >
-        <View>
-          <Image source={require("@/assets/images/deleteList.png")} style={styles.rightActionIcon} />
-        </View>
-        <Text style={styles.rightActionText}>Delete</Text>
-      </Pressable>
-      <Pressable
-        style={[styles.rightAction, { backgroundColor: "#9A001D" }]}
-        onPress={() => {
-          swipeableRef.current?.close();
-          onBlock(profile?.user_id);
-        }}
-      >
-        <View>
-          <Image source={require("@/assets/images/block.png")} style={styles.rightActionIcon} />
-        </View>
-        <Text style={styles.rightActionText}>Block</Text>
-      </Pressable>
-    </View>
-  );
+        <Pressable
+          style={[styles.rightAction]}
+          onPress={() => {
+            swipeableRef.current?.close();
+            onRemove(connection._id);
+          }}
+        >
+          <View>
+            <Image source={require("@/assets/images/deleteList.png")} style={styles.rightActionIcon} />
+          </View>
+          <Text style={styles.rightActionText}>Delete</Text>
+        </Pressable>
+        <Pressable
+          style={[styles.rightAction, { backgroundColor: "#9A001D" }]}
+          onPress={() => {
+            swipeableRef.current?.close();
+            onBlock(profile?.user_id);
+          }}
+        >
+          <View>
+            <Image source={require("@/assets/images/block.png")} style={styles.rightActionIcon} />
+          </View>
+          <Text style={styles.rightActionText}>Block</Text>
+        </Pressable>
+      </Animated.View>
+    );
+  };
 
   const onPress = () => {
     router.push({
@@ -61,7 +84,7 @@ export default function FriendsItem({ connection, profile, onRemove, onBlock }: 
   const nameInitials = getProfileInitials(profile);
 
   return (
-    <Swipeable ref={swipeableRef} overshootRight={false} renderRightActions={renderRightActions}>
+    <Swipeable ref={swipeableRef} overshootRight={false} renderRightActions={renderRightActions} friction={1} overshootFriction={8} rightThreshold={40} useNativeAnimations={true}>
       <Pressable style={styles.container} onPress={onPress}>
         {imageUrl ? (
           <View>

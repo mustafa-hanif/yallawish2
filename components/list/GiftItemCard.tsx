@@ -1,7 +1,7 @@
 import { styles } from "@/styles/addGiftStyles";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { Animated, Image, Pressable, Text, View } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 
 export type GiftItem = {
@@ -56,24 +56,46 @@ export const GiftItemCard: React.FC<Props> = ({ title, item, onPress, onDelete, 
   };
 
   const isSoldOut = Number(item.claimed ?? 0) >= Number(item.quantity ?? 1);
-  const renderRightActions = () => (
-    <View style={{ width: SWIPE_WIDTH, justifyContent: "center", alignItems: "center" }}>
-      <Pressable
-        style={[styles.rightAction]}
-        onPress={() => {
-          swipeableRef.current?.close();
-          onDelete?.(String(item._id));
+
+  const renderRightActions = (progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>) => {
+    const opacity = progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, 1],
+    });
+
+    const translateX = dragX.interpolate({
+      inputRange: [-SWIPE_WIDTH, 0],
+      outputRange: [0, SWIPE_WIDTH],
+      extrapolate: "clamp",
+    });
+
+    return (
+      <Animated.View
+        style={{
+          width: SWIPE_WIDTH,
+          justifyContent: "center",
+          alignItems: "center",
+          opacity,
+          transform: [{ translateX }],
         }}
       >
-        <View>
-          <Image source={require("../../assets/images/deleteList.png")} style={styles.rightActionIcon} />
-        </View>
-        <Text style={styles.rightActionText}>Delete</Text>
-      </Pressable>
-    </View>
-  );
+        <Pressable
+          style={[styles.rightAction]}
+          onPress={() => {
+            swipeableRef.current?.close();
+            onDelete?.(String(item._id));
+          }}
+        >
+          <View>
+            <Image source={require("../../assets/images/deleteList.png")} style={styles.rightActionIcon} />
+          </View>
+          <Text style={styles.rightActionText}>Delete</Text>
+        </Pressable>
+      </Animated.View>
+    );
+  };
   return (
-    <Swipeable ref={swipeableRef} overshootRight={false} renderRightActions={renderRightActions} enabled={swipe}>
+    <Swipeable ref={swipeableRef} overshootRight={false} renderRightActions={renderRightActions} enabled={swipe} friction={1} overshootFriction={8} rightThreshold={40} useNativeAnimations={true}>
       <View style={styles.itemCard}>
         <View style={styles.itemImageWrap}>{item.image_url ? <Image source={{ uri: item.image_url }} style={styles.itemImage} /> : <View style={[styles.itemImage, { backgroundColor: "#EEE" }]} />}</View>
         <View style={styles.itemContent}>
