@@ -1,3 +1,4 @@
+import FriendsEmptyState from "@/components/friends/FriendsEmptyState";
 import FriendsItem from "@/components/friends/FriendsItem";
 import FriendsSectionHeader from "@/components/friends/FriendsSectionHeader";
 import RequestItem from "@/components/friends/RequestItem";
@@ -141,22 +142,29 @@ const Friends = () => {
     <View style={styles.container}>
       <Header title="Friends" handleBack={handleBack} />
       <Tabs currentTab={currentTab} setCurrentTab={setCurrentTab} tabs={tabs} />
-      <FriendsSectionHeader title={currentTab === "friends" ? "Friends" : currentTab === "requests" ? "Requests" : "Pending Invites"} currentTab={currentTab} count={currentTab === "friends" ? friends.length : currentTab === "requests" ? requests.length : pendingInvites.length} handlePressAdd={handlePressAddFriends} />
-      <FlatList
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContainer}
-        data={currentTab === "friends" ? friends : currentTab === "requests" ? requests : pendingInvites}
-        renderItem={({ item }) => {
-          if (currentTab === "friends") {
-            return <FriendsItem connection={item.connection} profile={item.profile} onRemove={handleRemoveFriend} onBlock={handleBlockUser} />;
-          } else if (currentTab === "requests") {
-            return <RequestItem connection={item.connection} profile={item.profile} onAccept={handleAcceptRequest} onReject={handleRejectRequest} type="received" />;
-          } else {
-            return <RequestItem connection={item.connection} profile={item.profile} onAccept={handleAcceptRequest} onReject={handleRejectRequest} type="sent" />;
-          }
-        }}
-        keyExtractor={(item, index) => item.connection?._id || index.toString()}
-      />
+      {(currentTab === "friends" && friends.length === 0) || (currentTab === "requests" && requests.length === 0) || (currentTab === "pending-invites" && pendingInvites.length === 0) ? (
+        <FriendsEmptyState currentTab={currentTab} handlePressAdd={handlePressAddFriends} />
+      ) : (
+        <>
+          <FriendsSectionHeader title={currentTab === "friends" ? "Friends" : currentTab === "requests" ? "Requests" : "pending-invites"} currentTab={currentTab} count={currentTab === "friends" ? friends.length : currentTab === "requests" ? requests.length : pendingInvites.length} handlePressAdd={handlePressAddFriends} />
+          <FlatList
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listContainer}
+            data={currentTab === "friends" ? friends : currentTab === "requests" ? requests : pendingInvites}
+            renderItem={({ item }) => {
+              if (currentTab === "friends") {
+                return <FriendsItem connection={item.connection} profile={item.profile} onRemove={handleRemoveFriend} onBlock={handleBlockUser} />;
+              } else if (currentTab === "requests") {
+                return <RequestItem connection={item.connection} profile={item.profile} onAccept={handleAcceptRequest} onReject={handleRejectRequest} type="received" />;
+              } else {
+                return <RequestItem connection={item.connection} profile={item.profile} onAccept={handleAcceptRequest} onReject={handleRejectRequest} type="sent" />;
+              }
+            }}
+            keyExtractor={(item, index) => item.connection?._id || index.toString()}
+          />
+        </>
+      )}
+
       <BottomSheet isVisible={isAddFriendsSheetVisible} onClose={() => setIsAddFriendsSheetVisible(false)}>
         <UserProfileBottomSheetContent userProfiles={userProfiles} onSendRequest={handleSendRequest} />
       </BottomSheet>
