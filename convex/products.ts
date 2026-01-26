@@ -429,6 +429,29 @@ export const getListShares = query({
   },
 });
 
+export const getListsByGroup = query({
+  args: { group_id: v.id("groups") },
+  handler: async (ctx, args) => {
+    // Get all list shares for this group
+    const listShares = await ctx.db
+      .query("list_shares")
+      .withIndex("by_group", (q) => q.eq("group_id", args.group_id))
+      .collect();
+
+    // Get unique list IDs and fetch list details
+    const listIds = [...new Set(listShares.map((share) => share.list_id))];
+    const lists = await Promise.all(
+      listIds.map(async (listId) => {
+        const list = await ctx.db.get(listId);
+        return list;
+      }),
+    );
+
+    // Filter out null values and return
+    return lists.filter((list) => list !== null);
+  },
+});
+
 export const setListShares = mutation({
   args: {
     list_id: v.id("lists"),
@@ -1491,9 +1514,9 @@ export const getGroups = query({
 
         // Find next upcoming event
         const now = new Date();
-        const upcomingLists = validLists.filter((list) => list?.event_date && new Date(list.event_date) > now).sort((a, b) => new Date(a!.event_date!).getTime() - new Date(b!.event_date!).getTime());
+        const upcomingLists = validLists.filter((list) => list?.eventDate && new Date(list.eventDate) > now).sort((a, b) => new Date(a!.eventDate!).getTime() - new Date(b!.eventDate!).getTime());
 
-        const nextEventDate = upcomingLists.length > 0 ? upcomingLists[0]?.event_date : null;
+        const nextEventDate = upcomingLists.length > 0 ? upcomingLists[0]?.eventDate : null;
 
         return {
           ...group,
@@ -1510,6 +1533,56 @@ export const getGroups = query({
 
     // Filter out null values and return
     return groups.filter((g) => g !== null);
+  },
+});
+
+export const getGroupById = query({
+  args: { group_id: v.id("groups"), user_id: v.string() },
+  handler: async (ctx, args) => {
+    // Get the group
+    const group = await ctx.db.get(args.group_id);
+    if (!group) return null;
+
+    // Get member count
+    const allMembers = await ctx.db
+      .query("group_members")
+      .withIndex("by_group", (q) => q.eq("group_id", args.group_id))
+      .collect();
+
+    // Check if user is member
+    const membership = allMembers.find((m) => m.user_id === args.user_id);
+    if (!membership) return null; // User is not a member
+
+    // Get all lists shared with this group
+    const listShares = await ctx.db
+      .query("list_shares")
+      .withIndex("by_group", (q) => q.eq("group_id", args.group_id))
+      .collect();
+
+    // Get unique list IDs and fetch list details
+    const listIds = [...new Set(listShares.map((share) => share.list_id))];
+    const lists = await Promise.all(listIds.map((listId) => ctx.db.get(listId)));
+    const validLists = lists.filter((list) => list !== null);
+
+    // Count unique occasions
+    const occasions = [...new Set(validLists.map((list) => list?.occasion).filter(Boolean))];
+
+    // Find next upcoming event
+    const now = new Date();
+    const upcomingLists = validLists.filter((list) => list?.eventDate && new Date(list.eventDate) > now).sort((a, b) => new Date(a!.eventDate!).getTime() - new Date(b!.eventDate!).getTime());
+
+    const nextEventDate = upcomingLists.length > 0 ? upcomingLists[0]?.eventDate : null;
+
+    return {
+      ...group,
+      memberCount: allMembers.length,
+      giftListCount: validLists.length,
+      occasionCount: occasions.length,
+      nextEventDate: nextEventDate,
+      isOwner: group.owner_id === args.user_id,
+      isAdmin: membership.is_admin,
+      membership,
+    };
   },
 });
 

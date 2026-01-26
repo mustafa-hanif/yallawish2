@@ -3,16 +3,34 @@ import SectionHeader from "@/components/circle/SectionHeader";
 import ViewCircleGroupInfo from "@/components/circle/ViewCircleGroupInfo";
 import Header from "@/components/Header";
 import WishListCard from "@/components/wishlists/WishListCard";
+import { api } from "@/convex/_generated/api";
+import { useAuth } from "@clerk/clerk-expo";
 import { Entypo } from "@expo/vector-icons";
-
+import { useQuery } from "convex/react";
 import { router, useLocalSearchParams } from "expo-router";
-import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const ViewCircle = () => {
-  const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
+  const { returnTo, circleId } = useLocalSearchParams<{ returnTo?: string; circleId?: string }>();
+  const { userId } = useAuth();
 
   const encodedReturnTo = returnTo ? String(returnTo) : undefined;
   const decodedReturnTo = encodedReturnTo ? decodeURIComponent(encodedReturnTo) : undefined;
+
+  // Fetch circle details
+  const circle = useQuery(api.products.getGroupById, circleId && userId ? { group_id: circleId as any, user_id: userId } : "skip");
+
+  // Fetch circle members with profiles
+  const members = useQuery(api.products.getGroupMembers, circleId ? { group_id: circleId as any } : "skip");
+
+  // Fetch owner profile
+  const ownerProfile = useQuery(api.products.getUserProfileByUserId, circle?.owner_id ? { user_id: circle.owner_id } : "skip");
+
+  // Fetch lists shared with this circle
+  const listShares = useQuery(api.products.getListsByGroup, circleId ? { group_id: circleId as any } : "skip");
+
+  const isLoading = circle === undefined || members === undefined;
+
   const handleBack = () => {
     if (decodedReturnTo) {
       router.replace(decodedReturnTo as any);
@@ -21,75 +39,94 @@ const ViewCircle = () => {
     router.back();
   };
 
-  const membersArray = Array.from({ length: 10 });
-
   const handlePressAddNew = () => {
     router.push("/create-circle-step1");
   };
+
+  // Get member initials helper
+  const getMemberInitials = (member: any) => {
+    const firstName = member.profile?.firstName || "";
+    const lastName = member.profile?.lastName || "";
+    const displayName = member.profile?.displayName || "";
+
+    if (firstName && lastName) {
+      return `${firstName[0]}${lastName[0]}`.toUpperCase();
+    } else if (displayName) {
+      const parts = displayName.split(" ");
+      if (parts.length >= 2) {
+        return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+      }
+      return displayName.substring(0, 2).toUpperCase();
+    }
+    return "??";
+  };
+
   return (
     <View style={styles.container}>
       <Header title="View Circle" handleBack={handleBack} />
-      <ScrollView>
-        <CircleBanner />
-        <ViewCircleGroupInfo />
-        <SectionHeader title="Occasions" count={4} buttonTitle={"Add New"} buttonAction={handlePressAddNew} />
-        <View style={styles.section}>
-          <FlatList
-            columnWrapperStyle={styles.listColumnWrapperStyle}
-            contentContainerStyle={styles.listContentContainerStyle}
-            showsVerticalScrollIndicator={false}
-            numColumns={2}
-            key={2}
-            data={[
-              { _id: "1", title: "Wish List 1" },
-              { _id: "2", title: "Wish List 2" },
-              { _id: "3", title: "Wish List 3" },
-              { _id: "4", title: "Wish List 4" },
-            ]}
-            // onViewableItemsChanged={onViewableItemsChanged}
-            renderItem={({ item }) => (
-              <WishListCard
-                item={item}
-                //  viewableItems={viewableItems}
-                //  onSelectDelete={onSelectDelete}
-                //  handleArchiveList={handleArchiveList}
-                //  handleDuplicateList={handleDuplicateList}
-              />
-            )}
-            keyExtractor={(item) => String(item._id)}
-          />
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator color="#3B0076" size="large" />
+          <Text style={styles.loadingText}>Loading circle details...</Text>
         </View>
-        <SectionHeader title="Members" count={24} buttonTitle={"Invite"} />
-        <View>
-          <FlatList
-            data={membersArray}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              return (
-                <View style={[styles.memberItem, index === membersArray.length - 1 && { borderBottomWidth: 0 }]} key={index}>
-                  <View style={styles.infoContainer}>
-                    <View style={styles.memberProfileAndInitial}>
-                      <Text style={styles.nameInitials}>WS</Text>
+      ) : !circle ? (
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Circle not found</Text>
+        </View>
+      ) : (
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <CircleBanner coverPhotoUri={circle.coverPhotoUri} title={circle.name} />
+          <ViewCircleGroupInfo createdBy={circle.isOwner ? "You" : ownerProfile?.displayName || ownerProfile?.firstName || "Unknown"} memberCount={circle.memberCount || 0} />
+          <SectionHeader title="Occasions" count={circle.occasionCount || 0} buttonTitle={"Add New"} buttonAction={handlePressAddNew} />
+          <View style={styles.section}>
+            <FlatList scrollEnabled={false} columnWrapperStyle={styles.listColumnWrapperStyle} contentContainerStyle={styles.listContentContainerStyle} showsVerticalScrollIndicator={false} numColumns={2} key={2} data={listShares || []} renderItem={({ item }) => <WishListCard item={item} />} keyExtractor={(item) => String(item._id)} />
+          </View>
+          <SectionHeader title="Members" count={members?.length || 0} buttonTitle={"Invite"} />
+          <View>
+            <FlatList
+              scrollEnabled={false}
+              data={members || []}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item, index }) => {
+                return (
+                  <View style={[styles.memberItem, index === (members?.length || 0) - 1 && { borderBottomWidth: 0 }]} key={index}>
+                    <View style={styles.memberProfileAndInitial}>{item.profile?.profileImageUrl ? <Image source={{ uri: item.profile.profileImageUrl }} style={styles.profileImage} /> : <Text style={styles.nameInitials}>{getMemberInitials(item)}</Text>}</View>
+                    <View style={styles.memberInfo}>
+                      <Text style={styles.memberName} numberOfLines={1}>
+                        {item.profile?.displayName || item.profile?.firstName || "Unknown"}
+                      </Text>
+                      <Text style={styles.memberEmail} numberOfLines={1}>
+                        {item.profile?.contactEmail || "No email"}
+                      </Text>
                     </View>
-                    <View>
-                      <Text style={styles.memberName}>Will Smith</Text>
-                      <Text style={styles.memberEmail}>will.smith@gmail.com</Text>
-                    </View>
+                    {item.is_admin ? (
+                      <View style={styles.adminBadgeContainer}>
+                        <View style={styles.adminBadge}>
+                          <Text style={styles.adminBadgeText}>ADMIN</Text>
+                        </View>
+                        {circle.isOwner && (
+                          <Pressable style={styles.removeButton}>
+                            <Entypo name="circle-with-cross" size={24} color="#3B0076" />
+                          </Pressable>
+                        )}
+                      </View>
+                    ) : circle.isOwner ? (
+                      <Pressable style={styles.removeButton}>
+                        <Entypo name="circle-with-cross" size={24} color="#3B0076" />
+                      </Pressable>
+                    ) : null}
                   </View>
-                  <Pressable>
-                    <Entypo name="circle-with-cross" size={24} color="#3B0076" />
-                  </Pressable>
-                </View>
-              );
-            }}
-          />
-        </View>
-        <View style={styles.footer}>
-          <Pressable style={styles.primaryButton}>
-            <Text style={styles.primaryButtonText}>Invite Members</Text>
-          </Pressable>
-        </View>
-      </ScrollView>
+                );
+              }}
+            />
+          </View>
+          <View style={styles.footer}>
+            <Pressable style={styles.primaryButton}>
+              <Text style={styles.primaryButtonText}>Invite Members</Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+      )}
     </View>
   );
 };
@@ -100,6 +137,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 40,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: "Nunito_600SemiBold",
+    color: "#1C0335",
   },
   listContentContainerStyle: {
     gap: 8,
@@ -134,14 +183,9 @@ const styles = StyleSheet.create({
     padding: 15.32,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    gap: 8,
     borderBottomWidth: 0.96,
     borderColor: "#AEAEB2",
-  },
-  infoContainer: {
-    flexDirection: "row",
-    gap: 8,
-    alignItems: "center",
   },
   memberProfileAndInitial: {
     backgroundColor: "#A2845E",
@@ -150,9 +194,19 @@ const styles = StyleSheet.create({
     borderRadius: 7.66,
     justifyContent: "center",
     alignItems: "center",
+    flexShrink: 0,
+  },
+  profileImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 7.66,
+  },
+  memberInfo: {
+    flex: 1,
+    marginHorizontal: 8,
   },
   nameInitials: {
-    color: "#ffff",
+    color: "#FFFFFF",
     fontSize: 15.32,
     fontFamily: "Nunito_900Black",
   },
@@ -165,5 +219,26 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Nunito_300Light",
     color: "#1C0335",
+  },
+  adminBadgeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    flexShrink: 0,
+  },
+  adminBadge: {
+    backgroundColor: "#4CD964",
+    borderRadius: 100,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  adminBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontFamily: "Nunito_700Bold",
+    letterSpacing: 0.5,
+  },
+  removeButton: {
+    padding: 4,
   },
 });

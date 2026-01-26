@@ -55,7 +55,15 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
     return "??";
   };
 
-  const handleViewCircle = () => router.push("/view-circle");
+  const handleViewCircle = () => {
+    if (circle?._id) {
+      router.push({
+        pathname: "/view-circle",
+        params: { circleId: circle._id },
+      });
+    }
+  };
+
   const handleLongPress = () => {
     setIsBottomSheet(true);
   };
