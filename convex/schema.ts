@@ -24,6 +24,7 @@ export default defineSchema({
   // New table to store user-created gift lists
   lists: defineTable({
     user_id: v.optional(v.union(v.string(), v.null())),
+    group_id: v.optional(v.id("groups")), // For lists that belong to a circle
     title: v.string(),
     note: v.optional(v.union(v.string(), v.null())),
     eventDate: v.optional(v.union(v.string(), v.null())),
@@ -37,7 +38,9 @@ export default defineSchema({
     isArchived: v.optional(v.boolean()),
     created_at: v.string(),
     updated_at: v.string(),
-  }).index("by_user", ["user_id"]),
+  })
+    .index("by_user", ["user_id"])
+    .index("by_group", ["group_id"]),
 
   // Contacts (friends) owned by a user
   contacts: defineTable({

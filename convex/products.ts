@@ -432,23 +432,13 @@ export const getListShares = query({
 export const getListsByGroup = query({
   args: { group_id: v.id("groups") },
   handler: async (ctx, args) => {
-    // Get all list shares for this group
-    const listShares = await ctx.db
-      .query("list_shares")
+    // Get all lists that belong to this group directly
+    const lists = await ctx.db
+      .query("lists")
       .withIndex("by_group", (q) => q.eq("group_id", args.group_id))
       .collect();
 
-    // Get unique list IDs and fetch list details
-    const listIds = [...new Set(listShares.map((share) => share.list_id))];
-    const lists = await Promise.all(
-      listIds.map(async (listId) => {
-        const list = await ctx.db.get(listId);
-        return list;
-      }),
-    );
-
-    // Filter out null values and return
-    return lists.filter((list) => list !== null);
+    return lists;
   },
 });
 
