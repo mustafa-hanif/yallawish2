@@ -2,19 +2,22 @@ import React from "react";
 import { Image, Text, View } from "react-native";
 import { styles } from "./style";
 
-export default function ViewCircleGroupInfo() {
-  const createBy = "You";
-  const members = 24;
+interface ViewCircleGroupInfoProps {
+  createdBy: string;
+  memberCount: number;
+}
+
+export default function ViewCircleGroupInfo({ createdBy, memberCount }: ViewCircleGroupInfoProps) {
   return (
     <View style={styles.container}>
       <View style={styles.bodyItem}>
         <Image style={styles.bodyItemImage} resizeMode="contain" source={require("@/assets/images/users.png")} />
-        <Text style={styles.bodyItemText}>Created By: {createBy}</Text>
+        <Text style={styles.bodyItemText}>Created By: {createdBy}</Text>
       </View>
 
       <View style={styles.bodyItem}>
         <Image style={styles.bodyItemImage} resizeMode="contain" source={require("@/assets/images/calendar.png")} />
-        <Text style={styles.bodyItemText}>Members: {members}</Text>
+        <Text style={styles.bodyItemText}>Members: {memberCount}</Text>
       </View>
     </View>
   );
