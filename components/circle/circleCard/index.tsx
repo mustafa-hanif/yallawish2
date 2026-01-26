@@ -1,7 +1,10 @@
+import { api } from "@/convex/_generated/api";
+import { useMutation } from "convex/react";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
+import DeleteConfirmation from "../../DeleteConfirmationModal";
 import BottomSheet from "../../ui/BottomSheet";
 import { styles } from "./style";
 
@@ -31,6 +34,8 @@ interface CircleCardProps {
 
 export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
   const [isBottomSheet, setIsBottomSheet] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const deleteGroup = useMutation(api.products.deleteGroup);
 
   // Debug logging
   console.log("=== CircleCard Debug ===");
@@ -71,6 +76,27 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
 
   const handleLongPress = () => {
     setIsBottomSheet(true);
+  };
+
+  const handleDeleteCircle = async () => {
+    try {
+      if (circle?._id) {
+        await deleteGroup({ group_id: circle._id });
+        setShowDeleteConfirmation(false);
+        setIsBottomSheet(false);
+        // Optionally navigate back or refresh
+      }
+    } catch (error) {
+      console.error("Failed to delete circle:", error);
+    }
+  };
+
+  const handleActionPress = (actionTitle: string) => {
+    if (actionTitle === "Delete Circle") {
+      setIsBottomSheet(false);
+      setShowDeleteConfirmation(true);
+    }
+    // Handle other actions here
   };
 
   const quickActions = [
@@ -153,7 +179,7 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
           <Text style={styles.sheetTitle}>Manage Circle</Text>
           <View style={styles.actionsContainer}>
             {quickActions?.map((action) => (
-              <Pressable key={action.title} style={[styles.actionButton]}>
+              <Pressable key={action.title} style={[styles.actionButton]} onPress={() => handleActionPress(action.title)}>
                 <View style={[styles.actionIconContainer, action.title === "Delete Circle" ? { backgroundColor: "#FFF0F0" } : {}]}>
                   <Image style={[styles.icon, action.title === "Delete Circle" ? { tintColor: "#FF3B30" } : {}]} source={action.icon} resizeMode="contain" />
                 </View>
@@ -165,6 +191,7 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
           </View>
         </ScrollView>
       </BottomSheet>
+      <DeleteConfirmation visible={showDeleteConfirmation} text="Are you sure you want to\ndelete this circle?" onCancel={() => setShowDeleteConfirmation(false)} onDelete={handleDeleteCircle} />
     </>
   );
 }
