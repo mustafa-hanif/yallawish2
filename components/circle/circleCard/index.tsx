@@ -13,6 +13,9 @@ interface CircleCardProps {
     coverPhotoUri?: string | null;
     owner_id: string;
     memberCount?: number;
+    giftListCount?: number;
+    occasionCount?: number;
+    nextEventDate?: string | null;
     isOwner?: boolean;
     isAdmin?: boolean;
   };
@@ -66,10 +69,19 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
     { title: "Delete Circle", icon: require("@/assets/images/deleteList.png") },
   ];
 
-  const numberOfMembers = 10;
-  const numberOfGiftItems = 25;
-  const nextEvent = "15 Aug";
-  const numberOfOccasions = 3;
+  // Format next event date
+  const formatEventDate = (dateString: string | null | undefined) => {
+    if (!dateString) return "No events";
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.toLocaleString("en-US", { month: "short" });
+    return `${day} ${month}`;
+  };
+
+  const numberOfMembers = circle?.memberCount || 0;
+  const numberOfGiftItems = circle?.giftListCount || 0;
+  const nextEvent = formatEventDate(circle?.nextEventDate);
+  const numberOfOccasions = circle?.occasionCount || 0;
 
   return (
     <>

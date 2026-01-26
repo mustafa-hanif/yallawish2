@@ -1475,9 +1475,32 @@ export const getGroups = query({
           .withIndex("by_group", (q) => q.eq("group_id", membership.group_id))
           .collect();
 
+        // Get all lists shared with this group
+        const listShares = await ctx.db
+          .query("list_shares")
+          .withIndex("by_group", (q) => q.eq("group_id", membership.group_id))
+          .collect();
+
+        // Get unique list IDs and fetch list details
+        const listIds = [...new Set(listShares.map((share) => share.list_id))];
+        const lists = await Promise.all(listIds.map((listId) => ctx.db.get(listId)));
+        const validLists = lists.filter((list) => list !== null);
+
+        // Count unique occasions
+        const occasions = [...new Set(validLists.map((list) => list?.occasion).filter(Boolean))];
+
+        // Find next upcoming event
+        const now = new Date();
+        const upcomingLists = validLists.filter((list) => list?.event_date && new Date(list.event_date) > now).sort((a, b) => new Date(a!.event_date!).getTime() - new Date(b!.event_date!).getTime());
+
+        const nextEventDate = upcomingLists.length > 0 ? upcomingLists[0]?.event_date : null;
+
         return {
           ...group,
           memberCount: allMembers.length,
+          giftListCount: validLists.length,
+          occasionCount: occasions.length,
+          nextEventDate: nextEventDate,
           isOwner: group.owner_id === args.user_id,
           isAdmin: membership.is_admin,
           membership,
