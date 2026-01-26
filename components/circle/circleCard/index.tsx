@@ -5,8 +5,52 @@ import { ScrollView } from "react-native-gesture-handler";
 import BottomSheet from "../../ui/BottomSheet";
 import { styles } from "./style";
 
-export default function CircleCard() {
+interface CircleCardProps {
+  circle?: {
+    _id: any;
+    name: string;
+    description?: string | null;
+    coverPhotoUri?: string | null;
+    owner_id: string;
+    memberCount?: number;
+    isOwner?: boolean;
+    isAdmin?: boolean;
+  };
+  ownerProfile?: {
+    displayName?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    profileImageUrl?: string | null;
+  } | null;
+}
+
+export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
   const [isBottomSheet, setIsBottomSheet] = useState(false);
+
+  // Debug logging
+  console.log("=== CircleCard Debug ===");
+  console.log("Circle data:", circle);
+  console.log("Owner profile:", ownerProfile);
+  console.log("Owner profile image URL:", ownerProfile?.profileImageUrl);
+
+  // Get owner initials
+  const getOwnerInitials = () => {
+    if (!ownerProfile) return "??";
+    const firstName = ownerProfile.firstName || "";
+    const lastName = ownerProfile.lastName || "";
+    const displayName = ownerProfile.displayName || "";
+
+    if (firstName && lastName) {
+      return `${firstName[0]}${lastName[0]}`.toUpperCase();
+    } else if (displayName) {
+      const parts = displayName.split(" ");
+      if (parts.length >= 2) {
+        return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+      }
+      return displayName.substring(0, 2).toUpperCase();
+    }
+    return "??";
+  };
 
   const handleViewCircle = () => router.push("/view-circle");
   const handleLongPress = () => {
@@ -23,30 +67,31 @@ export default function CircleCard() {
   ];
 
   const numberOfMembers = 10;
-  const numberOfList = 25;
+  const numberOfGiftItems = 25;
   const nextEvent = "15 Aug";
+  const numberOfOccasions = 3;
 
   return (
     <>
       <Pressable style={styles.container} onLongPress={handleLongPress}>
         <View style={styles.header}>
-          <Image source={{ uri: "https://festive-deer-706.convex.cloud/api/storage/fee43c85-a348-45b6-a135-db9b6d34e9e9" }} style={styles.headerImage} />
+          {circle?.coverPhotoUri ? <Image source={{ uri: circle.coverPhotoUri }} style={styles.headerImage} /> : <View style={[styles.headerImage, { backgroundColor: "#D1D1D6" }]} />}
           <View style={styles.headerContent}>
             <View style={styles.headerContentTop}>
               <View style={styles.circleOccasions}>
-                <Text style={styles.circleOccasionsText}>3 Occasions</Text>
+                <Text style={styles.circleOccasionsText}>{numberOfOccasions} Occasions</Text>
               </View>
               <View style={styles.circleStatus}>
                 <Text style={styles.circleStatusText}>Active</Text>
               </View>
             </View>
             <View style={styles.headerContentBottom}>
-              <View style={styles.circleAdminInitials}>
-                <Text style={styles.circleAdminInitialsText}>HK</Text>
-              </View>
+              <View style={styles.circleAdminInitials}>{ownerProfile?.profileImageUrl ? <Image source={{ uri: ownerProfile.profileImageUrl }} style={{ width: "100%", height: "100%", borderRadius: 8 }} /> : <Text style={styles.circleAdminInitialsText}>{getOwnerInitials()}</Text>}</View>
               <View>
-                <Text style={styles.circleTitle}>APACS Class of 2023</Text>
-                <Text style={styles.circleDescription}>Manage all your gifting circles hash hasyhfs...</Text>
+                <Text style={styles.circleTitle}>{circle?.name || "Untitled Circle"}</Text>
+                <Text style={styles.circleDescription} numberOfLines={1} ellipsizeMode="tail">
+                  {circle?.description || "No description"}
+                </Text>
               </View>
             </View>
           </View>
@@ -58,7 +103,7 @@ export default function CircleCard() {
           </View>
           <View style={styles.bodyItem}>
             <Image style={styles.bodyItemImage} resizeMode="contain" source={require("@/assets/images/gift.png")} />
-            <Text style={styles.bodyItemText}>{numberOfList}</Text>
+            <Text style={styles.bodyItemText}>{numberOfGiftItems}</Text>
           </View>
           <View style={styles.bodyItem}>
             <Image style={styles.bodyItemImage} resizeMode="contain" source={require("@/assets/images/calendar.png")} />

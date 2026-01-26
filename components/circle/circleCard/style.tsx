@@ -72,6 +72,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#3B0076",
     borderWidth: 1,
     borderColor: "#FFFFFF",
+    overflow: "hidden",
   },
   circleAdminInitialsText: {
     color: "#FFFFFF",
