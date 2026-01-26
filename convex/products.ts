@@ -157,6 +157,7 @@ export const createList = mutation({
     requiresPassword: v.optional(v.boolean()),
     password: v.optional(v.union(v.string(), v.null())),
     user_id: v.optional(v.union(v.string(), v.null())),
+    group_id: v.optional(v.id("groups")),
   },
   handler: async (ctx, args) => {
     const now = new Date().toISOString();
@@ -172,6 +173,7 @@ export const createList = mutation({
       privacy: args.privacy,
       requiresPassword: args.requiresPassword ?? false,
       password: args.password ?? null,
+      group_id: args.group_id ?? undefined,
       isArchived: false,
       created_at: now,
       updated_at: now,
@@ -438,7 +440,46 @@ export const getListsByGroup = query({
       .withIndex("by_group", (q) => q.eq("group_id", args.group_id))
       .collect();
 
-    return lists;
+    // Return complete details for each list (same as getMyLists)
+    return await Promise.all(
+      lists.map(async (list) => {
+        let coverPhotoUri = list.coverPhotoUri ?? null;
+        if (list.coverPhotoStorageId) {
+          const refreshed = await ctx.storage.getUrl(list.coverPhotoStorageId as any);
+          if (refreshed) {
+            coverPhotoUri = refreshed;
+          }
+        }
+
+        // Aggregate list item counts for this list
+        const items = await ctx.db
+          .query("list_items")
+          .withIndex("by_list", (q) => q.eq("list_id", list._id))
+          .collect();
+        const totalItems = items.length;
+        const totalClaimed = items.reduce((s: number, it: any) => s + Number(it.claimed ?? 0), 0);
+
+        let creator: any = null;
+        const uid = (list.user_id ?? null) as string | null;
+        if (uid) {
+          const profile = await ctx.db
+            .query("user_profiles")
+            .withIndex("by_user", (q) => q.eq("user_id", uid))
+            .first();
+          if (profile) {
+            creator = {
+              user_id: profile.user_id,
+              firstName: profile.firstName ?? null,
+              lastName: profile.lastName ?? null,
+              profileImageUrl: profile.profileImageUrl ?? null,
+              contactEmail: profile.contactEmail ?? null,
+            } as any;
+          }
+        }
+
+        return { ...list, coverPhotoUri, totalItems, totalClaimed, creator };
+      }),
+    );
   },
 });
 
@@ -1488,32 +1529,41 @@ export const getGroups = query({
           .withIndex("by_group", (q) => q.eq("group_id", membership.group_id))
           .collect();
 
-        // Get all lists shared with this group
-        const listShares = await ctx.db
-          .query("list_shares")
+        // Get all lists that belong to this group directly
+        const lists = await ctx.db
+          .query("lists")
           .withIndex("by_group", (q) => q.eq("group_id", membership.group_id))
           .collect();
 
-        // Get unique list IDs and fetch list details
-        const listIds = [...new Set(listShares.map((share) => share.list_id))];
-        const lists = await Promise.all(listIds.map((listId) => ctx.db.get(listId)));
-        const validLists = lists.filter((list) => list !== null);
-
         // Count unique occasions
-        const occasions = [...new Set(validLists.map((list) => list?.occasion).filter(Boolean))];
+        const occasions = [...new Set(lists.map((list) => list.occasion).filter(Boolean))];
 
         // Find next upcoming event
         const now = new Date();
-        const upcomingLists = validLists.filter((list) => list?.eventDate && new Date(list.eventDate) > now).sort((a, b) => new Date(a!.eventDate!).getTime() - new Date(b!.eventDate!).getTime());
+        const upcomingLists = lists.filter((list) => list.eventDate && new Date(list.eventDate) > now).sort((a, b) => new Date(a.eventDate!).getTime() - new Date(b.eventDate!).getTime());
 
-        const nextEventDate = upcomingLists.length > 0 ? upcomingLists[0]?.eventDate : null;
+        const nextEventDate = upcomingLists.length > 0 ? upcomingLists[0].eventDate : null;
+
+        // Count total gift items across all lists
+        let totalGiftItems = 0;
+        console.log(`[getGroups] Group ${membership.group_id}: Found ${lists.length} lists`);
+        for (const list of lists) {
+          const items = await ctx.db
+            .query("list_items")
+            .withIndex("by_list", (q) => q.eq("list_id", list._id))
+            .collect();
+          console.log(`[getGroups] List ${list._id}: Found ${items.length} items`);
+          totalGiftItems += items.length;
+        }
+        console.log(`[getGroups] Group ${membership.group_id}: Total gift items = ${totalGiftItems}`);
 
         return {
           ...group,
           memberCount: allMembers.length,
-          giftListCount: validLists.length,
+          giftListCount: lists.length,
           occasionCount: occasions.length,
           nextEventDate: nextEventDate,
+          totalGiftItems: totalGiftItems,
           isOwner: group.owner_id === args.user_id,
           isAdmin: membership.is_admin,
           membership,
@@ -1543,32 +1593,38 @@ export const getGroupById = query({
     const membership = allMembers.find((m) => m.user_id === args.user_id);
     if (!membership) return null; // User is not a member
 
-    // Get all lists shared with this group
-    const listShares = await ctx.db
-      .query("list_shares")
+    // Get all lists that belong to this group directly
+    const lists = await ctx.db
+      .query("lists")
       .withIndex("by_group", (q) => q.eq("group_id", args.group_id))
       .collect();
 
-    // Get unique list IDs and fetch list details
-    const listIds = [...new Set(listShares.map((share) => share.list_id))];
-    const lists = await Promise.all(listIds.map((listId) => ctx.db.get(listId)));
-    const validLists = lists.filter((list) => list !== null);
-
     // Count unique occasions
-    const occasions = [...new Set(validLists.map((list) => list?.occasion).filter(Boolean))];
+    const occasions = [...new Set(lists.map((list) => list.occasion).filter(Boolean))];
 
     // Find next upcoming event
     const now = new Date();
-    const upcomingLists = validLists.filter((list) => list?.eventDate && new Date(list.eventDate) > now).sort((a, b) => new Date(a!.eventDate!).getTime() - new Date(b!.eventDate!).getTime());
+    const upcomingLists = lists.filter((list) => list.eventDate && new Date(list.eventDate) > now).sort((a, b) => new Date(a.eventDate!).getTime() - new Date(b.eventDate!).getTime());
 
-    const nextEventDate = upcomingLists.length > 0 ? upcomingLists[0]?.eventDate : null;
+    const nextEventDate = upcomingLists.length > 0 ? upcomingLists[0].eventDate : null;
+
+    // Count total gift items across all lists
+    let totalGiftItems = 0;
+    for (const list of lists) {
+      const items = await ctx.db
+        .query("list_items")
+        .withIndex("by_list", (q) => q.eq("list_id", list._id))
+        .collect();
+      totalGiftItems += items.length;
+    }
 
     return {
       ...group,
       memberCount: allMembers.length,
-      giftListCount: validLists.length,
+      giftListCount: lists.length,
       occasionCount: occasions.length,
       nextEventDate: nextEventDate,
+      totalGiftItems: totalGiftItems,
       isOwner: group.owner_id === args.user_id,
       isAdmin: membership.is_admin,
       membership,

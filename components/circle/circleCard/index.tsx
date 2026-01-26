@@ -16,6 +16,7 @@ interface CircleCardProps {
     giftListCount?: number;
     occasionCount?: number;
     nextEventDate?: string | null;
+    totalGiftItems?: number;
     isOwner?: boolean;
     isAdmin?: boolean;
   };
@@ -33,6 +34,9 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
   // Debug logging
   console.log("=== CircleCard Debug ===");
   console.log("Circle data:", circle);
+  console.log("Total gift items from backend:", circle?.totalGiftItems);
+  console.log("Gift list count from backend:", circle?.giftListCount);
+  console.log("Calculated numberOfGiftItems:", circle?.totalGiftItems || 0);
   console.log("Owner profile:", ownerProfile);
   console.log("Owner profile image URL:", ownerProfile?.profileImageUrl);
 
@@ -87,7 +91,7 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
   };
 
   const numberOfMembers = circle?.memberCount || 0;
-  const numberOfGiftItems = circle?.giftListCount || 0;
+  const numberOfGiftItems = circle?.totalGiftItems || 0;
   const nextEvent = formatEventDate(circle?.nextEventDate);
   const numberOfOccasions = circle?.occasionCount || 0;
 
