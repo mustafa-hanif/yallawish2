@@ -401,27 +401,6 @@ export const createContact = mutation({
   },
 });
 
-// Groups
-export const getGroups = query({
-  args: { owner_id: v.string() },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query("groups")
-      .withIndex("by_owner", (q) => q.eq("owner_id", args.owner_id))
-      .collect();
-  },
-});
-
-export const getGroupMembers = query({
-  args: { group_id: v.id("groups") },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query("group_members")
-      .withIndex("by_group", (q) => q.eq("group_id", args.group_id))
-      .collect();
-  },
-});
-
 // Share list with a group or contact
 export const addListShare = mutation({
   args: {
@@ -533,15 +512,18 @@ export const seedShareData = internalMutation({
     }
 
     // Add a few members to each group
-    for (const gid of groupIds) {
-      for (const contact of contacts.slice(0, 3)) {
-        await ctx.db.insert("group_members", {
-          group_id: gid,
-          contact_id: contact._id as any,
-          created_at: now,
-        });
-      }
-    }
+    // Note: This seed function is outdated - group_members now uses user_id from user_connections
+    // Skipping group member creation in this seed function
+    // for (const gid of groupIds) {
+    //   for (const contact of contacts.slice(0, 3)) {
+    //     await ctx.db.insert("group_members", {
+    //       group_id: gid,
+    //       user_id: args.owner_id, // Would need actual user IDs from connections
+    //       is_admin: false,
+    //       created_at: now,
+    //     });
+    //   }
+    // }
 
     return "ok";
   },
@@ -605,15 +587,18 @@ export const seedShareDataPublic = mutation({
     }
 
     // Add first 3 contacts to each group
-    for (const gid of groupIds) {
-      for (const contact of contacts.slice(0, 3)) {
-        await ctx.db.insert("group_members", {
-          group_id: gid,
-          contact_id: contact._id as any,
-          created_at: now,
-        });
-      }
-    }
+    // Note: This seed function is outdated - group_members now uses user_id from user_connections
+    // Skipping group member creation in this seed function
+    // for (const gid of groupIds) {
+    //   for (const contact of contacts.slice(0, 3)) {
+    //     await ctx.db.insert("group_members", {
+    //       group_id: gid,
+    //       user_id: args.owner_id, // Would need actual user IDs from connections
+    //       is_admin: false,
+    //       created_at: now,
+    //     });
+    //   }
+    // }
 
     return "ok";
   },
@@ -1412,5 +1397,177 @@ export const getAllUsersWithConnectionStatus = query({
     }
 
     return usersWithStatus;
+  },
+});
+
+// ============================================================================
+// GROUP/CIRCLE MUTATIONS
+// ============================================================================
+
+export const createGroup = mutation({
+  args: {
+    owner_id: v.string(),
+    name: v.string(),
+    description: v.optional(v.string()),
+    coverPhotoUri: v.optional(v.string()),
+    coverPhotoStorageId: v.optional(v.string()),
+    member_user_ids: v.array(v.string()), // YallaWish friend user IDs to add as members
+    admin_user_ids: v.array(v.string()), // Subset of member_user_ids who are admins
+  },
+  handler: async (ctx, args) => {
+    const now = new Date().toISOString();
+
+    // Create the group
+    const groupId = await ctx.db.insert("groups", {
+      owner_id: args.owner_id,
+      name: args.name,
+      description: args.description || null,
+      coverPhotoUri: args.coverPhotoUri || null,
+      coverPhotoStorageId: args.coverPhotoStorageId || null,
+      created_at: now,
+      updated_at: now,
+    });
+
+    // Add owner as super admin member
+    await ctx.db.insert("group_members", {
+      group_id: groupId,
+      user_id: args.owner_id,
+      is_admin: true,
+      created_at: now,
+    });
+
+    // Add all selected members
+    for (const userId of args.member_user_ids) {
+      // Skip if user is already owner (to avoid duplicate)
+      if (userId === args.owner_id) continue;
+
+      const isAdmin = args.admin_user_ids.includes(userId);
+      await ctx.db.insert("group_members", {
+        group_id: groupId,
+        user_id: userId,
+        is_admin: isAdmin,
+        created_at: now,
+      });
+    }
+
+    return groupId;
+  },
+});
+
+export const getGroups = query({
+  args: { user_id: v.string() },
+  handler: async (ctx, args) => {
+    // Get all groups where user is a member
+    const memberships = await ctx.db
+      .query("group_members")
+      .withIndex("by_user", (q) => q.eq("user_id", args.user_id))
+      .collect();
+
+    // Fetch full group details for each membership
+    const groups = await Promise.all(
+      memberships.map(async (membership) => {
+        const group = await ctx.db.get(membership.group_id);
+        if (!group) return null;
+
+        // Get member count
+        const allMembers = await ctx.db
+          .query("group_members")
+          .withIndex("by_group", (q) => q.eq("group_id", membership.group_id))
+          .collect();
+
+        return {
+          ...group,
+          memberCount: allMembers.length,
+          isOwner: group.owner_id === args.user_id,
+          isAdmin: membership.is_admin,
+          membership,
+        };
+      }),
+    );
+
+    // Filter out null values and return
+    return groups.filter((g) => g !== null);
+  },
+});
+
+export const getGroupMembers = query({
+  args: { group_id: v.id("groups") },
+  handler: async (ctx, args) => {
+    // Get all members of the group
+    const memberships = await ctx.db
+      .query("group_members")
+      .withIndex("by_group", (q) => q.eq("group_id", args.group_id))
+      .collect();
+
+    // Fetch user profiles for each member
+    const membersWithProfiles = await Promise.all(
+      memberships.map(async (membership) => {
+        // Skip legacy entries without user_id (old contact-based records)
+        if (!membership.user_id) {
+          return {
+            ...membership,
+            profile: null,
+          };
+        }
+
+        const profile = await ctx.db
+          .query("user_profiles")
+          .withIndex("by_user", (q) => q.eq("user_id", membership.user_id!))
+          .first();
+
+        return {
+          ...membership,
+          profile,
+        };
+      }),
+    );
+
+    return membersWithProfiles;
+  },
+});
+
+export const updateGroupMemberAdminStatus = mutation({
+  args: {
+    group_id: v.id("groups"),
+    user_id: v.string(),
+    is_admin: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    // Find the membership record
+    const membership = await ctx.db
+      .query("group_members")
+      .withIndex("by_group_and_user", (q) => q.eq("group_id", args.group_id).eq("user_id", args.user_id))
+      .first();
+
+    if (!membership) {
+      throw new Error("Membership not found");
+    }
+
+    // Update admin status
+    await ctx.db.patch(membership._id, {
+      is_admin: args.is_admin,
+    });
+
+    return membership._id;
+  },
+});
+
+export const deleteGroup = mutation({
+  args: { group_id: v.id("groups") },
+  handler: async (ctx, args) => {
+    // Delete all members first
+    const members = await ctx.db
+      .query("group_members")
+      .withIndex("by_group", (q) => q.eq("group_id", args.group_id))
+      .collect();
+
+    for (const member of members) {
+      await ctx.db.delete(member._id);
+    }
+
+    // Delete the group
+    await ctx.db.delete(args.group_id);
+
+    return { success: true };
   },
 });

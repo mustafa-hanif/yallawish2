@@ -1,20 +1,83 @@
 import Header from "@/components/Header";
 import { ProgressIndicator } from "@/components/ProgressIndicator";
 import { TextInputField } from "@/components/TextInputField";
+import { api } from "@/convex/_generated/api";
+import { useAuth } from "@clerk/clerk-expo";
 import { Entypo, Feather } from "@expo/vector-icons";
+import { useQuery } from "convex/react";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-
-interface FormData {}
+import React, { useMemo, useState } from "react";
+import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const CreateCircleStep2 = () => {
-  const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
-  const [formData, setFormData] = useState<FormData>({});
+  const { returnTo, name, description, coverPhotoUri, coverPhotoStorageId } = useLocalSearchParams<{
+    returnTo?: string;
+    name?: string;
+    description?: string;
+    coverPhotoUri?: string;
+    coverPhotoStorageId?: string;
+  }>();
+  const { userId } = useAuth();
+  const [selectedFriends, setSelectedFriends] = useState<Set<string>>(new Set());
+  const [searchText, setSearchText] = useState("");
+  const [showFriendSection, setShowFriendSection] = useState(true);
 
   const encodedReturnTo = returnTo ? String(returnTo) : undefined;
   const decodedReturnTo = encodedReturnTo ? decodeURIComponent(encodedReturnTo) : undefined;
-  const friendsArray = Array.from({ length: 10 });
+
+  // Fetch friends from user_connections
+  const friendsData = useQuery(api.products.getMyFriends, userId ? { user_id: userId } : "skip");
+  const isLoadingFriends = friendsData === undefined;
+
+  // Filter friends based on search text
+  const filteredFriends = useMemo(() => {
+    if (!friendsData) return [];
+    if (!searchText.trim()) return friendsData;
+
+    const searchLower = searchText.toLowerCase();
+    return friendsData.filter((friend) => {
+      const displayName = friend.profile?.displayName || "";
+      const email = friend.profile?.contactEmail || "";
+      const firstName = friend.profile?.firstName || "";
+      const lastName = friend.profile?.lastName || "";
+      return displayName.toLowerCase().includes(searchLower) || email.toLowerCase().includes(searchLower) || firstName.toLowerCase().includes(searchLower) || lastName.toLowerCase().includes(searchLower);
+    });
+  }, [friendsData, searchText]);
+
+  // Get initials from name
+  const getInitials = (profile: any) => {
+    const firstName = profile?.firstName || "";
+    const lastName = profile?.lastName || "";
+    const displayName = profile?.displayName || "";
+
+    if (firstName && lastName) {
+      return `${firstName[0]}${lastName[0]}`.toUpperCase();
+    } else if (displayName) {
+      const parts = displayName.split(" ");
+      if (parts.length >= 2) {
+        return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+      }
+      return displayName.substring(0, 2).toUpperCase();
+    }
+    return "??";
+  };
+
+  const toggleFriendSelection = (friendUserId: string) => {
+    setSelectedFriends((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(friendUserId)) {
+        newSet.delete(friendUserId);
+      } else {
+        newSet.add(friendUserId);
+      }
+      return newSet;
+    });
+  };
+
+  const clearAllSelections = () => {
+    setSelectedFriends(new Set());
+  };
+
   const handleBack = () => {
     if (decodedReturnTo) {
       router.replace(decodedReturnTo as any);
@@ -24,109 +87,94 @@ const CreateCircleStep2 = () => {
   };
 
   const handleContinue = () => {
-    router.push({ pathname: "/create-circle-step3" });
+    if (selectedFriends.size === 0) return;
+
+    router.push({
+      pathname: "/create-circle-step3",
+      params: {
+        name: name || "",
+        description: description || "",
+        coverPhotoUri: coverPhotoUri || "",
+        coverPhotoStorageId: coverPhotoStorageId || "",
+        selectedFriendIds: JSON.stringify(Array.from(selectedFriends)),
+      },
+    });
   };
+
   return (
     <View style={styles.container}>
       <Header title="Add Members" handleBack={handleBack} />
 
       <ProgressIndicator activeSteps={2} />
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <Pressable style={[styles.expandableButton, true && styles.expandableButtonActive]}>
+        <Pressable style={[styles.expandableButton, showFriendSection && styles.expandableButtonActive]} onPress={() => setShowFriendSection(!showFriendSection)}>
           <View style={styles.expandableContent}>
             <Image source={require("@/assets/images/users.png")} />
-            <Text style={styles.expandableText}>Add Existing Friends</Text>
+            <Text style={styles.expandableText}>Add YallaWish Friends</Text>
           </View>
           <View>
-            <Entypo name="chevron-down" size={24} color="#1C0335" />
+            <Entypo name={showFriendSection ? "chevron-up" : "chevron-down"} size={24} color="#1C0335" />
           </View>
         </Pressable>
-        <View style={styles.expandableSection}>
-          <View style={styles.expandableSearchSection}>
-            <TextInputField label="Search by name or email" icon={<Image source={require("@/assets/images/search.png")} />} />
-            <View style={styles.selectedAndClearContainer}>
-              <Text style={styles.selectedText}>0 friends selected</Text>
-              <Text style={styles.clearText}>Clear All</Text>
-            </View>
-          </View>
-          <View>
-            {friendsArray.map((_, index) => (
-              <View style={[styles.friendItem, index === friendsArray.length - 1 && { borderBottomWidth: 0 }]} key={index}>
-                <View style={styles.infoContainer}>
-                  <View style={styles.friendProfileAndInitial}>
-                    <Text style={styles.nameInitials}>WS</Text>
-                  </View>
-                  <View>
-                    <Text style={styles.friendName}>Will Smith</Text>
-                    <Text style={styles.friendEmail}>will.smith@gmail.com</Text>
-                  </View>
-                </View>
-                <View style={styles.checkButton}>{/* <Feather name="check" size={15} color="#3B0076" /> */}</View>
+        {showFriendSection && (
+          <View style={styles.expandableSection}>
+            <View style={styles.expandableSearchSection}>
+              <TextInputField label="Search by name or email" icon={<Image source={require("@/assets/images/search.png")} />} value={searchText} onChangeText={setSearchText} />
+              <View style={styles.selectedAndClearContainer}>
+                <Text style={styles.selectedText}>{selectedFriends.size} friends selected</Text>
+                {selectedFriends.size > 0 && (
+                  <Pressable onPress={clearAllSelections}>
+                    <Text style={styles.clearText}>Clear All</Text>
+                  </Pressable>
+                )}
               </View>
-            ))}
-            <View style={styles.addSelectedFriendsContainer}>
-              <Pressable
-                style={[
-                  styles.addSelectedFriendsButton,
-                  // !isFormValid && styles.continueButtonDisabled,
-                ]}
-                // disabled={!isFormValid}
-              >
-                <Feather name="check" size={24} color="#3B0076" />
-                <Text style={styles.addSelectedFriendsButtonText}>Add selected friends</Text>
-              </Pressable>
+            </View>
+            <View>
+              {isLoadingFriends ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator color="#3B0076" size="large" />
+                  <Text style={styles.loadingText}>Loading friends...</Text>
+                </View>
+              ) : filteredFriends && filteredFriends.length > 0 ? (
+                filteredFriends.map((friend, index) => {
+                  const friendUserId = friend.connection.requester_id === userId ? friend.connection.receiver_id : friend.connection.requester_id;
+                  const isSelected = selectedFriends.has(friendUserId);
+                  const displayName = friend.profile?.displayName || `${friend.profile?.firstName || ""} ${friend.profile?.lastName || ""}`.trim() || "Unknown";
+                  const email = friend.profile?.contactEmail || "";
+                  const initials = getInitials(friend.profile);
+                  const profileImage = friend.profile?.profileImageUrl;
+
+                  return (
+                    <Pressable key={friendUserId} style={[styles.friendItem, index === filteredFriends.length - 1 && { borderBottomWidth: 0 }]} onPress={() => toggleFriendSelection(friendUserId)}>
+                      <View style={styles.infoContainer}>
+                        <View style={styles.friendProfileAndInitial}>{profileImage ? <Image source={{ uri: profileImage }} style={styles.profileImage} /> : <Text style={styles.nameInitials}>{initials}</Text>}</View>
+                        <View>
+                          <Text style={styles.friendName}>{displayName}</Text>
+                          {email && <Text style={styles.friendEmail}>{email}</Text>}
+                        </View>
+                      </View>
+                      <View style={[styles.checkButton, isSelected && styles.checkButtonActive]}>{isSelected && <Feather name="check" size={15} color="#ffffff" />}</View>
+                    </Pressable>
+                  );
+                })
+              ) : (
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>{searchText ? "No friends found matching your search" : "You don't have any YallaWish friends yet"}</Text>
+                </View>
+              )}
             </View>
           </View>
-        </View>
-        <Pressable style={[styles.expandableButton, true && { borderRadius: 0, borderTopWidth: 0, borderBottomWidth: 0 }]}>
+        )}
+        {/* Invite New Friends Section - Disabled for now */}
+        <Pressable style={[styles.expandableButton, { borderRadius: 0, borderTopWidth: 0, borderBottomWidth: 0, opacity: 0.5 }]} disabled>
           <View style={styles.expandableContent}>
             <Image source={require("@/assets/images/users.png")} />
-            <Text style={styles.expandableText}>Invite New Friends</Text>
-          </View>
-          <View>
-            <Entypo name="chevron-down" size={24} color="#1C0335" />
+            <Text style={styles.expandableText}>Invite New Friends (Coming Soon)</Text>
           </View>
         </Pressable>
-        <View style={styles.expandableSection}>
-          <View style={styles.expandableSearchSection}>
-            <TextInputField label="Email Address or Phone Number" hint="Invited users will be added as friends once they accepted" />
-          </View>
-          <View>
-            <View style={styles.addSelectedFriendsContainer}>
-              <Pressable style={styles.primaryButton}>
-                <Text style={styles.primaryButtonText}>Send invite and add to circle</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-        <Pressable style={[styles.expandableButton, true && { borderRadius: 0, borderTopWidth: 0, borderBottomWidth: 0 }]}>
-          <View style={styles.expandableContent}>
-            <Image source={require("@/assets/images/users.png")} />
-            <Text style={styles.expandableText}>Share invite link</Text>
-          </View>
-          <View>
-            <Entypo name="chevron-down" size={24} color="#1C0335" />
-          </View>
-        </Pressable>
-        <View style={[styles.expandableSection, { borderBottomEndRadius: 8, borderBottomStartRadius: 8 }]}>
-          <View>
-            <View style={styles.addSelectedFriendsContainer}>
-              <Pressable style={styles.primaryButton}>
-                <Text style={styles.primaryButtonText}>Copy link to clipboard</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
       </ScrollView>
       <View style={styles.bottomButtons}>
-        <Pressable
-          style={[
-            styles.continueButton,
-            // !isFormValid && styles.continueButtonDisabled,
-          ]}
-          onPress={handleContinue}
-          // disabled={!isFormValid}
-        >
+        <Pressable style={[styles.continueButton, selectedFriends.size === 0 && styles.continueButtonDisabled]} onPress={handleContinue} disabled={selectedFriends.size === 0}>
           <Text style={styles.continueButtonText}>Done</Text>
         </Pressable>
       </View>
@@ -248,6 +296,31 @@ const styles = StyleSheet.create({
   checkButtonActive: {
     backgroundColor: "#3B0076",
     borderColor: "#3B0076",
+  },
+  profileImage: {
+    width: 45.95,
+    height: 45.95,
+    borderRadius: 7.66,
+  },
+  loadingContainer: {
+    padding: 40,
+    alignItems: "center",
+    gap: 16,
+  },
+  loadingText: {
+    fontSize: 14,
+    fontFamily: "Nunito_400Regular",
+    color: "#8E8E93",
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: "center",
+  },
+  emptyText: {
+    fontSize: 14,
+    fontFamily: "Nunito_400Regular",
+    color: "#8E8E93",
+    textAlign: "center",
   },
   bottomButtons: {
     paddingHorizontal: 16,

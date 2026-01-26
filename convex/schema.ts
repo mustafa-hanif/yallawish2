@@ -62,19 +62,27 @@ export default defineSchema({
   groups: defineTable({
     owner_id: v.string(), // Clerk user id of owner
     name: v.string(),
+    description: v.optional(v.union(v.string(), v.null())),
     coverPhotoUri: v.optional(v.union(v.string(), v.null())),
+    coverPhotoStorageId: v.optional(v.union(v.string(), v.null())),
     created_at: v.string(),
     updated_at: v.string(),
   }).index("by_owner", ["owner_id"]),
 
-  // Group membership linking groups to contacts
+  // Group membership linking groups to user_connections (YallaWish friends)
   group_members: defineTable({
     group_id: v.id("groups"),
-    contact_id: v.id("contacts"),
+    // New schema fields
+    user_id: v.optional(v.string()), // Clerk user id of the member (from user_connections)
+    is_admin: v.optional(v.boolean()), // Whether this member has admin privileges
+    // Legacy field for backwards compatibility - will be removed after migration
+    contact_id: v.optional(v.id("contacts")),
     created_at: v.string(),
   })
     .index("by_group", ["group_id"])
-    .index("by_contact", ["contact_id"]),
+    .index("by_user", ["user_id"])
+    .index("by_contact", ["contact_id"])
+    .index("by_group_and_user", ["group_id", "user_id"]),
 
   // List shares: which groups or contacts can access a list when shared
   list_shares: defineTable({

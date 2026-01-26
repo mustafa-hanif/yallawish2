@@ -3,18 +3,50 @@ import CircleManagement from "@/components/circle/CircleManagement";
 import NoCircleFound from "@/components/circle/NoCircleFound";
 import Header from "@/components/Header";
 import { TextInputField } from "@/components/TextInputField";
+import { api } from "@/convex/_generated/api";
+import { useAuth } from "@clerk/clerk-expo";
 import { AntDesign, Entypo } from "@expo/vector-icons";
+import { useQuery } from "convex/react";
 import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
-import { FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useMemo, useState } from "react";
+import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 const Circle = () => {
   const [isCirclesIamMemberOfExpanded, setIsCirclesIamMemberOfExpanded] = useState(false);
   const [isCirclesIamAdminOfExpanded, setIsCirclesIamAdminOfExpanded] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const { userId } = useAuth();
 
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
 
   const encodedReturnTo = returnTo ? String(returnTo) : undefined;
   const decodedReturnTo = encodedReturnTo ? decodeURIComponent(encodedReturnTo) : undefined;
+
+  // Fetch all circles where user is a member
+  const allCircles = useQuery(api.products.getGroups, userId ? { user_id: userId } : "skip");
+  const isLoading = allCircles === undefined;
+
+  // Categorize circles by admin/owner status
+  const { circlesIamAdminOf, circlesIamMemberOf } = useMemo(() => {
+    if (!allCircles) return { circlesIamAdminOf: [], circlesIamMemberOf: [] };
+
+    const adminCircles = allCircles.filter((circle) => circle.isOwner || circle.isAdmin);
+    const memberCircles = allCircles.filter((circle) => !circle.isOwner && !circle.isAdmin);
+
+    // Apply search filter if present
+    if (searchText.trim()) {
+      const searchLower = searchText.toLowerCase();
+      return {
+        circlesIamAdminOf: adminCircles.filter((c) => c.name.toLowerCase().includes(searchLower)),
+        circlesIamMemberOf: memberCircles.filter((c) => c.name.toLowerCase().includes(searchLower)),
+      };
+    }
+
+    return {
+      circlesIamAdminOf: adminCircles,
+      circlesIamMemberOf: memberCircles,
+    };
+  }, [allCircles, searchText]);
+
   const handleBack = () => {
     if (decodedReturnTo) {
       router.replace(decodedReturnTo as any);
@@ -22,9 +54,6 @@ const Circle = () => {
     }
     router.back();
   };
-
-  const circlesIamAdminOf = Array.from({ length: 10 });
-  const circlesIamMemberOf = Array.from({ length: 10 });
 
   const handlePressAddCircle = () => {
     router.push("/(tabs)/create-circle-step1");
@@ -34,11 +63,16 @@ const Circle = () => {
       <Header title="My Circles" handleBack={handleBack} />
       <CircleManagement />
 
-      {circlesIamMemberOf.length === 0 && circlesIamAdminOf.length === 0 ? (
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator color="#3B0076" size="large" />
+          <Text style={styles.loadingText}>Loading circles...</Text>
+        </View>
+      ) : circlesIamMemberOf.length === 0 && circlesIamAdminOf.length === 0 ? (
         <NoCircleFound />
       ) : (
         <View style={styles.circleContainer}>
-          <TextInputField placeholder="Search" icon={<Image source={require("@/assets/images/search.png")} />} />
+          <TextInputField placeholder="Search" icon={<Image source={require("@/assets/images/search.png")} />} value={searchText} onChangeText={setSearchText} />
           <View style={{ gap: 16 }}>
             <View>
               <Pressable style={[styles.circleExpandableButton, isCirclesIamAdminOfExpanded && { borderBottomEndRadius: 0, borderBottomStartRadius: 0 }]} onPress={() => setIsCirclesIamAdminOfExpanded(!isCirclesIamAdminOfExpanded)}>
@@ -123,5 +157,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Nunito_700Bold",
     color: "#1C1C1C",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 16,
+  },
+  loadingText: {
+    fontSize: 14,
+    fontFamily: "Nunito_400Regular",
+    color: "#8E8E93",
   },
 });

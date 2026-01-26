@@ -1,20 +1,95 @@
 import Header from "@/components/Header";
 import { ProgressIndicator } from "@/components/ProgressIndicator";
 import { TextInputField } from "@/components/TextInputField";
+import { api } from "@/convex/_generated/api";
+import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Fontisto } from "@expo/vector-icons";
+import { useMutation, useQuery } from "convex/react";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
-import { Image, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
+import React, { useMemo, useState } from "react";
+import { ActivityIndicator, Alert, Image, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
 
-interface FormData {}
-
-const CreateCircleStep2 = () => {
-  const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
-  const [formData, setFormData] = useState<FormData>({});
+const CreateCircleStep3 = () => {
+  const { returnTo, name, description, coverPhotoUri, coverPhotoStorageId, selectedFriendIds } = useLocalSearchParams<{
+    returnTo?: string;
+    name?: string;
+    description?: string;
+    coverPhotoUri?: string;
+    coverPhotoStorageId?: string;
+    selectedFriendIds?: string;
+  }>();
+  const { userId } = useAuth();
+  const { user } = useUser();
+  const [adminUserIds, setAdminUserIds] = useState<Set<string>>(new Set());
+  const [searchText, setSearchText] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
 
   const encodedReturnTo = returnTo ? String(returnTo) : undefined;
   const decodedReturnTo = encodedReturnTo ? decodeURIComponent(encodedReturnTo) : undefined;
-  const membersArray = Array.from({ length: 10 });
+
+  // Parse selected friend IDs
+  const memberUserIds = useMemo(() => {
+    try {
+      return selectedFriendIds ? JSON.parse(selectedFriendIds) : [];
+    } catch {
+      return [];
+    }
+  }, [selectedFriendIds]);
+
+  // Fetch all friends to get their profile data
+  const friendsData = useQuery(api.products.getMyFriends, userId ? { user_id: userId } : "skip");
+  const createGroupMutation = useMutation(api.products.createGroup);
+
+  // Filter to only show selected members
+  const selectedMembers = useMemo(() => {
+    if (!friendsData) return [];
+    return friendsData.filter((friend) => {
+      const friendUserId = friend.connection.requester_id === userId ? friend.connection.receiver_id : friend.connection.requester_id;
+      return memberUserIds.includes(friendUserId);
+    });
+  }, [friendsData, memberUserIds, userId]);
+
+  // Apply search filter
+  const filteredMembers = useMemo(() => {
+    if (!searchText.trim()) return selectedMembers;
+    const searchLower = searchText.toLowerCase();
+    return selectedMembers.filter((friend) => {
+      const displayName = friend.profile?.displayName || "";
+      const email = friend.profile?.contactEmail || "";
+      const firstName = friend.profile?.firstName || "";
+      const lastName = friend.profile?.lastName || "";
+      return displayName.toLowerCase().includes(searchLower) || email.toLowerCase().includes(searchLower) || firstName.toLowerCase().includes(searchLower) || lastName.toLowerCase().includes(searchLower);
+    });
+  }, [selectedMembers, searchText]);
+
+  const getInitials = (profile: any) => {
+    const firstName = profile?.firstName || "";
+    const lastName = profile?.lastName || "";
+    const displayName = profile?.displayName || "";
+
+    if (firstName && lastName) {
+      return `${firstName[0]}${lastName[0]}`.toUpperCase();
+    } else if (displayName) {
+      const parts = displayName.split(" ");
+      if (parts.length >= 2) {
+        return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+      }
+      return displayName.substring(0, 2).toUpperCase();
+    }
+    return "??";
+  };
+
+  const toggleAdmin = (memberUserId: string) => {
+    setAdminUserIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(memberUserId)) {
+        newSet.delete(memberUserId);
+      } else {
+        newSet.add(memberUserId);
+      }
+      return newSet;
+    });
+  };
 
   const handleBack = () => {
     if (decodedReturnTo) {
@@ -24,8 +99,34 @@ const CreateCircleStep2 = () => {
     router.back();
   };
 
-  const handleContinue = () => {
-    router.push({ pathname: "/create-circle-success" });
+  const handleContinue = async () => {
+    if (!userId || !name) {
+      Alert.alert("Error", "Missing required information");
+      return;
+    }
+
+    try {
+      setIsCreating(true);
+
+      // Create the group with members and admins
+      const groupId = await createGroupMutation({
+        owner_id: userId,
+        name,
+        description: description || undefined,
+        coverPhotoUri: coverPhotoUri || undefined,
+        coverPhotoStorageId: coverPhotoStorageId || undefined,
+        member_user_ids: memberUserIds,
+        admin_user_ids: Array.from(adminUserIds),
+      });
+
+      // Navigate to success screen
+      router.push({ pathname: "/create-circle-success" });
+    } catch (error) {
+      console.error("Failed to create circle:", error);
+      Alert.alert("Error", "Failed to create circle. Please try again.");
+    } finally {
+      setIsCreating(false);
+    }
   };
   return (
     <View style={styles.container}>
@@ -40,7 +141,13 @@ const CreateCircleStep2 = () => {
           <View style={styles.ownerContainer}>
             <View style={styles.ownerInfo}>
               <View style={styles.ownerImageContainer}>
-                <Image style={styles.ownerImage} source={{ uri: "https://images.ctfassets.net/xjcz23wx147q/iegram9XLv7h3GemB5vUR/0345811de2da23fafc79bd00b8e5f1c6/Max_Rehkopf_200x200.jpeg" }} />
+                {user?.imageUrl ? (
+                  <Image style={styles.ownerImage} source={{ uri: user.imageUrl }} />
+                ) : (
+                  <View style={[styles.ownerImageContainer, { backgroundColor: "#3B0076" }]}>
+                    <Text style={styles.nameInitials}>{getInitials({ firstName: user?.firstName, lastName: user?.lastName, displayName: user?.fullName })}</Text>
+                  </View>
+                )}
               </View>
               <View>
                 <Text style={styles.ownerName}>You (Owner)</Text>
@@ -52,50 +159,54 @@ const CreateCircleStep2 = () => {
             </View>
           </View>
           <View style={styles.searchContainer}>
-            <TextInputField label="Search by name or email" icon={<Image source={require("@/assets/images/search.png")} />} />
+            <TextInputField label="Search by name or email" icon={<Image source={require("@/assets/images/search.png")} />} value={searchText} onChangeText={setSearchText} />
           </View>
           <View>
-            {membersArray.map((_, index) => (
-              <View style={[styles.memberItem, index === membersArray.length - 1 && { borderBottomWidth: 0 }]} key={index}>
-                <View style={styles.infoContainer}>
-                  <View style={styles.memberProfileAndInitial}>
-                    <Text style={styles.nameInitials}>WS</Text>
-                  </View>
-                  <View>
-                    <Text style={styles.memberName}>Will Smith</Text>
-                    <Text style={styles.memberEmail}>will.smith@gmail.com</Text>
-                  </View>
-                </View>
-                <Switch
-                  //   value={true}
-                  // onValueChange={setRequirePassword}
-                  trackColor={{ false: "#78788029", true: "#34C759" }}
-                  thumbColor="#FFFFFF"
-                  // disabled={!isSelected}
-                />
-                {/* <View style={styles.checkButton}><Feather name="check" size={15} color="#3B0076" /></View> */}
+            {!friendsData ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator color="#3B0076" size="large" />
+                <Text style={styles.loadingText}>Loading members...</Text>
               </View>
-            ))}
+            ) : filteredMembers.length > 0 ? (
+              filteredMembers.map((friend, index) => {
+                const memberUserId = friend.connection.requester_id === userId ? friend.connection.receiver_id : friend.connection.requester_id;
+                const isAdmin = adminUserIds.has(memberUserId);
+                const displayName = friend.profile?.displayName || `${friend.profile?.firstName || ""} ${friend.profile?.lastName || ""}`.trim() || "Unknown";
+                const email = friend.profile?.contactEmail || "";
+                const initials = getInitials(friend.profile);
+                const profileImage = friend.profile?.profileImageUrl;
+
+                return (
+                  <View style={[styles.memberItem, index === filteredMembers.length - 1 && { borderBottomWidth: 0 }]} key={memberUserId}>
+                    <View style={styles.infoContainer}>
+                      <View style={styles.memberProfileAndInitial}>{profileImage ? <Image source={{ uri: profileImage }} style={styles.profileImage} /> : <Text style={styles.nameInitials}>{initials}</Text>}</View>
+                      <View>
+                        <Text style={styles.memberName}>{displayName}</Text>
+                        {email && <Text style={styles.memberEmail}>{email}</Text>}
+                      </View>
+                    </View>
+                    <Switch value={isAdmin} onValueChange={() => toggleAdmin(memberUserId)} trackColor={{ false: "#78788029", true: "#34C759" }} thumbColor="#FFFFFF" />
+                  </View>
+                );
+              })
+            ) : (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>{searchText ? "No members found matching your search" : "No members selected"}</Text>
+              </View>
+            )}
           </View>
         </View>
       </ScrollView>
       <View style={styles.bottomButtons}>
-        <Pressable
-          style={[
-            styles.continueButton,
-            // !isFormValid && styles.continueButtonDisabled,
-          ]}
-          onPress={handleContinue}
-          // disabled={!isFormValid}
-        >
-          <Text style={styles.continueButtonText}>Finish Circle Setup</Text>
+        <Pressable style={[styles.continueButton, isCreating && styles.continueButtonDisabled]} onPress={handleContinue} disabled={isCreating}>
+          {isCreating ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.continueButtonText}>Finish Circle Setup</Text>}
         </Pressable>
       </View>
     </View>
   );
 };
 
-export default CreateCircleStep2;
+export default CreateCircleStep3;
 
 const styles = StyleSheet.create({
   container: {
@@ -223,5 +334,30 @@ const styles = StyleSheet.create({
     fontSize: 11.49,
     fontFamily: "Nunito_300Light",
     color: "#1C0335",
+  },
+  profileImage: {
+    width: 45.95,
+    height: 45.95,
+    borderRadius: 7.66,
+  },
+  loadingContainer: {
+    padding: 40,
+    alignItems: "center",
+    gap: 16,
+  },
+  loadingText: {
+    fontSize: 14,
+    fontFamily: "Nunito_400Regular",
+    color: "#8E8E93",
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: "center",
+  },
+  emptyText: {
+    fontSize: 14,
+    fontFamily: "Nunito_400Regular",
+    color: "#8E8E93",
+    textAlign: "center",
   },
 });
