@@ -1,3 +1,4 @@
+import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 import FriendsEmptyState from "@/components/friends/FriendsEmptyState";
 import FriendsItem from "@/components/friends/FriendsItem";
 import FriendsSectionHeader from "@/components/friends/FriendsSectionHeader";
@@ -31,6 +32,8 @@ const Friends = () => {
   const { user } = useUser();
   const [currentTab, setCurrentTab] = useState("friends");
   const [isAddFriendsSheetVisible, setIsAddFriendsSheetVisible] = useState(false);
+  const [removeConnectionId, setRemoveConnectionId] = useState<string | null>(null);
+  const [blockUserId, setBlockUserId] = useState<string | null>(null);
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
   const encodedReturnTo = returnTo ? String(returnTo) : undefined;
   const decodedReturnTo = encodedReturnTo ? decodeURIComponent(encodedReturnTo) : undefined;
@@ -81,41 +84,35 @@ const Friends = () => {
   };
 
   const handleRemoveFriend = async (connectionId: string) => {
-    if (!user?.id) return;
+    setRemoveConnectionId(connectionId);
+  };
 
-    Alert.alert("Remove Friend", "Are you sure you want to remove this friend?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Remove",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await removeFriend({ connection_id: connectionId as any, user_id: user.id });
-          } catch (error) {
-            Alert.alert("Error", "Failed to remove friend");
-          }
-        },
-      },
-    ]);
+  const handleConfirmRemoveFriend = async () => {
+    if (!user?.id || !removeConnectionId) return;
+
+    try {
+      await removeFriend({ connection_id: removeConnectionId as any, user_id: user.id });
+      setRemoveConnectionId(null);
+    } catch (error) {
+      Alert.alert("Error", "Failed to remove friend");
+      setRemoveConnectionId(null);
+    }
   };
 
   const handleBlockUser = async (userId: string) => {
-    if (!user?.id) return;
+    setBlockUserId(userId);
+  };
 
-    Alert.alert("Block User", "Are you sure you want to block this user?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Block",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await blockUser({ blocker_id: user.id, blocked_id: userId });
-          } catch (error) {
-            Alert.alert("Error", "Failed to block user");
-          }
-        },
-      },
-    ]);
+  const handleConfirmBlockUser = async () => {
+    if (!user?.id || !blockUserId) return;
+
+    try {
+      await blockUser({ blocker_id: user.id, blocked_id: blockUserId });
+      setBlockUserId(null);
+    } catch (error) {
+      Alert.alert("Error", "Failed to block user");
+      setBlockUserId(null);
+    }
   };
 
   const handleAcceptRequest = async (connectionId: string) => {
@@ -168,6 +165,10 @@ const Friends = () => {
       <BottomSheet isVisible={isAddFriendsSheetVisible} onClose={() => setIsAddFriendsSheetVisible(false)}>
         <UserProfileBottomSheetContent userProfiles={userProfiles} onSendRequest={handleSendRequest} />
       </BottomSheet>
+
+      <DeleteConfirmationModal visible={removeConnectionId !== null} text="Are you sure you want to remove this friend?" onCancel={() => setRemoveConnectionId(null)} onDelete={handleConfirmRemoveFriend} />
+
+      <DeleteConfirmationModal visible={blockUserId !== null} text="Are you sure you want to block this user?" onCancel={() => setBlockUserId(null)} onDelete={handleConfirmBlockUser} />
     </View>
   );
 };
