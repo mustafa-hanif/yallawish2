@@ -68,6 +68,8 @@ export default defineSchema({
     description: v.optional(v.union(v.string(), v.null())),
     coverPhotoUri: v.optional(v.union(v.string(), v.null())),
     coverPhotoStorageId: v.optional(v.union(v.string(), v.null())),
+    isArchived: v.optional(v.boolean()),
+    archived_date: v.optional(v.union(v.string(), v.null())),
     created_at: v.string(),
     updated_at: v.string(),
   }).index("by_owner", ["owner_id"]),

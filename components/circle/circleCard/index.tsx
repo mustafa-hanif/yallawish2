@@ -17,6 +17,7 @@ interface CircleCardProps {
     occasionCount?: number;
     nextEventDate?: string | null;
     totalGiftItems?: number;
+    isArchived?: boolean;
     isOwner?: boolean;
     isAdmin?: boolean;
   };
@@ -94,6 +95,9 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
   const numberOfGiftItems = circle?.totalGiftItems || 0;
   const nextEvent = formatEventDate(circle?.nextEventDate);
   const numberOfOccasions = circle?.occasionCount || 0;
+  const isArchived = circle?.isArchived || false;
+  const statusText = isArchived ? "Archived" : "Active";
+  const statusBackgroundColor = isArchived ? "#8E8E93" : "#4CD964";
 
   return (
     <>
@@ -105,8 +109,8 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
               <View style={styles.circleOccasions}>
                 <Text style={styles.circleOccasionsText}>{numberOfOccasions} Occasions</Text>
               </View>
-              <View style={styles.circleStatus}>
-                <Text style={styles.circleStatusText}>Active</Text>
+              <View style={[styles.circleStatus, { backgroundColor: statusBackgroundColor }]}>
+                <Text style={styles.circleStatusText}>{statusText}</Text>
               </View>
             </View>
             <View style={styles.headerContentBottom}>

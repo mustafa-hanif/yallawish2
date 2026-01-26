@@ -117,6 +117,11 @@ export const styles = StyleSheet.create({
     fontFamily: "Nunito_700Bold",
     color: "#330065",
   },
+  archivedDateText: {
+    fontSize: 12,
+    fontFamily: "Nunito_400Regular",
+    color: "#1C1C1C",
+  },
   members: {
     width: 75,
     height: 33.3,
