@@ -35,6 +35,7 @@ interface CircleCardProps {
 export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
   const [isBottomSheet, setIsBottomSheet] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [showArchiveConfirmation, setShowArchiveConfirmation] = useState(false);
   const deleteGroup = useMutation(api.products.deleteGroup);
   const toggleGroupArchived = useMutation(api.products.toggleGroupArchived);
 
@@ -92,19 +93,25 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
     }
   };
 
+  const handleArchiveCircle = async () => {
+    try {
+      if (circle?._id) {
+        await toggleGroupArchived({ group_id: circle._id });
+        setShowArchiveConfirmation(false);
+        setIsBottomSheet(false);
+      }
+    } catch (error) {
+      console.error("Failed to toggle archive:", error);
+    }
+  };
+
   const handleActionPress = async (actionTitle: string) => {
     if (actionTitle === "Delete Circle") {
       setIsBottomSheet(false);
       setShowDeleteConfirmation(true);
     } else if (actionTitle === "Archive Circle" || actionTitle === "Unarchive Circle") {
-      try {
-        if (circle?._id) {
-          await toggleGroupArchived({ group_id: circle._id });
-          setIsBottomSheet(false);
-        }
-      } catch (error) {
-        console.error("Failed to toggle archive:", error);
-      }
+      setIsBottomSheet(false);
+      setShowArchiveConfirmation(true);
     }
     // Handle other actions here
   };
@@ -213,6 +220,7 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
         </ScrollView>
       </BottomSheet>
       <DeleteConfirmation visible={showDeleteConfirmation} text="Are you sure you want to\ndelete this circle?" onCancel={() => setShowDeleteConfirmation(false)} onDelete={handleDeleteCircle} />
+      <DeleteConfirmation visible={showArchiveConfirmation} text={`Are you sure you want to\n${circle?.isArchived ? "unarchive" : "archive"} ${circle?.name || "this circle"} circle?`} onCancel={() => setShowArchiveConfirmation(false)} onDelete={handleArchiveCircle} />
     </>
   );
 }

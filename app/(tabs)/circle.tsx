@@ -74,17 +74,18 @@ const Circle = () => {
     <View style={styles.container}>
       <Header title="My Circles" handleBack={handleBack} />
       <CircleManagement />
-
+      <View style={{ paddingHorizontal: 16, marginBottom: 22.3 }}>
+        <TextInputField placeholder="Search" icon={<Image source={require("@/assets/images/search.png")} />} value={searchText} onChangeText={setSearchText} />
+      </View>
       {isLoading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator color="#3B0076" size="large" />
           <Text style={styles.loadingText}>Loading circles...</Text>
         </View>
       ) : circlesIamMemberOf.length === 0 && circlesIamAdminOf.length === 0 ? (
-        <NoCircleFound />
+        <NoCircleFound searchText={searchText} />
       ) : (
         <View style={styles.circleContainer}>
-          <TextInputField placeholder="Search" icon={<Image source={require("@/assets/images/search.png")} />} value={searchText} onChangeText={setSearchText} />
           <View style={{ gap: 16 }}>
             {circlesIamAdminOf.length > 0 && (
               <View>
