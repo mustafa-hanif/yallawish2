@@ -1715,6 +1715,54 @@ export const deleteGroup = mutation({
   },
 });
 
+// Remove a member from a group (owner/admin only)
+export const removeGroupMember = mutation({
+  args: {
+    group_id: v.id("groups"),
+    member_user_id: v.string(),
+    requester_user_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // 1. Get the group to verify ownership
+    const group = await ctx.db.get(args.group_id);
+    if (!group) {
+      throw new Error("Group not found");
+    }
+
+    // 2. Get requester's membership to verify they're owner/admin
+    const requesterMembership = await ctx.db
+      .query("group_members")
+      .withIndex("by_group_and_user", (q) => q.eq("group_id", args.group_id).eq("user_id", args.requester_user_id))
+      .first();
+
+    // 3. Verify authorization (owner or admin)
+    const isOwner = group.owner_id === args.requester_user_id;
+    const isAdmin = requesterMembership?.is_admin === true;
+
+    if (!isOwner && !isAdmin) {
+      throw new Error("Only owners and admins can remove members");
+    }
+
+    // 4. Prevent removing the owner
+    if (args.member_user_id === group.owner_id) {
+      throw new Error("Cannot remove the group owner");
+    }
+
+    // 5. Find and delete the member
+    const memberToRemove = await ctx.db
+      .query("group_members")
+      .withIndex("by_group_and_user", (q) => q.eq("group_id", args.group_id).eq("user_id", args.member_user_id))
+      .first();
+
+    if (!memberToRemove) {
+      throw new Error("Member not found in this group");
+    }
+
+    await ctx.db.delete(memberToRemove._id);
+    return { success: true };
+  },
+});
+
 // Toggle archived state for current user's membership in a group (per-user archive)
 export const toggleGroupArchivedForUser = mutation({
   args: { group_id: v.id("groups"), user_id: v.string() },

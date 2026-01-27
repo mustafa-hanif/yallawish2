@@ -1,21 +1,28 @@
 import CircleBanner from "@/components/circle/CircleBanner";
 import SectionHeader from "@/components/circle/SectionHeader";
 import ViewCircleGroupInfo from "@/components/circle/ViewCircleGroupInfo";
+import DeleteConfirmation from "@/components/DeleteConfirmationModal";
 import Header from "@/components/Header";
 import WishListCard from "@/components/wishlists/WishListCard";
 import { api } from "@/convex/_generated/api";
 import { useAuth } from "@clerk/clerk-expo";
 import { Entypo } from "@expo/vector-icons";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { router, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const ViewCircle = () => {
   const { returnTo, circleId } = useLocalSearchParams<{ returnTo?: string; circleId?: string }>();
   const { userId } = useAuth();
+  const [memberToRemove, setMemberToRemove] = useState<string | null>(null);
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
 
   const encodedReturnTo = returnTo ? String(returnTo) : undefined;
   const decodedReturnTo = encodedReturnTo ? decodeURIComponent(encodedReturnTo) : undefined;
+
+  // Mutation for removing members
+  const removeGroupMember = useMutation(api.products.removeGroupMember);
 
   // Fetch circle details
   const circle = useQuery(api.products.getGroupById, circleId && userId ? { group_id: circleId as any, user_id: userId } : "skip");
@@ -61,6 +68,31 @@ const ViewCircle = () => {
     return "??";
   };
 
+  // Handle remove member button press
+  const handleRemoveMember = (memberUserId: string, memberName: string) => {
+    setMemberToRemove(memberUserId);
+    setShowRemoveModal(true);
+  };
+
+  // Confirm member removal
+  const confirmRemoveMember = async () => {
+    if (!memberToRemove || !circleId || !userId) return;
+
+    try {
+      await removeGroupMember({
+        group_id: circleId as any,
+        member_user_id: memberToRemove,
+        requester_user_id: userId,
+      });
+      setShowRemoveModal(false);
+      setMemberToRemove(null);
+    } catch (error) {
+      console.error("Failed to remove member:", error);
+      setShowRemoveModal(false);
+      setMemberToRemove(null);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Header title="View Circle" handleBack={handleBack} />
@@ -104,14 +136,14 @@ const ViewCircle = () => {
                         <View style={styles.adminBadge}>
                           <Text style={styles.adminBadgeText}>ADMIN</Text>
                         </View>
-                        {circle.isOwner && (
-                          <Pressable style={styles.removeButton}>
+                        {circle.isOwner && item.user_id !== circle.owner_id && (
+                          <Pressable style={styles.removeButton} onPress={() => handleRemoveMember(item.user_id, item.profile?.displayName || item.profile?.firstName || "this member")}>
                             <Entypo name="circle-with-cross" size={24} color="#3B0076" />
                           </Pressable>
                         )}
                       </View>
-                    ) : circle.isOwner ? (
-                      <Pressable style={styles.removeButton}>
+                    ) : circle.isOwner && item.user_id !== circle.owner_id ? (
+                      <Pressable style={styles.removeButton} onPress={() => handleRemoveMember(item.user_id, item.profile?.displayName || item.profile?.firstName || "this member")}>
                         <Entypo name="circle-with-cross" size={24} color="#3B0076" />
                       </Pressable>
                     ) : null}
@@ -127,6 +159,7 @@ const ViewCircle = () => {
           </View>
         </ScrollView>
       )}
+      <DeleteConfirmation visible={showRemoveModal} text={"Are you sure you want to\nremove this member from the circle?"} onCancel={() => setShowRemoveModal(false)} onDelete={confirmRemoveMember} deleteButtonText="Remove" />
     </View>
   );
 };
