@@ -198,6 +198,7 @@ export default function TabLayout() {
         <Tabs.Screen name="view-circle" options={{ href: null }} />
         <Tabs.Screen name="friend-profile" options={{ href: null }} />
         <Tabs.Screen name="friends" options={{ href: null }} />
+        <Tabs.Screen name="edit-circle" options={{ href: null }} />
         {/* Gift and List journey screens - hidden from tab bar but included in this navigator */}
         {/* <Tabs.Screen
         name="create-list-step1"

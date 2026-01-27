@@ -1822,3 +1822,49 @@ export const leaveGroup = mutation({
     return { success: true };
   },
 });
+
+// Update circle details (name, description, cover photo)
+export const updateGroup = mutation({
+  args: {
+    group_id: v.id("groups"),
+    user_id: v.string(),
+    name: v.optional(v.string()),
+    description: v.optional(v.string()),
+    coverPhotoUri: v.optional(v.string()),
+    coverPhotoStorageId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // 1. Get the group to verify ownership
+    const group = await ctx.db.get(args.group_id);
+    if (!group) {
+      throw new Error("Circle not found");
+    }
+
+    // 2. Verify user is owner or admin
+    const membership = await ctx.db
+      .query("group_members")
+      .withIndex("by_group_and_user", (q) => q.eq("group_id", args.group_id).eq("user_id", args.user_id))
+      .first();
+
+    const isOwner = group.owner_id === args.user_id;
+    const isAdmin = membership?.is_admin === true;
+
+    if (!isOwner && !isAdmin) {
+      throw new Error("Only owners and admins can edit circle details");
+    }
+
+    // 3. Update the group with provided fields
+    const updateData: any = {
+      updated_at: new Date().toISOString(),
+    };
+
+    if (args.name !== undefined) updateData.name = args.name;
+    if (args.description !== undefined) updateData.description = args.description || null;
+    if (args.coverPhotoUri !== undefined) updateData.coverPhotoUri = args.coverPhotoUri || null;
+    if (args.coverPhotoStorageId !== undefined) updateData.coverPhotoStorageId = args.coverPhotoStorageId || null;
+
+    await ctx.db.patch(args.group_id, updateData);
+
+    return { success: true };
+  },
+});

@@ -142,6 +142,12 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
     } else if (actionTitle === "Exit Circle") {
       setIsBottomSheet(false);
       setShowExitConfirmation(true);
+    } else if (actionTitle === "Edit Circle") {
+      router.push({
+        pathname: "/edit-circle",
+        params: { circleId: circle?._id },
+      });
+      setIsBottomSheet(false);
     }
     // Handle other actions here
   };
