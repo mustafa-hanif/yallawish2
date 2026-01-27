@@ -1511,10 +1511,11 @@ export const createGroup = mutation({
 export const getGroups = query({
   args: { user_id: v.string() },
   handler: async (ctx, args) => {
-    // Get all groups where user is a member
+    // Get all groups where user is a member (excluding archived circles)
     const memberships = await ctx.db
       .query("group_members")
       .withIndex("by_user", (q) => q.eq("user_id", args.user_id))
+      .filter((q) => q.neq(q.field("isArchived"), true))
       .collect();
 
     // Fetch full group details for each membership
@@ -1714,29 +1715,27 @@ export const deleteGroup = mutation({
   },
 });
 
-// Archive or unarchive a group
-export const setGroupArchived = mutation({
-  args: { group_id: v.id("groups"), isArchived: v.boolean() },
+// Toggle archived state for current user's membership in a group (per-user archive)
+export const toggleGroupArchivedForUser = mutation({
+  args: { group_id: v.id("groups"), user_id: v.string() },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.group_id, {
-      isArchived: args.isArchived,
-      archived_date: args.isArchived ? new Date().toISOString() : null,
-    });
-    return true;
-  },
-});
+    // Find the user's membership record
+    const membership = await ctx.db
+      .query("group_members")
+      .withIndex("by_group_and_user", (q) => q.eq("group_id", args.group_id).eq("user_id", args.user_id))
+      .first();
 
-// Toggle archived state for a group; returns the new state
-export const toggleGroupArchived = mutation({
-  args: { group_id: v.id("groups") },
-  handler: async (ctx, args) => {
-    const group = await ctx.db.get(args.group_id);
-    if (!group) return false as any;
-    const next = !Boolean((group as any).isArchived);
-    await ctx.db.patch(args.group_id, {
-      isArchived: next,
-      archived_date: next ? new Date().toISOString() : null,
+    if (!membership) {
+      throw new Error("User is not a member of this group");
+    }
+
+    // Toggle the archived state for this user only
+    const newArchivedState = !Boolean(membership.isArchived);
+    await ctx.db.patch(membership._id, {
+      isArchived: newArchivedState,
+      archived_date: newArchivedState ? new Date().toISOString() : null,
     });
-    return next as any;
+
+    return newArchivedState;
   },
 });

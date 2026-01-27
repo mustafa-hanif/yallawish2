@@ -1,4 +1,5 @@
 import { api } from "@/convex/_generated/api";
+import { useAuth } from "@clerk/clerk-expo";
 import { useMutation } from "convex/react";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -33,11 +34,12 @@ interface CircleCardProps {
 }
 
 export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
+  const { userId } = useAuth();
   const [isBottomSheet, setIsBottomSheet] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showArchiveConfirmation, setShowArchiveConfirmation] = useState(false);
   const deleteGroup = useMutation(api.products.deleteGroup);
-  const toggleGroupArchived = useMutation(api.products.toggleGroupArchived);
+  const toggleGroupArchived = useMutation(api.products.toggleGroupArchivedForUser);
 
   // Debug logging
   console.log("=== CircleCard Debug ===");
@@ -95,8 +97,11 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
 
   const handleArchiveCircle = async () => {
     try {
-      if (circle?._id) {
-        await toggleGroupArchived({ group_id: circle._id });
+      if (circle?._id && userId) {
+        await toggleGroupArchived({
+          group_id: circle._id,
+          user_id: userId,
+        });
         setShowArchiveConfirmation(false);
         setIsBottomSheet(false);
       }
@@ -219,8 +224,8 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
           </View>
         </ScrollView>
       </BottomSheet>
-      <DeleteConfirmation visible={showDeleteConfirmation} text="Are you sure you want to\ndelete this circle?" onCancel={() => setShowDeleteConfirmation(false)} onDelete={handleDeleteCircle} />
-      <DeleteConfirmation visible={showArchiveConfirmation} text={`Are you sure you want to\n${circle?.isArchived ? "unarchive" : "archive"} ${circle?.name || "this circle"} circle?`} onCancel={() => setShowArchiveConfirmation(false)} onDelete={handleArchiveCircle} />
+      <DeleteConfirmation visible={showDeleteConfirmation} text={"Are you sure you want to\ndelete this circle?"} onCancel={() => setShowDeleteConfirmation(false)} onDelete={handleDeleteCircle} />
+      <DeleteConfirmation iconSource={circle?.isArchived ? require("@/assets/images/unarchiveList.png") : require("@/assets/images/archiveList.png")} deleteButtonText={circle?.isArchived ? "Unarchive" : "Archive"} deleteButtonColor={"#8E8E93"} visible={showArchiveConfirmation} text={`Are you sure you want to\n${circle?.isArchived ? "unarchive" : "archive"} this circle?`} onCancel={() => setShowArchiveConfirmation(false)} onDelete={handleArchiveCircle} />
     </>
   );
 }

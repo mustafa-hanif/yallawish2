@@ -19,7 +19,7 @@ export default function NoCircleFound({ searchText }: NoCircleFoundProps) {
       <View>
         <Text style={styles.title}>{searchText?.length > 0 ? `No circles found` : "Your Circle Lives Here"}</Text>
       </View>
-      {searchText.length < 0 && (
+      {searchText.length === 0 && (
         <>
           <View>
             <Text style={styles.description}>{"Start your first circle and make gifting\neasier for every occasions"}</Text>
