@@ -1787,3 +1787,38 @@ export const toggleGroupArchivedForUser = mutation({
     return newArchivedState;
   },
 });
+
+// Leave a circle (remove self from group membership)
+export const leaveGroup = mutation({
+  args: {
+    group_id: v.id("groups"),
+    user_id: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // 1. Get the group to verify it exists and check ownership
+    const group = await ctx.db.get(args.group_id);
+    if (!group) {
+      throw new Error("Circle not found");
+    }
+
+    // 2. Prevent owner from leaving (must delete circle or transfer ownership)
+    if (group.owner_id === args.user_id) {
+      throw new Error("Circle owner cannot leave. Please delete the circle or transfer ownership first.");
+    }
+
+    // 3. Find user's membership record
+    const membership = await ctx.db
+      .query("group_members")
+      .withIndex("by_group_and_user", (q) => q.eq("group_id", args.group_id).eq("user_id", args.user_id))
+      .first();
+
+    if (!membership) {
+      throw new Error("You are not a member of this circle");
+    }
+
+    // 4. Delete the membership record
+    await ctx.db.delete(membership._id);
+
+    return { success: true };
+  },
+});

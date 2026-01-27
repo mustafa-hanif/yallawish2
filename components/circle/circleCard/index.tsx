@@ -38,8 +38,10 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
   const [isBottomSheet, setIsBottomSheet] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showArchiveConfirmation, setShowArchiveConfirmation] = useState(false);
+  const [showExitConfirmation, setShowExitConfirmation] = useState(false);
   const deleteGroup = useMutation(api.products.deleteGroup);
   const toggleGroupArchived = useMutation(api.products.toggleGroupArchivedForUser);
+  const leaveGroup = useMutation(api.products.leaveGroup);
 
   // Debug logging
   console.log("=== CircleCard Debug ===");
@@ -110,6 +112,26 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
     }
   };
 
+  const handleExitCircle = async () => {
+    try {
+      if (circle?._id && userId) {
+        await leaveGroup({
+          group_id: circle._id,
+          user_id: userId,
+        });
+        setShowExitConfirmation(false);
+        setIsBottomSheet(false);
+        // Navigate back to circles list
+        router.push("/circle");
+      }
+    } catch (error: any) {
+      console.error("Failed to leave circle:", error);
+      // Show error alert to user
+      alert(error?.message || "Failed to leave circle. Please try again.");
+      setShowExitConfirmation(false);
+    }
+  };
+
   const handleActionPress = async (actionTitle: string) => {
     if (actionTitle === "Delete Circle") {
       setIsBottomSheet(false);
@@ -117,6 +139,9 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
     } else if (actionTitle === "Archive Circle" || actionTitle === "Unarchive Circle") {
       setIsBottomSheet(false);
       setShowArchiveConfirmation(true);
+    } else if (actionTitle === "Exit Circle") {
+      setIsBottomSheet(false);
+      setShowExitConfirmation(true);
     }
     // Handle other actions here
   };
@@ -230,6 +255,7 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
       </BottomSheet>
       <DeleteConfirmation visible={showDeleteConfirmation} text={"Are you sure you want to\ndelete this circle?"} onCancel={() => setShowDeleteConfirmation(false)} onDelete={handleDeleteCircle} />
       <DeleteConfirmation iconSource={circle?.isArchived ? require("@/assets/images/unarchiveList.png") : require("@/assets/images/archiveList.png")} deleteButtonText={circle?.isArchived ? "Unarchive" : "Archive"} deleteButtonColor={"#8E8E93"} visible={showArchiveConfirmation} text={`Are you sure you want to\n${circle?.isArchived ? "unarchive" : "archive"} this circle?`} onCancel={() => setShowArchiveConfirmation(false)} onDelete={handleArchiveCircle} />
+      <DeleteConfirmation iconSource={require("@/assets/images/archiveList.png")} deleteButtonText="Leave" visible={showExitConfirmation} text={"Are you sure you want to\nleave this circle?"} onCancel={() => setShowExitConfirmation(false)} onDelete={handleExitCircle} />
     </>
   );
 }
