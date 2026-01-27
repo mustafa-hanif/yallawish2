@@ -1713,3 +1713,30 @@ export const deleteGroup = mutation({
     return { success: true };
   },
 });
+
+// Archive or unarchive a group
+export const setGroupArchived = mutation({
+  args: { group_id: v.id("groups"), isArchived: v.boolean() },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.group_id, {
+      isArchived: args.isArchived,
+      archived_date: args.isArchived ? new Date().toISOString() : null,
+    });
+    return true;
+  },
+});
+
+// Toggle archived state for a group; returns the new state
+export const toggleGroupArchived = mutation({
+  args: { group_id: v.id("groups") },
+  handler: async (ctx, args) => {
+    const group = await ctx.db.get(args.group_id);
+    if (!group) return false as any;
+    const next = !Boolean((group as any).isArchived);
+    await ctx.db.patch(args.group_id, {
+      isArchived: next,
+      archived_date: next ? new Date().toISOString() : null,
+    });
+    return next as any;
+  },
+});

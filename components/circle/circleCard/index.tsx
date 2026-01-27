@@ -36,6 +36,7 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
   const [isBottomSheet, setIsBottomSheet] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const deleteGroup = useMutation(api.products.deleteGroup);
+  const toggleGroupArchived = useMutation(api.products.toggleGroupArchived);
 
   // Debug logging
   console.log("=== CircleCard Debug ===");
@@ -91,22 +92,42 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
     }
   };
 
-  const handleActionPress = (actionTitle: string) => {
+  const handleActionPress = async (actionTitle: string) => {
     if (actionTitle === "Delete Circle") {
       setIsBottomSheet(false);
       setShowDeleteConfirmation(true);
+    } else if (actionTitle === "Archive Circle" || actionTitle === "Unarchive Circle") {
+      try {
+        if (circle?._id) {
+          await toggleGroupArchived({ group_id: circle._id });
+          setIsBottomSheet(false);
+        }
+      } catch (error) {
+        console.error("Failed to toggle archive:", error);
+      }
     }
     // Handle other actions here
   };
 
-  const quickActions = [
-    { title: "Edit Circle", icon: require("@/assets/images/Edit.png") },
-    { title: "Invite Members", icon: require("@/assets/images/inviteMembers.png") },
-    { title: "Copy share link", icon: require("@/assets/images/copyShareLink.png") },
-    { title: "Archive Circle", icon: require("@/assets/images/archiveList.png") },
-    { title: "Exit Circle", icon: require("@/assets/images/archiveList.png") },
-    { title: "Delete Circle", icon: require("@/assets/images/deleteList.png") },
-  ];
+  // Define actions based on user role
+  const isOwnerOrAdmin = circle?.isOwner || circle?.isAdmin;
+
+  const quickActions = isOwnerOrAdmin
+    ? [
+        { title: "Edit Circle", icon: require("@/assets/images/Edit.png") },
+        { title: "Invite Members", icon: require("@/assets/images/inviteMembers.png") },
+        { title: "Copy share link", icon: require("@/assets/images/copyShareLink.png") },
+        {
+          title: circle?.isArchived ? "Unarchive Circle" : "Archive Circle",
+          icon: require("@/assets/images/archiveList.png"),
+        },
+        { title: "Delete Circle", icon: require("@/assets/images/deleteList.png") },
+      ]
+    : [
+        { title: "Invite Members", icon: require("@/assets/images/inviteMembers.png") },
+        { title: "Copy share link", icon: require("@/assets/images/copyShareLink.png") },
+        { title: "Exit Circle", icon: require("@/assets/images/archiveList.png") },
+      ];
 
   // Format next event date
   const formatEventDate = (dateString: string | null | undefined) => {
@@ -174,7 +195,7 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
           </Pressable>
         </View>
       </Pressable>
-      <BottomSheet isVisible={isBottomSheet} onClose={() => setIsBottomSheet(false)}>
+      <BottomSheet height={isOwnerOrAdmin ? 550 : 400} isVisible={isBottomSheet} onClose={() => setIsBottomSheet(false)}>
         <ScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
           <Text style={styles.sheetTitle}>Manage Circle</Text>
           <View style={styles.actionsContainer}>
