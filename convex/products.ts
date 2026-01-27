@@ -1515,7 +1515,7 @@ export const getGroups = query({
     const memberships = await ctx.db
       .query("group_members")
       .withIndex("by_user", (q) => q.eq("user_id", args.user_id))
-      .filter((q) => q.neq(q.field("isArchived"), true))
+      .filter((q) => q.neq(q.field("is_archived"), true))
       .collect();
 
     // Fetch full group details for each membership
@@ -1730,9 +1730,9 @@ export const toggleGroupArchivedForUser = mutation({
     }
 
     // Toggle the archived state for this user only
-    const newArchivedState = !Boolean(membership.isArchived);
+    const newArchivedState = !Boolean(membership.is_archived);
     await ctx.db.patch(membership._id, {
-      isArchived: newArchivedState,
+      is_archived: newArchivedState,
       archived_date: newArchivedState ? new Date().toISOString() : null,
     });
 

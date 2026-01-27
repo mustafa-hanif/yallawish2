@@ -80,7 +80,7 @@ export default defineSchema({
     // New schema fields
     user_id: v.optional(v.string()), // Clerk user id of the member (from user_connections)
     is_admin: v.optional(v.boolean()), // Whether this member has admin privileges
-    isArchived: v.optional(v.boolean()), // Whether this member has archived this circle for themselves
+    is_archived: v.optional(v.boolean()), // Whether this member has archived this circle for themselves
     archived_date: v.optional(v.union(v.string(), v.null())), // When this member archived the circle
     // Legacy field for backwards compatibility - will be removed after migration
     contact_id: v.optional(v.id("contacts")),
