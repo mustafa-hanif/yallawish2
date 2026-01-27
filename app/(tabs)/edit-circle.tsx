@@ -89,12 +89,6 @@ const EditCircle = () => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleDeleteImage = () => {
-    updateFormData("coverPhotoUri", null);
-    updateFormData("coverPhotoStorageId", null);
-    setShowDeleteImageConfirm(false);
-  };
-
   const handlePickImage = async (isReframe: boolean = false) => {
     try {
       if (isUploadingCover) return;
