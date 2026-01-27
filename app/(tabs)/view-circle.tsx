@@ -47,7 +47,10 @@ const ViewCircle = () => {
   };
 
   const handlePressAddNew = () => {
-    router.push("/create-circle-step1");
+    router.push({
+      pathname: "/create-list-step1",
+      params: { circleId },
+    });
   };
 
   // Get member initials helper
