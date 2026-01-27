@@ -12,6 +12,8 @@ const window: ScaledSize = Dimensions.get("screen");
 
 export function Hero({}: HeroProp) {
   const handleCreateWishlist = () => router.push("/create-list-step1");
+  const handleCreateCircle = () => router.push("/create-circle-step1");
+
   const progress = useSharedValue<number>(0);
   const { user } = useUser();
 
@@ -30,7 +32,7 @@ export function Hero({}: HeroProp) {
       subtitle: "Invite friends & family to view your list",
       image: require("@/assets/images/addCommunity.png"),
       backgroundColor: "#E9FFE2",
-      action: () => Alert.alert("Share", "Sharing coming soon"),
+      action: handleCreateCircle,
     },
     {
       id: "3",
