@@ -138,6 +138,10 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
     : [
         { title: "Invite Members", icon: require("@/assets/images/inviteMembers.png") },
         { title: "Copy share link", icon: require("@/assets/images/copyShareLink.png") },
+        {
+          title: circle?.isArchived ? "Unarchive Circle" : "Archive Circle",
+          icon: require("@/assets/images/archiveList.png"),
+        },
         { title: "Exit Circle", icon: require("@/assets/images/archiveList.png") },
       ];
 
@@ -207,7 +211,7 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
           </Pressable>
         </View>
       </Pressable>
-      <BottomSheet height={isOwnerOrAdmin ? 550 : 400} isVisible={isBottomSheet} onClose={() => setIsBottomSheet(false)}>
+      <BottomSheet height={isOwnerOrAdmin ? 550 : 450} isVisible={isBottomSheet} onClose={() => setIsBottomSheet(false)}>
         <ScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
           <Text style={styles.sheetTitle}>Manage Circle</Text>
           <View style={styles.actionsContainer}>
