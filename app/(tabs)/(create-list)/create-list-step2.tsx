@@ -158,7 +158,7 @@ export default function CreateListStep2() {
   const generateCoverUploadUrl = useMutation(api.products.generateListCoverUploadUrl as any);
   const getCoverUrl = useMutation(api.products.getListCoverUrl as any);
   const { user } = useUser();
-  const { listId } = useLocalSearchParams<{ listId?: string }>();
+  const { listId, circleId } = useLocalSearchParams<{ listId?: string; circleId?: string }>();
   const existing = useQuery(api.products.getListById, listId ? { listId: listId as any } : "skip");
 
   React.useEffect(() => {
@@ -256,6 +256,7 @@ export default function CreateListStep2() {
         return;
       }
 
+      const isCircleList = Boolean(circleId);
       const newListId = await createList({
         title: formData.eventTitle,
         note: formData.eventNote || null,
@@ -264,13 +265,23 @@ export default function CreateListStep2() {
         occasion: formData.occasion || null,
         coverPhotoUri: formData.coverPhotoUri || null,
         coverPhotoStorageId: formData.coverPhotoStorageId || null,
-        privacy: "private",
+        privacy: isCircleList ? "shared" : "private",
         user_id: user?.id ?? null,
+        group_id: circleId ? (circleId as any) : undefined,
       });
-      router.push({
-        pathname: "/create-list-step3",
-        params: { listId: String(newListId) },
-      });
+
+      if (isCircleList) {
+        // Skip step3 for circle-owned lists, go directly to add-gift
+        router.push({
+          pathname: "/add-gift",
+          params: { listId: String(newListId) },
+        });
+      } else {
+        router.push({
+          pathname: "/create-list-step3",
+          params: { listId: String(newListId) },
+        });
+      }
     } catch (e) {
       console.error("Failed to save list", e);
       Alert.alert("Error", "Could not save your list. Please try again.");
@@ -494,6 +505,7 @@ export default function CreateListStep2() {
     occasions: OCCASION_OPTIONS,
     onOccasionSelect,
     listId,
+    circleId,
     onWebDateChange,
   };
 
@@ -529,6 +541,7 @@ type SharedLayoutProps = {
   occasions: OccasionOption[];
   onOccasionSelect: (occasionId: OccasionOption["id"]) => void;
   listId?: string;
+  circleId?: string;
   onWebDateChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
@@ -537,7 +550,7 @@ type DesktopLayoutProps = SharedLayoutProps & {
   onWebDateChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
-function DesktopLayout({ headerTitle, formData, characterCount, updateFormData, handleNoteChange, handleBack, handleContinue, showDatePicker, handlePickImage, isFormValid, isUploadingCover, occasions, onOccasionSelect, steps, onWebDateChange }: DesktopLayoutProps) {
+function DesktopLayout({ headerTitle, formData, characterCount, updateFormData, handleNoteChange, handleBack, handleContinue, showDatePicker, handlePickImage, isFormValid, isUploadingCover, occasions, onOccasionSelect, steps, circleId, onWebDateChange }: DesktopLayoutProps) {
   return (
     <SafeAreaView style={styles.desktopSafeArea} edges={["top"]}>
       <StatusBar barStyle="dark-content" />
@@ -658,7 +671,7 @@ function DesktopLayout({ headerTitle, formData, characterCount, updateFormData, 
                 <Text style={styles.desktopBackButtonText}>Back</Text>
               </Pressable>
               <Pressable onPress={handleContinue} disabled={!isFormValid} style={[styles.desktopContinueButton, !isFormValid && styles.desktopContinueButtonDisabled]}>
-                <Text style={styles.desktopContinueButtonText}>Continue</Text>
+                <Text style={styles.desktopContinueButtonText}>{circleId ? "Yallah! Let's add gifts" : "Continue"}</Text>
               </Pressable>
             </View>
           </View>
@@ -689,7 +702,7 @@ function DesktopOccasionCard({ option, selected, onPress }: DesktopOccasionCardP
   );
 }
 
-function MobileLayout({ headerTitle, formData, characterCount, updateFormData, handleNoteChange, handleBack, handleContinue, showDatePicker, handlePickImage, isFormValid, isUploadingCover, occasions, onOccasionSelect, listId }: SharedLayoutProps) {
+function MobileLayout({ headerTitle, formData, characterCount, updateFormData, handleNoteChange, handleBack, handleContinue, showDatePicker, handlePickImage, isFormValid, isUploadingCover, occasions, onOccasionSelect, listId, circleId }: SharedLayoutProps) {
   const ProgressIndicator = () => (
     <View style={styles.progressContainer}>
       <View style={styles.progressBarContainer}>
@@ -777,7 +790,7 @@ function MobileLayout({ headerTitle, formData, characterCount, updateFormData, h
 
       <View style={styles.bottomButtons}>
         <Pressable style={[styles.continueButton, !isFormValid && styles.continueButtonDisabled]} onPress={handleContinue} disabled={!isFormValid}>
-          <Text style={styles.continueButtonText}>Continue</Text>
+          <Text style={styles.continueButtonText}>{circleId ? "Yallah! Let's add gifts" : "Continue"}</Text>
         </Pressable>
         {/* <Pressable onPress={handleBack} style={styles.backButtonBottom}>
           <Text style={styles.backButtonText}>Back</Text>

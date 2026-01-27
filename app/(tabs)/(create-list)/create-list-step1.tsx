@@ -2,20 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import {
-  Dimensions, Image, ImageSourcePropType, Platform,
-  Pressable,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-  useWindowDimensions
-} from "react-native";
+import { Dimensions, Image, ImageSourcePropType, Platform, Pressable, ScrollView, StatusBar, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import Ripple from "react-native-material-ripple";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-
 
 const { width: screenWidth } = Dimensions.get("window");
 const DESKTOP_BREAKPOINT = 1024;
@@ -28,7 +17,7 @@ type OptionConfig = {
   description: string;
   mobileDescription: string;
   icon: (color: string, size: number) => React.ReactNode;
-  mobileIcon: ImageSourcePropType
+  mobileIcon: ImageSourcePropType;
 };
 
 const STEP_ITEMS = ["Who is this list for?", "Giftlist Details", "Who can see this list?"];
@@ -40,7 +29,7 @@ const OPTION_CONFIG: OptionConfig[] = [
     description: "Build a wish list for your own celebrations, milestones, or just a treat for yourself!",
     mobileDescription: "Build a wish list for your celebrations, big or small — or just because you deserve it.",
     icon: (color, size) => <Ionicons name="person-outline" size={size} color={color} />,
-    mobileIcon: require("@/assets/images/myself.png")
+    mobileIcon: require("@/assets/images/myself.png"),
   },
   {
     id: "someone-else",
@@ -49,7 +38,7 @@ const OPTION_CONFIG: OptionConfig[] = [
     mobileDescription: "Make a list on behalf of your kids, pets, spouse, parents, or anyone special.",
 
     icon: (color, size) => <Ionicons name="people-outline" size={size} color={color} />,
-    mobileIcon: require("@/assets/images/someoneElse.png")
+    mobileIcon: require("@/assets/images/someoneElse.png"),
   },
 ];
 
@@ -61,7 +50,7 @@ type LayoutProps = {
 };
 
 export default function CreateListStep1() {
-  const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
+  const { returnTo, circleId } = useLocalSearchParams<{ returnTo?: string; circleId?: string }>();
   const encodedReturnTo = returnTo ? String(returnTo) : undefined;
   const decodedReturnTo = encodedReturnTo ? decodeURIComponent(encodedReturnTo) : undefined;
 
@@ -81,14 +70,18 @@ export default function CreateListStep1() {
 
   const handleContinue = () => {
     if (!selectedOption) return;
-    const params = encodedReturnTo ? { returnTo: encodedReturnTo } : undefined;
+    const params: Record<string, string> = {};
+    if (encodedReturnTo) params.returnTo = encodedReturnTo;
+    if (circleId) params.circleId = String(circleId);
+
+    const hasParams = Object.keys(params).length > 0;
     if (selectedOption === "someone-else") {
-      if (params) {
+      if (hasParams) {
         router.push({ pathname: "/select-profile", params });
       } else {
         router.push("/select-profile");
       }
-    } else if (params) {
+    } else if (hasParams) {
       router.push({ pathname: "/create-list-step2", params });
     } else {
       router.push("/create-list-step2");
@@ -96,24 +89,10 @@ export default function CreateListStep1() {
   };
 
   if (isDesktop) {
-    return (
-      <DesktopLayout
-        selectedOption={selectedOption}
-        onSelect={handleSelect}
-        onBack={handleBack}
-        onContinue={handleContinue}
-      />
-    );
+    return <DesktopLayout selectedOption={selectedOption} onSelect={handleSelect} onBack={handleBack} onContinue={handleContinue} />;
   }
 
-  return (
-    <MobileLayout
-      selectedOption={selectedOption}
-      onSelect={handleSelect}
-      onBack={handleBack}
-      onContinue={handleContinue}
-    />
-  );
+  return <MobileLayout selectedOption={selectedOption} onSelect={handleSelect} onBack={handleBack} onContinue={handleContinue} />;
 }
 
 function DesktopLayout({ selectedOption, onSelect, onBack, onContinue }: LayoutProps) {
@@ -127,76 +106,38 @@ function DesktopLayout({ selectedOption, onSelect, onBack, onContinue }: LayoutP
             <Text style={styles.desktopBackText}>Back</Text>
           </Pressable>
           <Text style={styles.desktopTitle}>Create Gift List</Text>
-          <Text style={styles.desktopSubtitle}>
-            To create your gift list, please provide the following details:
-          </Text>
+          <Text style={styles.desktopSubtitle}>To create your gift list, please provide the following details:</Text>
           <View style={styles.stepList}>
             {STEP_ITEMS.map((label, index) => {
               const isActive = index === 0;
               return (
                 <View key={label} style={styles.stepItem}>
                   <View style={styles.stepIndicator}>
-                    <View
-                      style={[
-                        styles.stepNumberCircle,
-                        isActive ? styles.stepNumberCircleActive : styles.stepNumberCircleInactive,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.stepNumberText,
-                          isActive ? styles.stepNumberTextActive : styles.stepNumberTextInactive,
-                        ]}
-                      >
-                        {index + 1}
-                      </Text>
+                    <View style={[styles.stepNumberCircle, isActive ? styles.stepNumberCircleActive : styles.stepNumberCircleInactive]}>
+                      <Text style={[styles.stepNumberText, isActive ? styles.stepNumberTextActive : styles.stepNumberTextInactive]}>{index + 1}</Text>
                     </View>
                     {index < STEP_ITEMS.length - 1 && <View style={styles.stepConnector} />}
                   </View>
-                  <Text
-                    style={[
-                      styles.stepLabel,
-                      isActive ? styles.stepLabelActive : styles.stepLabelInactive,
-                    ]}
-                  >
-                    {label}
-                  </Text>
+                  <Text style={[styles.stepLabel, isActive ? styles.stepLabelActive : styles.stepLabelInactive]}>{label}</Text>
                 </View>
               );
             })}
           </View>
         </View>
         <View style={styles.desktopContent}>
-          <ScrollView
-            contentContainerStyle={styles.desktopContentScroll}
-            showsVerticalScrollIndicator={false}
-          >
+          <ScrollView contentContainerStyle={styles.desktopContentScroll} showsVerticalScrollIndicator={false}>
             <Text style={styles.desktopSectionHeading}>Who is this list for?</Text>
-            <Text style={styles.desktopSectionDescription}>
-              Select who you are creating this gift list for to personalise the experience.
-            </Text>
+            <Text style={styles.desktopSectionDescription}>Select who you are creating this gift list for to personalise the experience.</Text>
             <View style={styles.desktopOptionsRow}>
               {OPTION_CONFIG.map((config) => (
-                <DesktopOptionCard
-                  key={config.id}
-                  config={config}
-                  selected={selectedOption === config.id}
-                  onPress={() => onSelect(config.id)}
-                />
+                <DesktopOptionCard key={config.id} config={config} selected={selectedOption === config.id} onPress={() => onSelect(config.id)} />
               ))}
             </View>
             <View style={styles.desktopActions}>
               <Pressable onPress={onBack} style={styles.desktopSecondaryButton}>
                 <Text style={styles.desktopSecondaryButtonText}>Back</Text>
               </Pressable>
-              <Pressable
-                onPress={onContinue}
-                disabled={!selectedOption}
-                style={[
-                  styles.desktopPrimaryButton,
-                  !selectedOption && styles.desktopPrimaryButtonDisabled,
-                ]}
-              >
+              <Pressable onPress={onContinue} disabled={!selectedOption} style={[styles.desktopPrimaryButton, !selectedOption && styles.desktopPrimaryButtonDisabled]}>
                 <Text style={styles.desktopPrimaryButtonText}>Continue</Text>
               </Pressable>
             </View>
@@ -216,23 +157,13 @@ type DesktopOptionCardProps = {
 function DesktopOptionCard({ config, selected, onPress }: DesktopOptionCardProps) {
   const iconColor = selected ? "#330065" : "#4B0082";
   return (
-    <Pressable
-      onPress={onPress}
-      style={[styles.desktopOptionCard, selected && styles.desktopOptionCardSelected]}
-    >
+    <Pressable onPress={onPress} style={[styles.desktopOptionCard, selected && styles.desktopOptionCardSelected]}>
       <View style={styles.desktopOptionHeader}>
         <View style={styles.desktopOptionTitleRow}>
           {config.icon(iconColor, 32)}
           <Text style={styles.desktopOptionTitle}>{config.title}</Text>
         </View>
-        <View
-          style={[
-            styles.desktopSelectionIndicator,
-            selected && styles.desktopSelectionIndicatorSelected,
-          ]}
-        >
-          {selected && <View style={styles.desktopSelectionIndicatorDot} />}
-        </View>
+        <View style={[styles.desktopSelectionIndicator, selected && styles.desktopSelectionIndicatorSelected]}>{selected && <View style={styles.desktopSelectionIndicatorDot} />}</View>
       </View>
       <Text style={styles.desktopOptionDescription}>{config.description}</Text>
     </Pressable>
@@ -253,24 +184,13 @@ function MobileLayout({ selectedOption, onSelect, onBack, onContinue }: LayoutPr
   const renderOptionCard = (config: OptionConfig) => {
     const isSelected = selectedOption === config.id;
     return (
-      <Ripple
-        rippleOpacity={0.2}
-        rippleColor="#3B0076"
-        rippleDuration={900}
-        key={config.id}
-        style={[styles.optionCard, isSelected ? styles.optionCardSelected : styles.optionCardUnselected]}
-        onPress={() => onSelect(config.id)}
-      >
+      <Ripple rippleOpacity={0.2} rippleColor="#3B0076" rippleDuration={900} key={config.id} style={[styles.optionCard, isSelected ? styles.optionCardSelected : styles.optionCardUnselected]} onPress={() => onSelect(config.id)}>
         <View style={styles.optionContent}>
           <View style={styles.checkboxContainer}>
-            <View
-              style={[styles.checkbox, isSelected ? styles.checkboxSelected : styles.checkboxUnselected]}
-            >
-              {isSelected && <Ionicons name="checkmark" size={16} color="#FFFFFF" />}
-            </View>
+            <View style={[styles.checkbox, isSelected ? styles.checkboxSelected : styles.checkboxUnselected]}>{isSelected && <Ionicons name="checkmark" size={16} color="#FFFFFF" />}</View>
           </View>
           <View style={styles.optionHeader}>
-            <Image source={config.mobileIcon} style={styles.mobileIcon} resizeMode="contain"/>
+            <Image source={config.mobileIcon} style={styles.mobileIcon} resizeMode="contain" />
             <Text style={styles.optionTitle}>{config.title}</Text>
           </View>
           <Text style={styles.optionDescription}>{config.mobileDescription}</Text>
@@ -282,13 +202,7 @@ function MobileLayout({ selectedOption, onSelect, onBack, onContinue }: LayoutPr
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" />
-      <LinearGradient
-        colors={["#330065", "#45018ad7"]}
-        style={styles.header}
-        locations={[0, 0.7]}  
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 2 }}
-      >
+      <LinearGradient colors={["#330065", "#45018ad7"]} style={styles.header} locations={[0, 0.7]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 2 }}>
         <SafeAreaView edges={["top"]}>
           <View style={styles.headerContent}>
             <View style={styles.navigation}>
@@ -303,16 +217,12 @@ function MobileLayout({ selectedOption, onSelect, onBack, onContinue }: LayoutPr
       <ProgressIndicator />
       <View style={styles.content}>
         <Text style={styles.sectionTitle}>Who is this list for?</Text>
-          <View style={styles.optionsContainer}>{OPTION_CONFIG.map(renderOptionCard)}</View>
-          <View style={styles.continueContainer}>
-            <Pressable
-              style={[styles.continueButton, !selectedOption && styles.continueButtonDisabled]}
-              onPress={onContinue}
-              disabled={!selectedOption}
-            >
-              <Text style={styles.continueButtonText}>Continue</Text>
-            </Pressable>
-          </View>
+        <View style={styles.optionsContainer}>{OPTION_CONFIG.map(renderOptionCard)}</View>
+        <View style={styles.continueContainer}>
+          <Pressable style={[styles.continueButton, !selectedOption && styles.continueButtonDisabled]} onPress={onContinue} disabled={!selectedOption}>
+            <Text style={styles.continueButtonText}>Continue</Text>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
@@ -325,7 +235,7 @@ const styles = StyleSheet.create({
   },
   header: {
     minHeight: 108,
-    justifyContent:'flex-end'
+    justifyContent: "flex-end",
   },
   headerContent: {
     paddingHorizontal: 16,
@@ -367,8 +277,7 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingVertical: 16,
   },
-  backButton: {
-  },
+  backButton: {},
   headerTitle: {
     color: "#FFFFFF",
     fontSize: 24,
@@ -417,7 +326,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 16,
     paddingBottom: 24,
-    height:171
+    height: 171,
   },
   optionCardSelected: {
     backgroundColor: "#F5EDFE",
@@ -457,8 +366,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     marginTop: 24,
   },
-  mobileIcon:{
-     width: 40, height: 40, objectFit:'contain' 
+  mobileIcon: {
+    width: 40,
+    height: 40,
+    objectFit: "contain",
   },
   optionTitle: {
     fontSize: 24,
@@ -479,8 +390,8 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   continueButton: {
-    height:56,
-    justifyContent:'center',
+    height: 56,
+    justifyContent: "center",
     backgroundColor: "#3B0076",
     borderRadius: 8,
     paddingVertical: 16,

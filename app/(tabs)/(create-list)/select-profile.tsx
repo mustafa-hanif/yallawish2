@@ -24,6 +24,7 @@ type ContactDoc = Doc<"contacts">;
 type Params = {
   profileId?: string | string[];
   returnTo?: string | string[];
+  circleId?: string | string[];
 };
 
 function getParamValue(param?: string | string[]) {
@@ -52,6 +53,7 @@ export default function SelectProfileScreen() {
   const params = useLocalSearchParams<Params>();
   const initialProfileId = getParamValue(params.profileId);
   const encodedReturnTo = getParamValue(params.returnTo);
+  const circleId = getParamValue(params.circleId);
 
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(initialProfileId ?? null);
   const contacts = useQuery(api.products.getContacts as any, userId ? ({ owner_id: userId } as any) : "skip");
@@ -161,6 +163,9 @@ export default function SelectProfileScreen() {
     if (encodedReturnTo) {
       nextParams.returnTo = encodedReturnTo;
     }
+    if (circleId) {
+      nextParams.circleId = circleId;
+    }
     router.push({ pathname: "/create-list-step2", params: nextParams });
   };
 
@@ -225,6 +230,9 @@ export default function SelectProfileScreen() {
         };
         if (encodedReturnTo) {
           nextParams.returnTo = encodedReturnTo;
+        }
+        if (circleId) {
+          nextParams.circleId = circleId;
         }
         router.push({ pathname: "/create-list-step2", params: nextParams });
         return;

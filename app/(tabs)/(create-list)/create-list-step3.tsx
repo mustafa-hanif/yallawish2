@@ -101,7 +101,7 @@ const PublicPasswordSettings = React.memo(function PublicPasswordSettingsBase({ 
     (text: string) => {
       setPassword(text);
     },
-    [setPassword]
+    [setPassword],
   );
 
   return (
@@ -604,7 +604,7 @@ export default function CreateListStep3() {
   const updatePrivacy = useMutation(api.products.updateListPrivacy);
 
   const existing = useQuery(api.products.getListById, listId ? ({ listId } as any) : "skip");
-  const myGroups = useQuery(api.products.getGroups, existing?.user_id ? { owner_id: existing.user_id } : "skip");
+  const myGroups = useQuery(api.products.getGroups, existing?.user_id ? { user_id: existing.user_id } : "skip");
   const myContacts = useQuery(api.products.getContacts, existing?.user_id ? { owner_id: existing.user_id } : "skip");
   const currentShares = useQuery(api.products.getListShares, listId ? ({ list_id: listId } as any) : "skip");
 
