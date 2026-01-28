@@ -1553,9 +1553,6 @@ export const getGroups = query({
           )
         ).filter((l): l is Doc<"lists"> => l !== null);
 
-        // Count unique occasions
-        const occasions = [...new Set(lists.map((list) => list.occasion).filter(Boolean))];
-
         // Find next upcoming event
         const todayStr = new Date().toISOString().split("T")[0];
         const upcomingLists = lists.filter((list) => list.eventDate && list.eventDate >= todayStr).sort((a, b) => a.eventDate!.localeCompare(b.eventDate!));

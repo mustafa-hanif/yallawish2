@@ -17,7 +17,6 @@ interface CircleCardProps {
     coverPhotoUri?: string | null;
     owner_id: string;
     memberCount?: number;
-    giftListCount?: number;
     occasionCount?: number;
     nextEventDate?: string | null;
     totalGiftItems?: number;
