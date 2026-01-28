@@ -134,10 +134,39 @@ const CreateCircleStep3 = () => {
       <ProgressIndicator activeSteps={3} />
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Who’s in charge?</Text>
-            <Text style={styles.sectionDescription}>Admins can invite new members, approve, edit and manage circle settings</Text>
-          </View>
+          {selectedMembers.length > 0 ? (
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Who’s in charge?</Text>
+              <Text style={styles.sectionDescription}>Admins can invite new members, approve, edit and manage circle settings</Text>
+            </View>
+          ) : (
+            <View style={[styles.ownerInfo, styles.ownerInfoContainer]}>
+              <View style={[styles.ownerImageContainer, styles.ownerImageWrapper]}>
+                <Image style={styles.adminBadge} source={require("@/assets/images/adminOnlyMember.png")} />
+
+                {user?.imageUrl ? (
+                  <Image style={[styles.ownerImage, styles.ownerImageRounded]} source={{ uri: user.imageUrl }} />
+                ) : (
+                  <View style={[styles.ownerImageContainer, styles.fallbackAvatar]}>
+                    <Text style={styles.nameInitials}>
+                      {getInitials({
+                        firstName: user?.firstName,
+                        lastName: user?.lastName,
+                        displayName: user?.fullName,
+                      })}
+                    </Text>
+                  </View>
+                )}
+              </View>
+
+              <View style={styles.ownerTextContainer}>
+                <Text style={[styles.sectionTitle, styles.sectionTitleTight]}>Assign Admins</Text>
+                <Text style={styles.sectionDescription}>
+                  Since there are no members in this circle yet, <Text style={styles.highlight}>you are the only Admin.</Text>
+                </Text>
+              </View>
+            </View>
+          )}
           <View style={styles.ownerContainer}>
             <View style={styles.ownerInfo}>
               <View style={styles.ownerImageContainer}>
@@ -359,5 +388,59 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito_400Regular",
     color: "#8E8E93",
     textAlign: "center",
+  },
+  highlight: {
+    color: "#1C1C1C",
+  },
+  ownerInfoContainer: {
+    padding: 16,
+    width: "100%",
+  },
+
+  // Profile image outer container
+  ownerImageWrapper: {
+    width: 88,
+    height: 88,
+    borderWidth: 4,
+    borderColor: "#FFFFFF",
+    borderRadius: 16,
+    shadowColor: "#000000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 4,
+    overflow: "visible",
+    position: "relative",
+  },
+
+  // Admin badge image
+  adminBadge: {
+    position: "absolute",
+    top: -28,
+    right: -28,
+    zIndex: 1,
+  },
+
+  // Owner image rounded
+  ownerImageRounded: {
+    borderRadius: 16,
+  },
+
+  // Fallback avatar container
+  fallbackAvatar: {
+    backgroundColor: "#3B0076",
+  },
+
+  // Text content container
+  ownerTextContainer: {
+    flex: 1,
+    marginHorizontal: 12,
+  },
+
+  sectionTitleTight: {
+    marginBottom: 2,
   },
 });

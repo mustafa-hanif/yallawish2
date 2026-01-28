@@ -87,7 +87,7 @@ const CreateCircleStep2 = () => {
   };
 
   const handleContinue = () => {
-    if (selectedFriends.size === 0) return;
+    // if (selectedFriends.size === 0) return;
 
     router.push({
       pathname: "/create-circle-step3",
@@ -174,7 +174,7 @@ const CreateCircleStep2 = () => {
         </Pressable>
       </ScrollView>
       <View style={styles.bottomButtons}>
-        <Pressable style={[styles.continueButton, selectedFriends.size === 0 && styles.continueButtonDisabled]} onPress={handleContinue} disabled={selectedFriends.size === 0}>
+        <Pressable style={[styles.continueButton]} onPress={handleContinue}>
           <Text style={styles.continueButtonText}>Done</Text>
         </Pressable>
       </View>
