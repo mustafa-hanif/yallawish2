@@ -140,13 +140,13 @@ const ViewCircle = () => {
                           <Text style={styles.adminBadgeText}>ADMIN</Text>
                         </View>
                         {circle.isOwner && item.user_id !== circle.owner_id && (
-                          <Pressable style={styles.removeButton} onPress={() => handleRemoveMember(item.user_id, item.profile?.displayName || item.profile?.firstName || "this member")}>
+                          <Pressable style={styles.removeButton} onPress={() => handleRemoveMember(item.user_id as string, item.profile?.displayName || item.profile?.firstName || "this member")}>
                             <Entypo name="circle-with-cross" size={24} color="#3B0076" />
                           </Pressable>
                         )}
                       </View>
-                    ) : circle.isOwner && item.user_id !== circle.owner_id ? (
-                      <Pressable style={styles.removeButton} onPress={() => handleRemoveMember(item.user_id, item.profile?.displayName || item.profile?.firstName || "this member")}>
+                    ) : circle.isOwner && (item.user_id as string) !== circle.owner_id ? (
+                      <Pressable style={styles.removeButton} onPress={() => handleRemoveMember(item.user_id as string, item.profile?.displayName || item.profile?.firstName || "this member")}>
                         <Entypo name="circle-with-cross" size={24} color="#3B0076" />
                       </Pressable>
                     ) : null}

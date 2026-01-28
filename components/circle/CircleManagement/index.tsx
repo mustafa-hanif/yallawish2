@@ -10,18 +10,18 @@ export default function CircleManagement() {
     router.push("/(tabs)/friends");
   };
   return (
-    <LinearGradient colors={["#F6F0FF", "#FFFFFF"]} style={styles.container}>
-      <View>
-        <Text style={styles.title}>Circle Management</Text>
-        <Text style={styles.description}>Manage all your gifting circles</Text>
-      </View>
-      <View>
-        <View style={styles.iconContainer}>
-          <Pressable onPress={handlePressFriends}>
-            <FontAwesome5 name="user-friends" size={12} color="black" />
-          </Pressable>
+    <Pressable onPress={handlePressFriends}>
+      <LinearGradient colors={["#F6F0FF", "#FFFFFF"]} style={styles.container}>
+        <View>
+          <Text style={styles.title}>Circle Management</Text>
+          <Text style={styles.description}>Manage all your gifting circles</Text>
         </View>
-      </View>
-    </LinearGradient>
+        <View>
+          <View style={styles.iconContainer}>
+            <FontAwesome5 name="user-friends" size={12} color="black" />
+          </View>
+        </View>
+      </LinearGradient>
+    </Pressable>
   );
 }
