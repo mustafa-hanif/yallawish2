@@ -1557,8 +1557,8 @@ export const getGroups = query({
         const occasions = [...new Set(lists.map((list) => list.occasion).filter(Boolean))];
 
         // Find next upcoming event
-        const now = new Date();
-        const upcomingLists = lists.filter((list) => list.eventDate && new Date(list.eventDate) > now).sort((a, b) => new Date(a.eventDate!).getTime() - new Date(b.eventDate!).getTime());
+        const todayStr = new Date().toISOString().split("T")[0];
+        const upcomingLists = lists.filter((list) => list.eventDate && list.eventDate >= todayStr).sort((a, b) => a.eventDate!.localeCompare(b.eventDate!));
 
         const nextEventDate = upcomingLists.length > 0 ? upcomingLists[0].eventDate : null;
 
@@ -1629,8 +1629,8 @@ export const getGroupById = query({
     const occasions = [...new Set(lists.map((list) => list.occasion).filter(Boolean))];
 
     // Find next upcoming event
-    const now = new Date();
-    const upcomingLists = lists.filter((list) => list.eventDate && new Date(list.eventDate) > now).sort((a, b) => new Date(a.eventDate!).getTime() - new Date(b.eventDate!).getTime());
+    const todayStr = new Date().toISOString().split("T")[0];
+    const upcomingLists = lists.filter((list) => list.eventDate && list.eventDate >= todayStr).sort((a, b) => a.eventDate!.localeCompare(b.eventDate!));
 
     const nextEventDate = upcomingLists.length > 0 ? upcomingLists[0].eventDate : null;
 
