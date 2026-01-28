@@ -43,15 +43,6 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
   const toggleGroupArchived = useMutation(api.products.toggleGroupArchivedForUser);
   const leaveGroup = useMutation(api.products.leaveGroup);
 
-  // Debug logging
-  console.log("=== CircleCard Debug ===");
-  console.log("Circle data:", circle);
-  console.log("Total gift items from backend:", circle?.totalGiftItems);
-  console.log("Gift list count from backend:", circle?.giftListCount);
-  console.log("Calculated numberOfGiftItems:", circle?.totalGiftItems || 0);
-  console.log("Owner profile:", ownerProfile);
-  console.log("Owner profile image URL:", ownerProfile?.profileImageUrl);
-
   // Get owner initials
   const getOwnerInitials = () => {
     if (!ownerProfile) return "??";
