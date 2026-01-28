@@ -112,7 +112,7 @@ const ViewCircle = () => {
         <ScrollView showsVerticalScrollIndicator={false}>
           <CircleBanner coverPhotoUri={circle.coverPhotoUri} title={circle.name} />
           <ViewCircleGroupInfo createdBy={circle.isOwner ? "You" : ownerProfile?.displayName || ownerProfile?.firstName || "Unknown"} memberCount={circle.memberCount || 0} />
-          <SectionHeader title="Occasions" count={circle.occasionCount || 0} buttonTitle={"Add New"} buttonAction={handlePressAddNew} />
+          <SectionHeader title="Occasions" count={listShares?.length || 0} buttonTitle={"Add New"} buttonAction={handlePressAddNew} />
           <View style={styles.section}>
             <FlatList scrollEnabled={false} columnWrapperStyle={styles.listColumnWrapperStyle} contentContainerStyle={styles.listContentContainerStyle} showsVerticalScrollIndicator={false} numColumns={2} key={2} data={listShares || []} renderItem={({ item }) => <WishListCard item={item} />} keyExtractor={(item) => String(item._id)} />
           </View>

@@ -2,6 +2,7 @@ import { DateInputField } from "@/components/DateInputField";
 import { TextInputAreaField } from "@/components/TextInputAreaField";
 import { TextInputField } from "@/components/TextInputField";
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "convex/react";
@@ -157,6 +158,7 @@ export default function CreateListStep2() {
   const updateListDetails = useMutation(api.products.updateListDetails);
   const generateCoverUploadUrl = useMutation(api.products.generateListCoverUploadUrl as any);
   const getCoverUrl = useMutation(api.products.getListCoverUrl as any);
+  const setShares = useMutation(api.products.setListShares);
   const { user } = useUser();
   const { listId, circleId } = useLocalSearchParams<{ listId?: string; circleId?: string }>();
   const existing = useQuery(api.products.getListById, listId ? { listId: listId as any } : "skip");
@@ -267,11 +269,16 @@ export default function CreateListStep2() {
         coverPhotoStorageId: formData.coverPhotoStorageId || null,
         privacy: isCircleList ? "shared" : "private",
         user_id: user?.id ?? null,
-        group_id: circleId ? (circleId as any) : undefined,
+        // group_id: circleId ? (circleId as any) : undefined,
       });
 
       if (isCircleList) {
         // Skip step3 for circle-owned lists, go directly to add-gift
+        await setShares({
+          list_id: newListId as unknown as Id<"lists">,
+          group_ids: [circleId as unknown as Id<"groups">],
+          contact_ids: [],
+        });
         router.push({
           pathname: "/add-gift",
           params: { listId: String(newListId) },

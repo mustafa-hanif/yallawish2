@@ -434,11 +434,20 @@ export const getListShares = query({
 export const getListsByGroup = query({
   args: { group_id: v.id("groups") },
   handler: async (ctx, args) => {
-    // Get all lists that belong to this group directly
-    const lists = await ctx.db
-      .query("lists")
+    // Get all shares for this group
+    const shares = await ctx.db
+      .query("list_shares")
       .withIndex("by_group", (q) => q.eq("group_id", args.group_id))
       .collect();
+
+    // Fetch the corresponding lists
+    const lists = (
+      await Promise.all(
+        shares.map(async (share) => {
+          return await ctx.db.get(share.list_id);
+        }),
+      )
+    ).filter((l): l is Doc<"lists"> => l !== null);
 
     // Return complete details for each list (same as getMyLists)
     return await Promise.all(
