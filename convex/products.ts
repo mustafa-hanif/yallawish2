@@ -1539,11 +1539,20 @@ export const getGroups = query({
           .withIndex("by_group", (q) => q.eq("group_id", membership.group_id))
           .collect();
 
-        // Get all lists that belong to this group directly
-        const lists = await ctx.db
-          .query("lists")
+        // Get all lists shared with this group
+        const shares = await ctx.db
+          .query("list_shares")
           .withIndex("by_group", (q) => q.eq("group_id", membership.group_id))
           .collect();
+
+        console.log("shares", shares);
+        const lists = (
+          await Promise.all(
+            shares.map(async (share) => {
+              return await ctx.db.get(share.list_id);
+            }),
+          )
+        ).filter((l): l is Doc<"lists"> => l !== null);
 
         // Count unique occasions
         const occasions = [...new Set(lists.map((list) => list.occasion).filter(Boolean))];
@@ -1603,11 +1612,19 @@ export const getGroupById = query({
     const membership = allMembers.find((m) => m.user_id === args.user_id);
     if (!membership) return null; // User is not a member
 
-    // Get all lists that belong to this group directly
-    const lists = await ctx.db
-      .query("lists")
+    // Get all lists shared with this group
+    const shares = await ctx.db
+      .query("list_shares")
       .withIndex("by_group", (q) => q.eq("group_id", args.group_id))
       .collect();
+
+    const lists = (
+      await Promise.all(
+        shares.map(async (share) => {
+          return await ctx.db.get(share.list_id);
+        }),
+      )
+    ).filter((l): l is Doc<"lists"> => l !== null);
 
     // Count unique occasions
     const occasions = [...new Set(lists.map((list) => list.occasion).filter(Boolean))];
