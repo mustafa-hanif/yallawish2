@@ -130,7 +130,7 @@ const Circle = () => {
                         borderBottomStartRadius: 8,
                       }}
                     >
-                      <FlatList showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 16, paddingBottom: 100 }} data={item.data} keyExtractor={(circle) => circle._id} renderItem={({ item }) => <CircleCardWithOwner circle={item} />} nestedScrollEnabled />
+                      <FlatList ItemSeparatorComponent={() => <View style={{ height: 16 }} />} showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 20, paddingBottom: 100 }} data={item.data} keyExtractor={(circle) => circle._id} renderItem={({ item }) => <CircleCardWithOwner circle={item} />} nestedScrollEnabled />
                     </View>
                   )}
                 </View>
