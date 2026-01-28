@@ -9,7 +9,7 @@ import { AntDesign, Entypo } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 // Wrapper component to fetch owner profile for each circle
 const CircleCardWithOwner = ({ circle }: { circle: any }) => {
@@ -86,34 +86,36 @@ const Circle = () => {
         <NoCircleFound searchText={searchText} />
       ) : (
         <View style={styles.circleContainer}>
-          <View style={{ gap: 16 }}>
-            {circlesIamAdminOf.length > 0 && (
-              <View>
-                <Pressable style={[styles.circleExpandableButton, isCirclesIamAdminOfExpanded && { borderBottomEndRadius: 0, borderBottomStartRadius: 0 }]} onPress={() => setIsCirclesIamAdminOfExpanded(!isCirclesIamAdminOfExpanded)}>
-                  <Text style={styles.circleExpandableButtonText}>Circles you're Admin of</Text>
-                  <Entypo name="chevron-down" size={24} color="#1C0335" />
-                </Pressable>
-                {isCirclesIamAdminOfExpanded && (
-                  <View style={{ maxHeight: 624, backgroundColor: "#ECE3F7", paddingHorizontal: 8, paddingBottom: 16, borderBottomEndRadius: 8, borderBottomStartRadius: 8 }}>
-                    <FlatList contentContainerStyle={{ gap: 16 }} data={circlesIamAdminOf} keyExtractor={(item) => item._id} renderItem={({ item }) => <CircleCardWithOwner circle={item} />} scrollEnabled={false} />
-                  </View>
-                )}
-              </View>
-            )}
-            {circlesIamMemberOf.length > 0 && (
-              <View>
-                <Pressable style={[styles.circleExpandableButton, isCirclesIamMemberOfExpanded && { borderBottomEndRadius: 0, borderBottomStartRadius: 0 }]} onPress={() => setIsCirclesIamMemberOfExpanded(!isCirclesIamMemberOfExpanded)}>
-                  <Text style={styles.circleExpandableButtonText}>Member Circles</Text>
-                  <Entypo name="chevron-down" size={24} color="#1C0335" />
-                </Pressable>
-                {isCirclesIamMemberOfExpanded && (
-                  <View style={{ maxHeight: 624, backgroundColor: "#ECE3F7", paddingHorizontal: 8, paddingBottom: 16, borderBottomEndRadius: 8, borderBottomStartRadius: 8 }}>
-                    <FlatList contentContainerStyle={{ gap: 16 }} data={circlesIamMemberOf} keyExtractor={(item) => item._id} renderItem={({ item }) => <CircleCardWithOwner circle={item} />} scrollEnabled={false} />
-                  </View>
-                )}
-              </View>
-            )}
-          </View>
+          <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+            <View style={{ gap: 16 }}>
+              {circlesIamAdminOf.length > 0 && (
+                <View>
+                  <Pressable style={[styles.circleExpandableButton, isCirclesIamAdminOfExpanded && { borderBottomEndRadius: 0, borderBottomStartRadius: 0 }]} onPress={() => setIsCirclesIamAdminOfExpanded(!isCirclesIamAdminOfExpanded)}>
+                    <Text style={styles.circleExpandableButtonText}>Circles you're Admin of</Text>
+                    <Entypo name="chevron-down" size={24} color="#1C0335" />
+                  </Pressable>
+                  {isCirclesIamAdminOfExpanded && (
+                    <View style={{ maxHeight: 624, backgroundColor: "#ECE3F7", paddingHorizontal: 8, paddingBottom: 16, borderBottomEndRadius: 8, borderBottomStartRadius: 8 }}>
+                      <FlatList showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 16 }} data={circlesIamAdminOf} keyExtractor={(item) => item._id} renderItem={({ item }) => <CircleCardWithOwner circle={item} />} scrollEnabled={true} nestedScrollEnabled={true} />
+                    </View>
+                  )}
+                </View>
+              )}
+              {circlesIamMemberOf.length > 0 && (
+                <View>
+                  <Pressable style={[styles.circleExpandableButton, isCirclesIamMemberOfExpanded && { borderBottomEndRadius: 0, borderBottomStartRadius: 0 }]} onPress={() => setIsCirclesIamMemberOfExpanded(!isCirclesIamMemberOfExpanded)}>
+                    <Text style={styles.circleExpandableButtonText}>Member Circles</Text>
+                    <Entypo name="chevron-down" size={24} color="#1C0335" />
+                  </Pressable>
+                  {isCirclesIamMemberOfExpanded && (
+                    <View style={{ maxHeight: 624, backgroundColor: "#ECE3F7", paddingHorizontal: 8, paddingBottom: 16, borderBottomEndRadius: 8, borderBottomStartRadius: 8 }}>
+                      <FlatList showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 16 }} data={circlesIamMemberOf} keyExtractor={(item) => item._id} renderItem={({ item }) => <CircleCardWithOwner circle={item} />} scrollEnabled={true} nestedScrollEnabled={true} />
+                    </View>
+                  )}
+                </View>
+              )}
+            </View>
+          </ScrollView>
           <View style={styles.createCircleButtonContainer}>
             <Pressable style={styles.createCircleButton} onPress={handlePressAddCircle}>
               <AntDesign name="plus" size={16} color="#1C1C1C" />
