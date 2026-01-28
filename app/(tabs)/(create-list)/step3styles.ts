@@ -294,6 +294,11 @@ export const styles = StyleSheet.create({
     fontFamily: "Nunito_400Regular",
     color: "#FFFFFF",
   },
+  createdByValue: {
+    fontSize: 11.51,
+    fontFamily: "Nunito_700Bold",
+    color: "#FFFFFF",
+  },
   orWrap: {
     flexDirection: "row",
     alignItems: "center",

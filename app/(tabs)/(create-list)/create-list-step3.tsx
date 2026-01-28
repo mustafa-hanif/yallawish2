@@ -26,6 +26,8 @@ type GroupOption = {
   id: string;
   name: string;
   cover?: string;
+  isOwner: boolean;
+  ownerId?: string;
 };
 
 type FriendOption = {
@@ -193,6 +195,27 @@ function getInitials(name: string) {
     .join("")
     .toUpperCase();
 }
+
+const GroupCardItem = React.memo(({ group, selected, onToggle, styles, isDesktop }: { group: GroupOption; selected: boolean; onToggle: (id: string) => void; styles: any; isDesktop: boolean }) => {
+  const ownerProfile = useQuery(api.products.getUserProfileByUserId, !group.isOwner && group.ownerId ? { user_id: group.ownerId } : "skip");
+
+  return (
+    <Pressable style={[!isDesktop ? styles.groupCardMobile : styles.groupCard]} onPress={() => onToggle(group.id)}>
+      {group.cover && <Image source={{ uri: group.cover }} style={styles.groupImage} />}
+      <View style={styles.groupOverlay} />
+      <View style={[styles.groupCheck, selected && styles.groupCheckSelected]}>
+        <AnimatedCheckIcon visible={selected} size={14} color="#FFFFFF" />
+      </View>
+      <View style={styles.groupTextWrap}>
+        <Text style={styles.groupTitle}>{group.name}</Text>
+        <Text style={styles.groupBy}>Created By</Text>
+        <Text style={styles.createdByValue} numberOfLines={1}>
+          {group.isOwner ? "You" : ownerProfile?.displayName || ownerProfile?.firstName || "Unknown"}
+        </Text>
+      </View>
+    </Pressable>
+  );
+});
 
 type DesktopShareModalProps = {
   visible: boolean;
@@ -440,26 +463,7 @@ function MobileLayout({ headerTitle, selectedOption, setSelectedOption, requireP
             <View style={styles.groupGrid}>
               {filteredGroups.map((group) => {
                 const selected = selectedGroups.includes(group.id);
-                return (
-                  <Pressable
-                    key={group.id}
-                    style={[
-                      !isDesktop ? styles.groupCardMobile : styles.groupCard,
-                      // selected && styles.groupCardSelected,
-                    ]}
-                    onPress={() => toggleGroup(group.id)}
-                  >
-                    {group.cover && <Image source={{ uri: group.cover }} style={styles.groupImage} />}
-                    <View style={styles.groupOverlay} />
-                    <View style={[styles.groupCheck, selected && styles.groupCheckSelected]}>
-                      <AnimatedCheckIcon visible={selected} size={14} color="#FFFFFF" />
-                    </View>
-                    <View style={styles.groupTextWrap}>
-                      <Text style={styles.groupTitle}>{group.name}</Text>
-                      <Text style={styles.groupBy}>Created By: You</Text>
-                    </View>
-                  </Pressable>
-                );
+                return <GroupCardItem key={group.id} group={group} selected={selected} onToggle={toggleGroup} styles={styles} isDesktop={isDesktop} />;
               })}
             </View>
 
@@ -656,7 +660,13 @@ export default function CreateListStep3() {
   }, [selectedOption]);
 
   const groups = React.useMemo<GroupOption[]>(() => {
-    return (myGroups ?? []).map((group) => ({ id: String(group._id), name: group.name, cover: group.coverPhotoUri }));
+    return (myGroups ?? []).map((group) => ({
+      id: String(group._id),
+      name: group.name,
+      cover: group.coverPhotoUri,
+      isOwner: !!group.isOwner,
+      ownerId: group.owner_id,
+    }));
   }, [myGroups]);
 
   const friends = React.useMemo<FriendOption[]>(() => {
