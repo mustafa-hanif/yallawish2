@@ -442,7 +442,7 @@ const EditCircle = () => {
         {/* Back Button */}
         <View style={styles.bottomButtonContainer}>
           <Pressable style={[styles.backButton, isSaving && styles.backButtonDisabled]} onPress={handleSaveChanges} disabled={isSaving}>
-            {isSaving ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.backButtonText}>Back</Text>}
+            {isSaving ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.backButtonText}>Save</Text>}
           </Pressable>
         </View>
       </ScrollView>
