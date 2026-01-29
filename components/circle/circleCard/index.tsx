@@ -191,17 +191,23 @@ export default function CircleCard({ circle, ownerProfile }: CircleCardProps) {
           <View style={styles.headerContent}>
             <View style={styles.headerContentTop}>
               <View style={styles.circleOccasions}>
-                <Text style={styles.circleOccasionsText}>{numberOfOccasions} Occasions</Text>
+                <Text numberOfLines={1} style={styles.circleOccasionsText}>
+                  {numberOfOccasions} Occasions
+                </Text>
               </View>
               <View style={[styles.circleStatus, { backgroundColor: statusBackgroundColor }]}>
-                <Text style={styles.circleStatusText}>{statusText}</Text>
+                <Text numberOfLines={1} style={styles.circleStatusText}>
+                  {statusText}
+                </Text>
               </View>
             </View>
             <View style={styles.headerContentBottom}>
               <View style={styles.circleAdminInitials}>{ownerProfile?.profileImageUrl ? <Image source={{ uri: ownerProfile.profileImageUrl }} style={{ width: "100%", height: "100%", borderRadius: 8 }} /> : <Text style={styles.circleAdminInitialsText}>{getOwnerInitials()}</Text>}</View>
-              <View>
-                <Text style={styles.circleTitle}>{circle?.name || "Untitled Circle"}</Text>
-                <Text style={styles.circleDescription} numberOfLines={1} ellipsizeMode="tail">
+              <View style={{ flex: 1, maxWidth: "85%" }}>
+                <Text numberOfLines={1} ellipsizeMode="tail" style={styles.circleTitle}>
+                  {circle?.name || "Untitled Circle"}
+                </Text>
+                <Text numberOfLines={1} ellipsizeMode="tail" style={styles.circleDescription}>
                   {circle?.description || "No description"}
                 </Text>
               </View>

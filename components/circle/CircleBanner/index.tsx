@@ -12,7 +12,9 @@ export default function CircleBanner({ coverPhotoUri, title }: CircleBannerProps
     <View style={styles.container}>
       {coverPhotoUri ? <Image source={{ uri: coverPhotoUri }} style={styles.headerImage} /> : <View style={[styles.headerImage, { backgroundColor: "#D1D1D6" }]} />}
       <View style={styles.content}>
-        <Text style={styles.title}>{title}</Text>
+        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.title}>
+          {title}
+        </Text>
       </View>
     </View>
   );
