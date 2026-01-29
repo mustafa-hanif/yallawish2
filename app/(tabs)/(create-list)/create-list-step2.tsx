@@ -697,7 +697,7 @@ type DesktopOccasionCardProps = {
 function DesktopOccasionCard({ option, selected, onPress }: DesktopOccasionCardProps) {
   const accentColor = option.borderColor;
   return (
-    <Pressable onPress={onPress} style={[styles.desktopOccasionCard, { borderColor: accentColor }, selected && styles.desktopOccasionCardSelected]}>
+    <Pressable onPress={onPress} style={[styles.desktopOccasionCard, { flex: 1, borderColor: accentColor }, selected && styles.desktopOccasionCardSelected, selected && option.title === "Other" ? { height: 186 } : {}]}>
       <View style={styles.desktopOccasionHeader}>
         <View style={styles.desktopOccasionInfo}>
           {option.icon("#330065", 18)}
@@ -705,6 +705,12 @@ function DesktopOccasionCard({ option, selected, onPress }: DesktopOccasionCardP
         </View>
         <View style={[styles.desktopOccasionRadio, selected && styles.desktopOccasionRadioSelected]}>{selected && <View style={styles.desktopOccasionRadioDot} />}</View>
       </View>
+      {selected && option.title === "Other" && (
+        <View>
+          <Text style={[styles.specifyText, { marginBottom: 11, fontSize: 12, color: "#AEAEB2" }]}>Please specify</Text>
+          <TextInput style={[{ height: 32, borderRadius: 4, borderWidth: 1, borderColor: "#AEAEB2", paddingHorizontal: 13, paddingVertical: 4, fontSize: 12, color: "#1C0335", backgroundColor: "#FFFFFF", outlineColor: "transparent" }]} />
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -1417,13 +1423,15 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   desktopOccasionCard: {
+    height: 120,
     flexGrow: 1,
     minWidth: 240,
     maxWidth: 320,
     borderWidth: 2,
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 24,
     backgroundColor: "#FFFFFF",
+    position: "relative",
   },
   desktopOccasionCardSelected: {
     borderColor: "#4B0082",
@@ -1446,6 +1454,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   desktopOccasionInfo: {
+    width: "100%",
     flexDirection: "column",
     alignItems: "center",
     gap: 12,
@@ -1463,6 +1472,9 @@ const styles = StyleSheet.create({
     borderColor: "#D8C9F6",
     alignItems: "center",
     justifyContent: "center",
+    position: "absolute",
+    top: -18,
+    right: -17,
   },
   desktopOccasionRadioSelected: {
     borderColor: "#4B0082",

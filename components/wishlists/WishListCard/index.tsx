@@ -116,11 +116,7 @@ export default function WishListCard({ item, onSelectDelete, handleArchiveList, 
     }
   };
 
-  const profileInitials = useMemo(
-  () => getProfileInitials(user),
-  [user?.firstName, user?.lastName, user?.contactEmail]
-);
-
+  const profileInitials = useMemo(() => getProfileInitials(user), [user?.firstName, user?.lastName, user?.contactEmail]);
 
   const handlePressActionButton = (title: string) => {
     if (id) {

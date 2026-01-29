@@ -9,6 +9,7 @@ export const styles = StyleSheet.create({
   contentContainerStyle: {
     gap: 8,
     paddingBottom: 16,
+    paddingTop: 12,
   },
   columnWrapperStyle: {
     gap: 8,
