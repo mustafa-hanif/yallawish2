@@ -793,6 +793,14 @@ export const desktopStyles = StyleSheet.create({
   shareModalGroupCheckSelected: {
     backgroundColor: "#FFFFFF",
   },
+  groupImage: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#845EF7",
+  },
+  groupOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(28, 3, 53, 0.65)",
+  },
   shareModalGroupText: {
     // position: "absolute",
     // left: 16,

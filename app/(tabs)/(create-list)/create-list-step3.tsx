@@ -202,8 +202,8 @@ const GroupCardItem = React.memo(({ group, selected, onToggle, styles, isDesktop
 
   return (
     <Pressable style={[!isDesktop ? styles.groupCardMobile : styles.groupCard]} onPress={() => onToggle(group.id)}>
-      {group.cover && <Image source={{ uri: group.cover }} style={styles.groupImage} />}
       <View style={styles.groupOverlay} />
+      {group.cover && <Image source={{ uri: group.cover }} style={styles.groupImage} />}
       <View style={[styles.groupCheck, selected && styles.groupCheckSelected]}>
         <AnimatedCheckIcon visible={selected} size={14} color="#FFFFFF" />
       </View>
@@ -290,6 +290,7 @@ function DesktopShareModal({ visible, onRequestClose, groupQuery, setGroupQuery,
                 return (
                   <Pressable key={item.id} style={[desktopStyles.shareModalGroupCard, selected && desktopStyles.shareModalGroupSelected]} onPress={() => toggleGroup(item.id)}>
                     <View style={styles.groupImage} />
+                    {item.cover && <Image source={{ uri: item.cover }} style={desktopStyles.groupImage} />}
                     <View style={styles.groupOverlay} />
                     <View style={[desktopStyles.shareModalGroupCheck, selected && desktopStyles.shareModalGroupCheckSelected]}>
                       <AnimatedCheckIcon visible={selected} size={15} color="#330065" />
