@@ -5,19 +5,18 @@ import { styles } from "./style";
 
 interface NoCircleFoundProps {
   searchText: string;
+  isCreateList?: boolean;
 }
-export default function NoCircleFound({ searchText }: NoCircleFoundProps) {
+export default function NoCircleFound({ searchText, isCreateList = false }: NoCircleFoundProps) {
   const handleCreateCircle = () => router.push("/create-circle-step1");
   return (
     <View style={styles.container}>
+      <View>{isCreateList ? <Text style={styles.noCircleFound}>No circles found :(</Text> : <Image source={require("@/assets/images/noCircleFound.png")} />}</View>
       <View>
-        <Image source={require("@/assets/images/noCircleFound.png")} />
+        <Image style={isCreateList ? styles.smImage : undefined} source={require("@/assets/images/noCircletFound.png")} />
       </View>
       <View>
-        <Image source={require("@/assets/images/noCircletFound.png")} />
-      </View>
-      <View>
-        <Text style={styles.title}>{searchText?.length > 0 ? `No circles found` : "Your Circle Lives Here"}</Text>
+        <Text style={styles.title}>{isCreateList ? "Add a new circle" : searchText?.length > 0 ? `No circles found` : "Your Circle Lives Here"}</Text>
       </View>
       {searchText.length === 0 && (
         <>

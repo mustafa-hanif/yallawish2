@@ -1,3 +1,4 @@
+import NoCircleFound from "@/components/circle/NoCircleFound";
 import { TextInputField } from "@/components/TextInputField";
 import BottomSheet from "@/components/ui/BottomSheet";
 import { api } from "@/convex/_generated/api";
@@ -245,7 +246,7 @@ function DesktopShareModal({ visible, onRequestClose, groupQuery, setGroupQuery,
                 <Text style={desktopStyles.shareModalTitle}>My People</Text>
               </View>
               <View>
-                <Text style={desktopStyles.shareModalSubtitle}>Share with your friends and groups</Text>
+                <Text style={desktopStyles.shareModalSubtitle}>Share with your friends and circles</Text>
               </View>
             </View>
             <Pressable onPress={onRequestClose}>
@@ -256,7 +257,7 @@ function DesktopShareModal({ visible, onRequestClose, groupQuery, setGroupQuery,
             <Ionicons name="search-outline" size={20} color="#AEAEB2" />
             <TextInput
               style={desktopStyles.shareModalSearchInput}
-              placeholder="Search groups or friends by name, email..."
+              placeholder="Search Circles or friends by name, email..."
               placeholderTextColor="#AEAEB2"
               value={groupQuery || friendQuery}
               onChangeText={(e) => {
@@ -456,16 +457,20 @@ function MobileLayout({ headerTitle, selectedOption, setSelectedOption, requireP
       <BottomSheet isVisible={shareVisible} onClose={closeShareModal}>
         <KeyboardAvoidingView style={[styles.sheet, { flex: 1 }]} behavior={Platform.OS === "ios" ? "padding" : undefined} keyboardVerticalOffset={12}>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24, paddingTop: isKeyboardVisible ? 100 : 4 }}>
-            <Text style={styles.sheetTitle}>Share with groups</Text>
-
-            <TextInputField label="Search groups" value={groupQuery} onChangeText={setGroupQuery} icon={<Image source={require("@/assets/images/search.png")} />} />
-
-            <View style={styles.groupGrid}>
-              {filteredGroups.map((group) => {
-                const selected = selectedGroups.includes(group.id);
-                return <GroupCardItem key={group.id} group={group} selected={selected} onToggle={toggleGroup} styles={styles} isDesktop={isDesktop} />;
-              })}
-            </View>
+            <Text style={styles.sheetTitle}>Share with circles</Text>
+            {filteredGroups?.length ? (
+              <>
+                <TextInputField label="Search Circles" value={groupQuery} onChangeText={setGroupQuery} icon={<Image source={require("@/assets/images/search.png")} />} />
+                <View style={styles.groupGrid}>
+                  {filteredGroups.map((group) => {
+                    const selected = selectedGroups.includes(group.id);
+                    return <GroupCardItem key={group.id} group={group} selected={selected} onToggle={toggleGroup} styles={styles} isDesktop={isDesktop} />;
+                  })}
+                </View>
+              </>
+            ) : (
+              <NoCircleFound searchText="" isCreateList />
+            )}
 
             <View style={styles.orWrap}>
               <View style={styles.orLine} />

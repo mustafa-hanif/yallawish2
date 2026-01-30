@@ -34,4 +34,14 @@ export const styles = StyleSheet.create({
     fontFamily: "Nunito_700Bold",
     color: "#FFFFFF",
   },
+  smImage: {
+    width: 145.7922821044922,
+    height: 64,
+    resizeMode: "contain",
+  },
+  noCircleFound: {
+    fontSize: 12,
+    color: "#626262",
+    fontFamily: "Nunito_600SemiBold",
+  },
 });
