@@ -1726,7 +1726,7 @@ function DesktopLayout({ title, subtitle, ribbonSubtitle, coverUri, formattedEve
           </View>
 
           <View style={desktopStyles.controlsRow}>
-            <Pressable style={desktopStyles.visibilityTrigger} onPress={onManage}>
+            <Pressable style={[desktopStyles.visibilityTrigger, { borderRadius: 5 }]} onPress={onManage}>
               <Ionicons name={privacyDisplay.icon === "globe-outline" ? "eye-outline" : privacyDisplay.icon} size={18} color="#3B0076" />
               <Text style={desktopStyles.visibilityText}>{visibilityText}</Text>
               <Ionicons name="chevron-down" size={16} color="#3B0076" />
@@ -1735,21 +1735,21 @@ function DesktopLayout({ title, subtitle, ribbonSubtitle, coverUri, formattedEve
             <View style={desktopStyles.filterCluster}>
               <View style={desktopStyles.filterGroup}>
                 <Text style={desktopStyles.filterLabel}>Availability:</Text>
-                <Pressable style={[desktopStyles.filterButton, { width: 150, justifyContent: "space-between" }]} onPress={() => setShowAvailabilityMenu(true)}>
+                <Pressable style={[desktopStyles.filterButton, { width: 150, justifyContent: "space-between", borderRadius: 5 }]} onPress={() => setShowAvailabilityMenu(true)}>
                   <Text style={desktopStyles.filterButtonText}>{availabilityLabel}</Text>
                   <Ionicons name="chevron-down" size={14} color="#3B0076" />
                 </Pressable>
               </View>
               <View style={desktopStyles.filterGroup}>
                 <Text style={desktopStyles.filterLabel}>Sort</Text>
-                <Pressable style={[desktopStyles.filterButton, { width: 200, justifyContent: "space-between" }]} onPress={() => setShowSortMenu(true)}>
+                <Pressable style={[desktopStyles.filterButton, { width: 200, justifyContent: "space-between", borderRadius: 5 }]} onPress={() => setShowSortMenu(true)}>
                   <Text style={desktopStyles.filterButtonText}>{sortLabel}</Text>
                   <Ionicons name="chevron-down" size={14} color="#3B0076" />
                 </Pressable>
               </View>
             </View>
 
-            <Pressable style={desktopStyles.shareLink} onPress={onShare}>
+            <Pressable style={[desktopStyles.shareLink, { borderRadius: 5 }]} onPress={onShare}>
               <Ionicons name="share-social-outline" size={18} color="#3B0076" />
               <Text style={desktopStyles.shareLinkText}>Share List</Text>
             </Pressable>
