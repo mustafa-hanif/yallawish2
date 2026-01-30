@@ -1688,10 +1688,6 @@ function DesktopLayout({ title, subtitle, ribbonSubtitle, coverUri, formattedEve
                 <Ionicons name="add" size={20} color="#FFFFFF" />
                 <Text style={[{ ...desktopStyles.addButtonText }, { color: "#FFFFFF" }]}>Add a Gift</Text>
               </Pressable>
-              <Pressable style={[desktopStyles.addButton, { shadowOffset: { width: 0, height: 0 }, gap: 10, backgroundColor: "#330065", borderRadius: 8, paddingHorizontal: 24, paddingVertical: 8, height: 48 }]} onPress={onShare}>
-                <Ionicons name="share-social-outline" size={20} color="#FFFFFF" />
-                <Text style={[{ ...desktopStyles.addButtonText }, { color: "#FFFFFF" }]}>Share list</Text>
-              </Pressable>
             </View>
           </View>
 
